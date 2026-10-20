@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_job_work_exceptions" model="ir.cron">
+            <field name="name">Job Work: check exceptions and overdue jobs</field>
+            <field name="model_id" ref="model_zivo_job_work"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_check_exceptions()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+        <record id="ir_cron_job_work_scorecards" model="ir.cron">
+            <field name="name">Job Work: compute job worker scorecards</field>
+            <field name="model_id" ref="model_zivo_job_work_vendor_score"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_generate_scorecards()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">weeks</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

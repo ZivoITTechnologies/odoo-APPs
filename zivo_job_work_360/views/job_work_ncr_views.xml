@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_ncr_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.ncr.form</field>
+        <field name="model">zivo.job.work.ncr</field>
+        <field name="arch" type="xml">
+            <form string="Non-Conformance Report">
+                <header>
+                    <button name="action_start" string="Start Investigation" type="object" class="oe_highlight"
+                            invisible="state != 'open'"/>
+                    <button name="action_close" string="Close NCR" type="object" class="oe_highlight"
+                            invisible="state == 'closed'"/>
+                    <button name="action_reopen" string="Re-open" type="object" invisible="state != 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="job_id"/>
+                            <field name="qc_id"/>
+                            <field name="partner_id"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="severity"/>
+                            <field name="disposition"/>
+                            <field name="exception_id"/>
+                        </group>
+                    </group>
+                    <group string="Non-Conformance"><field name="description" nolabel="1" colspan="2"/></group>
+                    <group string="Root Cause"><field name="root_cause" nolabel="1" colspan="2"/></group>
+                    <group string="Corrective Action"><field name="corrective_action" nolabel="1" colspan="2"/></group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_ncr_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.ncr.list</field>
+        <field name="model">zivo.job.work.ncr</field>
+        <field name="arch" type="xml">
+            <list string="NCRs" sample="1">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="severity"/>
+                <field name="disposition" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge" decoration-danger="state == 'open'"
+                       decoration-warning="state == 'in_progress'" decoration-success="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_ncr_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.ncr.search</field>
+        <field name="model">zivo.job.work.ncr</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <filter string="Open" name="open" domain="[('state', '!=', 'closed')]"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Severity" name="group_severity" context="{'group_by': 'severity'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_ncr" model="ir.actions.act_window">
+        <field name="name">Non-Conformance Reports</field>
+        <field name="res_model">zivo.job.work.ncr</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+</odoo>

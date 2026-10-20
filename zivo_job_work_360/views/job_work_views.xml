@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- Job Work Order                                                -->
+    <!-- ============================================================ -->
+    <record id="view_zivo_job_work_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.form</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <form string="Job Work Order">
+                <header>
+                    <button name="action_plan" string="Plan" type="object" class="oe_highlight"
+                            invisible="state != 'draft'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_send_to_vendor" string="Send to Job Worker" type="object"
+                            class="oe_highlight" invisible="state not in ('planned', 'ready') or date_sent"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_issue_material" string="Issue Material" type="object" class="oe_highlight"
+                            invisible="state not in ('planned', 'ready')" groups="zivo_job_work_360.group_job_work_user"
+                            data-hotkey="i"/>
+                    <button name="action_receive" string="Receive Output" type="object" class="oe_highlight"
+                            invisible="state not in ('issued', 'at_vendor', 'processing', 'qc_pending')"
+                            groups="zivo_job_work_360.group_job_work_user" data-hotkey="r"/>
+                    <button name="action_inspect" string="Inspect" type="object" class="oe_highlight"
+                            invisible="state != 'qc_pending'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_reconcile" string="Reconcile" type="object" class="oe_highlight"
+                            invisible="state != 'completed'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_close" string="Close Job" type="object" class="oe_highlight"
+                            invisible="state != 'reconciled'" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <button name="action_send_to_vendor" string="Re-send to Job Worker" type="object"
+                            invisible="state not in ('planned', 'ready', 'issued') or not date_sent"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_vendor_confirm_receipt" string="Vendor Received Material" type="object"
+                            invisible="state != 'issued'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_vendor_start" string="Start Processing" type="object"
+                            invisible="state not in ('issued', 'at_vendor')" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_mark_completed" string="Mark Completed" type="object"
+                            invisible="state not in ('issued', 'at_vendor', 'processing')"
+                            confirm="The job will be completed with the quantity received so far. Continue?"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_create_next_stage" string="Next Stage" type="object"
+                            invisible="state not in ('completed', 'reconciled', 'closed') or qty_accepted &lt;= 0"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_reopen" string="Re-open" type="object" invisible="state != 'reconciled'"
+                            groups="zivo_job_work_360.group_job_work_manager"/>
+                    <button name="action_hold" string="Hold" type="object"
+                            invisible="state in ('draft', 'closed', 'cancel', 'hold')"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_resume" string="Resume" type="object" class="oe_highlight"
+                            invisible="state != 'hold'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_draft" string="Reset to Draft" type="object"
+                            invisible="state not in ('planned', 'cancel')" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('closed', 'cancel', 'reconciled')"
+                            confirm="Cancel this job work order?" groups="zivo_job_work_360.group_job_work_user"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,planned,ready,issued,at_vendor,processing,qc_pending,completed,reconciled,closed"/>
+                </header>
+                <div class="alert alert-danger mb-0" role="alert" invisible="not has_blocking_exception">
+                    This job has open high-severity exceptions.
+                    <button name="action_view_exceptions" type="object" string="Review exceptions" class="btn-link p-0"/>
+                </div>
+                <div class="alert alert-warning mb-0" role="alert" invisible="vendor_state != 'rejected'">
+                    The job worker rejected this job: <field name="vendor_reject_reason" class="d-inline"/>
+                    <button name="action_reset_vendor_state" type="object" string="Reset" class="btn-link p-0 ms-2"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                </div>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_pickings" type="object" class="oe_stat_button" icon="fa-truck"
+                                invisible="not picking_count" groups="stock.group_stock_user">
+                            <field name="picking_count" widget="statinfo" string="Transfers"/>
+                        </button>
+                        <button name="action_view_purchase" type="object" class="oe_stat_button" icon="fa-credit-card"
+                                invisible="not purchase_count" groups="purchase.group_purchase_user">
+                            <field name="purchase_count" widget="statinfo" string="Purchase"/>
+                        </button>
+                        <button name="action_view_bills" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not bill_count" groups="account.group_account_invoice">
+                            <field name="bill_count" widget="statinfo" string="Vendor Bills"/>
+                        </button>
+                        <button name="action_view_qc" type="object" class="oe_stat_button" icon="fa-check-square-o"
+                                invisible="not qc_count">
+                            <field name="qc_count" widget="statinfo" string="Inspections"/>
+                        </button>
+                        <button name="action_view_ncr" type="object" class="oe_stat_button" icon="fa-exclamation-circle"
+                                invisible="not ncr_count">
+                            <field name="ncr_count" widget="statinfo" string="NCRs"/>
+                        </button>
+                        <button name="action_view_exceptions" type="object" class="oe_stat_button" icon="fa-warning">
+                            <field name="open_exception_count" widget="statinfo" string="Open Exceptions"/>
+                        </button>
+                        <button name="action_view_requests" type="object" class="oe_stat_button" icon="fa-cubes"
+                                invisible="not request_count">
+                            <field name="request_count" widget="statinfo" string="Material Requests"/>
+                        </button>
+                        <button name="action_view_children" type="object" class="oe_stat_button" icon="fa-sitemap"
+                                invisible="not child_count">
+                            <field name="child_count" widget="statinfo" string="Next Stages"/>
+                        </button>
+                        <button name="action_view_chain" type="object" class="oe_stat_button" icon="fa-link"
+                                invisible="not parent_id and not child_count" string="Job Chain"/>
+                        <button name="action_preview" type="object" class="oe_stat_button" icon="fa-globe"
+                                invisible="state in ('draft', 'cancel')" string="Vendor Portal"/>
+                    </div>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger" invisible="not is_overdue"/>
+                    <widget name="web_ribbon" title="Disputed" bg_color="text-bg-warning" invisible="not is_disputed or is_overdue"/>
+                    <div class="oe_title">
+                        <h1 class="d-flex">
+                            <field name="priority" widget="priority" class="me-3"/>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="partners">
+                            <field name="partner_id" readonly="state not in ('draft', 'planned')"
+                                   context="{'default_jw_is_job_worker': True, 'default_is_company': True}"/>
+                            <field name="job_type_id" readonly="state not in ('draft', 'planned')"/>
+                            <field name="principal_id"/>
+                            <field name="client_ref"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                        </group>
+                        <group name="output">
+                            <field name="product_id" readonly="state not in ('draft', 'planned')"/>
+                            <label for="product_qty"/>
+                            <div class="o_row">
+                                <field name="product_qty" readonly="state not in ('draft', 'planned')"/>
+                                <field name="product_uom_id" readonly="state not in ('draft', 'planned')"
+                                       options="{'no_create': True}"/>
+                            </div>
+                            <field name="date_planned_start" readonly="state in ('closed', 'cancel')"/>
+                            <field name="date_expected" readonly="state in ('closed', 'cancel')"
+                                   decoration-danger="is_overdue"/>
+                            <label for="rate"/>
+                            <div class="o_row">
+                                <field name="rate" readonly="state in ('reconciled', 'closed', 'cancel')"/>
+                                <span class="text-muted">per</span>
+                                <field name="product_uom_id" readonly="1" nolabel="1" class="oe_inline"/>
+                            </div>
+                            <field name="currency_id" groups="base.group_multi_currency"
+                                   readonly="state not in ('draft', 'planned')"/>
+                            <field name="is_overdue" invisible="1"/>
+                            <field name="date_sent" invisible="1"/>
+                            <field name="has_material_to_issue" invisible="1"/>
+                            <field name="allowed_uom_ids" invisible="1"/>
+                            <field name="has_material_balance" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="row g-2 mb-3" invisible="state in ('draft', 'cancel')">
+                        <div class="col-6 col-md-3 col-lg">
+                            <div class="border rounded p-2 text-center h-100">
+                                <div class="text-muted small">Received</div>
+                                <div class="fs-4 fw-bold"><field name="qty_received" nolabel="1"/></div>
+                                <div class="small"><field name="progress" widget="progressbar" nolabel="1"/></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg">
+                            <div class="border rounded p-2 text-center h-100">
+                                <div class="text-muted small">Accepted</div>
+                                <div class="fs-4 fw-bold text-success"><field name="qty_accepted" nolabel="1"/></div>
+                                <div class="small text-muted"><field name="acceptance_rate" nolabel="1" widget="float" digits="[16,1]"/> % acceptance</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg">
+                            <div class="border rounded p-2 text-center h-100">
+                                <div class="text-muted small">Rejected · Rework · Scrap</div>
+                                <div class="fs-5 fw-bold text-danger text-nowrap">
+                                    <field name="qty_rejected" nolabel="1" class="oe_inline"/> ·
+                                    <field name="qty_rework" nolabel="1" class="oe_inline"/> ·
+                                    <field name="qty_qc_scrap" nolabel="1" class="oe_inline"/>
+                                </div>
+                                <div class="small text-muted">Pending QC: <field name="qty_pending_qc" nolabel="1" class="oe_inline"/></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg">
+                            <div class="border rounded p-2 text-center h-100">
+                                <div class="text-muted small">Yield (actual / std)</div>
+                                <div class="fs-4 fw-bold"><field name="actual_yield" nolabel="1" widget="float" digits="[16,1]" class="oe_inline"/> %</div>
+                                <div class="small text-muted">std <field name="expected_yield" nolabel="1" class="oe_inline" readonly="state not in ('draft', 'planned')"/> %</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg">
+                            <div class="border rounded p-2 text-center h-100">
+                                <div class="text-muted small">Material at Job Worker</div>
+                                <div class="fs-4 fw-bold"><field name="material_balance_value" nolabel="1"/></div>
+                                <div class="small text-muted">Scrap rate <field name="scrap_rate" nolabel="1" widget="float" digits="[16,2]" class="oe_inline"/> %</div>
+                            </div>
+                        </div>
+                    </div>
+                    <notebook>
+                        <page string="Materials" name="materials">
+                            <div class="d-flex flex-wrap gap-2 mb-2" groups="zivo_job_work_360.group_job_work_user"
+                                 invisible="state not in ('issued', 'at_vendor', 'processing', 'qc_pending', 'completed')">
+                                <button name="action_issue_material" string="Issue Remaining Material" type="object"
+                                        class="btn btn-secondary btn-sm" icon="fa-truck"
+                                        invisible="not has_material_to_issue or state == 'completed'"/>
+                                <button name="action_return_material" string="Return Material" type="object"
+                                        class="btn btn-secondary btn-sm" icon="fa-undo" invisible="not has_material_balance"/>
+                                <button name="action_request_loss" string="Record Loss" type="object"
+                                        class="btn btn-secondary btn-sm" icon="fa-minus-circle" invisible="not has_material_balance"/>
+                            </div>
+                            <field name="material_ids" readonly="state not in ('draft', 'planned')"
+                                   context="{'default_job_id': id}">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="allowed_uom_ids" column_invisible="1"/>
+                                    <field name="product_id" readonly="qty_issued &gt; 0" width="180px"/>
+                                    <field name="planned_qty" readonly="parent.state not in ('draft', 'planned')"/>
+                                    <field name="product_uom_id" readonly="qty_issued &gt; 0" options="{'no_create': True}"/>
+                                    <field name="scrap_pct" optional="show" readonly="parent.state not in ('draft', 'planned')"/>
+                                    <field name="std_qty_per_unit" optional="hide"/>
+                                    <field name="unit_cost" optional="hide" readonly="parent.state not in ('draft', 'planned')"/>
+                                    <field name="qty_issued" column_invisible="parent.state in ('draft', 'planned')"/>
+                                    <field name="qty_consumed" column_invisible="parent.state in ('draft', 'planned', 'ready')"/>
+                                    <field name="qty_returned" column_invisible="parent.state in ('draft', 'planned', 'ready')"/>
+                                    <field name="qty_scrap" column_invisible="parent.state in ('draft', 'planned', 'ready')"/>
+                                    <field name="qty_loss" optional="show" column_invisible="parent.state in ('draft', 'planned', 'ready')"/>
+                                    <field name="balance_qty" column_invisible="parent.state in ('draft', 'planned')"
+                                           decoration-danger="balance_qty &gt; 0 and parent.state in ('completed', 'reconciled')"
+                                           decoration-bf="1"/>
+                                    <field name="expected_consumption" optional="hide"
+                                           column_invisible="parent.state in ('draft', 'planned', 'ready')"/>
+                                    <field name="consumption_variance" optional="show"
+                                           column_invisible="parent.state in ('draft', 'planned', 'ready')"
+                                           decoration-danger="consumption_variance &gt; 0"/>
+                                    <field name="scrap_product_id" optional="hide"/>
+                                    <field name="is_capital_goods" optional="hide"/>
+                                    <button name="action_view_moves" type="object" icon="fa-list" title="Stock moves"
+                                            invisible="qty_issued == 0"/>
+                                </list>
+                            </field>
+                            <div class="text-muted small" invisible="state in ('draft', 'planned')">
+                                Balance at Job Worker = Sent - Consumed - Returned - Scrap - Approved Loss
+                            </div>
+                        </page>
+                        <page string="Receipts &amp; Quality" name="receipts" invisible="state in ('draft', 'planned', 'ready')">
+                            <field name="production_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="vendor_challan_ref" optional="show"/>
+                                    <field name="qty_received" sum="Total"/>
+                                    <field name="qty_accepted" sum="Total"/>
+                                    <field name="qty_rejected" sum="Total"/>
+                                    <field name="qty_rework" sum="Total"/>
+                                    <field name="qty_scrap" sum="Total"/>
+                                    <field name="is_final" optional="hide"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'done'"
+                                           decoration-warning="state in ('waiting', 'qc_pending')"/>
+                                    <button name="action_open_picking" type="object" icon="fa-truck" title="Transfer"
+                                            groups="stock.group_stock_user"/>
+                                    <button name="action_open_qc" type="object" icon="fa-check-square-o" title="Inspection"
+                                            invisible="state != 'qc_pending'"/>
+                                </list>
+                            </field>
+                            <group string="Inspections" invisible="not qc_ids">
+                                <field name="qc_ids" nolabel="1" colspan="2" readonly="1">
+                                    <list decoration-danger="result == 'fail'">
+                                        <field name="name"/>
+                                        <field name="date"/>
+                                        <field name="inspector_id" widget="many2one_avatar_user"/>
+                                        <field name="qty_inspected"/>
+                                        <field name="qty_accepted"/>
+                                        <field name="qty_rejected"/>
+                                        <field name="qty_rework"/>
+                                        <field name="qty_scrap"/>
+                                        <field name="acceptance_rate"/>
+                                        <field name="result" widget="badge" decoration-success="result == 'pass'"
+                                               decoration-danger="result == 'fail'"/>
+                                        <field name="state" widget="badge"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Costing" name="costing">
+                            <div class="row">
+                                <div class="col-lg-7">
+                                    <table class="table table-sm o_jw_cost_table">
+                                        <thead>
+                                            <tr><th>Cost Component</th><th class="text-end">Expected</th><th class="text-end">Actual</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>Raw material</td>
+                                                <td class="text-end"><field name="cost_exp_material" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_material" nolabel="1"/></td></tr>
+                                            <tr><td>Job work <span class="text-muted small">(<field name="cost_processing_source" nolabel="1" class="oe_inline"/>)</span></td>
+                                                <td class="text-end"><field name="cost_exp_processing" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_processing" nolabel="1"/></td></tr>
+                                            <tr><td>Freight</td>
+                                                <td class="text-end"><field name="cost_exp_freight" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_freight" nolabel="1"/></td></tr>
+                                            <tr><td>Inspection</td>
+                                                <td class="text-end"><field name="cost_exp_inspection" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_inspection" nolabel="1"/></td></tr>
+                                            <tr><td>Scrap impact</td>
+                                                <td class="text-end"><field name="cost_exp_scrap" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_scrap" nolabel="1"/></td></tr>
+                                            <tr><td>Rework &amp; other</td>
+                                                <td class="text-end"><field name="cost_exp_other" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_other" nolabel="1"/></td></tr>
+                                            <tr class="fw-bold border-top"><td>Total</td>
+                                                <td class="text-end"><field name="cost_exp_total" nolabel="1"/></td>
+                                                <td class="text-end"><field name="cost_act_total" nolabel="1"/></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-lg-5">
+                                    <group>
+                                        <field name="cost_variance" decoration-danger="cost_variance &gt; 0"
+                                               decoration-success="cost_variance &lt; 0"/>
+                                        <field name="cost_variance_pct" widget="float" digits="[16,2]"/>
+                                        <field name="cost_per_unit"/>
+                                        <field name="service_product_id" readonly="state in ('reconciled', 'closed', 'cancel')"/>
+                                        <field name="purchase_count" invisible="1"/>
+                                        <field name="company_currency_id" invisible="1"/>
+                                    </group>
+                                    <button name="action_create_purchase_order" string="Create Purchase Order" type="object"
+                                            class="btn btn-primary btn-sm ms-3" icon="fa-credit-card"
+                                            invisible="state in ('draft', 'cancel', 'closed') or purchase_count or not rate"
+                                            groups="zivo_job_work_360.group_job_work_user"/>
+                                </div>
+                            </div>
+                            <separator string="Freight, Inspection &amp; Other Costs"/>
+                            <field name="cost_line_ids" readonly="state in ('closed', 'cancel')">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="cost_type"/>
+                                    <field name="name"/>
+                                    <field name="partner_id" optional="show"/>
+                                    <field name="date" optional="hide"/>
+                                    <field name="currency_id" groups="base.group_multi_currency" optional="show"/>
+                                    <field name="expected_amount" sum="Expected"/>
+                                    <field name="actual_amount" sum="Actual"/>
+                                    <field name="bill_id" optional="show" groups="account.group_account_invoice"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Reconciliation" name="reconciliation" invisible="state in ('draft', 'planned', 'ready')">
+                            <group>
+                                <group>
+                                    <field name="reconciliation_state" widget="badge"
+                                           decoration-success="reconciliation_state == 'balanced'"
+                                           decoration-danger="reconciliation_state == 'exception'"/>
+                                    <field name="has_blocking_exception" invisible="1"/>
+                                    <field name="open_exception_count"/>
+                                </group>
+                                <group>
+                                    <field name="cost_snapshot_expected" invisible="state not in ('reconciled', 'closed')"/>
+                                    <field name="cost_snapshot_actual" invisible="state not in ('reconciled', 'closed')"/>
+                                    <field name="cost_snapshot_variance_pct" invisible="state not in ('reconciled', 'closed')"/>
+                                </group>
+                            </group>
+                            <field name="exception_ids" readonly="1">
+                                <list decoration-danger="state == 'open' and severity == 'high'"
+                                      decoration-warning="state == 'open' and severity == 'medium'"
+                                      decoration-muted="state != 'open'">
+                                    <field name="create_date" string="Raised"/>
+                                    <field name="exception_type"/>
+                                    <field name="severity" widget="badge"/>
+                                    <field name="description"/>
+                                    <field name="state" widget="badge"/>
+                                    <button name="action_resolve" type="object" string="Resolve" icon="fa-check"
+                                            invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_user"/>
+                                    <button name="action_waive" type="object" string="Waive" icon="fa-ban"
+                                            invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                </list>
+                            </field>
+                            <group string="Loss Requests" invisible="not loss_ids">
+                                <field name="loss_ids" nolabel="1" colspan="2" readonly="1">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="product_id"/>
+                                        <field name="qty"/>
+                                        <field name="value" sum="Total"/>
+                                        <field name="reason"/>
+                                        <field name="note"/>
+                                        <field name="state" widget="badge" decoration-success="state == 'approved'"
+                                               decoration-warning="state == 'to_approve'"/>
+                                        <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                                                invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                        <button name="action_reject" type="object" string="Reject" icon="fa-times"
+                                                invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Job Worker" name="vendor" invisible="state == 'draft'">
+                            <group>
+                                <group string="Collaboration">
+                                    <field name="vendor_state" widget="badge"/>
+                                    <field name="date_sent"/>
+                                    <field name="vendor_accept_date"/>
+                                    <field name="vendor_receipt_date"/>
+                                    <field name="vendor_start_date"/>
+                                    <field name="vendor_complete_date"/>
+                                </group>
+                                <group string="Reported by Job Worker">
+                                    <field name="vendor_reported_qty"/>
+                                    <field name="vendor_reported_scrap"/>
+                                    <field name="vendor_location_id" groups="stock.group_stock_multi_locations"/>
+                                </group>
+                            </group>
+                            <field name="progress_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="qty_completed" sum="Total"/>
+                                    <field name="qty_scrap" sum="Total"/>
+                                    <field name="qty_rejected" sum="Total"/>
+                                    <field name="qty_rework" sum="Total"/>
+                                    <field name="note"/>
+                                    <field name="source" readonly="1"/>
+                                    <field name="reported_by_id" readonly="1" optional="hide"/>
+                                </list>
+                            </field>
+                            <group string="Material Requests" invisible="not request_ids">
+                                <field name="request_ids" nolabel="1" colspan="2" readonly="1">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="product_id"/>
+                                        <field name="qty"/>
+                                        <field name="product_uom_id"/>
+                                        <field name="reason"/>
+                                        <field name="source"/>
+                                        <field name="state" widget="badge" decoration-success="state == 'approved'"
+                                               decoration-warning="state == 'to_approve'" decoration-danger="state == 'rejected'"/>
+                                        <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                                                invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                        <button name="action_reject" type="object" string="Reject" icon="fa-times"
+                                                invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                    </list>
+                                </field>
+                            </group>
+                            <group string="Documents for Job Worker">
+                                <field name="shared_attachment_ids" widget="many2many_binary" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Instructions" name="instructions">
+                            <field name="notes" placeholder="Process instructions, drawings references, packing requirements..."/>
+                        </page>
+                        <page string="Other Information" name="other">
+                            <group>
+                                <group string="Logistics">
+                                    <field name="warehouse_id" readonly="state not in ('draft', 'planned')"/>
+                                    <field name="location_src_id" groups="stock.group_stock_multi_locations"
+                                           readonly="state not in ('draft', 'planned')"/>
+                                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"
+                                           readonly="state in ('reconciled', 'closed', 'cancel')"/>
+                                </group>
+                                <group string="Traceability">
+                                    <field name="parent_id" readonly="state != 'draft'"/>
+                                    <field name="root_id" readonly="1"/>
+                                    <field name="stage_sequence"/>
+                                    <field name="mrp_production_id"/>
+                                    <field name="date_issued"/>
+                                    <field name="date_completed"/>
+                                    <field name="date_closed"/>
+                                    <field name="cycle_time_days" widget="float" digits="[16,1]"/>
+                                    <field name="is_disputed"/>
+                                </group>
+                            </group>
+                            <field name="internal_note" placeholder="Internal notes (not visible to the job worker)"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_zivo_job_work_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.list</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <list string="Job Work Orders" sample="1" decoration-muted="state in ('closed', 'cancel')"
+                  decoration-danger="is_overdue" multi_edit="1">
+                <field name="priority" widget="priority" optional="show" nolabel="1"/>
+                <field name="name" decoration-bf="1"/>
+                <field name="partner_id"/>
+                <field name="job_type_id"/>
+                <field name="product_id"/>
+                <field name="product_qty" string="Planned"/>
+                <field name="qty_received" optional="show"/>
+                <field name="qty_accepted" optional="show"/>
+                <field name="product_uom_id" optional="hide" string="Unit"/>
+                <field name="progress" widget="progressbar" optional="show"/>
+                <field name="date_expected" widget="remaining_days" invisible="state in ('completed', 'reconciled', 'closed', 'cancel')"/>
+                <field name="material_balance_value" optional="show" sum="Total"/>
+                <field name="actual_yield" optional="hide"/>
+                <field name="open_exception_count" optional="show" string="Exceptions"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="client_ref" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="vendor_state" widget="badge" optional="hide"/>
+                <field name="state" widget="badge" decoration-info="state in ('planned', 'ready')"
+                       decoration-warning="state in ('issued', 'at_vendor', 'processing', 'qc_pending', 'hold')"
+                       decoration-success="state in ('completed', 'reconciled', 'closed')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivo_job_work_kanban" model="ir.ui.view">
+        <field name="name">zivo.job.work.kanban</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" sample="1" quick_create="false"
+                    group_create="false" group_delete="false" group_edit="false" records_draggable="false">
+                <field name="state"/>
+                <field name="is_overdue"/>
+                <field name="open_exception_count"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex mb-1">
+                            <field name="priority" widget="priority"/>
+                            <field name="name" class="fw-bold ms-1"/>
+                            <span t-if="record.is_overdue.raw_value" class="badge text-bg-danger ms-auto">Overdue</span>
+                        </div>
+                        <field name="partner_id" class="fw-bolder"/>
+                        <div class="text-muted">
+                            <field name="job_type_id"/> · <field name="product_id"/>
+                        </div>
+                        <div class="d-flex mt-1">
+                            <span><field name="qty_received"/> / <field name="product_qty"/> <field name="product_uom_id"/></span>
+                            <span class="ms-auto" t-if="record.open_exception_count.raw_value">
+                                <i class="fa fa-warning text-danger" title="Open exceptions"/> <field name="open_exception_count"/>
+                            </span>
+                        </div>
+                        <field name="progress" widget="progressbar"/>
+                        <footer class="pt-1">
+                            <field name="date_expected" widget="date"/>
+                            <div class="d-flex ms-auto align-items-center">
+                                <field name="activity_ids" widget="kanban_activity" class="me-1"/>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_zivo_job_work_calendar" model="ir.ui.view">
+        <field name="name">zivo.job.work.calendar</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <calendar string="Job Work Orders" date_start="date_planned_start" date_stop="date_expected"
+                      color="partner_id" event_limit="5" quick_create="0" mode="month">
+                <field name="partner_id" filters="1"/>
+                <field name="product_id"/>
+                <field name="product_qty"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_zivo_job_work_pivot" model="ir.ui.view">
+        <field name="name">zivo.job.work.pivot</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <pivot string="Job Work Analysis" sample="1">
+                <field name="partner_id" type="row"/>
+                <field name="job_type_id" type="col"/>
+                <field name="product_qty" type="measure"/>
+                <field name="qty_accepted" type="measure"/>
+                <field name="material_balance_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_zivo_job_work_graph" model="ir.ui.view">
+        <field name="name">zivo.job.work.graph</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <graph string="Job Work Analysis" type="bar" sample="1">
+                <field name="partner_id"/>
+                <field name="material_balance_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_zivo_job_work_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.search</field>
+        <field name="model">zivo.job.work</field>
+        <field name="arch" type="xml">
+            <search string="Job Work Orders">
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('client_ref', 'ilike', self)]"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="material_ids" string="Material" filter_domain="[('material_ids.product_id', 'ilike', self)]"/>
+                <field name="job_type_id"/>
+                <field name="user_id"/>
+                <field name="root_id" string="Job Chain"/>
+                <filter string="My Jobs" name="my" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Open" name="open"
+                        domain="[('state', 'in', ('planned', 'ready', 'issued', 'at_vendor', 'processing', 'qc_pending', 'completed', 'hold'))]"/>
+                <filter string="At Job Worker" name="at_vendor"
+                        domain="[('state', 'in', ('issued', 'at_vendor', 'processing'))]"/>
+                <filter string="QC Pending" name="qc_pending" domain="[('state', '=', 'qc_pending')]"/>
+                <filter string="To Reconcile" name="to_reconcile" domain="[('state', '=', 'completed')]"/>
+                <filter string="Closed" name="closed" domain="[('state', 'in', ('reconciled', 'closed'))]"/>
+                <separator/>
+                <filter string="Overdue" name="overdue" domain="[('is_overdue', '=', True)]"/>
+                <filter string="With Exceptions" name="exceptions" domain="[('open_exception_count', '&gt;', 0)]"/>
+                <filter string="Disputed" name="disputed" domain="[('is_disputed', '=', True)]"/>
+                <filter string="Rework Jobs" name="rework" domain="[('is_rework', '=', True)]"/>
+                <filter string="Urgent" name="urgent" domain="[('priority', '=', '2')]"/>
+                <separator/>
+                <filter string="Expected Completion" name="date_expected" date="date_expected"/>
+                <filter string="Completed On" name="date_completed" date="date_completed"/>
+                <group>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Job Type" name="group_type" context="{'group_by': 'job_type_id'}"/>
+                    <filter string="Output Product" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Responsible" name="group_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Job Chain" name="group_chain" context="{'group_by': 'root_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_job_work" model="ir.actions.act_window">
+        <field name="name">Job Work Orders</field>
+        <field name="res_model">zivo.job.work</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
+        <field name="search_view_id" ref="view_zivo_job_work_search"/>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first Job Work Order</p>
+            <p>Plan the material to send, the job worker and the expected output. Job Work 360 then tracks
+               the material at the job worker, receipts, scrap, yield, quality, costs and reconciliation.</p>
+        </field>
+    </record>
+
+    <record id="action_zivo_job_work_analysis" model="ir.actions.act_window">
+        <field name="name">Job Work Analysis</field>
+        <field name="res_model">zivo.job.work</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="search_view_id" ref="view_zivo_job_work_search"/>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Receipts -->
+    <record id="view_zivo_job_work_production_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.production.list</field>
+        <field name="model">zivo.job.work.production</field>
+        <field name="arch" type="xml">
+            <list string="Job Work Receipts" create="false" sample="1">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="vendor_challan_ref" optional="show"/>
+                <field name="qty_received" sum="Total"/>
+                <field name="qty_accepted" sum="Total"/>
+                <field name="qty_rejected" sum="Total"/>
+                <field name="qty_rework" sum="Total" optional="show"/>
+                <field name="qty_scrap" sum="Total" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                       decoration-warning="state in ('waiting', 'qc_pending')"/>
+                <button name="action_open_picking" type="object" icon="fa-truck" title="Transfer"
+                        groups="stock.group_stock_user"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_production_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.production.form</field>
+        <field name="model">zivo.job.work.production</field>
+        <field name="arch" type="xml">
+            <form string="Job Work Receipt" create="false">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="job_id" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="product_id"/>
+                            <field name="date" readonly="1"/>
+                            <field name="picking_id" groups="stock.group_stock_user"/>
+                        </group>
+                        <group>
+                            <field name="qty_received" readonly="1"/>
+                            <field name="qty_accepted"/>
+                            <field name="qty_rejected"/>
+                            <field name="qty_rework"/>
+                            <field name="qty_scrap"/>
+                            <field name="is_final" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="vendor_challan_ref"/>
+                            <field name="vendor_challan_date"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Notes"/>
+                    <field name="move_ids" readonly="1" groups="stock.group_stock_user">
+                        <list>
+                            <field name="date"/>
+                            <field name="jw_move_type"/>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="product_uom"/>
+                            <field name="location_id"/>
+                            <field name="location_dest_id"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_production_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.production.search</field>
+        <field name="model">zivo.job.work.production</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <filter string="QC Pending" name="qc_pending" domain="[('state', '=', 'qc_pending')]"/>
+                <filter string="Waiting Validation" name="waiting" domain="[('state', '=', 'waiting')]"/>
+                <filter string="Received On" name="date" date="date"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Product" name="group_product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_production" model="ir.actions.act_window">
+        <field name="name">Job Work Receipts</field>
+        <field name="res_model">zivo.job.work.production</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No receipt yet</p>
+            <p>Use "Receive Output" on a job work order to register output, consumption and scrap.</p>
+        </field>
+    </record>
+</odoo>

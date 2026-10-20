@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_job_work" model="ir.ui.view">
+        <field name="name">stock.picking.form.job.work</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_jw_order" type="object" class="oe_stat_button" icon="fa-cogs"
+                        invisible="not jw_order_id" groups="zivo_job_work_360.group_job_work_viewer">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value"><field name="jw_order_id" readonly="1"/></span>
+                        <span class="o_stat_text">Job Work</span>
+                    </div>
+                </button>
+            </div>
+        </field>
+    </record>
+    <record id="view_picking_search_job_work" model="ir.ui.view">
+        <field name="name">stock.picking.search.job.work</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <field name="origin" position="after">
+                <field name="jw_order_id" groups="zivo_job_work_360.group_job_work_viewer"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_move_tree_job_work" model="ir.ui.view">
+        <field name="name">stock.move.list.job.work</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_tree"/>
+        <field name="arch" type="xml">
+            <field name="product_id" position="after">
+                <field name="jw_move_type" optional="hide" groups="zivo_job_work_360.group_job_work_viewer"/>
+                <field name="jw_order_id" optional="hide" groups="zivo_job_work_360.group_job_work_viewer"/>
+            </field>
+        </field>
+    </record>
+</odoo>

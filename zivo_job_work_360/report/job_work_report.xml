@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_job_work" model="ir.actions.report">
+        <field name="name">Job Work Order</field>
+        <field name="model">zivo.job.work</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivo_job_work_360.report_job_work</field>
+        <field name="report_file">zivo_job_work_360.report_job_work</field>
+        <field name="print_report_name">'Job Work - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_zivo_job_work"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_job_work_reconciliation" model="ir.actions.report">
+        <field name="name">Reconciliation &amp; Costing</field>
+        <field name="model">zivo.job.work</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivo_job_work_360.report_job_work_reconciliation</field>
+        <field name="report_file">zivo_job_work_360.report_job_work_reconciliation</field>
+        <field name="print_report_name">'Job Work Reconciliation - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_zivo_job_work"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

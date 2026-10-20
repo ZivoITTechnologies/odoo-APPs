@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_type_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.type.list</field>
+        <field name="model">zivo.job.work.type</field>
+        <field name="arch" type="xml">
+            <list string="Job Types">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="service_product_id" optional="show"/>
+                <field name="quality_required"/>
+                <field name="expected_yield"/>
+                <field name="expected_scrap_pct"/>
+                <field name="lead_days"/>
+                <field name="is_rework" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_type_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.type.form</field>
+        <field name="model">zivo.job.work.type</field>
+        <field name="arch" type="xml">
+            <form string="Job Type">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Heat Treatment"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="service_product_id" context="{'default_type': 'service', 'default_purchase_ok': True}"/>
+                            <field name="lead_days"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="quality_required"/>
+                            <field name="expected_yield"/>
+                            <field name="expected_scrap_pct"/>
+                            <field name="scrap_product_id"/>
+                            <field name="is_rework"/>
+                        </group>
+                    </group>
+                    <separator string="Standard Instructions"/>
+                    <field name="instructions"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_type" model="ir.actions.act_window">
+        <field name="name">Job Types</field>
+        <field name="res_model">zivo.job.work.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

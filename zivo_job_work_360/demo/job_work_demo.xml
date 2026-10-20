@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_partner_vendor_a" model="res.partner">
+        <field name="name">Apex Heat Treatment</field>
+        <field name="is_company" eval="True"/>
+        <field name="jw_is_job_worker" eval="True"/>
+        <field name="email">jobs@apex-heat.example.com</field>
+        <field name="city">Pune</field>
+    </record>
+    <record id="demo_partner_vendor_b" model="res.partner">
+        <field name="name">Brightline Plating</field>
+        <field name="is_company" eval="True"/>
+        <field name="jw_is_job_worker" eval="True"/>
+        <field name="email">orders@brightline.example.com</field>
+        <field name="city">Chennai</field>
+    </record>
+    <record id="demo_partner_vendor_c" model="res.partner">
+        <field name="name">Precision Turning Works</field>
+        <field name="is_company" eval="True"/>
+        <field name="jw_is_job_worker" eval="True"/>
+        <field name="email">ptw@turning.example.com</field>
+        <field name="city">Rajkot</field>
+    </record>
+
+    <record id="demo_product_bracket_machined" model="product.product">
+        <field name="name">Steering Bracket - Machined</field>
+        <field name="default_code">SB-100-M</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="standard_price">100.0</field>
+    </record>
+    <record id="demo_product_bracket_hardened" model="product.product">
+        <field name="name">Steering Bracket - Hardened</field>
+        <field name="default_code">SB-100-H</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="standard_price">112.0</field>
+    </record>
+    <record id="demo_product_bracket_plated" model="product.product">
+        <field name="name">Steering Bracket - Plated</field>
+        <field name="default_code">SB-100-P</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="standard_price">125.0</field>
+    </record>
+    <record id="demo_product_brass_rod" model="product.product">
+        <field name="name">Brass Rod 25mm</field>
+        <field name="default_code">BR-25</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="uom_id" ref="uom.product_uom_kgm"/>
+        <field name="standard_price">650.0</field>
+    </record>
+    <record id="demo_product_brass_bush" model="product.product">
+        <field name="name">Brass Bush 25mm</field>
+        <field name="default_code">BB-25</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="uom_id" ref="uom.product_uom_kgm"/>
+        <field name="standard_price">780.0</field>
+    </record>
+    <record id="demo_product_brass_scrap" model="product.product">
+        <field name="name">Brass Turnings (Scrap)</field>
+        <field name="default_code">BR-SCRAP</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="uom_id" ref="uom.product_uom_kgm"/>
+        <field name="standard_price">420.0</field>
+    </record>
+
+    <function model="zivo.job.work" name="_jw_load_demo_scenario"/>
+</odoo>

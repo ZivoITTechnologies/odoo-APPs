@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_request_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.request.list</field>
+        <field name="model">zivo.job.work.request</field>
+        <field name="arch" type="xml">
+            <list string="Material Requests" sample="1">
+                <field name="name"/>
+                <field name="create_date" string="Requested On"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="qty"/>
+                <field name="product_uom_id"/>
+                <field name="source"/>
+                <field name="state" widget="badge" decoration-warning="state == 'to_approve'"
+                       decoration-success="state == 'approved'" decoration-danger="state == 'rejected'"/>
+                <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                        invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                <button name="action_reject" type="object" string="Reject" icon="fa-times"
+                        invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_request_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.request.form</field>
+        <field name="model">zivo.job.work.request</field>
+        <field name="arch" type="xml">
+            <form string="Material Request">
+                <header>
+                    <button name="action_approve" type="object" string="Approve" class="oe_highlight"
+                            invisible="state != 'to_approve' or not id" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state != 'to_approve' or not id" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="job_id" readonly="id"/>
+                            <field name="material_id" readonly="state != 'to_approve'"/>
+                            <field name="allowed_uom_ids" invisible="1"/>
+                            <field name="product_id" readonly="state != 'to_approve'"/>
+                            <label for="qty"/>
+                            <div class="o_row">
+                                <field name="qty" readonly="state != 'to_approve'"/>
+                                <field name="product_uom_id" readonly="state != 'to_approve'" options="{'no_create': True}"/>
+                            </div>
+                        </group>
+                        <group>
+                            <field name="source" readonly="1"/>
+                            <field name="requested_by_id" readonly="1"/>
+                            <field name="decided_by_id"/>
+                            <field name="date_decision"/>
+                            <field name="picking_id"/>
+                        </group>
+                    </group>
+                    <group string="Reason"><field name="reason" nolabel="1" colspan="2" readonly="state != 'to_approve'"/></group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_request_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.request.search</field>
+        <field name="model">zivo.job.work.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <filter string="To Approve" name="to_approve" domain="[('state', '=', 'to_approve')]"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_request" model="ir.actions.act_window">
+        <field name="name">Material Requests</field>
+        <field name="res_model">zivo.job.work.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_to_approve': 1}</field>
+    </record>
+
+    <record id="view_zivo_job_work_loss_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.loss.list</field>
+        <field name="model">zivo.job.work.loss</field>
+        <field name="arch" type="xml">
+            <list string="Material Losses" create="false" sample="1">
+                <field name="name"/>
+                <field name="create_date" string="Date"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="qty"/>
+                <field name="product_uom_id"/>
+                <field name="value" sum="Total"/>
+                <field name="reason"/>
+                <field name="recover_from_vendor" optional="show"/>
+                <field name="note" optional="show"/>
+                <field name="state" widget="badge" decoration-warning="state == 'to_approve'"
+                       decoration-success="state == 'approved'" decoration-danger="state == 'rejected'"/>
+                <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                        invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                <button name="action_reject" type="object" string="Reject" icon="fa-times"
+                        invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_loss_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.loss.search</field>
+        <field name="model">zivo.job.work.loss</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <filter string="To Approve" name="to_approve" domain="[('state', '=', 'to_approve')]"/>
+                <filter string="Recover From Job Worker" name="recover" domain="[('recover_from_vendor', '=', True)]"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Reason" name="group_reason" context="{'group_by': 'reason'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_loss" model="ir.actions.act_window">
+        <field name="name">Material Losses</field>
+        <field name="res_model">zivo.job.work.loss</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_to_approve': 1}</field>
+    </record>
+</odoo>

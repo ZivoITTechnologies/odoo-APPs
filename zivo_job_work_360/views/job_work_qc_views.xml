@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_qc_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.qc.form</field>
+        <field name="model">zivo.job.work.qc</field>
+        <field name="arch" type="xml">
+            <form string="Inspection" create="false">
+                <header>
+                    <button name="action_done" string="Validate Inspection" type="object" class="oe_highlight"
+                            invisible="state != 'draft'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_job" type="object" class="oe_stat_button" icon="fa-cogs" string="Job Work"/>
+                    </div>
+                    <widget name="web_ribbon" title="Exception" bg_color="text-bg-danger"
+                            invisible="state != 'done' or result != 'fail'"/>
+                    <widget name="web_ribbon" title="Passed" bg_color="text-bg-success"
+                            invisible="state != 'done' or result != 'pass'"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="job_id" readonly="1"/>
+                            <field name="production_id" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="product_id"/>
+                            <field name="inspector_id" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <label for="qty_inspected"/>
+                            <div class="o_row">
+                                <field name="qty_inspected" readonly="1"/>
+                                <field name="product_uom_id" readonly="1"/>
+                            </div>
+                            <field name="qty_accepted" readonly="state != 'draft'" decoration-success="1"/>
+                            <field name="qty_rejected" readonly="state != 'draft'"/>
+                            <field name="qty_rework" readonly="state != 'draft'"/>
+                            <field name="qty_scrap" readonly="state != 'draft'"/>
+                            <field name="accepted_under_deviation" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="acceptance_rate" widget="float" digits="[16,2]"/>
+                            <field name="tolerance" readonly="state != 'draft'"/>
+                            <field name="result" widget="badge" decoration-success="result == 'pass'"
+                                   decoration-danger="result == 'fail'"/>
+                        </group>
+                        <group>
+                            <field name="ncr_id"/>
+                            <field name="rework_job_id"/>
+                        </group>
+                    </group>
+                    <div class="text-muted small" invisible="state != 'draft'">
+                        Rejected and scrapped output is moved to the scrap location. Rework quantities are sent back
+                        to the job worker through a new rework job work order.
+                    </div>
+                    <notebook>
+                        <page string="Findings" name="findings">
+                            <field name="notes" readonly="state != 'draft'"/>
+                        </page>
+                        <page string="Certificates" name="certificates">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_qc_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.qc.list</field>
+        <field name="model">zivo.job.work.qc</field>
+        <field name="arch" type="xml">
+            <list string="Inspections" create="false" sample="1" decoration-danger="state == 'done' and result == 'fail'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="qty_inspected" sum="Total"/>
+                <field name="qty_accepted" sum="Total"/>
+                <field name="qty_rejected" sum="Total"/>
+                <field name="qty_rework" sum="Total"/>
+                <field name="qty_scrap" sum="Total"/>
+                <field name="acceptance_rate" avg="Average"/>
+                <field name="result" widget="badge" decoration-success="result == 'pass'" decoration-danger="result == 'fail'"/>
+                <field name="state" widget="badge" decoration-warning="state == 'draft'" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_qc_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.qc.search</field>
+        <field name="model">zivo.job.work.qc</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <filter string="To Inspect" name="to_inspect" domain="[('state', '=', 'draft')]"/>
+                <filter string="Failed" name="failed" domain="[('state', '=', 'done'), ('result', '=', 'fail')]"/>
+                <filter string="Date" name="date" date="date"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Job Type" name="group_type" context="{'group_by': 'job_type_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_qc_pivot" model="ir.ui.view">
+        <field name="name">zivo.job.work.qc.pivot</field>
+        <field name="model">zivo.job.work.qc</field>
+        <field name="arch" type="xml">
+            <pivot string="Quality KPIs">
+                <field name="partner_id" type="row"/>
+                <field name="qty_inspected" type="measure"/>
+                <field name="qty_accepted" type="measure"/>
+                <field name="qty_rejected" type="measure"/>
+                <field name="acceptance_rate" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_qc" model="ir.actions.act_window">
+        <field name="name">Inspections</field>
+        <field name="res_model">zivo.job.work.qc</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="context">{'search_default_to_inspect': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing to inspect</p>
+            <p>Inspections are created automatically when output is received for job types that require inspection.</p>
+        </field>
+    </record>
+</odoo>

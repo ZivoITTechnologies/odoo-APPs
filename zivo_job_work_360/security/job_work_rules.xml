@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Multi-company -->
+        <record id="rule_zivo_job_work_company" model="ir.rule">
+            <field name="name">Job Work: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_type_company" model="ir.rule">
+            <field name="name">Job Work Type: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_type"/>
+            <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+        </record>
+        <record id="rule_zivo_job_work_material_company" model="ir.rule">
+            <field name="name">Job Work Material: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_material"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_production_company" model="ir.rule">
+            <field name="name">Job Work Receipt: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_production"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_progress_company" model="ir.rule">
+            <field name="name">Job Work Progress: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_progress"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_qc_company" model="ir.rule">
+            <field name="name">Job Work QC: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_qc"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_ncr_company" model="ir.rule">
+            <field name="name">Job Work NCR: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_ncr"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_cost_company" model="ir.rule">
+            <field name="name">Job Work Cost: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_cost"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_exception_company" model="ir.rule">
+            <field name="name">Job Work Exception: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_exception"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_request_company" model="ir.rule">
+            <field name="name">Job Work Request: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_request"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_loss_company" model="ir.rule">
+            <field name="name">Job Work Loss: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_loss"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_score_company" model="ir.rule">
+            <field name="name">Job Worker Scorecard: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_vendor_score"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- Vendor portal isolation: a job worker only sees its own jobs -->
+        <record id="rule_zivo_job_work_portal" model="ir.rule">
+            <field name="name">Job Work: portal job worker sees own jobs</field>
+            <field name="model_id" ref="model_zivo_job_work"/>
+            <field name="domain_force">[('partner_id', 'child_of', [user.commercial_partner_id.id]), ('state', 'not in', ('draft', 'cancel'))]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <record id="rule_zivo_job_work_material_portal" model="ir.rule">
+            <field name="name">Job Work Material: portal job worker sees own lines</field>
+            <field name="model_id" ref="model_zivo_job_work_material"/>
+            <field name="domain_force">[('job_id.partner_id', 'child_of', [user.commercial_partner_id.id]), ('job_id.state', 'not in', ('draft', 'cancel'))]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+    </data>
+</odoo>

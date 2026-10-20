@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_job_work" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.job.work</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="40"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Job Work" string="Job Work" name="zivo_job_work_360"
+                     groups="zivo_job_work_360.group_job_work_manager">
+                    <block title="Material Custody" name="jw_custody">
+                        <setting id="jw_auto_vendor_location" company_dependent="1"
+                                 help="Create one custody location per job worker under the subcontracting location">
+                            <field name="jw_auto_vendor_location"/>
+                        </setting>
+                        <setting id="jw_shortage_tolerance" company_dependent="1" string="Material Shortage Tolerance"
+                                 help="Unaccounted material up to this % of the sent quantity is written off automatically at reconciliation; above it a shortage exception is raised">
+                            <field name="jw_shortage_tolerance" class="o_light_label"/> %
+                        </setting>
+                        <setting id="jw_scrap_tolerance" company_dependent="1" string="Scrap Tolerance"
+                                 help="Allowed scrap above the material's standard process scrap before an excess scrap exception">
+                            <field name="jw_scrap_tolerance"/> %
+                        </setting>
+                        <setting id="jw_yield_tolerance" company_dependent="1" string="Yield Tolerance"
+                                 help="Points below the expected yield before a low yield exception">
+                            <field name="jw_yield_tolerance"/> pts
+                        </setting>
+                    </block>
+                    <block title="Quality &amp; Costing" name="jw_quality">
+                        <setting id="jw_quality_tolerance" company_dependent="1" string="Minimum Acceptance Rate"
+                                 help="Inspections below this acceptance rate are flagged as exceptions">
+                            <field name="jw_quality_tolerance"/> %
+                        </setting>
+                        <setting id="jw_auto_ncr" company_dependent="1"
+                                 help="Automatically open a Non-Conformance Report for failed inspections">
+                            <field name="jw_auto_ncr"/>
+                        </setting>
+                        <setting id="jw_cost_variance_tolerance" company_dependent="1" string="Cost Variance Tolerance"
+                                 help="Actual cost above expected by more than this % raises a cost variance exception">
+                            <field name="jw_cost_variance_tolerance"/> %
+                        </setting>
+                    </block>
+                    <block title="Vendor Bill Control" name="jw_bills">
+                        <setting id="jw_block_bill_variance" company_dependent="1"
+                                 help="Bills for job work charges exceeding the accepted quantity or approved rate cannot be posted until a Job Work Administrator approves the variance">
+                            <field name="jw_block_bill_variance"/>
+                        </setting>
+                        <setting id="jw_bill_qty_tolerance" company_dependent="1" string="Quantity Tolerance"
+                                 help="Billed quantity may exceed the accepted quantity by this %">
+                            <field name="jw_bill_qty_tolerance"/> %
+                        </setting>
+                        <setting id="jw_bill_price_tolerance" company_dependent="1" string="Rate Tolerance"
+                                 help="Billed rate may exceed the approved job rate by this %">
+                            <field name="jw_bill_price_tolerance"/> %
+                        </setting>
+                    </block>
+                    <block title="Vendor Scorecard" name="jw_scorecard">
+                        <setting id="jw_score_period" company_dependent="1" string="Scorecard Period"
+                                 help="Number of days of completed jobs used for the scorecards and dashboard KPIs">
+                            <field name="jw_score_period_days"/> days
+                        </setting>
+                        <setting id="jw_score_weights" company_dependent="1" string="KPI Weights"
+                                 help="Relative weights of each KPI in the overall vendor score">
+                            <div class="content-group">
+                                <div class="row"><label for="jw_weight_on_time" class="col-6 o_light_label"/><field name="jw_weight_on_time" class="col-3"/></div>
+                                <div class="row"><label for="jw_weight_quality" class="col-6 o_light_label"/><field name="jw_weight_quality" class="col-3"/></div>
+                                <div class="row"><label for="jw_weight_yield" class="col-6 o_light_label"/><field name="jw_weight_yield" class="col-3"/></div>
+                                <div class="row"><label for="jw_weight_scrap" class="col-6 o_light_label"/><field name="jw_weight_scrap" class="col-3"/></div>
+                                <div class="row"><label for="jw_weight_material" class="col-6 o_light_label"/><field name="jw_weight_material" class="col-3"/></div>
+                                <div class="row"><label for="jw_weight_cost" class="col-6 o_light_label"/><field name="jw_weight_cost" class="col-3"/></div>
+                                <div class="row"><label for="jw_weight_response" class="col-6 o_light_label"/><field name="jw_weight_response" class="col-3"/></div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_job_work_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'zivo_job_work_360', 'bin_size': False}</field>
+    </record>
+</odoo>

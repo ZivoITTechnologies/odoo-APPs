@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_return_wizard_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.return.wizard.form</field>
+        <field name="model">zivo.job.work.return.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Return Unprocessed Material">
+                <field name="job_id" invisible="1"/>
+                <group>
+                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
+                    <field name="reason"/>
+                </group>
+                <field name="line_ids" nolabel="1">
+                    <list editable="bottom" create="false" delete="false">
+                        <field name="material_id" column_invisible="1" force_save="1"/>
+                        <field name="product_id"/>
+                        <field name="qty_balance"/>
+                        <field name="qty"/>
+                        <field name="product_uom_id" string="Unit"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm Return" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

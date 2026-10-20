@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_job_work_dashboard" model="ir.actions.client">
+        <field name="name">Job Work Control Tower</field>
+        <field name="tag">zivo_job_work_dashboard</field>
+    </record>
+
+    <menuitem id="menu_job_work_root" name="Job Work" sequence="36"
+              web_icon="zivo_job_work_360,static/description/icon.png"
+              groups="zivo_job_work_360.group_job_work_viewer"/>
+
+    <menuitem id="menu_job_work_dashboard" name="Control Tower" parent="menu_job_work_root" sequence="1"
+              action="action_job_work_dashboard"/>
+
+    <menuitem id="menu_job_work_operations" name="Operations" parent="menu_job_work_root" sequence="10"/>
+    <menuitem id="menu_job_work_orders" name="Job Work Orders" parent="menu_job_work_operations" sequence="1"
+              action="action_zivo_job_work"/>
+    <menuitem id="menu_job_work_receipts" name="Receipts" parent="menu_job_work_operations" sequence="5"
+              action="action_zivo_job_work_production"/>
+    <menuitem id="menu_job_work_requests" name="Material Requests" parent="menu_job_work_operations" sequence="10"
+              action="action_zivo_job_work_request"/>
+    <menuitem id="menu_job_work_losses" name="Material Losses" parent="menu_job_work_operations" sequence="12"
+              action="action_zivo_job_work_loss"/>
+    <menuitem id="menu_job_work_exceptions" name="Exceptions" parent="menu_job_work_operations" sequence="15"
+              action="action_zivo_job_work_exception"/>
+
+    <menuitem id="menu_job_work_quality" name="Quality" parent="menu_job_work_root" sequence="20"/>
+    <menuitem id="menu_job_work_qc" name="Inspections" parent="menu_job_work_quality" sequence="1"
+              action="action_zivo_job_work_qc"/>
+    <menuitem id="menu_job_work_ncr" name="Non-Conformance Reports" parent="menu_job_work_quality" sequence="5"
+              action="action_zivo_job_work_ncr"/>
+
+    <menuitem id="menu_job_work_custody" name="Custody" parent="menu_job_work_root" sequence="30"/>
+    <menuitem id="menu_job_work_custody_material" name="Material at Job Workers" parent="menu_job_work_custody"
+              sequence="1" action="action_zivo_job_work_custody"/>
+    <menuitem id="menu_job_work_custody_stock" name="Stock at Job Worker Locations" parent="menu_job_work_custody"
+              sequence="5" action="action_server_jw_subcontractor_stock" groups="zivo_job_work_360.group_job_work_user"/>
+
+    <menuitem id="menu_job_work_reporting" name="Reporting" parent="menu_job_work_root" sequence="40"/>
+    <menuitem id="menu_job_work_analysis" name="Job Work Analysis" parent="menu_job_work_reporting" sequence="1"
+              action="action_zivo_job_work_analysis"/>
+    <menuitem id="menu_job_work_reconciliation" name="Material Reconciliation" parent="menu_job_work_reporting"
+              sequence="5" action="action_zivo_job_work_reconciliation"/>
+    <menuitem id="menu_job_work_scorecards" name="Job Worker Scorecards" parent="menu_job_work_reporting"
+              sequence="10" action="action_zivo_job_work_vendor_score"/>
+
+    <menuitem id="menu_job_work_config" name="Configuration" parent="menu_job_work_root" sequence="90"
+              groups="zivo_job_work_360.group_job_work_manager"/>
+    <menuitem id="menu_job_work_settings" name="Settings" parent="menu_job_work_config" sequence="1"
+              action="action_job_work_config_settings" groups="base.group_system"/>
+    <menuitem id="menu_job_work_types" name="Job Types" parent="menu_job_work_config" sequence="5"
+              action="action_zivo_job_work_type"/>
+    <menuitem id="menu_job_work_workers" name="Job Workers" parent="menu_job_work_config" sequence="10"
+              action="action_zivo_job_workers"/>
+</odoo>

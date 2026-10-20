@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="zivo_job_work_360.JobWorkDashboard">
+        <div class="o_jw_dashboard o_action h-100 overflow-auto">
+            <div class="o_control_panel d-flex align-items-center px-3 py-2 border-bottom">
+                <h4 class="mb-0 me-auto">Job Work Control Tower</h4>
+                <button class="btn btn-primary me-2" t-on-click="openNewJob">New Job Work</button>
+                <button class="btn btn-secondary" t-on-click="() => this.load()" title="Refresh"><i class="fa fa-refresh"/></button>
+            </div>
+            <div t-if="state.loading and !state.data" class="p-5 text-center text-muted">Loading...</div>
+            <div t-if="state.data" class="container-fluid p-3">
+                <t t-set="k" t-value="state.data.kpis"/>
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="o_jw_kpi card h-100" t-on-click="openOpen">
+                            <div class="card-body"><div class="o_jw_kpi_label">Open Job Work Orders</div>
+                                <div class="o_jw_kpi_value" t-esc="k.open_jobs"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div t-attf-class="o_jw_kpi card h-100 #{k.overdue_jobs ? 'o_jw_kpi_alert' : ''}" t-on-click="openOverdue">
+                            <div class="card-body"><div class="o_jw_kpi_label">Jobs Overdue</div>
+                                <div class="o_jw_kpi_value" t-esc="k.overdue_jobs"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="o_jw_kpi card h-100" t-on-click="() => this.openCustody(false)">
+                            <div class="card-body"><div class="o_jw_kpi_label">Material Value at Job Workers</div>
+                                <div class="o_jw_kpi_value" t-esc="k.value_at_vendors"/></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div t-attf-class="o_jw_kpi card h-100 #{k.high_exceptions ? 'o_jw_kpi_alert' : ''}" t-on-click="() => this.openExceptions(false)">
+                            <div class="card-body"><div class="o_jw_kpi_label">Open Exceptions</div>
+                                <div class="o_jw_kpi_value"><t t-esc="k.open_exceptions"/>
+                                    <small class="fs-6 text-danger ms-1" t-if="k.high_exceptions">(<t t-esc="k.high_exceptions"/> high)</small></div></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="o_jw_kpi card h-100">
+                            <div class="card-body"><div class="o_jw_kpi_label">Avg. Cycle Time</div>
+                                <div class="o_jw_kpi_value"><t t-esc="k.avg_cycle_time"/> <small class="fs-6">days</small></div>
+                                <div class="small text-muted">last <t t-esc="k.period_days"/> days</div></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="o_jw_kpi card h-100">
+                            <div class="card-body"><div class="o_jw_kpi_label">Average Yield</div>
+                                <div class="o_jw_kpi_value"><t t-esc="k.avg_yield"/> %</div>
+                                <div class="small text-muted">last <t t-esc="k.period_days"/> days</div></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="o_jw_kpi card h-100">
+                            <div class="card-body"><div class="o_jw_kpi_label">Scrap Rate (value)</div>
+                                <div class="o_jw_kpi_value"><t t-esc="k.scrap_rate"/> %</div>
+                                <div class="small text-muted">last <t t-esc="k.period_days"/> days</div></div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <div class="o_jw_kpi card h-100">
+                            <div class="card-body"><div class="o_jw_kpi_label">Cost Variance</div>
+                                <div t-attf-class="o_jw_kpi_value #{k.cost_variance_pct > 0 ? 'text-danger' : 'text-success'}">
+                                    <t t-esc="k.cost_variance_pct > 0 ? '+' : ''"/><t t-esc="k.cost_variance_pct"/> %</div>
+                                <div class="small text-muted" t-esc="k.cost_variance"/></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3" t-if="state.data.compliance">
+                    <t t-set="c" t-value="state.data.compliance"/>
+                    <div class="card-header fw-bold d-flex align-items-center">
+                        <span t-esc="c.title"/>
+                        <span class="ms-2 small text-muted fw-normal" t-esc="c.period"/>
+                        <a href="#" class="ms-auto small" t-if="c.action" t-on-click.prevent="() => this.action.doAction(c.action)">Review &amp; Export</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 text-center">
+                            <div class="col-6 col-md-2" t-foreach="c.kpis" t-as="ck" t-key="ck.label">
+                                <div class="text-muted small" t-esc="ck.label"/>
+                                <div t-attf-class="fs-4 fw-bold #{ck.alert ? 'text-danger' : ''}" t-esc="ck.value"/>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2" t-if="c.note" t-esc="c.note"/>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold">Job Pipeline</div>
+                            <div class="card-body">
+                                <t t-set="pmax" t-value="pipelineMax()"/>
+                                <div t-foreach="state.data.pipeline" t-as="p" t-key="p.state"
+                                     class="o_jw_pipeline_row d-flex align-items-center mb-2" t-on-click="() => this.openState(p.state, p.label)">
+                                    <div class="o_jw_pipeline_label" t-esc="p.label"/>
+                                    <div class="flex-grow-1 mx-2 o_jw_bar_track">
+                                        <div class="o_jw_bar" t-attf-style="width: #{Math.round(p.count / pmax * 100)}%"/>
+                                    </div>
+                                    <div class="fw-bold o_jw_pipeline_count" t-esc="p.count"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold">Material at Job Workers</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead><tr><th>Job Worker</th><th class="text-end">Lines</th><th class="text-end">Value</th><th class="text-end">Oldest (days)</th></tr></thead>
+                                    <tbody>
+                                        <tr t-if="!state.data.vendors_custody.length"><td colspan="4" class="text-muted text-center">No material at job workers.</td></tr>
+                                        <tr t-foreach="state.data.vendors_custody" t-as="v" t-key="v.partner_id" class="cursor-pointer"
+                                            t-on-click="() => this.openCustody(v.partner_id)">
+                                            <td t-esc="v.name"/>
+                                            <td class="text-end" t-esc="v.lines"/>
+                                            <td class="text-end" t-esc="v.value_fmt"/>
+                                            <td t-attf-class="text-end #{v.age > 30 ? 'text-danger fw-bold' : (v.age > 15 ? 'text-warning' : '')}" t-esc="v.age"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold d-flex">Open Exceptions
+                                <a href="#" class="ms-auto small" t-on-click.prevent="() => this.openExceptions(false)">View all</a></div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <tbody>
+                                        <tr t-if="!state.data.exceptions.length"><td class="text-muted text-center">No open exception.</td></tr>
+                                        <tr t-foreach="state.data.exceptions" t-as="e" t-key="e.id" class="cursor-pointer"
+                                            t-on-click="() => this.openExceptions(e.id)">
+                                            <td><span t-attf-class="badge #{e.severity === 'high' ? 'text-bg-danger' : (e.severity === 'medium' ? 'text-bg-warning' : 'text-bg-secondary')}" t-esc="e.type"/></td>
+                                            <td><div class="fw-bold" t-esc="e.job"/><div class="small text-muted" t-esc="e.partner"/></td>
+                                            <td class="small" t-esc="e.description"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card h-100 mb-3">
+                            <div class="card-header fw-bold d-flex">Job Worker Performance
+                                <a href="#" class="ms-auto small" t-on-click.prevent="openScorecards">Scorecards</a></div>
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead><tr><th>Job Worker</th><th class="text-end">On-time</th><th class="text-end">Quality</th>
+                                        <th class="text-end">Yield</th><th class="text-end">Scrap</th><th class="text-end">Score</th></tr></thead>
+                                    <tbody>
+                                        <tr t-if="!state.data.scorecards.length"><td colspan="6" class="text-muted text-center">Scorecards are computed weekly from completed jobs.</td></tr>
+                                        <tr t-foreach="state.data.scorecards" t-as="s" t-key="s.id">
+                                            <td t-esc="s.partner"/>
+                                            <td class="text-end"><t t-esc="s.on_time"/>%</td>
+                                            <td class="text-end"><t t-esc="s.quality"/>%</td>
+                                            <td class="text-end"><t t-esc="s.yield"/>%</td>
+                                            <td class="text-end"><t t-esc="s.scrap"/>%</td>
+                                            <td class="text-end"><span t-attf-class="badge #{gradeClass(s.grade)}"><t t-esc="s.grade"/> · <t t-esc="s.score"/></span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12" t-if="state.data.overdue.length">
+                        <div class="card">
+                            <div class="card-header fw-bold text-danger">Overdue Jobs</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <tbody>
+                                        <tr t-foreach="state.data.overdue" t-as="j" t-key="j.id" class="cursor-pointer" t-on-click="() => this.openJob(j.id)">
+                                            <td class="fw-bold" t-esc="j.name"/>
+                                            <td t-esc="j.partner"/>
+                                            <td t-esc="j.product"/>
+                                            <td class="text-end text-danger"><t t-esc="j.days"/> days late</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

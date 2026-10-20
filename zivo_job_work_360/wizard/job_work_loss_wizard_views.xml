@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_loss_wizard_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.loss.wizard.form</field>
+        <field name="model">zivo.job.work.loss.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Record Material Loss">
+                <field name="job_id" invisible="1"/>
+                <field name="is_manager" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="material_id" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="qty_balance"/>
+                        <label for="qty"/>
+                        <div class="o_row">
+                            <field name="qty"/>
+                            <field name="product_uom_id" readonly="1"/>
+                        </div>
+                    </group>
+                    <group>
+                        <field name="reason"/>
+                        <field name="recover_from_vendor"/>
+                        <field name="approve_now" invisible="not is_manager"/>
+                    </group>
+                </group>
+                <field name="note" placeholder="Explain the loss (required for the audit trail)"/>
+                <div class="text-muted small" invisible="is_manager">
+                    The loss will be submitted to a Job Work Administrator for approval.
+                </div>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

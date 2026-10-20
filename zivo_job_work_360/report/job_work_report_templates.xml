@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_job_work_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+            <t t-set="address">
+                <div t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'/>
+            </t>
+            <div class="page">
+                <h2>Job Work Order <span t-field="o.name"/></h2>
+                <div class="row mt-3 mb-3">
+                    <div class="col-3"><strong>Job Type</strong><div t-field="o.job_type_id"/></div>
+                    <div class="col-3"><strong>Planned Start</strong><div t-field="o.date_planned_start" t-options='{"widget": "date"}'/></div>
+                    <div class="col-3"><strong>Expected Completion</strong><div t-field="o.date_expected" t-options='{"widget": "date"}'/></div>
+                    <div class="col-3"><strong>Reference</strong><div t-field="o.client_ref"/></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-3"><strong>Principal</strong><div t-field="o.principal_id"/></div>
+                    <div class="col-3"><strong>Responsible</strong><div t-field="o.user_id"/></div>
+                    <div class="col-3"><strong>Priority</strong><div t-field="o.priority"/></div>
+                    <div class="col-3" t-if="o.parent_id"><strong>Previous Stage</strong><div t-field="o.parent_id"/></div>
+                </div>
+                <h5>Output Required</h5>
+                <table class="table table-sm">
+                    <thead><tr><th>Product</th><th class="text-end">Quantity</th><th class="text-end">Rate</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><span t-field="o.product_id"/></td>
+                            <td class="text-end"><span t-field="o.product_qty"/> <span t-field="o.product_uom_id"/></td>
+                            <td class="text-end"><span t-field="o.rate"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5>Material Supplied</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th class="text-end">Required</th>
+                            <th class="text-end">Sent</th>
+                            <th class="text-end">Std. Consumption / Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.material_ids" t-as="m">
+                            <td><span t-field="m.product_id"/></td>
+                            <td class="text-end"><span t-field="m.planned_qty"/> <span t-field="m.product_uom_id"/></td>
+                            <td class="text-end"><span t-field="m.qty_issued"/></td>
+                            <td class="text-end"><span t-field="m.std_qty_per_unit"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div t-if="o.notes" class="mt-3">
+                    <h5>Instructions</h5>
+                    <div t-field="o.notes"/>
+                </div>
+                <div class="row mt-5">
+                    <div class="col-6"><p>For <span t-field="o.company_id.name"/></p><br/><br/><p>Authorised Signatory</p></div>
+                    <div class="col-6 text-end"><p>Accepted by <span t-field="o.partner_id.name"/></p><br/><br/><p>Signature &amp; Date</p></div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_job_work">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="zivo_job_work_360.report_job_work_document" t-lang="o.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_job_work_reconciliation_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>Job Work Reconciliation <span t-field="o.name"/></h2>
+                <div class="row mt-3 mb-3">
+                    <div class="col-3"><strong>Job Worker</strong><div t-field="o.partner_id"/></div>
+                    <div class="col-3"><strong>Job Type</strong><div t-field="o.job_type_id"/></div>
+                    <div class="col-3"><strong>Status</strong><div t-field="o.state"/></div>
+                    <div class="col-3"><strong>Reconciliation</strong><div t-field="o.reconciliation_state"/></div>
+                </div>
+                <h5>Output</h5>
+                <table class="table table-sm">
+                    <thead><tr>
+                        <th>Product</th><th class="text-end">Planned</th><th class="text-end">Received</th>
+                        <th class="text-end">Accepted</th><th class="text-end">Rejected</th><th class="text-end">Rework</th>
+                        <th class="text-end">Scrap</th><th class="text-end">Yield %</th>
+                    </tr></thead>
+                    <tbody><tr>
+                        <td><span t-field="o.product_id"/></td>
+                        <td class="text-end"><span t-field="o.product_qty"/></td>
+                        <td class="text-end"><span t-field="o.qty_received"/></td>
+                        <td class="text-end"><span t-field="o.qty_accepted"/></td>
+                        <td class="text-end"><span t-field="o.qty_rejected"/></td>
+                        <td class="text-end"><span t-field="o.qty_rework"/></td>
+                        <td class="text-end"><span t-field="o.qty_qc_scrap"/></td>
+                        <td class="text-end"><span t-esc="'%.2f' % o.actual_yield"/> (std <span t-esc="'%.2f' % o.expected_yield"/>)</td>
+                    </tr></tbody>
+                </table>
+                <h5>Material Reconciliation</h5>
+                <p class="text-muted small">Unaccounted = Sent - Consumed - Returned - Scrap - Approved Loss</p>
+                <table class="table table-sm">
+                    <thead><tr>
+                        <th>Material</th><th class="text-end">Sent</th><th class="text-end">Consumed</th>
+                        <th class="text-end">Returned</th><th class="text-end">Scrap</th><th class="text-end">Approved Loss</th>
+                        <th class="text-end">Unaccounted</th><th class="text-end">Std. Consumption</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="o.material_ids" t-as="m">
+                            <td><span t-field="m.product_id"/> (<span t-field="m.product_uom_id"/>)</td>
+                            <td class="text-end"><span t-field="m.qty_issued"/></td>
+                            <td class="text-end"><span t-field="m.qty_consumed"/></td>
+                            <td class="text-end"><span t-field="m.qty_returned"/></td>
+                            <td class="text-end"><span t-field="m.qty_scrap"/></td>
+                            <td class="text-end"><span t-field="m.qty_loss"/></td>
+                            <td t-attf-class="text-end #{'text-danger fw-bold' if m.balance_qty &gt; 0 else ''}"><span t-field="m.balance_qty"/></td>
+                            <td class="text-end"><span t-field="m.expected_consumption"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5>Costing (<span t-field="o.company_currency_id.name"/>)</h5>
+                <table class="table table-sm">
+                    <thead><tr><th>Cost Component</th><th class="text-end">Expected</th><th class="text-end">Actual</th><th class="text-end">Variance</th></tr></thead>
+                    <tbody>
+                        <t t-foreach="[('Raw material', o.cost_exp_material, o.cost_act_material), ('Job work', o.cost_exp_processing, o.cost_act_processing), ('Freight', o.cost_exp_freight, o.cost_act_freight), ('Inspection', o.cost_exp_inspection, o.cost_act_inspection), ('Scrap impact', o.cost_exp_scrap, o.cost_act_scrap), ('Other', o.cost_exp_other, o.cost_act_other)]" t-as="row">
+                            <tr>
+                                <td t-esc="row[0]"/>
+                                <td class="text-end"><span t-esc="row[1]" t-options='{"widget": "monetary", "display_currency": o.company_currency_id}'/></td>
+                                <td class="text-end"><span t-esc="row[2]" t-options='{"widget": "monetary", "display_currency": o.company_currency_id}'/></td>
+                                <td class="text-end"><span t-esc="row[2] - row[1]" t-options='{"widget": "monetary", "display_currency": o.company_currency_id}'/></td>
+                            </tr>
+                        </t>
+                        <tr class="fw-bold">
+                            <td>Total</td>
+                            <td class="text-end"><span t-field="o.cost_exp_total"/></td>
+                            <td class="text-end"><span t-field="o.cost_act_total"/></td>
+                            <td class="text-end"><span t-field="o.cost_variance"/> (<span t-esc="'%.2f' % o.cost_variance_pct"/>%)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Actual cost per accepted unit: <strong t-field="o.cost_per_unit"/></p>
+                <t t-set="excs" t-value="o.exception_ids"/>
+                <div t-if="excs">
+                    <h5>Exceptions</h5>
+                    <table class="table table-sm">
+                        <thead><tr><th>Exception</th><th>Severity</th><th>Status</th><th>Details</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="excs" t-as="e">
+                                <td><span t-field="e.exception_type"/></td>
+                                <td><span t-field="e.severity"/></td>
+                                <td><span t-field="e.state"/></td>
+                                <td><span t-field="e.description"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_job_work_reconciliation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="zivo_job_work_360.report_job_work_reconciliation_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_material_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.list</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="arch" type="xml">
+            <list string="Material at Job Workers" create="false" edit="false" delete="false" sample="1">
+                <field name="partner_id"/>
+                <field name="job_id"/>
+                <field name="product_id"/>
+                <field name="qty_issued" string="Sent"/>
+                <field name="qty_consumed"/>
+                <field name="qty_returned"/>
+                <field name="qty_scrap"/>
+                <field name="qty_loss" optional="show"/>
+                <field name="balance_qty" decoration-bf="1"/>
+                <field name="product_uom_id" string="Unit"/>
+                <field name="balance_value" sum="Total"/>
+                <field name="age_days" decoration-danger="age_days &gt; 30" decoration-warning="age_days &gt; 15"/>
+                <field name="consumption_variance" optional="hide"/>
+                <field name="job_state" widget="badge" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <button name="action_open_job" type="object" icon="fa-external-link" title="Open job"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_material_pivot" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.pivot</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="arch" type="xml">
+            <pivot string="Material Reconciliation" sample="1">
+                <field name="partner_id" type="row"/>
+                <field name="product_id" type="row"/>
+                <field name="qty_issued" type="measure"/>
+                <field name="qty_consumed" type="measure"/>
+                <field name="qty_returned" type="measure"/>
+                <field name="qty_scrap" type="measure"/>
+                <field name="qty_loss" type="measure"/>
+                <field name="balance_qty" type="measure"/>
+                <field name="balance_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_material_graph" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.graph</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="arch" type="xml">
+            <graph string="Material at Job Workers" type="bar" sample="1">
+                <field name="partner_id"/>
+                <field name="balance_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_material_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.search</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="job_id"/>
+                <filter string="Material at Job Worker" name="with_balance" domain="[('balance_qty', '&gt;', 0)]"/>
+                <filter string="Unaccounted on Completed Jobs" name="unaccounted"
+                        domain="[('balance_qty', '&gt;', 0), ('job_id.state', 'in', ('completed', 'reconciled'))]"/>
+                <filter string="Capital Goods" name="capital" domain="[('is_capital_goods', '=', True)]"/>
+                <filter string="First Issued" name="date_first_issue" date="date_first_issue"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Material" name="group_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Job Work" name="group_job" context="{'group_by': 'job_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_custody" model="ir.actions.act_window">
+        <field name="name">Material at Job Workers</field>
+        <field name="res_model">zivo.job.work.material</field>
+        <field name="view_mode">list,pivot,graph</field>
+        <field name="domain">[('job_id.state', 'not in', ('draft', 'cancel'))]</field>
+        <field name="context">{'search_default_with_balance': 1, 'search_default_group_partner': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No material at job workers</p>
+            <p>Material issued to job workers and not yet consumed, returned, scrapped or written off appears here.</p>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_reconciliation" model="ir.actions.act_window">
+        <field name="name">Material Reconciliation</field>
+        <field name="res_model">zivo.job.work.material</field>
+        <field name="view_mode">pivot,list,graph</field>
+        <field name="domain">[('job_id.state', 'not in', ('draft', 'cancel'))]</field>
+    </record>
+    <record id="action_server_jw_subcontractor_stock" model="ir.actions.server">
+        <field name="name">Stock at Job Workers</field>
+        <field name="model_id" ref="stock.model_stock_quant"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_view_jw_subcontractor_stock()</field>
+    </record>
+</odoo>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="product_job_work_service" model="product.product">
+            <field name="name">Job Work Processing Charges</field>
+            <field name="default_code">JW-SERVICE</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="purchase_method">receive</field>
+            <field name="list_price">0.0</field>
+            <field name="standard_price">0.0</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="job_type_machining" model="zivo.job.work.type">
+            <field name="name">Machining</field>
+            <field name="code">MCH</field>
+            <field name="sequence">10</field>
+            <field name="company_id" eval="False"/>
+            <field name="expected_yield">98</field>
+            <field name="expected_scrap_pct">2</field>
+            <field name="lead_days">7</field>
+        </record>
+        <record id="job_type_heat_treatment" model="zivo.job.work.type">
+            <field name="name">Heat Treatment</field>
+            <field name="code">HT</field>
+            <field name="sequence">20</field>
+            <field name="company_id" eval="False"/>
+            <field name="expected_yield">99</field>
+            <field name="lead_days">5</field>
+        </record>
+        <record id="job_type_plating" model="zivo.job.work.type">
+            <field name="name">Plating / Coating</field>
+            <field name="code">PLT</field>
+            <field name="sequence">30</field>
+            <field name="company_id" eval="False"/>
+            <field name="expected_yield">99</field>
+            <field name="lead_days">5</field>
+        </record>
+        <record id="job_type_painting" model="zivo.job.work.type">
+            <field name="name">Painting</field>
+            <field name="code">PNT</field>
+            <field name="sequence">40</field>
+            <field name="company_id" eval="False"/>
+            <field name="expected_yield">99</field>
+            <field name="lead_days">4</field>
+        </record>
+        <record id="job_type_fabrication" model="zivo.job.work.type">
+            <field name="name">Fabrication / Welding</field>
+            <field name="code">FAB</field>
+            <field name="sequence">50</field>
+            <field name="company_id" eval="False"/>
+            <field name="expected_yield">97</field>
+            <field name="expected_scrap_pct">3</field>
+            <field name="lead_days">10</field>
+        </record>
+        <record id="job_type_rework" model="zivo.job.work.type">
+            <field name="name">Rework</field>
+            <field name="code">RWK</field>
+            <field name="sequence">90</field>
+            <field name="company_id" eval="False"/>
+            <field name="is_rework" eval="True"/>
+            <field name="expected_yield">100</field>
+            <field name="lead_days">3</field>
+        </record>
+    </data>
+
+    <data noupdate="1">
+        <record id="mail_template_job_work_sent" model="mail.template">
+            <field name="name">Job Work: Send to Job Worker</field>
+            <field name="model_id" ref="model_zivo_job_work"/>
+            <field name="subject">Job Work {{ object.name }} - {{ object.job_type_id.name }}</field>
+            <field name="partner_to">{{ object.partner_id.id }}</field>
+            <field name="description">Sent to the job worker with a link to the vendor portal</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear <t t-out="object.partner_id.name or ''">Vendor</t>,
+        <br/><br/>
+        Please find job work order <strong t-out="object.name or ''">JW/2026/00001</strong>
+        (<t t-out="object.job_type_id.name or ''">Heat Treatment</t>) for
+        <strong t-out="object.product_qty or ''">100</strong> <t t-out="object.product_uom_id.name or ''">Units</t>
+        of <t t-out="object.product_id.display_name or ''">Product</t>.
+        <br/>
+        Expected completion: <strong t-out="format_datetime(object.date_expected, dt_format='medium') or ''">date</strong>.
+        <br/><br/>
+        You can accept the job, confirm receipt of material, report progress, request material and upload
+        documents online:
+        <br/><br/>
+        <a t-att-href="object.get_portal_url()"
+           style="background-color: #1f4e79; padding: 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;">
+            Open Job Work
+        </a>
+        <br/><br/>
+        Best regards,
+        <br/>
+        <t t-out="object.user_id.name or ''">Responsible</t>
+    </p>
+</div>
+            </field>
+            <field name="report_template_ids" eval="[(4, ref('zivo_job_work_360.action_report_job_work'))]"/>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>

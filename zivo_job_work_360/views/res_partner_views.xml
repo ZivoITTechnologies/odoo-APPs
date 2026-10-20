@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_job_work" model="ir.ui.view">
+        <field name="name">res.partner.form.job.work</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority" eval="40"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_jw_jobs" type="object" class="oe_stat_button" icon="fa-cogs"
+                        groups="zivo_job_work_360.group_job_work_viewer" invisible="not jw_job_count">
+                    <field name="jw_job_count" widget="statinfo" string="Job Work"/>
+                </button>
+                <button name="action_view_jw_scores" type="object" class="oe_stat_button" icon="fa-trophy"
+                        groups="zivo_job_work_360.group_job_work_viewer" invisible="not jw_grade">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value"><field name="jw_grade" readonly="1"/></span>
+                        <span class="o_stat_text">Vendor Grade</span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//page[@name='sales_purchases']//group[@name='purchase']" position="inside">
+                <field name="jw_is_job_worker" groups="zivo_job_work_360.group_job_work_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_zivo_job_workers" model="ir.actions.act_window">
+        <field name="name">Job Workers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">['|', ('jw_is_job_worker', '=', True), ('jw_job_ids', '!=', False)]</field>
+        <field name="context">{'default_jw_is_job_worker': True, 'default_is_company': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a job worker</p>
+            <p>Job workers are the subcontractors processing your material.</p>
+        </field>
+    </record>
+</odoo>

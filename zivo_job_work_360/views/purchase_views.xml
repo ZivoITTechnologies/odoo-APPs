@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_order_form_job_work" model="ir.ui.view">
+        <field name="name">purchase.order.form.job.work</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_jw_orders" type="object" class="oe_stat_button" icon="fa-cogs"
+                        invisible="not jw_order_count" groups="zivo_job_work_360.group_job_work_viewer">
+                    <field name="jw_order_count" widget="statinfo" string="Job Work"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+    <record id="view_move_form_job_work" model="ir.ui.view">
+        <field name="name">account.move.form.job.work</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_jw_approve_variance" type="object" string="Approve Job Work Variance"
+                        class="btn-warning" groups="zivo_job_work_360.group_job_work_manager"
+                        invisible="not jw_has_variance or jw_review_state == 'approved' or state != 'draft'"/>
+                <button name="action_jw_hold" type="object" string="Hold"
+                        groups="zivo_job_work_360.group_job_work_manager"
+                        invisible="not jw_is_job_work_bill or jw_review_state in ('hold', 'dispute') or state != 'draft' or move_type != 'in_invoice'"/>
+                <button name="action_jw_dispute" type="object" string="Dispute"
+                        groups="zivo_job_work_360.group_job_work_manager"
+                        invisible="not jw_is_job_work_bill or jw_review_state == 'dispute' or state != 'draft' or move_type != 'in_invoice'"/>
+                <button name="action_jw_reset_review" type="object" string="Reset Job Work Review"
+                        groups="zivo_job_work_360.group_job_work_manager"
+                        invisible="jw_review_state == 'none' or state != 'draft'"/>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <field name="jw_is_job_work_bill" invisible="1"/>
+                <field name="jw_has_variance" invisible="1"/>
+                <div class="alert alert-danger mb-0" role="alert"
+                     invisible="not jw_has_variance or jw_review_state == 'approved' or move_type != 'in_invoice'">
+                    <strong>Job work variance:</strong> this bill exceeds the accepted job quantity or the approved rate.
+                    Value variance: <field name="jw_value_variance" class="oe_inline"/>
+                    <field name="jw_variance_html" nolabel="1"/>
+                </div>
+                <div class="alert alert-info mb-0" role="alert"
+                     invisible="not jw_is_job_work_bill or jw_review_state == 'none' or move_type != 'in_invoice'">
+                    Job work review: <field name="jw_review_state" class="oe_inline fw-bold" readonly="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_production_form_job_work" model="ir.ui.view">
+        <field name="name">mrp.production.form.job.work</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_jw_orders" type="object" class="oe_stat_button" icon="fa-cogs"
+                        invisible="not jw_order_count" groups="zivo_job_work_360.group_job_work_viewer">
+                    <field name="jw_order_count" widget="statinfo" string="Job Work"/>
+                </button>
+            </div>
+            <xpath expr="//header" position="inside">
+                <button name="action_create_job_work" type="object" string="Send for Job Work"
+                        invisible="state in ('draft', 'cancel')" groups="zivo_job_work_360.group_job_work_user"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

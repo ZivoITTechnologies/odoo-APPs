@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_receive_wizard_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.receive.wizard.form</field>
+        <field name="model">zivo.job.work.receive.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Receive Job Work Output">
+                <field name="job_id" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="product_id" readonly="1"/>
+                        <label for="qty_received"/>
+                        <div class="o_row">
+                            <field name="qty_received"/>
+                            <field name="product_uom_id" readonly="1"/>
+                        </div>
+                        <field name="qty_remaining" string="Still Expected"/>
+                        <field name="vendor_reported_qty" invisible="not vendor_reported_qty"/>
+                        <field name="is_final"/>
+                    </group>
+                    <group>
+                        <field name="date"/>
+                        <field name="vendor_challan_ref"/>
+                        <field name="vendor_challan_date"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" role="alert" invisible="product_tracking == 'none'">
+                    The output is tracked by lots/serial numbers: the receipt transfer opens after confirmation so you
+                    can register them and validate it.
+                </div>
+                <separator string="Material Consumption &amp; Scrap at the Job Worker"/>
+                <field name="line_ids" nolabel="1">
+                    <list editable="bottom" create="false" delete="false">
+                        <field name="material_id" column_invisible="1" force_save="1"/>
+                        <field name="product_id"/>
+                        <field name="qty_balance"/>
+                        <field name="qty_expected"/>
+                        <field name="qty_consumed"/>
+                        <field name="qty_scrap"/>
+                        <field name="scrap_product_id" optional="hide"/>
+                        <field name="scrap_returned" readonly="not scrap_product_id"/>
+                        <field name="product_uom_id" string="Unit"/>
+                    </list>
+                </field>
+                <field name="note" placeholder="Notes..."/>
+                <field name="product_tracking" invisible="1"/>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm Receipt" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_vendor_score_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.vendor.score.list</field>
+        <field name="model">zivo.job.work.vendor.score</field>
+        <field name="arch" type="xml">
+            <list string="Job Worker Scorecards" create="false" edit="false" sample="1"
+                  decoration-success="grade == 'A'" decoration-danger="grade == 'D'">
+                <header>
+                    <button name="action_generate_scorecards" type="object" string="Recompute Scorecards"
+                            class="btn-primary" display="always" groups="zivo_job_work_360.group_job_work_manager"/>
+                </header>
+                <field name="partner_id"/>
+                <field name="date_from" optional="hide"/>
+                <field name="date_to"/>
+                <field name="job_count"/>
+                <field name="open_job_count" optional="show"/>
+                <field name="on_time_rate" widget="float" digits="[16,1]"/>
+                <field name="quality_rate" widget="float" digits="[16,1]"/>
+                <field name="yield_rate" widget="float" digits="[16,1]"/>
+                <field name="scrap_rate" widget="float" digits="[16,2]"/>
+                <field name="material_variance_rate" widget="float" digits="[16,2]" optional="show"/>
+                <field name="cost_variance_rate" widget="float" digits="[16,2]" optional="show"/>
+                <field name="avg_delay_days" widget="float" digits="[16,1]" optional="hide"/>
+                <field name="responsiveness" optional="show"/>
+                <field name="score" widget="progressbar"/>
+                <field name="grade" widget="badge" decoration-success="grade == 'A'" decoration-info="grade == 'B'"
+                       decoration-warning="grade == 'C'" decoration-danger="grade == 'D'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_vendor_score_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.vendor.score.form</field>
+        <field name="model">zivo.job.work.vendor.score</field>
+        <field name="arch" type="xml">
+            <form string="Job Worker Scorecard" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="partner_id"/></h1>
+                        <h3>Grade <field name="grade"/> · <field name="score" widget="float" digits="[16,1]"/> / 100</h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="job_count"/>
+                            <field name="open_job_count"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="is_latest"/>
+                        </group>
+                    </group>
+                    <table class="table table-sm">
+                        <thead><tr><th>KPI</th><th class="text-end">Value</th><th class="text-end">Score (0-100)</th></tr></thead>
+                        <tbody>
+                            <tr><td>On-time delivery (%)</td><td class="text-end"><field name="on_time_rate" nolabel="1"/></td><td class="text-end"><field name="score_on_time" nolabel="1"/></td></tr>
+                            <tr><td>Average delay (days)</td><td class="text-end"><field name="avg_delay_days" nolabel="1"/></td><td/></tr>
+                            <tr><td>Quality acceptance (%)</td><td class="text-end"><field name="quality_rate" nolabel="1"/></td><td class="text-end"><field name="score_quality" nolabel="1"/></td></tr>
+                            <tr><td>Yield (%)</td><td class="text-end"><field name="yield_rate" nolabel="1"/></td><td class="text-end"><field name="score_yield" nolabel="1"/></td></tr>
+                            <tr><td>Scrap (%)</td><td class="text-end"><field name="scrap_rate" nolabel="1"/></td><td class="text-end"><field name="score_scrap" nolabel="1"/></td></tr>
+                            <tr><td>Material variance (%)</td><td class="text-end"><field name="material_variance_rate" nolabel="1"/></td><td class="text-end"><field name="score_material" nolabel="1"/></td></tr>
+                            <tr><td>Cost variance (%)</td><td class="text-end"><field name="cost_variance_rate" nolabel="1"/></td><td class="text-end"><field name="score_cost" nolabel="1"/></td></tr>
+                            <tr><td>Responsiveness (avg. hours to accept)</td><td class="text-end"><field name="response_hours" nolabel="1"/> <field name="responsiveness" nolabel="1"/></td><td class="text-end"><field name="score_response" nolabel="1"/></td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-muted small">KPIs without data in the period are excluded and the remaining weights are re-normalised.
+                        Weights are configured in Job Work settings.</p>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_vendor_score_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.vendor.score.search</field>
+        <field name="model">zivo.job.work.vendor.score</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <filter string="Latest" name="latest" domain="[('is_latest', '=', True)]"/>
+                <group>
+                    <filter string="Grade" name="group_grade" context="{'group_by': 'grade'}"/>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_vendor_score_graph" model="ir.ui.view">
+        <field name="name">zivo.job.work.vendor.score.graph</field>
+        <field name="model">zivo.job.work.vendor.score</field>
+        <field name="arch" type="xml">
+            <graph string="Scorecards" type="bar">
+                <field name="partner_id"/>
+                <field name="score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_vendor_score" model="ir.actions.act_window">
+        <field name="name">Job Worker Scorecards</field>
+        <field name="res_model">zivo.job.work.vendor.score</field>
+        <field name="view_mode">list,form,graph</field>
+        <field name="context">{'search_default_latest': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No scorecard yet</p>
+            <p>Scorecards are computed weekly from completed job work orders. Use "Recompute Scorecards" to refresh now.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_exception_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.exception.list</field>
+        <field name="model">zivo.job.work.exception</field>
+        <field name="arch" type="xml">
+            <list string="Exceptions" create="false" sample="1"
+                  decoration-danger="state == 'open' and severity == 'high'"
+                  decoration-warning="state == 'open' and severity == 'medium'"
+                  decoration-muted="state != 'open'">
+                <field name="create_date" string="Raised"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="exception_type"/>
+                <field name="severity" widget="badge"/>
+                <field name="description"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="state" widget="badge"/>
+                <button name="action_resolve" type="object" string="Resolve" icon="fa-check"
+                        invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_user"/>
+                <button name="action_waive" type="object" string="Waive" icon="fa-ban"
+                        invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_manager"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_exception_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.exception.form</field>
+        <field name="model">zivo.job.work.exception</field>
+        <field name="arch" type="xml">
+            <form string="Exception" create="false">
+                <header>
+                    <button name="action_resolve" type="object" string="Resolve" class="oe_highlight"
+                            invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_waive" type="object" string="Waive"
+                            invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <button name="action_reopen" type="object" string="Re-open"
+                            invisible="state == 'open'" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_job" type="object" class="oe_stat_button" icon="fa-cogs" string="Job Work"/>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="job_id" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="material_id" readonly="1" invisible="not material_id"/>
+                            <field name="ncr_id" invisible="not ncr_id"/>
+                        </group>
+                        <group>
+                            <field name="exception_type" readonly="1"/>
+                            <field name="severity" readonly="1"/>
+                            <field name="create_date" string="Raised On"/>
+                            <field name="resolved_by_id" invisible="state == 'open'"/>
+                            <field name="date_resolved" invisible="state == 'open'"/>
+                        </group>
+                    </group>
+                    <group string="Details"><field name="description" nolabel="1" colspan="2" readonly="1"/></group>
+                    <group string="Resolution / Justification"><field name="resolution" nolabel="1" colspan="2"/></group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_exception_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.exception.search</field>
+        <field name="model">zivo.job.work.exception</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="exception_type"/>
+                <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
+                <filter string="High Severity" name="high" domain="[('severity', '=', 'high')]"/>
+                <filter string="My Jobs" name="my" domain="[('user_id', '=', uid)]"/>
+                <group>
+                    <filter string="Exception" name="group_type" context="{'group_by': 'exception_type'}"/>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Severity" name="group_severity" context="{'group_by': 'severity'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_exception" model="ir.actions.act_window">
+        <field name="name">Exceptions</field>
+        <field name="res_model">zivo.job.work.exception</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No exception</p>
+            <p>Shortages, excess scrap, low yield, overdue returns, invoice variances and quality failures are
+               raised here automatically.</p>
+        </field>
+    </record>
+</odoo>
