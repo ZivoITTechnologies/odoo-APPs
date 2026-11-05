@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tally_connection_user,tally.connection user,model_tally_connection,group_tally_user,1,0,0,0
+access_tally_connection_manager,tally.connection manager,model_tally_connection,group_tally_manager,1,1,1,1
+access_tally_mapping_user,tally.mapping user,model_tally_mapping,group_tally_user,1,1,1,0
+access_tally_mapping_manager,tally.mapping manager,model_tally_mapping,group_tally_manager,1,1,1,1
+access_tally_request_user,tally.request user,model_tally_request,group_tally_user,1,1,0,0
+access_tally_request_manager,tally.request manager,model_tally_request,group_tally_manager,1,1,1,1
+access_tally_voucher_user,tally.voucher user,model_tally_voucher,group_tally_user,1,1,0,0
+access_tally_voucher_manager,tally.voucher manager,model_tally_voucher,group_tally_manager,1,1,1,1
+access_tally_voucher_line_user,tally.voucher.line user,model_tally_voucher_line,group_tally_user,1,1,0,0
+access_tally_voucher_line_manager,tally.voucher.line manager,model_tally_voucher_line,group_tally_manager,1,1,1,1
+access_tally_recon_user,tally.recon.line user,model_tally_recon_line,group_tally_user,1,0,0,0
+access_tally_recon_manager,tally.recon.line manager,model_tally_recon_line,group_tally_manager,1,1,1,1
+access_tally_file_import,tally.file.import,model_tally_file_import,group_tally_user,1,1,1,1
+access_tally_file_export,tally.file.export,model_tally_file_export,group_tally_user,1,1,1,1
+access_tally_migration,tally.migration,model_tally_migration,group_tally_manager,1,1,1,1
+access_tally_agent_setup,tally.agent.setup,model_tally_agent_setup,group_tally_manager,1,1,1,1

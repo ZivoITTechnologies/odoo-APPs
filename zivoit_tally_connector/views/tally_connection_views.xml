@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_connection_kanban" model="ir.ui.view">
+        <field name="name">tally.connection.kanban</field>
+        <field name="model">tally.connection</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard" create="true" sample="1">
+                <field name="state"/>
+                <field name="transport"/>
+                <field name="agent_online"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <field name="name" class="fw-bold fs-4"/>
+                                <div class="text-muted"><field name="tally_company"/></div>
+                                <div class="small"><field name="transport"/></div>
+                            </div>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'connected'"
+                                   decoration-danger="state == 'error'"/>
+                        </div>
+                        <div class="row mt-3 g-2 text-center">
+                            <div class="col-3"><a name="action_view_requests" type="object">
+                                <div class="fs-4"><field name="count_done_today"/></div>
+                                <div class="small text-muted">Synced today</div></a></div>
+                            <div class="col-3"><a name="action_view_requests" type="object">
+                                <div class="fs-4"><field name="count_pending"/></div>
+                                <div class="small text-muted">Queued</div></a></div>
+                            <div class="col-3"><a name="action_view_failed" type="object">
+                                <div class="fs-4 text-danger"><field name="count_failed"/></div>
+                                <div class="small text-muted">Failed</div></a></div>
+                            <div class="col-3"><a name="action_view_vouchers_review" type="object">
+                                <div class="fs-4 text-warning"><field name="count_vouchers_review"/></div>
+                                <div class="small text-muted">To review</div></a></div>
+                        </div>
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            <button name="action_sync_now" type="object" class="btn btn-primary btn-sm">Sync now</button>
+                            <button name="action_test_connection" type="object" class="btn btn-secondary btn-sm">Test</button>
+                            <button name="action_view_mappings_review" type="object" class="btn btn-secondary btn-sm">
+                                Mappings (<field name="count_mapping_review"/>)</button>
+                        </div>
+                        <div class="small mt-2" t-if="record.transport.raw_value == 'agent'">
+                            <span t-if="record.agent_online.raw_value" class="text-success">● Agent online</span>
+                            <span t-else="" class="text-danger">● Agent offline</span>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_tally_connection_list" model="ir.ui.view">
+        <field name="name">tally.connection.list</field>
+        <field name="model">tally.connection</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="tally_company"/>
+                <field name="transport"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="last_pull_date"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'"
+                       decoration-danger="state == 'error'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_connection_form" model="ir.ui.view">
+        <field name="name">tally.connection.form</field>
+        <field name="model">tally.connection</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object" string="Test connection" class="btn-primary"/>
+                    <button name="action_sync_now" type="object" string="Sync now" invisible="transport == 'file'"/>
+                    <button name="action_ai_match_all" type="object" string="AI match masters"/>
+                    <button name="action_reconcile" type="object" string="Reconcile balances" invisible="transport == 'file'"/>
+                    <button name="action_ai_health" type="object" string="AI health check"/>
+                    <button name="action_detect_deletions" type="object" string="Detect deletions"
+                            invisible="transport == 'file' or not detect_deletions"/>
+                    <button name="action_full_resync" type="object" string="Full re-sync" invisible="transport == 'file'"
+                            confirm="Re-read every ledger, item and voucher from Tally? Existing links are kept."/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_requests" type="object" class="oe_stat_button" icon="fa-exchange">
+                            <field name="count_pending" widget="statinfo" string="Queued"/>
+                        </button>
+                        <button name="action_view_failed" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <field name="count_failed" widget="statinfo" string="Failed"/>
+                        </button>
+                        <button name="action_view_vouchers" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="count_vouchers_review" widget="statinfo" string="Vouchers to review"/>
+                        </button>
+                        <button name="action_view_mappings" type="object" class="oe_stat_button" icon="fa-link">
+                            <field name="count_mapping_review" widget="statinfo" string="Mappings to review"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Head office Tally"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="tally_company"/>
+                            <field name="transport" widget="radio"/>
+                            <field name="schema"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="host" invisible="transport == 'file'"/>
+                            <field name="port" invisible="transport == 'file'"/>
+                            <field name="use_https" invisible="transport != 'direct'"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="status" invisible="not last_test_message">
+                        <field name="last_test_message" nolabel="1"/>
+                    </div>
+                    <field name="ai_summary" nolabel="1" invisible="not ai_summary"/>
+                    <notebook>
+                        <page string="Sync scope" name="scope">
+                            <group>
+                                <group string="Masters">
+                                    <field name="sync_parties"/>
+                                    <field name="sync_ledgers"/>
+                                    <field name="sync_items"/>
+                                    <field name="auto_create_ledgers"/>
+                                </group>
+                                <group string="Vouchers">
+                                    <field name="sync_sales"/>
+                                    <field name="sync_purchases"/>
+                                    <field name="sync_payments"/>
+                                    <field name="sync_journals"/>
+                                    <field name="pull_from_date"/>
+                                </group>
+                                <group string="Cost centres">
+                                    <field name="sync_cost_centres"/>
+                                    <field name="primary_plan_id" invisible="sync_cost_centres == 'none'"/>
+                                </group>
+                                <group string="Deletions in Tally">
+                                    <field name="detect_deletions"/>
+                                    <field name="census_interval_hours" invisible="not detect_deletions"/>
+                                    <field name="deletion_guard_pct" invisible="not detect_deletions"/>
+                                    <field name="last_census_date" invisible="not detect_deletions"/>
+                                </group>
+                                <group string="Behaviour">
+                                    <field name="push_on_post"/>
+                                    <field name="auto_post_imported"/>
+                                    <field name="voucher_mode"/>
+                                    <field name="conflict_policy"/>
+                                    <field name="amount_tolerance"/>
+                                    <field name="fallback_to_entry"/>
+                                </group>
+                                <group string="Reliability">
+                                    <field name="batch_size"/>
+                                    <field name="timeout"/>
+                                    <field name="max_attempts"/>
+                                    <field name="auto_heal"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Tally names" name="tally_names">
+                            <group>
+                                <group string="Voucher types">
+                                    <field name="vt_sales"/>
+                                    <field name="vt_purchase"/>
+                                    <field name="vt_credit_note"/>
+                                    <field name="vt_debit_note"/>
+                                    <field name="vt_receipt"/>
+                                    <field name="vt_payment"/>
+                                    <field name="vt_journal"/>
+                                    <field name="vt_contra"/>
+                                </group>
+                                <group string="Groups &amp; ledgers">
+                                    <field name="group_customers"/>
+                                    <field name="group_vendors"/>
+                                    <field name="round_off_ledger"/>
+                                </group>
+                            </group>
+                            <p class="text-muted">Custom voucher types (e.g. "GST Sales" under "Sales") are
+                                detected automatically from Tally.</p>
+                        </page>
+                        <page string="Odoo defaults" name="odoo_defaults">
+                            <group>
+                                <group>
+                                    <field name="sale_journal_id"/>
+                                    <field name="purchase_journal_id"/>
+                                    <field name="misc_journal_id"/>
+                                    <field name="bank_journal_id"/>
+                                </group>
+                                <group>
+                                    <field name="suspense_account_id"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="AI" name="ai">
+                            <group>
+                                <group string="Provider">
+                                    <field name="ai_provider"/>
+                                    <field name="ai_model" invisible="ai_provider == 'none'"
+                                           placeholder="e.g. claude-sonnet-5-5"/>
+                                    <field name="ai_api_key" password="True" invisible="ai_provider == 'none'"/>
+                                    <field name="ai_base_url" invisible="ai_provider not in ('openai_compatible', 'openai')"
+                                           placeholder="https://api.openai.com/v1"/>
+                                    <field name="ai_send_amounts" invisible="ai_provider == 'none'"/>
+                                    <button name="action_ai_test" type="object" string="Test AI" class="btn-link"
+                                            invisible="ai_provider == 'none'" colspan="2"/>
+                                </group>
+                                <group string="Matching">
+                                    <field name="ai_match_threshold"/>
+                                    <field name="ai_suggest_threshold"/>
+                                </group>
+                                <group string="Anomaly guard">
+                                    <field name="anomaly_check"/>
+                                    <field name="anomaly_block"/>
+                                    <field name="z_threshold"/>
+                                    <field name="large_amount"/>
+                                </group>
+                            </group>
+                            <p class="text-muted">The built-in engine (GSTIN/PAN/fuzzy matching, GST checks,
+                                outliers, duplicates, Tally error doctor) works with no external AI.
+                                An LLM is only consulted for ambiguous matches and explanations.</p>
+                        </page>
+                        <page string="Bridge agent" name="agent" invisible="transport != 'agent'">
+                            <group>
+                                <group>
+                                    <field name="agent_online"/>
+                                    <field name="agent_last_seen"/>
+                                    <field name="agent_hostname"/>
+                                    <field name="agent_version"/>
+                                    <field name="agent_tally_ok"/>
+                                </group>
+                                <group>
+                                    <field name="agent_token" password="True"/>
+                                    <button name="action_generate_agent_token" type="object" string="Generate new token"
+                                            class="btn-link" colspan="2"
+                                            confirm="The running agent will stop working until its config is updated. Continue?"/>
+                                    <button name="%(action_tally_agent_setup)d" type="action" string="Download agent package"
+                                            class="btn-primary" colspan="2" context="{'default_connection_id': id}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Cursors" name="cursors" groups="base.group_no_one">
+                            <group>
+                                <field name="last_alter_vchtype"/>
+                                <field name="last_alter_ledger"/>
+                                <field name="last_alter_item"/>
+                                <field name="last_alter_voucher"/>
+                                <field name="last_alter_costcentre"/>
+                                <field name="last_alter_godown"/>
+                                <field name="last_pull_date"/>
+                                <field name="last_push_date"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tally_connection" model="ir.actions.act_window">
+        <field name="name">Tally Connections</field>
+        <field name="res_model">tally.connection</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Odoo to TallyPrime</p>
+            <p>Choose Direct (same network), Bridge Agent (cloud Odoo) or Offline XML.</p>
+        </field>
+    </record>
+</odoo>

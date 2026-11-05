@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_mapping_list" model="ir.ui.view">
+        <field name="name">tally.mapping.list</field>
+        <field name="model">tally.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" decoration-warning="state == 'suggested'"
+                  decoration-danger="state in ('conflict', 'deleted')" decoration-muted="state == 'ignored'">
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm"/>
+                    <button name="action_ai_rematch" type="object" string="AI re-match"/>
+                    <button name="action_push_to_tally" type="object" string="Push to Tally"/>
+                    <button name="action_ignore" type="object" string="Ignore"/>
+                </header>
+                <field name="connection_id" optional="hide"/>
+                <field name="kind"/>
+                <field name="tally_name"/>
+                <field name="tally_parent" optional="show"/>
+                <field name="tally_gstin" optional="hide"/>
+                <field name="partner_id" invisible="kind != 'party'"/>
+                <field name="account_id" invisible="kind != 'ledger'"/>
+                <field name="tax_id" invisible="kind != 'tax'"/>
+                <field name="journal_id" invisible="kind != 'bank'"/>
+                <field name="product_id" invisible="kind != 'item'"/>
+                <field name="uom_id" invisible="kind != 'unit'"/>
+                <field name="analytic_account_id" invisible="kind != 'costcentre'"/>
+                <field name="analytic_plan_id" invisible="kind != 'costcategory'"/>
+                <field name="confidence" widget="percentage" optional="show"/>
+                <field name="match_reason" optional="show"/>
+                <field name="synced_to_tally" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'suggested'" decoration-danger="state == 'conflict'"/>
+                <button name="action_confirm" type="object" icon="fa-check" title="Confirm"
+                        invisible="state == 'confirmed'"/>
+                <button name="action_resolve_keep_tally" type="object" string="Keep Tally"
+                        invisible="state != 'conflict'"/>
+                <button name="action_resolve_keep_odoo" type="object" string="Keep Odoo"
+                        invisible="state != 'conflict'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_form" model="ir.ui.view">
+        <field name="name">tally.mapping.form</field>
+        <field name="model">tally.mapping</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary"
+                            invisible="state == 'confirmed'"/>
+                    <button name="action_ai_rematch" type="object" string="AI re-match"/>
+                    <button name="action_resolve_keep_tally" type="object" string="Keep Tally version"
+                            invisible="state != 'conflict'"/>
+                    <button name="action_resolve_keep_odoo" type="object" string="Keep Odoo version"
+                            invisible="state != 'conflict'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="unmapped,suggested,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Tally">
+                            <field name="connection_id"/>
+                            <field name="kind"/>
+                            <field name="tally_name"/>
+                            <field name="tally_parent"/>
+                            <field name="tally_primary_group"/>
+                            <field name="tally_role"/>
+                            <field name="tally_gstin"/>
+                            <field name="tally_balance"/>
+                            <field name="tally_guid" groups="base.group_no_one"/>
+                            <field name="tally_alter_id" groups="base.group_no_one"/>
+                        </group>
+                        <group string="Odoo">
+                            <field name="partner_id" invisible="kind != 'party'"/>
+                            <field name="account_id" invisible="kind != 'ledger'"/>
+                            <field name="tax_id" invisible="kind != 'tax'"/>
+                            <field name="journal_id" invisible="kind != 'bank'"/>
+                            <field name="product_id" invisible="kind != 'item'"/>
+                            <field name="uom_id" invisible="kind != 'unit'"/>
+                            <field name="analytic_account_id" invisible="kind != 'costcentre'"/>
+                            <field name="analytic_plan_id" invisible="kind != 'costcategory'"/>
+                            <field name="origin"/>
+                            <field name="confidence" widget="percentage"/>
+                            <field name="match_reason"/>
+                            <field name="alternatives"/>
+                            <field name="synced_to_tally"/>
+                            <field name="last_sync"/>
+                        </group>
+                    </group>
+                    <group string="Conflict: Tally version" invisible="state != 'conflict'">
+                        <field name="conflict_data" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Tally payload" groups="base.group_no_one">
+                        <field name="tally_data" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_search" model="ir.ui.view">
+        <field name="name">tally.mapping.search</field>
+        <field name="model">tally.mapping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tally_name"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="account_id"/>
+                <filter name="review" string="To review" domain="[('state', 'in', ('suggested', 'unmapped', 'conflict', 'deleted'))]"/>
+                <filter name="suggested" string="AI suggestions" domain="[('state', '=', 'suggested')]"/>
+                <filter name="conflict" string="Conflicts" domain="[('state', '=', 'conflict')]"/>
+                <filter name="deleted" string="Deleted in Tally" domain="[('state', '=', 'deleted')]"/>
+                <separator/>
+                <filter name="parties" string="Parties" domain="[('kind', '=', 'party')]"/>
+                <filter name="ledgers" string="Ledgers" domain="[('kind', 'in', ('ledger', 'tax', 'bank'))]"/>
+                <filter name="items" string="Items" domain="[('kind', 'in', ('item', 'unit'))]"/>
+                <filter name="costcentres" string="Cost centres" domain="[('kind', 'in', ('costcentre', 'costcategory'))]"/>
+                <group>
+                    <filter name="by_kind" string="Type" context="{'group_by': 'kind'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_mapping" model="ir.actions.act_window">
+        <field name="name">Mappings</field>
+        <field name="res_model">tally.mapping</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_review': 1}</field>
+    </record>
+</odoo>

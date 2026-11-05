@@ -1,0 +1,50 @@
+<section class="oe_container" style="font-family:Inter,Arial,sans-serif;color:#1f2937">
+  <div style="background:linear-gradient(135deg,#0F4C81,#1E88E5);color:#fff;padding:48px 32px;border-radius:16px;text-align:center">
+    <h1 style="font-size:40px;margin:0 0 8px;color:#fff">ZivoIT Tally Connector AI</h1>
+    <p style="font-size:20px;margin:0;color:#E3F2FD">Real-time two-way Odoo 19 ⇄ TallyPrime 7.x — works with Odoo Online through a secure Bridge Agent</p>
+    <p style="margin-top:16px;color:#FFD54F;font-weight:600">Masters · All 8 voucher types · Bill-wise · GST · AI matching · AI anomaly guard · Self-healing</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:16px;margin:32px 0">
+    <div style="flex:1 1 260px;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+      <h3 style="color:#0F4C81">Cloud Odoo ⇄ office Tally</h3>
+      <p>The Bridge Agent on the Tally PC only makes outbound HTTPS calls with an Odoo API key. No port forwarding, VPN or static IP. Direct LAN and offline XML modes included.</p>
+    </div>
+    <div style="flex:1 1 260px;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+      <h3 style="color:#0F4C81">Truly two-way</h3>
+      <p>Parties, ledgers, taxes, banks, stock items, units and Sales, Purchase, Credit/Debit Notes, Receipts, Payments, Journals, Contra — with bill-wise references and automatic reconciliation.</p>
+    </div>
+    <div style="flex:1 1 260px;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
+      <h3 style="color:#0F4C81">AI built in</h3>
+      <p>GSTIN/PAN-aware master matching, GST place-of-supply and arithmetic checks, duplicate and outlier detection, Tally error doctor with auto-heal. Optional Claude / OpenAI / Gemini / Ollama.</p>
+    </div>
+  </div>
+
+  <h2 style="color:#0F4C81">Engineered for zero surprises</h2>
+  <ul style="line-height:1.8">
+    <li>Incremental pulls by Tally AlterID, idempotent pushes by REMOTEID, echo-loop prevention</li>
+    <li>Queue with masters-first ordering, exponential back-off, full XML audit log</li>
+    <li>Conflict policies: hold for review, Tally wins, Odoo wins</li>
+    <li>Party balance reconciliation Odoo vs Tally with mismatch hints</li>
+    <li>Historical migration in both directions with dry run</li>
+    <li>TallyPrime 3.0+ schema and legacy Tally.ERP 9 schema</li>
+    <li>Cost centres ↔ analytic accounts, godowns ↔ locations, batches ↔ lots with expiry</li>
+    <li>Real stock moves for Tally invoices; deletions in Tally detected with a mass-deletion guard</li>
+    <li>75 automated tests against a TallyPrime protocol simulator (included)</li>
+  </ul>
+
+  <h2 style="color:#0F4C81">How it compares</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:14px">
+    <tr style="background:#0F4C81;color:#fff"><th style="padding:8px;text-align:left">Capability</th><th>ZivoIT AI</th><th>Typical Tally apps</th></tr>
+    <tr><td style="padding:8px">Odoo Online ↔ office Tally live sync</td><td style="text-align:center">✔ Bridge Agent</td><td style="text-align:center">File import/export only</td></tr>
+    <tr style="background:#f9fafb"><td style="padding:8px">Voucher types</td><td style="text-align:center">All 8, both ways</td><td style="text-align:center">Often sales/receipts only</td></tr>
+    <tr><td style="padding:8px">AI matching &amp; anomaly guard</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
+    <tr style="background:#f9fafb"><td style="padding:8px">Self-healing missing masters</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
+    <tr><td style="padding:8px">Conflict handling</td><td style="text-align:center">✔ 3 policies</td><td style="text-align:center">Not described</td></tr>
+    <tr><td style="padding:8px">Godowns, batches, cost centres; stock moves from Tally invoices</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
+    <tr><td style="padding:8px">Deletion detection</td><td style="text-align:center">✔ with guard</td><td style="text-align:center">—</td></tr>
+    <tr style="background:#f9fafb"><td style="padding:8px">Balance reconciliation</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
+  </table>
+
+  <p style="margin-top:32px;text-align:center;color:#6b7280">Zivo IT Technologies · Official Odoo Partner · Hyderabad, India</p>
+</section>

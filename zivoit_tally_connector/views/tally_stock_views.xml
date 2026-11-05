@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_connection_form_stock" model="ir.ui.view">
+        <field name="name">tally.connection.form.stock</field>
+        <field name="model">tally.connection</field>
+        <field name="inherit_id" ref="zivoit_tally_connector.view_tally_connection_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='scope']/group" position="inside">
+                <group string="Inventory">
+                    <field name="warehouse_id"/>
+                    <field name="sync_godowns"/>
+                    <field name="sync_batches"/>
+                    <field name="create_stock_moves"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_list_stock" model="ir.ui.view">
+        <field name="name">tally.mapping.list.stock</field>
+        <field name="model">tally.mapping</field>
+        <field name="inherit_id" ref="zivoit_tally_connector.view_tally_mapping_list"/>
+        <field name="arch" type="xml">
+            <field name="uom_id" position="after">
+                <field name="location_id" invisible="kind != 'godown'"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_tally_mapping_form_stock" model="ir.ui.view">
+        <field name="name">tally.mapping.form.stock</field>
+        <field name="model">tally.mapping</field>
+        <field name="inherit_id" ref="zivoit_tally_connector.view_tally_mapping_form"/>
+        <field name="arch" type="xml">
+            <field name="uom_id" position="after">
+                <field name="location_id" invisible="kind != 'godown'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_tally_voucher_form_stock" model="ir.ui.view">
+        <field name="name">tally.voucher.form.stock</field>
+        <field name="model">tally.voucher</field>
+        <field name="inherit_id" ref="zivoit_tally_connector.view_tally_voucher_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_pickings" type="object" class="oe_stat_button"
+                        icon="fa-truck" invisible="not picking_ids" string="Transfers"/>
+            </xpath>
+            <xpath expr="//sheet/group" position="before">
+                <div class="alert alert-warning" role="status" invisible="not stock_message">
+                    <field name="stock_message" nolabel="1"/>
+                </div>
+            </xpath>
+            <field name="irn" position="after">
+                <field name="picking_ids" widget="many2many_tags" invisible="not picking_ids"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_move_form_tally_stock" model="ir.ui.view">
+        <field name="name">account.move.form.tally.stock</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="zivoit_tally_connector.view_move_form_tally"/>
+        <field name="arch" type="xml">
+            <field name="tally_voucher_id" position="after">
+                <field name="tally_picking_ids" widget="many2many_tags" readonly="1"
+                       invisible="not tally_picking_ids"/>
+            </field>
+        </field>
+    </record>
+</odoo>

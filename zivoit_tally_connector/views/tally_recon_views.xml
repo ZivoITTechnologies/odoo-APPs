@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_recon_list" model="ir.ui.view">
+        <field name="name">tally.recon.line.list</field>
+        <field name="model">tally.recon.line</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" decoration-danger="status == 'mismatch'"
+                  decoration-warning="status in ('only_tally', 'only_odoo')" decoration-success="status == 'match'">
+                <field name="as_of"/>
+                <field name="ledger"/>
+                <field name="partner_id"/>
+                <field name="tally_balance" sum="Tally"/>
+                <field name="odoo_balance" sum="Odoo"/>
+                <field name="difference" sum="Difference"/>
+                <field name="status" widget="badge"/>
+                <field name="hint"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_tally_recon_search" model="ir.ui.view">
+        <field name="name">tally.recon.line.search</field>
+        <field name="model">tally.recon.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="ledger"/>
+                <field name="partner_id"/>
+                <filter name="mismatch" string="Differences" domain="[('status', '!=', 'match')]"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_tally_recon" model="ir.actions.act_window">
+        <field name="name">Balance reconciliation</field>
+        <field name="res_model">tally.recon.line</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_mismatch': 1}</field>
+    </record>
+</odoo>

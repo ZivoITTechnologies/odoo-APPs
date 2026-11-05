@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_tally_root" name="Tally" sequence="45"
+              web_icon="zivoit_tally_connector,static/description/icon.png"
+              groups="group_tally_user"/>
+    <menuitem id="menu_tally_dashboard" name="Dashboard" parent="menu_tally_root"
+              action="action_tally_connection" sequence="1"/>
+    <menuitem id="menu_tally_vouchers" name="Vouchers from Tally" parent="menu_tally_root"
+              action="action_tally_voucher" sequence="10"/>
+    <menuitem id="menu_tally_mappings" name="Mappings" parent="menu_tally_root"
+              action="action_tally_mapping" sequence="20"/>
+    <menuitem id="menu_tally_log" name="Activity log" parent="menu_tally_root"
+              action="action_tally_request" sequence="30"/>
+    <menuitem id="menu_tally_recon" name="Reconciliation" parent="menu_tally_root"
+              action="action_tally_recon" sequence="40"/>
+    <menuitem id="menu_tally_tools" name="Tools" parent="menu_tally_root" sequence="50"/>
+    <menuitem id="menu_tally_import" name="Import Tally XML" parent="menu_tally_tools"
+              action="action_tally_file_import" sequence="1"/>
+    <menuitem id="menu_tally_export" name="Export XML for Tally" parent="menu_tally_tools"
+              action="action_tally_file_export" sequence="2"/>
+    <menuitem id="menu_tally_migration" name="Historical migration" parent="menu_tally_tools"
+              action="action_tally_migration" sequence="3" groups="group_tally_manager"/>
+    <menuitem id="menu_tally_config" name="Configuration" parent="menu_tally_root" sequence="90"
+              groups="group_tally_manager"/>
+    <menuitem id="menu_tally_connections" name="Connections" parent="menu_tally_config"
+              action="action_tally_connection" sequence="1"/>
+</odoo>

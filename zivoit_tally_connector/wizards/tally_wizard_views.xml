@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_file_import_form" model="ir.ui.view">
+        <field name="name">tally.file.import.form</field>
+        <field name="model">tally.file.import</field>
+        <field name="arch" type="xml">
+            <form string="Import Tally XML">
+                <p class="text-muted">In TallyPrime: Alt+E Export › Masters / Day Book, Format = XML
+                    (Data Interchange). Upload the .xml (or a .zip of several).</p>
+                <group>
+                    <field name="connection_id"/>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="summary" invisible="not summary"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Import" class="btn-primary"
+                            invisible="summary"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_tally_file_import" model="ir.actions.act_window">
+        <field name="name">Import Tally XML</field>
+        <field name="res_model">tally.file.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_tally_file_export_form" model="ir.ui.view">
+        <field name="name">tally.file.export.form</field>
+        <field name="model">tally.file.export</field>
+        <field name="arch" type="xml">
+            <form string="Export for Tally">
+                <group>
+                    <field name="connection_id"/>
+                    <field name="include_failed"/>
+                    <field name="mark_done"/>
+                    <field name="summary" invisible="not summary"/>
+                    <field name="file" filename="filename" invisible="not file"/>
+                    <field name="filename" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_export" type="object" string="Build file" class="btn-primary"
+                            invisible="file"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_tally_file_export" model="ir.actions.act_window">
+        <field name="name">Export XML for Tally</field>
+        <field name="res_model">tally.file.export</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_tally_migration_form" model="ir.ui.view">
+        <field name="name">tally.migration.form</field>
+        <field name="model">tally.migration</field>
+        <field name="arch" type="xml">
+            <form string="Historical migration">
+                <group>
+                    <group>
+                        <field name="connection_id"/>
+                        <field name="direction" widget="radio"/>
+                        <field name="include_masters" invisible="direction != 'pull'"/>
+                    </group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="dry_run"/>
+                    </group>
+                </group>
+                <field name="summary" invisible="not summary" readonly="1"/>
+                <footer>
+                    <button name="action_run" type="object" string="Run" class="btn-primary"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_tally_migration" model="ir.actions.act_window">
+        <field name="name">Historical migration</field>
+        <field name="res_model">tally.migration</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_tally_agent_setup_form" model="ir.ui.view">
+        <field name="name">tally.agent.setup.form</field>
+        <field name="model">tally.agent.setup</field>
+        <field name="arch" type="xml">
+            <form string="Bridge agent package">
+                <p>The package contains the agent, a Windows service installer and a pre-filled
+                    <code>agent_config.json</code>. Paste the API key of the agent user into it.</p>
+                <group>
+                    <field name="connection_id"/>
+                    <field name="odoo_url"/>
+                    <field name="database"/>
+                    <field name="api_user_id"/>
+                    <field name="file" filename="filename" invisible="not file"/>
+                    <field name="filename" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_build" type="object" string="Build package" class="btn-primary"
+                            invisible="file"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_tally_agent_setup" model="ir.actions.act_window">
+        <field name="name">Bridge agent setup</field>
+        <field name="res_model">tally.agent.setup</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

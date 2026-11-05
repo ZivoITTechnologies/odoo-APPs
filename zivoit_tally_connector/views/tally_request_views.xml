@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_request_list" model="ir.ui.view">
+        <field name="name">tally.request.list</field>
+        <field name="model">tally.request</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-danger="state == 'failed'" decoration-info="state in ('pending', 'sent')"
+                  decoration-muted="state == 'cancelled'" default_order="id desc">
+                <header>
+                    <button name="action_retry" type="object" string="Retry"/>
+                    <button name="action_cancel" type="object" string="Cancel"/>
+                    <button name="action_ai_explain" type="object" string="AI explain"/>
+                </header>
+                <field name="id"/>
+                <field name="create_date" string="Queued"/>
+                <field name="connection_id" optional="hide"/>
+                <field name="purpose"/>
+                <field name="direction"/>
+                <field name="records_in" optional="show"/>
+                <field name="created" optional="show"/>
+                <field name="altered" optional="show"/>
+                <field name="attempts" optional="hide"/>
+                <field name="duration_ms" optional="hide"/>
+                <field name="error" optional="show"/>
+                <field name="auto_healed" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                       decoration-danger="state == 'failed'" decoration-info="state in ('pending', 'sent')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_request_form" model="ir.ui.view">
+        <field name="name">tally.request.form</field>
+        <field name="model">tally.request</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_retry" type="object" string="Retry" class="btn-primary"
+                            invisible="state not in ('failed', 'cancelled')"/>
+                    <button name="action_ai_explain" type="object" string="AI explain" invisible="not error"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state not in ('pending', 'failed')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,sent,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="connection_id"/>
+                            <field name="purpose"/>
+                            <field name="direction"/>
+                            <field name="res_model"/>
+                            <field name="res_ids"/>
+                            <field name="priority"/>
+                        </group>
+                        <group>
+                            <field name="attempts"/>
+                            <field name="next_attempt"/>
+                            <field name="sent_at"/>
+                            <field name="done_at"/>
+                            <field name="duration_ms"/>
+                            <field name="records_in"/>
+                            <field name="created"/>
+                            <field name="altered"/>
+                            <field name="errors"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="status" invisible="not error">
+                        <field name="error" nolabel="1"/>
+                    </div>
+                    <div class="alert alert-info" role="status" invisible="not ai_hint">
+                        <strong>AI diagnosis: </strong><field name="ai_hint" nolabel="1"/>
+                    </div>
+                    <notebook>
+                        <page string="Request XML">
+                            <field name="request_xml" widget="code" options="{'mode': 'xml'}"/>
+                        </page>
+                        <page string="Response">
+                            <field name="response_xml" widget="code" options="{'mode': 'xml'}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_request_search" model="ir.ui.view">
+        <field name="name">tally.request.search</field>
+        <field name="model">tally.request</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="purpose"/>
+                <field name="error"/>
+                <filter name="failed" string="Failed" domain="[('state', '=', 'failed')]"/>
+                <filter name="queued" string="Queued" domain="[('state', 'in', ('pending', 'sent'))]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="in" string="Tally → Odoo" domain="[('direction', '=', 'in')]"/>
+                <filter name="out" string="Odoo → Tally" domain="[('direction', '=', 'out')]"/>
+                <group>
+                    <filter name="by_purpose" string="Purpose" context="{'group_by': 'purpose'}"/>
+                    <filter name="by_code" string="Error type" context="{'group_by': 'error_code'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_request" model="ir.actions.act_window">
+        <field name="name">Activity log</field>
+        <field name="res_model">tally.request</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

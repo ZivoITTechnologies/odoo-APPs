@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_voucher_list" model="ir.ui.view">
+        <field name="name">tally.voucher.list</field>
+        <field name="model">tally.voucher</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-danger="state in ('error', 'deleted')" decoration-warning="state in ('anomaly', 'conflict')"
+                  decoration-muted="state in ('skipped', 'cancelled')">
+                <header>
+                    <button name="action_process" type="object" string="Process"/>
+                    <button name="action_skip" type="object" string="Skip"/>
+                </header>
+                <field name="date"/>
+                <field name="vch_type"/>
+                <field name="number"/>
+                <field name="party_name"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="risk_score" optional="show" widget="progressbar"/>
+                <field name="move_id" optional="show"/>
+                <field name="message" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                       decoration-danger="state == 'error'" decoration-warning="state in ('anomaly', 'conflict')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_voucher_form" model="ir.ui.view">
+        <field name="name">tally.voucher.form</field>
+        <field name="model">tally.voucher</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_process" type="object" string="Process" class="btn-primary"
+                            invisible="state not in ('draft', 'error', 'anomaly')"/>
+                    <button name="action_apply_tally_version" type="object" string="Apply Tally version"
+                            class="btn-primary" invisible="state != 'conflict'"/>
+                    <button name="action_keep_odoo" type="object" string="Keep Odoo version"
+                            invisible="state != 'conflict'"/>
+                    <button name="action_apply_deletion" type="object" string="Cancel in Odoo"
+                            class="btn-primary" invisible="state != 'deleted' or not move_id"/>
+                    <button name="action_keep_after_deletion" type="object" string="Keep in Odoo"
+                            invisible="state != 'deleted'"/>
+                    <button name="action_ai_review" type="object" string="AI review"/>
+                    <button name="action_skip" type="object" string="Skip" invisible="state in ('done', 'skipped')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_move" type="object" class="oe_stat_button" icon="fa-book"
+                                invisible="not move_id" string="Journal entry"/>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="vch_type" readonly="1"/> <field name="number" readonly="1"/></h1>
+                    </div>
+                    <div class="alert alert-danger" role="status" invisible="not message">
+                        <field name="message" nolabel="1"/>
+                    </div>
+                    <field name="findings_html" nolabel="1" invisible="not findings_html"/>
+                    <div class="alert alert-info" role="status" invisible="not ai_summary">
+                        <strong>AI review: </strong><field name="ai_summary" nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="connection_id"/>
+                            <field name="date"/>
+                            <field name="kind"/>
+                            <field name="reference"/>
+                            <field name="party_name"/>
+                            <field name="partner_id"/>
+                            <field name="party_gstin"/>
+                        </group>
+                        <group>
+                            <field name="amount_total"/>
+                            <field name="risk_score"/>
+                            <field name="import_mode"/>
+                            <field name="move_id"/>
+                            <field name="place_of_supply"/>
+                            <field name="irn"/>
+                            <field name="cancelled"/>
+                            <field name="alter_id" groups="base.group_no_one"/>
+                            <field name="guid" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lines">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="line_type"/>
+                                    <field name="ledger"/>
+                                    <field name="item"/>
+                                    <field name="qty"/>
+                                    <field name="unit"/>
+                                    <field name="rate"/>
+                                    <field name="debit" sum="Dr"/>
+                                    <field name="credit" sum="Cr"/>
+                                    <field name="bills"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Narration">
+                            <field name="narration"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_voucher_search" model="ir.ui.view">
+        <field name="name">tally.voucher.search</field>
+        <field name="model">tally.voucher</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="number"/>
+                <field name="party_name"/>
+                <field name="vch_type"/>
+                <filter name="review" string="Needs review" domain="[('state', 'in', ('error', 'anomaly', 'conflict', 'deleted'))]"/>
+                <filter name="deleted" string="Deleted in Tally" domain="[('state', '=', 'deleted')]"/>
+                <filter name="anomaly" string="AI held" domain="[('state', '=', 'anomaly')]"/>
+                <filter name="done" string="Imported" domain="[('state', '=', 'done')]"/>
+                <filter name="risky" string="Risk ≥ 30" domain="[('risk_score', '>=', 30)]"/>
+                <group>
+                    <filter name="by_kind" string="Type" context="{'group_by': 'kind'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="by_date" string="Date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_voucher" model="ir.actions.act_window">
+        <field name="name">Vouchers from Tally</field>
+        <field name="res_model">tally.voucher</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
