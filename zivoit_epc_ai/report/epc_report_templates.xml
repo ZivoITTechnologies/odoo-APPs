@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_epc_ra_bill">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Running Account Bill <span t-field="o.name"/> (RA <span t-field="o.bill_no"/>)</h2>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <strong>Project:</strong> <span t-field="o.project_id.name"/><br/>
+                                <strong>Contract:</strong> <span t-field="o.project_id.epc_contract_ref"/><br/>
+                                <strong>Client:</strong> <span t-field="o.partner_id.name"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Date:</strong> <span t-field="o.date"/><br/>
+                                <strong>Period:</strong> <span t-field="o.period_from"/> – <span t-field="o.period_to"/><br/>
+                                <strong>Status:</strong> <span t-field="o.state"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm o_main_table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Unit</th>
+                                    <th class="text-end">Contract Qty</th>
+                                    <th class="text-end">Previous</th>
+                                    <th class="text-end">This Bill</th>
+                                    <th class="text-end">Cumulative</th>
+                                    <th class="text-end">Rate</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids" t-as="l">
+                                    <td><span t-field="l.boq_line_id.display_name"/></td>
+                                    <td><span t-field="l.uom_name"/></td>
+                                    <td class="text-end"><span t-field="l.contract_qty"/></td>
+                                    <td class="text-end"><span t-field="l.previous_qty"/></td>
+                                    <td class="text-end"><span t-field="l.certified_qty"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % (l.previous_qty + l.certified_qty)"/></td>
+                                    <td class="text-end"><span t-field="l.rate"/></td>
+                                    <td class="text-end"><span t-field="l.amount"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row justify-content-end">
+                            <div class="col-5">
+                                <table class="table table-sm">
+                                    <tr><td>Gross value of work</td><td class="text-end"><span t-field="o.gross_amount"/></td></tr>
+                                    <tr><td>Less retention (<span t-field="o.retention_pct"/>%)</td><td class="text-end"><span t-field="o.retention_amount"/></td></tr>
+                                    <tr><td>Less advance recovery (<span t-field="o.advance_recovery_pct"/>%)</td><td class="text-end"><span t-field="o.advance_recovery_amount"/></td></tr>
+                                    <tr><td>Less other deductions</td><td class="text-end"><span t-field="o.other_deductions"/></td></tr>
+                                    <tr class="fw-bold"><td>Net payable</td><td class="text-end"><span t-field="o.net_amount"/></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row mt-5">
+                            <div class="col-4 text-center">Prepared by (Contractor)</div>
+                            <div class="col-4 text-center">Checked by (PMC)</div>
+                            <div class="col-4 text-center">Certified by (Client)</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_epc_progress">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Progress Report — <span t-field="o.name"/></h2>
+                        <p>
+                            Contract <span t-field="o.epc_contract_ref"/> ·
+                            Client <span t-field="o.partner_id.name"/> ·
+                            Last prediction <span t-field="o.epc_prediction_date"/>
+                        </p>
+                        <table class="table table-sm">
+                            <tr><td>Planned progress</td><td class="text-end"><t t-esc="'%.1f' % o.epc_planned_progress"/>%</td>
+                                <td>Actual progress</td><td class="text-end"><t t-esc="'%.1f' % o.epc_actual_progress"/>%</td></tr>
+                            <tr><td>SPI</td><td class="text-end"><t t-esc="'%.2f' % o.epc_spi"/></td>
+                                <td>CPI</td><td class="text-end"><t t-esc="'%.2f' % o.epc_cpi"/></td></tr>
+                            <tr><td>Baseline finish</td><td class="text-end"><span t-field="o.epc_baseline_finish"/></td>
+                                <td>Predicted finish</td><td class="text-end"><span t-field="o.epc_predicted_finish"/></td></tr>
+                            <tr><td>Predicted delay (days)</td><td class="text-end"><span t-field="o.epc_predicted_delay_days"/></td>
+                                <td>Delay probability</td><td class="text-end"><t t-esc="'%.0f' % o.epc_delay_probability"/>%</td></tr>
+                            <tr><td>Budget at completion</td><td class="text-end"><span t-field="o.epc_bac"/></td>
+                                <td>Forecast at completion (P50 / P80)</td>
+                                <td class="text-end"><span t-field="o.epc_eac_p50"/> / <span t-field="o.epc_eac_p80"/></td></tr>
+                            <tr><td>LD exposure</td><td class="text-end"><span t-field="o.epc_ld_exposure"/></td>
+                                <td>AI risk level</td><td class="text-end"><span t-field="o.epc_risk_level"/></td></tr>
+                        </table>
+                        <h4>Forecast drivers</h4>
+                        <div t-field="o.epc_prediction_drivers"/>
+                        <h4 t-if="o.epc_ai_report">Narrative</h4>
+                        <div t-field="o.epc_ai_report"/>
+                        <h4>Open risks</h4>
+                        <table class="table table-sm">
+                            <thead><tr><th>Risk</th><th>Category</th><th>Level</th><th>Owner</th><th>Mitigation</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.epc_risk_ids.filtered(lambda r: r.state != 'closed')" t-as="r">
+                                    <td><span t-field="r.name"/></td>
+                                    <td><span t-field="r.category"/></td>
+                                    <td><span t-field="r.level"/></td>
+                                    <td><span t-field="r.owner_id.name"/></td>
+                                    <td><span t-field="r.mitigation"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_epc_dpr">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Daily Progress Report <span t-field="o.name"/></h2>
+                        <p>
+                            <strong>Project:</strong> <span t-field="o.project_id.name"/> ·
+                            <strong>Date:</strong> <span t-field="o.date"/> ·
+                            <strong>Supervisor:</strong> <span t-field="o.supervisor_id.name"/> ·
+                            <strong>Weather:</strong> <span t-field="o.weather"/>
+                        </p>
+                        <div t-if="o.ai_summary" t-field="o.ai_summary"/>
+                        <h4>Measured work</h4>
+                        <table class="table table-sm">
+                            <thead><tr><th>Activity</th><th>BOQ item</th><th class="text-end">Quantity</th><th>Unit</th><th>Remarks</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids" t-as="l">
+                                    <td><span t-field="l.activity_id.display_name"/></td>
+                                    <td><span t-field="l.boq_line_id.code"/></td>
+                                    <td class="text-end"><span t-field="l.quantity"/></td>
+                                    <td><span t-field="l.uom_name"/></td>
+                                    <td><span t-field="l.remarks"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Manpower (<span t-field="o.manpower_total"/>)</h4>
+                        <ul>
+                            <li t-foreach="o.manpower_ids" t-as="m"><span t-field="m.trade"/>: <span t-field="m.count"/></li>
+                        </ul>
+                        <h4>Hindrances (<span t-field="o.hours_lost_total"/> hours lost)</h4>
+                        <ul>
+                            <li t-foreach="o.hindrance_ids" t-as="h">
+                                <span t-field="h.hindrance_type"/> — <span t-field="h.description"/> (<span t-field="h.hours_lost"/> h)
+                            </li>
+                        </ul>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

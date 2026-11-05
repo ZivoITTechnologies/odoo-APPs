@@ -1,0 +1,3 @@
+project_id,source_system,external_ref,description,vendor_name,quantity,delivered_qty,uom_name,promised_date,stage,activity_ids
+220 kV Line,sap,4500012345/10,ACSR Zebra conductor,Cable Co,180,0,km,2026-11-30,manufacturing,ERC-01
+220 kV Line,sap,4500012346/10,Disc insulators 120 kN,Insulator Co,9000,3000,Nos,2026-11-15,shipped,ERC-01

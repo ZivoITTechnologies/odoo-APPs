@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_epc_ra_bill" model="ir.actions.report">
+        <field name="name">RA Bill / Measurement Abstract</field>
+        <field name="model">epc.ra.bill</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_epc_ai.report_epc_ra_bill</field>
+        <field name="report_file">zivoit_epc_ai.report_epc_ra_bill</field>
+        <field name="print_report_name">'RA Bill - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_epc_ra_bill"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_epc_progress" model="ir.actions.report">
+        <field name="name">EPC Progress Report</field>
+        <field name="model">project.project</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_epc_ai.report_epc_progress</field>
+        <field name="report_file">zivoit_epc_ai.report_epc_progress</field>
+        <field name="print_report_name">'Progress Report - %s' % object.name</field>
+        <field name="binding_model_id" ref="project.model_project_project"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_epc_dpr" model="ir.actions.report">
+        <field name="name">Daily Progress Report</field>
+        <field name="model">epc.dpr</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_epc_ai.report_epc_dpr</field>
+        <field name="report_file">zivoit_epc_ai.report_epc_dpr</field>
+        <field name="print_report_name">'DPR - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_epc_dpr"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

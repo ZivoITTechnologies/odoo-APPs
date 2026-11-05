@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Project form: EPC tabs, actions and smart buttons -->
+    <record id="view_project_form_epc" model="ir.ui.view">
+        <field name="name">project.project.form.epc</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_epc_compute_schedule" type="object" string="Compute Schedule"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+                <button name="action_epc_run_prediction" type="object" string="Run AI Prediction" class="btn-primary"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+                <button name="action_epc_open_assistant" type="object" string="Ask AI"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user"/>
+                <button name="action_epc_generate_report" type="object" string="AI Progress Report"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+                <button name="action_epc_open_optimizer" type="object" string="Optimise Schedule"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+                <button name="action_epc_set_baseline" type="object" string="Set Baseline"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"
+                        confirm="Overwrite the baseline with the current planned dates for all activities?"/>
+                <button name="action_epc_import_p6" type="object" string="Import P6"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+                <button name="action_epc_export_p6" type="object" string="Export P6"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object" name="action_epc_view_activities" icon="fa-tasks"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_activity_count" widget="statinfo" string="Activities"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_boq" icon="fa-list-ol"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_boq_count" widget="statinfo" string="BOQ Items"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_dprs" icon="fa-clipboard"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_dpr_count" widget="statinfo" string="DPRs"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_risks" icon="fa-exclamation-triangle"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_open_risk_count" widget="statinfo" string="Open Risks"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_documents" icon="fa-file-text-o"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_document_count" widget="statinfo" string="Documents"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_purchase_lines" icon="fa-truck"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_purchase_line_count" widget="statinfo" string="Expediting"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_hse" icon="fa-medkit"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_incident_count" widget="statinfo" string="Incidents"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_ncrs" icon="fa-check-square-o"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_open_ncr_count" widget="statinfo" string="Open NCRs"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_punch" icon="fa-list"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_open_punch_count" widget="statinfo" string="Punch Items"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_ra_bills" icon="fa-money"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager">
+                    <field name="epc_ra_bill_count" widget="statinfo" string="RA Bills"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="is_epc"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page name="epc_ai_insights" string="AI Insights" invisible="not is_epc">
+                    <div class="alert alert-info" role="alert" invisible="epc_prediction_date">
+                        No prediction yet. Press <b>Run AI Prediction</b> (it also runs every night).
+                    </div>
+                    <group>
+                        <group string="Schedule">
+                            <field name="epc_status_date" placeholder="Today"/>
+                            <field name="epc_planned_progress" widget="progressbar"/>
+                            <field name="epc_actual_progress" widget="progressbar"/>
+                            <field name="epc_spi"/>
+                            <field name="epc_baseline_finish"/>
+                            <field name="epc_predicted_finish"/>
+                            <field name="epc_predicted_delay_days"
+                                   decoration-danger="epc_predicted_delay_days &gt; 0"
+                                   decoration-success="epc_predicted_delay_days &lt;= 0"/>
+                            <field name="epc_delay_probability"/>
+                            <field name="epc_mc_p50_finish"/>
+                            <field name="epc_mc_p80_finish"/>
+                            <field name="epc_mc_p90_finish"/>
+                            <field name="epc_mc_on_time_probability"/>
+                            <field name="epc_risk_level" widget="badge"
+                                   decoration-success="epc_risk_level == 'low'"
+                                   decoration-warning="epc_risk_level == 'medium'"
+                                   decoration-danger="epc_risk_level in ('high', 'critical')"/>
+                        </group>
+                        <group string="Cost">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="epc_bac"/>
+                            <field name="epc_pv"/>
+                            <field name="epc_ev"/>
+                            <field name="epc_ac"/>
+                            <field name="epc_cpi"/>
+                            <field name="epc_currency_id" invisible="1"/>
+                            <field name="epc_eac_p50"/>
+                            <field name="epc_eac_p80"/>
+                            <field name="epc_ld_exposure"/>
+                            <field name="epc_prediction_date"/>
+                        </group>
+                    </group>
+                    <separator string="What is driving the forecast"/>
+                    <field name="epc_prediction_drivers" nolabel="1"/>
+                    <separator string="Progress report (draft for review)"/>
+                    <field name="epc_ai_report" nolabel="1" options="{'resizable': true}"/>
+                </page>
+                <page name="epc_site" string="Site, HSE &amp; Quality" invisible="not is_epc">
+                    <group>
+                        <group string="Safety">
+                            <field name="epc_man_hours"/>
+                            <field name="epc_safe_man_hours"/>
+                            <field name="epc_lti_count"/>
+                            <field name="epc_ltifr"/>
+                            <field name="epc_active_permit_count" string="Approved permits"/>
+                            <field name="epc_open_observation_count" string="Open observations"/>
+                            <field name="epc_shift_hours"/>
+                        </group>
+                        <group string="Quality &amp; handover">
+                            <field name="epc_inspection_pass_rate"/>
+                            <field name="epc_open_ncr_count" string="Open NCRs"/>
+                            <field name="epc_open_punch_count" string="Open punch items"/>
+                            <field name="epc_open_punch_a_count"/>
+                        </group>
+                    </group>
+                    <div class="d-flex gap-2">
+                        <button name="action_epc_view_permits" type="object" string="Permits to Work" class="btn-secondary"/>
+                        <button name="action_epc_view_observations" type="object" string="Safety Observations" class="btn-secondary"/>
+                        <button name="action_epc_view_inspections" type="object" string="Inspections" class="btn-secondary"/>
+                    </div>
+                </page>
+                <page name="epc_contract" string="EPC Contract" invisible="not is_epc">
+                    <group>
+                        <group>
+                            <field name="epc_contract_ref"/>
+                            <field name="epc_segment"/>
+                            <field name="epc_currency_id" invisible="1"/>
+                            <field name="epc_contract_value"/>
+                        </group>
+                        <group>
+                            <field name="epc_ld_rate_pct"/>
+                            <field name="epc_ld_cap_pct"/>
+                            <field name="epc_retention_pct"/>
+                            <field name="epc_advance_recovery_pct"/>
+                        </group>
+                    </group>
+                    <group string="Working calendar">
+                        <group>
+                            <field name="epc_work_week"/>
+                        </group>
+                    </group>
+                    <field name="epc_holiday_ids" context="{'default_project_id': id}">
+                        <list editable="bottom">
+                            <field name="date"/>
+                            <field name="name"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- EPC portfolio views -->
+    <record id="view_project_epc_kanban" model="ir.ui.view">
+        <field name="name">project.project.epc.kanban</field>
+        <field name="model">project.project</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="epc_risk_level"/>
+                <field name="epc_predicted_delay_days"/>
+                <field name="epc_predicted_finish"/>
+                <field name="epc_planned_progress"/>
+                <field name="epc_actual_progress"/>
+                <field name="epc_spi"/>
+                <field name="epc_cpi"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <span t-if="record.epc_risk_level.raw_value"
+                                  t-attf-class="badge rounded-pill text-bg-#{record.epc_risk_level.raw_value == 'low' ? 'success' : (record.epc_risk_level.raw_value == 'medium' ? 'warning' : 'danger')}">
+                                <field name="epc_risk_level"/>
+                            </span>
+                        </div>
+                        <div class="text-muted small">
+                            <field name="partner_id"/> · <field name="epc_segment"/>
+                        </div>
+                        <div class="mt-2 small">
+                            <div>Planned <t t-out="Math.round(record.epc_planned_progress.raw_value)"/>% · Actual <t t-out="Math.round(record.epc_actual_progress.raw_value)"/>%</div>
+                            <div>SPI <t t-out="record.epc_spi.value"/> · CPI <t t-out="record.epc_cpi.value"/></div>
+                            <div t-if="record.epc_predicted_finish.raw_value"
+                                 t-attf-class="#{record.epc_predicted_delay_days.raw_value &gt; 0 ? 'text-danger' : 'text-success'}">
+                                Predicted finish <t t-out="record.epc_predicted_finish.value"/>
+                                (<t t-out="record.epc_predicted_delay_days.value"/> days vs baseline)
+                            </div>
+                            <field name="epc_currency_id" invisible="1"/>
+                            <div class="d-flex gap-1">LD exposure <field name="epc_ld_exposure" widget="monetary"/></div>
+                        </div>
+                        <footer class="mt-2">
+                            <a name="action_epc_view_activities" type="object" class="me-2">Activities</a>
+                            <a name="action_epc_view_risks" type="object" class="me-2"><field name="epc_open_risk_count"/> risks</a>
+                            <field name="user_id" widget="many2one_avatar_user" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_project_epc_list" model="ir.ui.view">
+        <field name="name">project.project.epc.list</field>
+        <field name="model">project.project</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="EPC Projects">
+                <field name="name"/>
+                <field name="epc_contract_ref" optional="show"/>
+                <field name="partner_id" optional="show"/>
+                <field name="epc_segment" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="epc_currency_id" column_invisible="1"/>
+                <field name="epc_contract_value" optional="show"/>
+                <field name="epc_baseline_finish" optional="show"/>
+                <field name="epc_predicted_finish"/>
+                <field name="epc_predicted_delay_days" decoration-danger="epc_predicted_delay_days &gt; 0"/>
+                <field name="epc_delay_probability" optional="show"/>
+                <field name="epc_eac_p50" optional="hide"/>
+                <field name="epc_eac_p80" optional="show"/>
+                <field name="epc_ld_exposure" optional="show"/>
+                <field name="epc_risk_level" widget="badge"
+                       decoration-success="epc_risk_level == 'low'"
+                       decoration-warning="epc_risk_level == 'medium'"
+                       decoration-danger="epc_risk_level in ('high', 'critical')"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_project_epc_graph" model="ir.ui.view">
+        <field name="name">project.project.epc.graph</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <graph string="Predicted delay by project" type="bar">
+                <field name="name"/>
+                <field name="epc_predicted_delay_days" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_project_epc_search" model="ir.ui.view">
+        <field name="name">project.project.epc.search</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="epc_contract_ref"/>
+                <field name="partner_id"/>
+                <filter name="late" string="Forecast late" domain="[('epc_predicted_delay_days', '&gt;', 0)]"/>
+                <filter name="high_risk" string="High / critical risk" domain="[('epc_risk_level', 'in', ('high', 'critical'))]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_segment" string="Segment" context="{'group_by': 'epc_segment'}"/>
+                    <filter name="group_risk" string="AI Risk Level" context="{'group_by': 'epc_risk_level'}"/>
+                    <filter name="group_manager" string="Project Manager" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_projects" model="ir.actions.act_window">
+        <field name="name">EPC Projects</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban,list,form,graph</field>
+        <field name="domain">[('is_epc', '=', True)]</field>
+        <field name="context">{'default_is_epc': True}</field>
+        <field name="search_view_id" ref="view_project_epc_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first EPC project</p>
+            <p>Load the BOQ and schedule (or import Primavera P6), file daily progress reports, and let the
+               AI engine forecast delay, cost and supply risk.</p>
+        </field>
+    </record>
+    <record id="action_epc_projects_kanban" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_project_epc_kanban"/>
+        <field name="act_window_id" ref="action_epc_projects"/>
+    </record>
+    <record id="action_epc_projects_list" model="ir.actions.act_window.view">
+        <field name="sequence">2</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_project_epc_list"/>
+        <field name="act_window_id" ref="action_epc_projects"/>
+    </record>
+    <record id="action_epc_projects_form" model="ir.actions.act_window.view">
+        <field name="sequence">3</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="project.edit_project"/>
+        <field name="act_window_id" ref="action_epc_projects"/>
+    </record>
+</odoo>

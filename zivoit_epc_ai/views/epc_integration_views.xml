@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_project_form_epc_integration" model="ir.ui.view">
+        <field name="name">project.project.form.epc.integration</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="view_project_form_epc"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='epc_contract_value']" position="after">
+                <field name="epc_external_system"/>
+                <field name="epc_external_ref" invisible="not epc_external_system"/>
+            </xpath>
+            <xpath expr="//page[@name='epc_contract']" position="after">
+                <page name="epc_external_materials" string="ERP Materials" invisible="not is_epc">
+                    <p class="text-muted">
+                        Material status mirrored from SAP, Oracle or another ERP (through the REST API or CSV import).
+                        Linked activities use these dates in AI forecasting.
+                    </p>
+                    <field name="epc_external_material_ids" context="{'default_project_id': id}">
+                        <list editable="bottom" decoration-danger="expedite_status == 'late'"
+                              decoration-warning="expedite_status == 'at_risk'">
+                            <field name="source_system"/>
+                            <field name="external_ref"/>
+                            <field name="description"/>
+                            <field name="quantity"/>
+                            <field name="delivered_qty"/>
+                            <field name="uom_name"/>
+                            <field name="activity_ids" widget="many2many_tags" options="{'no_create': True}"
+                                   domain="[('project_id', '=', parent.id)]"/>
+                            <field name="required_date"/>
+                            <field name="promised_date"/>
+                            <field name="forecast_date"/>
+                            <field name="stage"/>
+                            <field name="expedite_status" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_epc_activity_list_integration" model="ir.ui.view">
+        <field name="name">epc.activity.list.integration</field>
+        <field name="model">epc.activity</field>
+        <field name="inherit_id" ref="view_epc_activity_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']" position="after">
+                <field name="external_ref" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_epc_activity_form_integration" model="ir.ui.view">
+        <field name="name">epc.activity.form.integration</field>
+        <field name="model">epc.activity</field>
+        <field name="inherit_id" ref="view_epc_activity_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']" position="after">
+                <field name="external_ref"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Portfolio -->
+    <record id="view_project_epc_portfolio_list" model="ir.ui.view">
+        <field name="name">project.project.epc.portfolio.list</field>
+        <field name="model">project.project</field>
+        <field name="priority">110</field>
+        <field name="arch" type="xml">
+            <list string="EPC Portfolio" default_order="epc_risk_level desc, epc_predicted_delay_days desc">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="epc_segment" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="epc_currency_id" column_invisible="1"/>
+                <field name="epc_contract_value" sum="Total"/>
+                <field name="epc_snap_planned" optional="show"/>
+                <field name="epc_snap_progress"/>
+                <field name="epc_snap_spi" decoration-danger="epc_snap_spi &lt; 0.9 and epc_snap_spi &gt; 0"/>
+                <field name="epc_snap_cpi" decoration-danger="epc_snap_cpi &lt; 0.9 and epc_snap_cpi &gt; 0"/>
+                <field name="epc_baseline_finish" optional="hide"/>
+                <field name="epc_mc_p80_finish"/>
+                <field name="epc_mc_on_time_probability" optional="show"/>
+                <field name="epc_predicted_delay_days" decoration-danger="epc_predicted_delay_days &gt; 0"/>
+                <field name="epc_eac_p80" sum="Total" optional="show"/>
+                <field name="epc_ld_exposure" sum="Total"/>
+                <field name="epc_snap_open_risks" sum="Total" optional="show"/>
+                <field name="epc_risk_level" widget="badge" decoration-success="epc_risk_level == 'low'"
+                       decoration-warning="epc_risk_level == 'medium'"
+                       decoration-danger="epc_risk_level in ('high', 'critical')"/>
+                <field name="epc_prediction_date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_project_epc_portfolio_pivot" model="ir.ui.view">
+        <field name="name">project.project.epc.portfolio.pivot</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <pivot string="EPC Portfolio" sample="1">
+                <field name="epc_segment" type="row"/>
+                <field name="epc_risk_level" type="col"/>
+                <field name="epc_contract_value" type="measure"/>
+                <field name="epc_ld_exposure" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_project_epc_portfolio_graph" model="ir.ui.view">
+        <field name="name">project.project.epc.portfolio.graph</field>
+        <field name="model">project.project</field>
+        <field name="arch" type="xml">
+            <graph string="Contract value at risk" type="bar" stacked="1" sample="1">
+                <field name="epc_segment"/>
+                <field name="epc_risk_level"/>
+                <field name="epc_contract_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_epc_portfolio" model="ir.actions.act_window">
+        <field name="name">Portfolio</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="domain">[('is_epc', '=', True)]</field>
+        <field name="context">{'default_is_epc': True}</field>
+        <field name="search_view_id" ref="view_project_epc_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No EPC projects yet</p>
+            <p>Each project's KPIs are refreshed every time the AI prediction runs (nightly, or on demand).</p>
+        </field>
+    </record>
+    <record id="action_epc_portfolio_list" model="ir.actions.act_window.view">
+        <field name="sequence">1</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_project_epc_portfolio_list"/>
+        <field name="act_window_id" ref="action_epc_portfolio"/>
+    </record>
+    <record id="action_epc_portfolio_pivot" model="ir.actions.act_window.view">
+        <field name="sequence">2</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_project_epc_portfolio_pivot"/>
+        <field name="act_window_id" ref="action_epc_portfolio"/>
+    </record>
+    <record id="action_epc_portfolio_graph" model="ir.actions.act_window.view">
+        <field name="sequence">3</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_project_epc_portfolio_graph"/>
+        <field name="act_window_id" ref="action_epc_portfolio"/>
+    </record>
+    <record id="action_epc_portfolio_form" model="ir.actions.act_window.view">
+        <field name="sequence">4</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="project.edit_project"/>
+        <field name="act_window_id" ref="action_epc_portfolio"/>
+    </record>
+</odoo>

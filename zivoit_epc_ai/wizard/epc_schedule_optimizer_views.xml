@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_schedule_optimizer_form" model="ir.ui.view">
+        <field name="name">epc.schedule.optimizer.form</field>
+        <field name="model">epc.schedule.optimizer</field>
+        <field name="arch" type="xml">
+            <form string="Schedule Optimiser">
+                <div class="alert alert-info" role="status" invisible="state != 'draft'">
+                    Shortens critical activities with the lowest <b>cost per day saved</b> until the target is met.
+                    Set <i>Shortest Duration</i> and <i>Cost per Day Saved</i> on activities (Cost tab) first.
+                </div>
+                <div class="alert alert-success" role="status" invisible="state == 'draft' or not target_met">
+                    Target can be met: finish <field name="achieved_finish" class="oe_inline"/> for an extra
+                    <field name="total_cost" class="oe_inline"/>.
+                </div>
+                <div class="alert alert-warning" role="status" invisible="state == 'draft' or target_met">
+                    Target cannot be fully met by shortening activities. Best achievable finish:
+                    <field name="achieved_finish" class="oe_inline"/>. Consider the fast-tracking options below.
+                </div>
+                <group>
+                    <group>
+                        <field name="project_id" readonly="1"/>
+                        <field name="current_finish"/>
+                    </group>
+                    <group>
+                        <field name="target_finish" readonly="state != 'draft'"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="target_met" invisible="1"/>
+                        <field name="state" invisible="1"/>
+                    </group>
+                </group>
+                <field name="line_ids" invisible="state == 'draft'">
+                    <list>
+                        <field name="activity_id"/>
+                        <field name="current_duration"/>
+                        <field name="proposed_duration"/>
+                        <field name="days_saved" sum="Total"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="cost" sum="Total"/>
+                    </list>
+                </field>
+                <separator string="Fast-tracking options" invisible="state == 'draft'"/>
+                <field name="fast_track_html" nolabel="1" invisible="state == 'draft'"/>
+                <footer>
+                    <button name="action_optimise" type="object" string="Optimise" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_apply" type="object" string="Apply to Schedule" class="btn-primary"
+                            invisible="state != 'proposed'" confirm="Change the durations of the listed activities and reschedule?"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

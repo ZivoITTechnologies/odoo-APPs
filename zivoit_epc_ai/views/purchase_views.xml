@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_order_form_epc" model="ir.ui.view">
+        <field name="name">purchase.order.form.epc</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list/field[@name='date_planned']" position="after">
+                <field name="epc_project_id" optional="hide" options="{'no_create': True}"/>
+                <field name="epc_forecast_date" optional="hide"/>
+                <field name="epc_expedite_status" optional="hide" widget="badge"
+                       decoration-success="epc_expedite_status in ('on_track', 'received')"
+                       decoration-warning="epc_expedite_status == 'at_risk'"
+                       decoration-danger="epc_expedite_status == 'late'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_purchase_line_epc_expediting_list" model="ir.ui.view">
+        <field name="name">purchase.order.line.epc.expediting</field>
+        <field name="model">purchase.order.line</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Expediting" create="0" editable="bottom"
+                  decoration-danger="epc_expedite_status == 'late'" decoration-warning="epc_expedite_status == 'at_risk'">
+                <header>
+                    <button name="action_epc_draft_followup" type="object" string="AI Draft Follow-up"/>
+                    <button name="action_epc_refresh_forecast" type="object" string="Refresh Forecast"/>
+                </header>
+                <field name="epc_project_id" options="{'no_create': True}"/>
+                <field name="order_id" readonly="1"/>
+                <field name="partner_id" readonly="1"/>
+                <field name="name" readonly="1"/>
+                <field name="product_qty" readonly="1"/>
+                <field name="qty_received" readonly="1"/>
+                <field name="date_planned" string="Promised" readonly="1"/>
+                <field name="epc_required_date"/>
+                <field name="epc_forecast_date"/>
+                <field name="epc_predicted_delay_days"/>
+                <field name="epc_supplier_risk"/>
+                <field name="epc_expedite_status" widget="badge"
+                       decoration-success="epc_expedite_status in ('on_track', 'received')"
+                       decoration-warning="epc_expedite_status == 'at_risk'"
+                       decoration-danger="epc_expedite_status == 'late'"/>
+                <field name="epc_last_followup" optional="show"/>
+                <field name="epc_expedite_note" optional="hide"/>
+                <field name="display_type" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_purchase_line_epc_search" model="ir.ui.view">
+        <field name="name">purchase.order.line.epc.search</field>
+        <field name="model">purchase.order.line</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="epc_project_id"/>
+                <filter name="open" string="Not fully received" domain="[('epc_expedite_status', '!=', 'received')]"/>
+                <filter name="late" string="Late / at risk" domain="[('epc_expedite_status', 'in', ('late', 'at_risk'))]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'epc_project_id'}"/>
+                    <filter name="group_vendor" string="Vendor" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_expediting" model="ir.actions.act_window">
+        <field name="name">Expediting</field>
+        <field name="res_model">purchase.order.line</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_purchase_line_epc_expediting_list"/>
+        <field name="search_view_id" ref="view_purchase_line_epc_search"/>
+        <field name="domain">[('epc_project_id', '!=', False), ('display_type', '=', False), ('state', 'in', ('purchase', 'done'))]</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+</odoo>

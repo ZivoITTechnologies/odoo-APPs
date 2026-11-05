@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_dpr_list" model="ir.ui.view">
+        <field name="name">epc.dpr.list</field>
+        <field name="model">epc.dpr</field>
+        <field name="arch" type="xml">
+            <list string="Daily Progress Reports" decoration-info="state == 'draft'" decoration-muted="state == 'approved'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="project_id"/>
+                <field name="supervisor_id" widget="many2one_avatar_user"/>
+                <field name="weather" optional="show"/>
+                <field name="manpower_total" sum="Total"/>
+                <field name="hours_lost_total" sum="Total"/>
+                <field name="ai_source" optional="hide"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'"
+                       decoration-warning="state == 'submitted'" decoration-success="state == 'approved'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_dpr_form" model="ir.ui.view">
+        <field name="name">epc.dpr.form</field>
+        <field name="model">epc.dpr</field>
+        <field name="arch" type="xml">
+            <form string="Daily Progress Report">
+                <header>
+                    <button name="action_ai_draft" type="object" string="AI Draft DPR" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_ai_photo_review" type="object" string="AI Photo Review"
+                            invisible="not photo_ids"/>
+                    <button name="action_submit" type="object" string="Submit" invisible="state != 'draft'"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state != 'submitted'" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state == 'draft'" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="supervisor_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="weather" readonly="state == 'approved'"/>
+                            <field name="manpower_total"/>
+                            <field name="hours_lost_total"/>
+                            <field name="approved_by_id" invisible="not approved_by_id"/>
+                        </group>
+                    </group>
+                    <group string="Site notes (type, paste, or dictate)" invisible="state != 'draft'">
+                        <field name="notes_raw" nolabel="1" colspan="2"
+                               placeholder="e.g. FDN2 concreting done for 3 nos foundations. Tower erection section A: 85 MT erected. Crane breakdown at loc 52, 3 hrs lost. 12 riggers and 25 helpers on site."/>
+                    </group>
+                    <div invisible="not ai_summary" class="alert alert-info" role="status">
+                        <b>AI summary</b> (<field name="ai_source" class="oe_inline" readonly="1"/>):
+                        <field name="ai_summary" nolabel="1" readonly="1"/>
+                    </div>
+                    <notebook>
+                        <page string="Measured Work" name="lines">
+                            <field name="line_ids" readonly="state == 'approved'">
+                                <list editable="bottom">
+                                    <field name="activity_id" options="{'no_create': True}"
+                                           domain="[('project_id', '=', parent.project_id)]"/>
+                                    <field name="boq_line_id" optional="show" options="{'no_create': True}"
+                                           domain="[('project_id', '=', parent.project_id)]"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_name"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Manpower" name="manpower">
+                            <field name="manpower_ids" readonly="state == 'approved'">
+                                <list editable="bottom">
+                                    <field name="trade"/>
+                                    <field name="count" sum="Total"/>
+                                    <field name="subcontractor_id" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Plant &amp; Equipment" name="plant">
+                            <field name="plant_ids" readonly="state == 'approved'">
+                                <list editable="bottom">
+                                    <field name="plant_id" options="{'no_create': True}"/>
+                                    <field name="activity_id" options="{'no_create': True}"/>
+                                    <field name="hours_worked" sum="Total"/>
+                                    <field name="hours_idle" sum="Total"/>
+                                    <field name="hours_breakdown" sum="Total"/>
+                                    <field name="remarks"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Photos &amp; Safety" name="photos">
+                            <field name="photo_ids" widget="many2many_binary" string="Site photos"/>
+                            <div class="text-muted small">Attach JPG/PNG photos (max 6 analysed, 5 MB each), then press <b>AI Photo Review</b>.</div>
+                            <field name="photo_review_source" invisible="1"/>
+                            <field name="photo_review" nolabel="1" invisible="not photo_review"/>
+                            <field name="observation_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="observation_type"/>
+                                    <field name="severity"/>
+                                    <field name="source"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Hindrances" name="hindrances">
+                            <field name="hindrance_ids" readonly="state == 'approved'">
+                                <list editable="bottom">
+                                    <field name="hindrance_type"/>
+                                    <field name="activity_id" options="{'no_create': True}"
+                                           domain="[('project_id', '=', parent.project_id)]"/>
+                                    <field name="hours_lost" sum="Total"/>
+                                    <field name="description"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_dpr_calendar" model="ir.ui.view">
+        <field name="name">epc.dpr.calendar</field>
+        <field name="model">epc.dpr</field>
+        <field name="arch" type="xml">
+            <calendar string="DPRs" date_start="date" mode="month" color="project_id" quick_create="0">
+                <field name="project_id"/>
+                <field name="supervisor_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_epc_dpr_search" model="ir.ui.view">
+        <field name="name">epc.dpr.search</field>
+        <field name="model">epc.dpr</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="supervisor_id"/>
+                <filter name="to_approve" string="To approve" domain="[('state', '=', 'submitted')]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="with_hindrance" string="With hindrances" domain="[('hours_lost_total', '&gt;', 0)]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_dprs" model="ir.actions.act_window">
+        <field name="name">Daily Progress Reports</field>
+        <field name="res_model">epc.dpr</field>
+        <field name="view_mode">list,form,calendar</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">File today's progress</p>
+            <p>Type or dictate the site notes and press <b>AI Draft DPR</b>: quantities, manpower and hindrances
+               are filled in for you to check.</p>
+        </field>
+    </record>
+
+    <record id="view_epc_hindrance_list" model="ir.ui.view">
+        <field name="name">epc.dpr.hindrance.list</field>
+        <field name="model">epc.dpr.hindrance</field>
+        <field name="arch" type="xml">
+            <list string="Hindrances" create="0">
+                <field name="date"/>
+                <field name="project_id"/>
+                <field name="dpr_id"/>
+                <field name="hindrance_type"/>
+                <field name="activity_id"/>
+                <field name="hours_lost" sum="Total"/>
+                <field name="description"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_hindrance_pivot" model="ir.ui.view">
+        <field name="name">epc.dpr.hindrance.pivot</field>
+        <field name="model">epc.dpr.hindrance</field>
+        <field name="arch" type="xml">
+            <pivot string="Hindrance analysis">
+                <field name="hindrance_type" type="row"/>
+                <field name="project_id" type="col"/>
+                <field name="hours_lost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_epc_hindrance_graph" model="ir.ui.view">
+        <field name="name">epc.dpr.hindrance.graph</field>
+        <field name="model">epc.dpr.hindrance</field>
+        <field name="arch" type="xml">
+            <graph string="Hours lost by cause" type="pie">
+                <field name="hindrance_type"/>
+                <field name="hours_lost" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_epc_hindrances" model="ir.actions.act_window">
+        <field name="name">Hindrance Analysis</field>
+        <field name="res_model">epc.dpr.hindrance</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+</odoo>

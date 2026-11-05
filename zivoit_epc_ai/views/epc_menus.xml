@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_epc_root" name="ZivoIT EPC AI" sequence="45"
+              web_icon="zivoit_epc_ai,static/description/icon.png"
+              groups="zivoit_epc_ai.group_epc_user"/>
+
+    <menuitem id="menu_epc_projects_top" name="Projects" parent="menu_epc_root" sequence="10"/>
+    <menuitem id="menu_epc_projects" name="Projects" parent="menu_epc_projects_top" sequence="10" action="action_epc_projects"/>
+    <menuitem id="menu_epc_portfolio" name="Portfolio" parent="menu_epc_projects_top" sequence="20" action="action_epc_portfolio"/>
+
+    <menuitem id="menu_epc_execution" name="Execution" parent="menu_epc_root" sequence="20"/>
+    <menuitem id="menu_epc_activities" name="Schedule Activities" parent="menu_epc_execution" sequence="10" action="action_epc_activities"/>
+    <menuitem id="menu_epc_dprs" name="Daily Progress Reports" parent="menu_epc_execution" sequence="20" action="action_epc_dprs"/>
+    <menuitem id="menu_epc_boq" name="Bill of Quantities" parent="menu_epc_execution" sequence="30" action="action_epc_boq_lines"/>
+
+    <menuitem id="menu_epc_site" name="Site &amp; HSE" parent="menu_epc_root" sequence="25"/>
+    <menuitem id="menu_epc_site_dprs" name="Daily Progress Reports" parent="menu_epc_site" sequence="5" action="action_epc_dprs"/>
+    <menuitem id="menu_epc_permits" name="Permits to Work" parent="menu_epc_site" sequence="10" action="action_epc_permits"/>
+    <menuitem id="menu_epc_incidents" name="Incidents" parent="menu_epc_site" sequence="20" action="action_epc_incidents"/>
+    <menuitem id="menu_epc_observations" name="Safety Observations" parent="menu_epc_site" sequence="30" action="action_epc_observations"/>
+    <menuitem id="menu_epc_inspections" name="Inspections (ITP)" parent="menu_epc_site" sequence="40" action="action_epc_inspections"/>
+    <menuitem id="menu_epc_ncrs" name="Non-Conformance Reports" parent="menu_epc_site" sequence="50" action="action_epc_ncrs"/>
+    <menuitem id="menu_epc_punch" name="Punch List" parent="menu_epc_site" sequence="60" action="action_epc_punch"/>
+    <menuitem id="menu_epc_plant" name="Plant &amp; Equipment" parent="menu_epc_site" sequence="70" action="action_epc_plant"/>
+
+    <menuitem id="menu_epc_engineering" name="Engineering" parent="menu_epc_root" sequence="30"/>
+    <menuitem id="menu_epc_documents" name="Document Register" parent="menu_epc_engineering" sequence="10" action="action_epc_documents"/>
+    <menuitem id="menu_epc_transmittals" name="Transmittals" parent="menu_epc_engineering" sequence="20" action="action_epc_transmittals"/>
+    <menuitem id="menu_epc_mto" name="Material Take-Off" parent="menu_epc_engineering" sequence="30" action="action_epc_mto"/>
+    <menuitem id="menu_epc_change_orders" name="Change Orders" parent="menu_epc_engineering" sequence="40" action="action_epc_change_orders"/>
+
+    <menuitem id="menu_epc_procurement" name="Procurement" parent="menu_epc_root" sequence="40"/>
+    <menuitem id="menu_epc_expediting" name="Expediting" parent="menu_epc_procurement" sequence="10" action="action_epc_expediting"/>
+    <menuitem id="menu_epc_supplier_risk" name="Supplier Risk Scores" parent="menu_epc_procurement" sequence="20" action="action_epc_supplier_risk"/>
+    <menuitem id="menu_epc_bid_packages" name="Bid Evaluation (TBE/CBE)" parent="menu_epc_procurement" sequence="5" action="action_epc_bid_packages"/>
+    <menuitem id="menu_epc_external_materials" name="External ERP Materials" parent="menu_epc_procurement" sequence="15" action="action_epc_external_materials"/>
+
+    <menuitem id="menu_epc_commercial" name="Commercial" parent="menu_epc_root" sequence="50" groups="zivoit_epc_ai.group_epc_manager"/>
+    <menuitem id="menu_epc_ra_bills" name="RA Bills" parent="menu_epc_commercial" sequence="10" action="action_epc_ra_bills"/>
+    <menuitem id="menu_epc_contract_reviews" name="Contract Risk Reviews" parent="menu_epc_commercial" sequence="20" action="action_epc_contract_reviews"/>
+
+    <menuitem id="menu_epc_ai" name="AI &amp; Risk" parent="menu_epc_root" sequence="60"/>
+    <menuitem id="menu_epc_early_warnings" name="Early Warnings" parent="menu_epc_ai" sequence="10" action="action_epc_activities_at_risk"/>
+    <menuitem id="menu_epc_risks" name="Risk Register" parent="menu_epc_ai" sequence="20" action="action_epc_risks"/>
+    <menuitem id="menu_epc_hindrances" name="Hindrance Analysis" parent="menu_epc_ai" sequence="30" action="action_epc_hindrances"/>
+    <menuitem id="menu_epc_models" name="Learned Duration Factors" parent="menu_epc_ai" sequence="40"
+              action="action_epc_prediction_models" groups="zivoit_epc_ai.group_epc_manager"/>
+    <menuitem id="menu_epc_ai_logs" name="AI Audit Log" parent="menu_epc_ai" sequence="50"
+              action="action_epc_ai_logs" groups="zivoit_epc_ai.group_epc_manager"/>
+
+    <menuitem id="menu_epc_config" name="Configuration" parent="menu_epc_root" sequence="90" groups="zivoit_epc_ai.group_epc_manager"/>
+    <menuitem id="menu_epc_settings" name="Settings" parent="menu_epc_config" sequence="10" action="action_epc_settings"/>
+</odoo>

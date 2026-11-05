@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_document_list" model="ir.ui.view">
+        <field name="name">epc.document.list</field>
+        <field name="model">epc.document</field>
+        <field name="arch" type="xml">
+            <list string="Master Document Register" decoration-danger="is_late">
+                <field name="project_id" optional="hide"/>
+                <field name="doc_number"/>
+                <field name="title"/>
+                <field name="discipline" optional="show"/>
+                <field name="doc_type" optional="show"/>
+                <field name="originator" optional="hide"/>
+                <field name="revision"/>
+                <field name="status" widget="badge" decoration-success="status == 'afc'"
+                       decoration-warning="status in ('ifr', 'ifa', 'approved_comments')"
+                       decoration-danger="status == 'rejected'"/>
+                <field name="planned_afc_date"/>
+                <field name="actual_afc_date" optional="show"/>
+                <field name="is_late" optional="hide"/>
+                <field name="days_late" optional="show"/>
+                <field name="responsible_id" widget="many2one_avatar_user" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_document_form" model="ir.ui.view">
+        <field name="name">epc.document.form</field>
+        <field name="model">epc.document</field>
+        <field name="arch" type="xml">
+            <form string="Document">
+                <header>
+                    <button name="action_issue_for_review" type="object" string="Issue for Review" invisible="status != 'draft'"/>
+                    <button name="action_issue_for_approval" type="object" string="Issue for Approval"
+                            invisible="status not in ('draft', 'ifr', 'rejected')"/>
+                    <button name="action_approve_afc" type="object" string="Approve for Construction" class="btn-primary"
+                            invisible="status not in ('ifa', 'approved_comments')" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <button name="action_approved_comments" type="object" string="Code B (comments)"
+                            invisible="status != 'ifa'" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <button name="action_reject" type="object" string="Code C (resubmit)"
+                            invisible="status not in ('ifa', 'ifr')" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <button name="action_new_revision" type="object" string="New Revision"
+                            invisible="status not in ('afc', 'approved_comments', 'rejected')"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,ifr,ifa,afc"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger" invisible="not is_late"/>
+                    <div class="oe_title">
+                        <h1><field name="doc_number" placeholder="Document number"/></h1>
+                        <h3><field name="title" placeholder="Title"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="discipline"/>
+                            <field name="doc_type"/>
+                            <field name="originator"/>
+                            <field name="vendor_id" invisible="originator != 'vendor'"/>
+                        </group>
+                        <group>
+                            <field name="revision"/>
+                            <field name="planned_afc_date"/>
+                            <field name="actual_afc_date"/>
+                            <field name="days_late" invisible="not is_late"/>
+                            <field name="is_late" invisible="1"/>
+                            <field name="responsible_id" widget="many2one_avatar_user"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Revision History" name="revisions">
+                            <field name="revision_ids" readonly="1">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="revision"/>
+                                    <field name="status"/>
+                                    <field name="user_id"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Needed by" name="activities">
+                            <field name="needed_by_activity_ids" options="{'no_create': True}" domain="[('project_id', '=', project_id)]">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="planned_start"/>
+                                    <field name="risk_level"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Transmittals" name="transmittals">
+                            <field name="transmittal_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="partner_id"/>
+                                    <field name="purpose"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_document_search" model="ir.ui.view">
+        <field name="name">epc.document.search</field>
+        <field name="model">epc.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="doc_number"/>
+                <field name="title"/>
+                <field name="project_id"/>
+                <filter name="late" string="Overdue" domain="[('is_late', '=', True)]"/>
+                <filter name="not_afc" string="Not yet AFC" domain="[('status', '!=', 'afc')]"/>
+                <filter name="with_client" string="With client" domain="[('status', 'in', ('ifr', 'ifa'))]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_discipline" string="Discipline" context="{'group_by': 'discipline'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_documents" model="ir.actions.act_window">
+        <field name="name">Master Document Register</field>
+        <field name="res_model">epc.document</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_epc_transmittal_list" model="ir.ui.view">
+        <field name="name">epc.transmittal.list</field>
+        <field name="model">epc.transmittal</field>
+        <field name="arch" type="xml">
+            <list string="Transmittals">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="project_id"/>
+                <field name="partner_id"/>
+                <field name="purpose"/>
+                <field name="state" widget="badge" decoration-success="state == 'sent'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_transmittal_form" model="ir.ui.view">
+        <field name="name">epc.transmittal.form</field>
+        <field name="model">epc.transmittal</field>
+        <field name="arch" type="xml">
+            <form string="Transmittal">
+                <header>
+                    <button name="action_ai_cover_note" type="object" string="AI Cover Note" invisible="state != 'draft'"/>
+                    <button name="action_send" type="object" string="Send" class="btn-primary" invisible="state != 'draft'"
+                            confirm="Send this transmittal to the recipient?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="purpose" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Documents" name="documents">
+                            <field name="document_ids" readonly="state != 'draft'" options="{'no_create': True}">
+                                <list>
+                                    <field name="doc_number"/>
+                                    <field name="title"/>
+                                    <field name="revision"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Cover Note" name="note">
+                            <field name="cover_note" readonly="state != 'draft'"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_epc_transmittals" model="ir.actions.act_window">
+        <field name="name">Transmittals</field>
+        <field name="res_model">epc.transmittal</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_activity_list" model="ir.ui.view">
+        <field name="name">epc.activity.list</field>
+        <field name="model">epc.activity</field>
+        <field name="arch" type="xml">
+            <list string="Activities" decoration-danger="risk_level in ('high', 'critical')"
+                  decoration-muted="state == 'done'" decoration-bf="is_critical">
+                <field name="sequence" widget="handle"/>
+                <field name="project_id" optional="hide"/>
+                <field name="wbs" optional="hide"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="discipline" optional="show"/>
+                <field name="duration" optional="show"/>
+                <field name="planned_start"/>
+                <field name="planned_finish"/>
+                <field name="baseline_finish" optional="hide"/>
+                <field name="total_float" optional="show"/>
+                <field name="is_critical" optional="show"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="state" optional="hide"/>
+                <field name="forecast_finish" optional="show"/>
+                <field name="predicted_slip_days" optional="show" decoration-danger="predicted_slip_days &gt; 0"/>
+                <field name="delay_probability" optional="show"/>
+                <field name="criticality_index" optional="hide"/>
+                <field name="risk_level" widget="badge" optional="show"
+                       decoration-success="risk_level == 'low'"
+                       decoration-warning="risk_level == 'medium'"
+                       decoration-danger="risk_level in ('high', 'critical')"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="budget" optional="hide" sum="Total"/>
+                <field name="responsible_id" widget="many2one_avatar_user" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_activity_form" model="ir.ui.view">
+        <field name="name">epc.activity.form</field>
+        <field name="model">epc.activity</field>
+        <field name="arch" type="xml">
+            <form string="Activity">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_dpr_lines" icon="fa-clipboard">
+                            <field name="executed_qty" widget="statinfo" string="Measured"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Activity name"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="risk_level not in ('high', 'critical')">
+                        <b>AI early warning:</b> forecast to finish <field name="predicted_slip_days" class="oe_inline"/> days late
+                        (<field name="delay_probability" class="oe_inline"/>% probability).
+                        <field name="prediction_drivers" class="oe_inline"/>
+                    </div>
+                    <group>
+                        <group string="Scope">
+                            <field name="code"/>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="wbs"/>
+                            <field name="discipline"/>
+                            <field name="is_milestone"/>
+                            <field name="responsible_id" widget="many2one_avatar_user"/>
+                            <field name="boq_line_id" options="{'no_create': True}"/>
+                            <field name="progress_method"/>
+                            <field name="planned_qty" invisible="progress_method != 'quantity'"/>
+                            <field name="uom_name" invisible="progress_method != 'quantity'"/>
+                            <field name="manual_progress" invisible="progress_method != 'manual'"/>
+                            <field name="progress" widget="progressbar"/>
+                        </group>
+                        <group string="Dates">
+                            <field name="duration" invisible="is_milestone"/>
+                            <field name="constraint_date"/>
+                            <field name="planned_start"/>
+                            <field name="planned_finish"/>
+                            <field name="baseline_start"/>
+                            <field name="baseline_finish"/>
+                            <field name="actual_start"/>
+                            <field name="actual_finish"/>
+                            <field name="total_float"/>
+                            <field name="is_critical"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Logic" name="logic">
+                            <field name="predecessor_link_ids" context="{'default_successor_id': id}">
+                                <list editable="bottom">
+                                    <field name="predecessor_id" domain="[('project_id', '=', parent.project_id), ('id', '!=', parent.id)]"
+                                           options="{'no_create': True}"/>
+                                    <field name="link_type"/>
+                                    <field name="lag_days"/>
+                                </list>
+                            </field>
+                            <separator string="Successors"/>
+                            <field name="successor_link_ids" readonly="1">
+                                <list>
+                                    <field name="successor_id"/>
+                                    <field name="link_type"/>
+                                    <field name="lag_days"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Readiness" name="readiness">
+                            <group string="Materials needed before start">
+                                <field name="purchase_line_ids" nolabel="1" colspan="2" options="{'no_create': True}">
+                                    <list>
+                                        <field name="order_id"/>
+                                        <field name="partner_id"/>
+                                        <field name="name"/>
+                                        <field name="product_qty"/>
+                                        <field name="qty_received"/>
+                                        <field name="date_planned"/>
+                                        <field name="epc_forecast_date"/>
+                                        <field name="epc_expedite_status" widget="badge"
+                                               decoration-success="epc_expedite_status in ('on_track', 'received')"
+                                               decoration-warning="epc_expedite_status == 'at_risk'"
+                                               decoration-danger="epc_expedite_status == 'late'"/>
+                                    </list>
+                                </field>
+                            </group>
+                            <group string="Documents needed (AFC)">
+                                <field name="document_ids" nolabel="1" colspan="2" options="{'no_create': True}"
+                                       domain="[('project_id', '=', project_id)]">
+                                    <list>
+                                        <field name="doc_number"/>
+                                        <field name="title"/>
+                                        <field name="revision"/>
+                                        <field name="status"/>
+                                        <field name="planned_afc_date"/>
+                                        <field name="is_late"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Cost" name="cost">
+                            <group>
+                                <field name="currency_id" invisible="1"/>
+                                <field name="budget"/>
+                                <field name="actual_cost"/>
+                                <field name="crash_duration"/>
+                                <field name="crash_cost_per_day"/>
+                            </group>
+                        </page>
+                        <page string="AI Forecast" name="forecast">
+                            <group>
+                                <group>
+                                    <field name="forecast_start"/>
+                                    <field name="forecast_finish"/>
+                                    <field name="predicted_slip_days"/>
+                                </group>
+                                <group>
+                                    <field name="delay_probability"/>
+                                    <field name="risk_level"/>
+                                    <field name="criticality_index"/>
+                                </group>
+                            </group>
+                            <field name="prediction_drivers" nolabel="1"/>
+                        </page>
+                        <page string="CPM" name="cpm" groups="base.group_no_one">
+                            <group>
+                                <field name="early_start"/>
+                                <field name="early_finish"/>
+                                <field name="late_start"/>
+                                <field name="late_finish"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_activity_search" model="ir.ui.view">
+        <field name="name">epc.activity.search</field>
+        <field name="model">epc.activity</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="wbs"/>
+                <field name="project_id"/>
+                <field name="responsible_id"/>
+                <filter name="critical" string="Critical" domain="[('is_critical', '=', True)]"/>
+                <filter name="at_risk" string="AI: high / critical risk" domain="[('risk_level', 'in', ('high', 'critical'))]"/>
+                <filter name="slipping" string="Forecast to slip" domain="[('predicted_slip_days', '&gt;', 0), ('state', '!=', 'done')]"/>
+                <separator/>
+                <filter name="open" string="Not completed" domain="[('state', '!=', 'done')]"/>
+                <filter name="milestones" string="Milestones" domain="[('is_milestone', '=', True)]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_discipline" string="Discipline" context="{'group_by': 'discipline'}"/>
+                    <filter name="group_risk" string="AI Risk" context="{'group_by': 'risk_level'}"/>
+                    <filter name="group_wbs" string="WBS" context="{'group_by': 'wbs'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_epc_activity_graph" model="ir.ui.view">
+        <field name="name">epc.activity.graph</field>
+        <field name="model">epc.activity</field>
+        <field name="arch" type="xml">
+            <graph string="Forecast slip by activity" type="bar">
+                <field name="code"/>
+                <field name="predicted_slip_days" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_epc_activity_pivot" model="ir.ui.view">
+        <field name="name">epc.activity.pivot</field>
+        <field name="model">epc.activity</field>
+        <field name="arch" type="xml">
+            <pivot string="Activity analysis">
+                <field name="discipline" type="row"/>
+                <field name="risk_level" type="col"/>
+                <field name="budget" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_epc_activities" model="ir.actions.act_window">
+        <field name="name">Schedule Activities</field>
+        <field name="res_model">epc.activity</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="context">{'search_default_group_project': 1, 'search_default_open': 1}</field>
+    </record>
+
+    <record id="action_epc_activities_at_risk" model="ir.actions.act_window">
+        <field name="name">Early Warnings</field>
+        <field name="res_model">epc.activity</field>
+        <field name="view_mode">list,form,graph</field>
+        <field name="context">{'search_default_slipping': 1}</field>
+    </record>
+</odoo>

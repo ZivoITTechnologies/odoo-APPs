@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_ra_bill_list" model="ir.ui.view">
+        <field name="name">epc.ra.bill.list</field>
+        <field name="model">epc.ra.bill</field>
+        <field name="arch" type="xml">
+            <list string="RA Bills" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="bill_no"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="gross_amount" sum="Total"/>
+                <field name="retention_amount" sum="Total" optional="show"/>
+                <field name="net_amount" sum="Total"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'submitted'"
+                       decoration-success="state in ('certified', 'invoiced')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_ra_bill_form" model="ir.ui.view">
+        <field name="name">epc.ra.bill.form</field>
+        <field name="model">epc.ra.bill</field>
+        <field name="arch" type="xml">
+            <form string="RA Bill">
+                <header>
+                    <button name="action_generate_lines" type="object" string="Fetch Measured Quantities"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_submit" type="object" string="Submit to Client" invisible="state != 'draft'"/>
+                    <button name="action_certify" type="object" string="Record Certification" class="btn-primary"
+                            invisible="state not in ('draft', 'submitted')"/>
+                    <button name="action_create_invoice" type="object" string="Create Invoice" class="btn-primary"
+                            invisible="state != 'certified'"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft"
+                            invisible="state not in ('submitted', 'certified', 'cancel')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('invoiced', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,certified,invoiced"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_invoice" icon="fa-pencil-square-o"
+                                invisible="not invoice_id" string="Invoice"/>
+                    </div>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="partner_id" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="bill_no"/>
+                            <field name="invoice_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date" readonly="state not in ('draft', 'submitted')"/>
+                            <label for="period_from" string="Period"/>
+                            <div class="o_row">
+                                <field name="period_from" readonly="state != 'draft'"/> to
+                                <field name="period_to" readonly="state != 'draft'"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Measured Items" name="lines">
+                            <field name="line_ids" readonly="state not in ('draft', 'submitted')">
+                                <list editable="bottom" create="0">
+                                    <field name="boq_line_id" readonly="1"/>
+                                    <field name="uom_name"/>
+                                    <field name="contract_qty" optional="hide"/>
+                                    <field name="previous_qty"/>
+                                    <field name="cumulative_qty" optional="show"/>
+                                    <field name="claimed_qty"/>
+                                    <field name="certified_qty"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="rate" readonly="1"/>
+                                    <field name="amount" sum="Total"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer" name="totals">
+                                <field name="currency_id" invisible="1"/>
+                                <field name="gross_amount"/>
+                                <field name="retention_pct" readonly="state not in ('draft', 'submitted')"/>
+                                <field name="retention_amount"/>
+                                <field name="advance_recovery_pct" readonly="state not in ('draft', 'submitted')"/>
+                                <field name="advance_recovery_amount"/>
+                                <field name="other_deductions" readonly="state not in ('draft', 'submitted')"/>
+                                <field name="net_amount" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_ra_bill_search" model="ir.ui.view">
+        <field name="name">epc.ra.bill.search</field>
+        <field name="model">epc.ra.bill</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="partner_id"/>
+                <filter name="to_invoice" string="Certified, to invoice" domain="[('state', '=', 'certified')]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_ra_bills" model="ir.actions.act_window">
+        <field name="name">RA Bills</field>
+        <field name="res_model">epc.ra.bill</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

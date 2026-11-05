@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Permits to work -->
+    <record id="view_epc_hse_permit_list" model="ir.ui.view">
+        <field name="name">epc.hse.permit.list</field>
+        <field name="model">epc.hse.permit</field>
+        <field name="arch" type="xml">
+            <list string="Permits to Work" decoration-danger="is_expired" decoration-muted="state in ('closed', 'cancelled')">
+                <field name="name"/>
+                <field name="project_id" optional="show"/>
+                <field name="permit_type"/>
+                <field name="location"/>
+                <field name="valid_from"/>
+                <field name="valid_to"/>
+                <field name="receiver" optional="show"/>
+                <field name="is_expired" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_hse_permit_form" model="ir.ui.view">
+        <field name="name">epc.hse.permit.form</field>
+        <field name="model">epc.hse.permit</field>
+        <field name="arch" type="xml">
+            <form string="Permit to Work">
+                <header>
+                    <button name="action_ai_precautions" type="object" string="AI Precautions" invisible="state != 'draft'"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary" invisible="state != 'draft'"
+                            groups="zivoit_epc_ai.group_epc_manager"/>
+                    <button name="action_close" type="object" string="Close Permit" invisible="state != 'approved'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state not in ('draft', 'approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,closed"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Expired" bg_color="text-bg-danger" invisible="not is_expired"/>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="activity_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="permit_type" readonly="state != 'draft'"/>
+                            <field name="location" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="valid_from" readonly="state != 'draft'"/>
+                            <field name="valid_to" readonly="state != 'draft'"/>
+                            <field name="issuer_id" readonly="state != 'draft'"/>
+                            <field name="receiver" readonly="state != 'draft'"/>
+                            <field name="workers_count" readonly="state != 'draft'"/>
+                            <field name="is_expired" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Work description">
+                        <field name="work_description" nolabel="1" colspan="2" readonly="state != 'draft'"/>
+                    </group>
+                    <group string="Precautions checklist">
+                        <field name="precautions" nolabel="1" colspan="2" readonly="state != 'draft'"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_epc_hse_permit_search" model="ir.ui.view">
+        <field name="name">epc.hse.permit.search</field>
+        <field name="model">epc.hse.permit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="location"/>
+                <filter name="active_permits" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="expired" string="Expired, not closed" domain="[('is_expired', '=', True)]"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'permit_type'}"/>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_epc_permits" model="ir.actions.act_window">
+        <field name="name">Permits to Work</field>
+        <field name="res_model">epc.hse.permit</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Incidents -->
+    <record id="view_epc_hse_incident_list" model="ir.ui.view">
+        <field name="name">epc.hse.incident.list</field>
+        <field name="model">epc.hse.incident</field>
+        <field name="arch" type="xml">
+            <list string="Incidents" decoration-danger="severity == 'high'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="project_id" optional="show"/>
+                <field name="incident_type"/>
+                <field name="severity" widget="badge" decoration-danger="severity == 'high'" decoration-warning="severity == 'medium'"/>
+                <field name="location" optional="show"/>
+                <field name="lost_days" sum="Total" optional="show"/>
+                <field name="root_cause_category" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_hse_incident_form" model="ir.ui.view">
+        <field name="name">epc.hse.incident.form</field>
+        <field name="model">epc.hse.incident</field>
+        <field name="arch" type="xml">
+            <form string="Incident">
+                <header>
+                    <button name="action_ai_root_cause" type="object" string="AI Root Cause" class="btn-primary"
+                            invisible="state == 'closed'"/>
+                    <button name="action_close" type="object" string="Close" invisible="state == 'closed'"
+                            groups="zivoit_epc_ai.group_epc_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="activity_id" options="{'no_create': True}"/>
+                            <field name="date"/>
+                            <field name="location"/>
+                        </group>
+                        <group>
+                            <field name="incident_type"/>
+                            <field name="severity"/>
+                            <field name="persons_involved"/>
+                            <field name="lost_days"/>
+                            <field name="risk_id" invisible="not risk_id"/>
+                        </group>
+                    </group>
+                    <group string="What happened">
+                        <field name="description" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Immediate action">
+                        <field name="immediate_action" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Investigation">
+                        <field name="root_cause_category"/>
+                        <field name="ai_source" invisible="not ai_source"/>
+                        <field name="root_cause" colspan="2"/>
+                        <field name="corrective_actions" colspan="2"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_epc_hse_incident_pivot" model="ir.ui.view">
+        <field name="name">epc.hse.incident.pivot</field>
+        <field name="model">epc.hse.incident</field>
+        <field name="arch" type="xml">
+            <pivot string="Incident analysis">
+                <field name="incident_type" type="row"/>
+                <field name="root_cause_category" type="col"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_epc_incidents" model="ir.actions.act_window">
+        <field name="name">Incidents</field>
+        <field name="res_model">epc.hse.incident</field>
+        <field name="view_mode">list,form,pivot</field>
+    </record>
+
+    <!-- Observations -->
+    <record id="view_epc_hse_observation_list" model="ir.ui.view">
+        <field name="name">epc.hse.observation.list</field>
+        <field name="model">epc.hse.observation</field>
+        <field name="arch" type="xml">
+            <list string="Safety Observations" editable="bottom" decoration-danger="severity == 'high' and state == 'open'"
+                  decoration-muted="state == 'closed'">
+                <field name="date"/>
+                <field name="project_id" options="{'no_create': True}"/>
+                <field name="name"/>
+                <field name="observation_type"/>
+                <field name="severity"/>
+                <field name="location" optional="show"/>
+                <field name="source" optional="show"/>
+                <field name="action_by_id" optional="show"/>
+                <field name="due_date" optional="show"/>
+                <field name="state"/>
+                <button name="action_close" type="object" string="Close" icon="fa-check" invisible="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_hse_observation_search" model="ir.ui.view">
+        <field name="name">epc.hse.observation.search</field>
+        <field name="model">epc.hse.observation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <filter name="open" string="Open" domain="[('state', '=', 'open')]"/>
+                <filter name="ai" string="From AI photo review" domain="[('source', '=', 'ai_photo')]"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'observation_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_epc_observations" model="ir.actions.act_window">
+        <field name="name">Safety Observations</field>
+        <field name="res_model">epc.hse.observation</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <!-- Inspections -->
+    <record id="view_epc_qa_inspection_list" model="ir.ui.view">
+        <field name="name">epc.qa.inspection.list</field>
+        <field name="model">epc.qa.inspection</field>
+        <field name="arch" type="xml">
+            <list string="Inspections" decoration-danger="result == 'fail'" decoration-success="result == 'pass'">
+                <field name="name"/>
+                <field name="planned_date"/>
+                <field name="project_id" optional="show"/>
+                <field name="activity_id" optional="show"/>
+                <field name="description"/>
+                <field name="inspection_type"/>
+                <field name="client_witness" optional="show"/>
+                <field name="inspector_id" optional="show"/>
+                <field name="result" widget="badge" decoration-success="result == 'pass'" decoration-danger="result == 'fail'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_qa_inspection_form" model="ir.ui.view">
+        <field name="name">epc.qa.inspection.form</field>
+        <field name="model">epc.qa.inspection</field>
+        <field name="arch" type="xml">
+            <form string="Inspection Request">
+                <header>
+                    <button name="action_pass" type="object" string="Accept" class="btn-primary" invisible="result != 'pending'"/>
+                    <button name="action_fail" type="object" string="Reject (raise NCR)" invisible="result != 'pending'"/>
+                    <field name="result" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="activity_id" options="{'no_create': True}"/>
+                            <field name="description"/>
+                            <field name="discipline"/>
+                        </group>
+                        <group>
+                            <field name="inspection_type"/>
+                            <field name="planned_date"/>
+                            <field name="inspector_id"/>
+                            <field name="client_witness"/>
+                        </group>
+                    </group>
+                    <group string="Remarks"><field name="remarks" nolabel="1" colspan="2"/></group>
+                    <field name="ncr_ids" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="severity"/>
+                            <field name="state"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_epc_inspections" model="ir.actions.act_window">
+        <field name="name">Inspections (ITP)</field>
+        <field name="res_model">epc.qa.inspection</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- NCRs -->
+    <record id="view_epc_qa_ncr_list" model="ir.ui.view">
+        <field name="name">epc.qa.ncr.list</field>
+        <field name="model">epc.qa.ncr</field>
+        <field name="arch" type="xml">
+            <list string="NCRs" decoration-danger="severity != 'minor' and state != 'closed'" decoration-muted="state == 'closed'">
+                <field name="name"/>
+                <field name="project_id" optional="show"/>
+                <field name="activity_id" optional="show"/>
+                <field name="severity"/>
+                <field name="raised_by" optional="show"/>
+                <field name="disposition" optional="show"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="due_date" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_qa_ncr_form" model="ir.ui.view">
+        <field name="name">epc.qa.ncr.form</field>
+        <field name="model">epc.qa.ncr</field>
+        <field name="arch" type="xml">
+            <form string="Non-Conformance Report">
+                <header>
+                    <button name="action_ai_suggest" type="object" string="AI Suggest" invisible="state != 'open'"/>
+                    <button name="action_start" type="object" string="Start Corrective Action" class="btn-primary" invisible="state != 'open'"/>
+                    <button name="action_verify" type="object" string="Verify" invisible="state != 'action'"/>
+                    <button name="action_close" type="object" string="Close" invisible="state != 'verified'"
+                            groups="zivoit_epc_ai.group_epc_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="activity_id" options="{'no_create': True}"/>
+                            <field name="inspection_id" readonly="1" invisible="not inspection_id"/>
+                            <field name="raised_by"/>
+                        </group>
+                        <group>
+                            <field name="severity"/>
+                            <field name="disposition"/>
+                            <field name="responsible_id"/>
+                            <field name="due_date"/>
+                            <field name="ai_source" invisible="not ai_source"/>
+                        </group>
+                    </group>
+                    <group string="Non-conformance"><field name="description" nolabel="1" colspan="2"/></group>
+                    <group string="Root cause"><field name="root_cause" nolabel="1" colspan="2"/></group>
+                    <group string="Corrective action"><field name="corrective_action" nolabel="1" colspan="2"/></group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_epc_qa_ncr_search" model="ir.ui.view">
+        <field name="name">epc.qa.ncr.search</field>
+        <field name="model">epc.qa.ncr</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <filter name="open" string="Not closed" domain="[('state', '!=', 'closed')]"/>
+                <filter name="major" string="Major / critical" domain="[('severity', '!=', 'minor')]"/>
+                <group>
+                    <filter name="group_disposition" string="Disposition" context="{'group_by': 'disposition'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_epc_ncrs" model="ir.actions.act_window">
+        <field name="name">Non-Conformance Reports</field>
+        <field name="res_model">epc.qa.ncr</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <!-- Punch list -->
+    <record id="view_epc_punch_list" model="ir.ui.view">
+        <field name="name">epc.punch.item.list</field>
+        <field name="model">epc.punch.item</field>
+        <field name="arch" type="xml">
+            <list string="Punch List" editable="bottom" decoration-danger="category == 'A' and state == 'open'"
+                  decoration-muted="state == 'closed'">
+                <field name="project_id" options="{'no_create': True}"/>
+                <field name="system" optional="show"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="discipline" optional="show"/>
+                <field name="responsible_id" optional="show"/>
+                <field name="due_date"/>
+                <field name="state"/>
+                <field name="closed_date" optional="hide"/>
+                <button name="action_close" type="object" string="Close" icon="fa-check" invisible="state == 'closed'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_punch_search" model="ir.ui.view">
+        <field name="name">epc.punch.item.search</field>
+        <field name="model">epc.punch.item</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <filter name="open" string="Open" domain="[('state', '=', 'open')]"/>
+                <filter name="cat_a" string="Category A" domain="[('category', '=', 'A')]"/>
+                <group>
+                    <filter name="group_system" string="System" context="{'group_by': 'system'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_epc_punch" model="ir.actions.act_window">
+        <field name="name">Punch List</field>
+        <field name="res_model">epc.punch.item</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <!-- Plant -->
+    <record id="view_epc_plant_list" model="ir.ui.view">
+        <field name="name">epc.plant.list</field>
+        <field name="model">epc.plant</field>
+        <field name="arch" type="xml">
+            <list string="Plant &amp; Equipment">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="plant_type"/>
+                <field name="ownership"/>
+                <field name="project_id"/>
+                <field name="hours_worked"/>
+                <field name="hours_breakdown"/>
+                <field name="utilisation" widget="progressbar"/>
+                <field name="availability" widget="progressbar" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_epc_plant_form" model="ir.ui.view">
+        <field name="name">epc.plant.form</field>
+        <field name="model">epc.plant</field>
+        <field name="arch" type="xml">
+            <form string="Plant">
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="plant_type"/>
+                            <field name="ownership"/>
+                            <field name="vendor_id" invisible="ownership != 'hired'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="hire_rate_per_day" invisible="ownership != 'hired'"/>
+                            <field name="project_id"/>
+                        </group>
+                        <group>
+                            <field name="hours_worked"/>
+                            <field name="hours_idle"/>
+                            <field name="hours_breakdown"/>
+                            <field name="utilisation" widget="progressbar"/>
+                            <field name="availability" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <field name="log_ids" readonly="1">
+                        <list>
+                            <field name="dpr_id"/>
+                            <field name="activity_id"/>
+                            <field name="hours_worked"/>
+                            <field name="hours_idle"/>
+                            <field name="hours_breakdown"/>
+                            <field name="remarks"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_epc_plant" model="ir.actions.act_window">
+        <field name="name">Plant &amp; Equipment</field>
+        <field name="res_model">epc.plant</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_boq_line_list" model="ir.ui.view">
+        <field name="name">epc.boq.line.list</field>
+        <field name="model">epc.boq.line</field>
+        <field name="arch" type="xml">
+            <list string="Bill of Quantities" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="project_id" optional="hide" options="{'no_create': True}"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="uom_name"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="quantity" sum="Total"/>
+                <field name="rate"/>
+                <field name="amount" sum="Total"/>
+                <field name="executed_qty"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="billed_qty" optional="show"/>
+                <field name="unbilled_qty" optional="show" decoration-warning="unbilled_qty &gt; 0"/>
+                <field name="executed_amount" sum="Total" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_boq_line_form" model="ir.ui.view">
+        <field name="name">epc.boq.line.form</field>
+        <field name="model">epc.boq.line</field>
+        <field name="arch" type="xml">
+            <form string="BOQ Item">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="uom_name"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="quantity"/>
+                            <field name="rate"/>
+                            <field name="amount"/>
+                            <field name="executed_qty"/>
+                            <field name="progress" widget="progressbar"/>
+                            <field name="billed_qty"/>
+                            <field name="unbilled_qty"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Activities" name="activities">
+                            <field name="activity_ids" readonly="1">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="planned_qty"/>
+                                    <field name="executed_qty"/>
+                                    <field name="progress" widget="progressbar"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_boq_line_search" model="ir.ui.view">
+        <field name="name">epc.boq.line.search</field>
+        <field name="model">epc.boq.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="project_id"/>
+                <filter name="unbilled" string="Executed, not billed" domain="[('unbilled_qty', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_boq_lines" model="ir.actions.act_window">
+        <field name="name">Bill of Quantities</field>
+        <field name="res_model">epc.boq.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_project': 1}</field>
+    </record>
+</odoo>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_risk_list" model="ir.ui.view">
+        <field name="name">epc.risk.list</field>
+        <field name="model">epc.risk</field>
+        <field name="arch" type="xml">
+            <list string="Risks" decoration-muted="state == 'closed'">
+                <field name="project_id" optional="show"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="probability"/>
+                <field name="impact"/>
+                <field name="score"/>
+                <field name="level" widget="badge"
+                       decoration-success="level == 'low'" decoration-warning="level == 'medium'"
+                       decoration-danger="level in ('high', 'critical')"/>
+                <field name="source" optional="show"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="due_date" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'open'" decoration-warning="state == 'mitigating'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_risk_kanban" model="ir.ui.view">
+        <field name="name">epc.risk.kanban</field>
+        <field name="model">epc.risk</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" highlight_color="color" sample="1">
+                <field name="color"/>
+                <field name="level"/>
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold"/>
+                        <div class="text-muted small"><field name="project_id"/></div>
+                        <div class="small">
+                            <field name="category"/> · score <field name="score"/>
+                            <span t-attf-class="badge ms-1 text-bg-#{record.level.raw_value == 'low' ? 'success' : (record.level.raw_value == 'medium' ? 'warning' : 'danger')}">
+                                <field name="level"/>
+                            </span>
+                        </div>
+                        <footer>
+                            <field name="source" class="small text-muted"/>
+                            <field name="owner_id" widget="many2one_avatar_user" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_epc_risk_form" model="ir.ui.view">
+        <field name="name">epc.risk.form</field>
+        <field name="model">epc.risk</field>
+        <field name="arch" type="xml">
+            <form string="Risk">
+                <header>
+                    <button name="action_mitigate" type="object" string="Start Mitigation" invisible="state != 'open'"/>
+                    <button name="action_close" type="object" string="Close" invisible="state == 'closed'"/>
+                    <button name="action_reopen" type="object" string="Reopen" invisible="state != 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Risk title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="activity_id" options="{'no_create': True}"/>
+                            <field name="purchase_line_id" readonly="1" invisible="not purchase_line_id"/>
+                            <field name="category"/>
+                            <field name="source"/>
+                        </group>
+                        <group>
+                            <field name="probability" widget="radio" options="{'horizontal': true}"/>
+                            <field name="impact" widget="radio" options="{'horizontal': true}"/>
+                            <field name="score"/>
+                            <field name="level"/>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="due_date"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Mitigation">
+                        <field name="mitigation" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_risk_search" model="ir.ui.view">
+        <field name="name">epc.risk.search</field>
+        <field name="model">epc.risk</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="owner_id"/>
+                <filter name="open" string="Open" domain="[('state', '!=', 'closed')]"/>
+                <filter name="engine" string="Raised by AI engine" domain="[('source', '=', 'engine')]"/>
+                <filter name="high" string="High / critical" domain="[('level', 'in', ('high', 'critical'))]"/>
+                <filter name="mine" string="My risks" domain="[('owner_id', '=', uid)]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
+                    <filter name="group_level" string="Level" context="{'group_by': 'level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_epc_risk_pivot" model="ir.ui.view">
+        <field name="name">epc.risk.pivot</field>
+        <field name="model">epc.risk</field>
+        <field name="arch" type="xml">
+            <pivot string="Risk heat map">
+                <field name="impact" type="row"/>
+                <field name="probability" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_epc_risks" model="ir.actions.act_window">
+        <field name="name">Risk Register</field>
+        <field name="res_model">epc.risk</field>
+        <field name="view_mode">list,kanban,form,pivot</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+</odoo>

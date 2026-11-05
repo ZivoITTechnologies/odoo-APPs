@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_epc" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.epc</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="60"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="ZivoIT EPC AI" string="ZivoIT EPC AI" name="zivoit_epc_ai" groups="zivoit_epc_ai.group_epc_manager">
+                    <block title="AI Provider" id="epc_ai_provider">
+                        <setting id="epc_ai_provider_setting"
+                                 help="Choose the language model used for DPR drafting, contract review, reports and Q&amp;A. Without one, the built-in engine answers.">
+                            <field name="epc_ai_provider"/>
+                            <div class="content-group" invisible="epc_ai_provider == 'none'">
+                                <div class="row mt8">
+                                    <label for="epc_ai_api_key" class="col-lg-3 o_light_label"/>
+                                    <field name="epc_ai_api_key" password="True"/>
+                                </div>
+                                <div class="row">
+                                    <label for="epc_ai_model" class="col-lg-3 o_light_label"/>
+                                    <field name="epc_ai_model" placeholder="Provider default"/>
+                                </div>
+                                <div class="row">
+                                    <label for="epc_ai_base_url" class="col-lg-3 o_light_label"/>
+                                    <field name="epc_ai_base_url" placeholder="https://api.openai.com/v1"/>
+                                </div>
+                                <div class="row">
+                                    <label for="epc_ai_timeout" class="col-lg-3 o_light_label"/>
+                                    <field name="epc_ai_timeout"/>
+                                </div>
+                                <div class="mt8">
+                                    <button name="action_epc_test_ai_connection" type="object" string="Test Connection"
+                                            icon="oi-arrow-right" class="btn-link"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Early Warnings" id="epc_alerts">
+                        <setting id="epc_alert_thresholds"
+                                 help="An activity raises an early-warning risk when both thresholds are exceeded.">
+                            <div class="row">
+                                <label for="epc_alert_delay_days" class="col-lg-5 o_light_label"/>
+                                <field name="epc_alert_delay_days"/>
+                            </div>
+                            <div class="row">
+                                <label for="epc_alert_probability" class="col-lg-5 o_light_label"/>
+                                <field name="epc_alert_probability"/>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_epc_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'zivoit_epc_ai', 'bin_size': False}</field>
+    </record>
+</odoo>

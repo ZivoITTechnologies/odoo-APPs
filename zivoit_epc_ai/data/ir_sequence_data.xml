@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_epc_dpr" model="ir.sequence">
+            <field name="name">EPC Daily Progress Report</field>
+            <field name="code">epc.dpr</field>
+            <field name="prefix">DPR/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_ra_bill" model="ir.sequence">
+            <field name="name">EPC RA Bill</field>
+            <field name="code">epc.ra.bill</field>
+            <field name="prefix">RAB/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_transmittal" model="ir.sequence">
+            <field name="name">EPC Transmittal</field>
+            <field name="code">epc.transmittal</field>
+            <field name="prefix">TRN/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_permit" model="ir.sequence">
+            <field name="name">EPC Permit to Work</field>
+            <field name="code">epc.hse.permit</field>
+            <field name="prefix">PTW/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_incident" model="ir.sequence">
+            <field name="name">EPC Incident</field>
+            <field name="code">epc.hse.incident</field>
+            <field name="prefix">INC/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_inspection" model="ir.sequence">
+            <field name="name">EPC Inspection Request</field>
+            <field name="code">epc.qa.inspection</field>
+            <field name="prefix">IR/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_ncr" model="ir.sequence">
+            <field name="name">EPC NCR</field>
+            <field name="code">epc.qa.ncr</field>
+            <field name="prefix">NCR/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_change_order" model="ir.sequence">
+            <field name="name">EPC Change Order</field>
+            <field name="code">epc.change.order</field>
+            <field name="prefix">CO/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_epc_bid_package" model="ir.sequence">
+            <field name="name">EPC Bid Package</field>
+            <field name="code">epc.bid.package</field>
+            <field name="prefix">BID/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

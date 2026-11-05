@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="rule_epc_boq_line_company" model="ir.rule">
+            <field name="name">EPC boq: multi-company</field>
+            <field name="model_id" ref="model_epc_boq_line"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_activity_company" model="ir.rule">
+            <field name="name">EPC activity: multi-company</field>
+            <field name="model_id" ref="model_epc_activity"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_activity_link_company" model="ir.rule">
+            <field name="name">EPC link: multi-company</field>
+            <field name="model_id" ref="model_epc_activity_link"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_dpr_company" model="ir.rule">
+            <field name="name">EPC dpr: multi-company</field>
+            <field name="model_id" ref="model_epc_dpr"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_dpr_line_company" model="ir.rule">
+            <field name="name">EPC dpr line: multi-company</field>
+            <field name="model_id" ref="model_epc_dpr_line"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_dpr_manpower_company" model="ir.rule">
+            <field name="name">EPC manpower: multi-company</field>
+            <field name="model_id" ref="model_epc_dpr_manpower"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_dpr_hindrance_company" model="ir.rule">
+            <field name="name">EPC hindrance: multi-company</field>
+            <field name="model_id" ref="model_epc_dpr_hindrance"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_risk_company" model="ir.rule">
+            <field name="name">EPC risk: multi-company</field>
+            <field name="model_id" ref="model_epc_risk"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_document_company" model="ir.rule">
+            <field name="name">EPC document: multi-company</field>
+            <field name="model_id" ref="model_epc_document"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_document_revision_company" model="ir.rule">
+            <field name="name">EPC document revision: multi-company</field>
+            <field name="model_id" ref="model_epc_document_revision"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_transmittal_company" model="ir.rule">
+            <field name="name">EPC transmittal: multi-company</field>
+            <field name="model_id" ref="model_epc_transmittal"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_ra_bill_company" model="ir.rule">
+            <field name="name">EPC RA bill: multi-company</field>
+            <field name="model_id" ref="model_epc_ra_bill"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_ra_bill_line_company" model="ir.rule">
+            <field name="name">EPC RA bill line: multi-company</field>
+            <field name="model_id" ref="model_epc_ra_bill_line"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_contract_review_company" model="ir.rule">
+            <field name="name">EPC contract review: multi-company</field>
+            <field name="model_id" ref="model_epc_contract_review"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_contract_clause_company" model="ir.rule">
+            <field name="name">EPC contract clause: multi-company</field>
+            <field name="model_id" ref="model_epc_contract_clause"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_hse_permit_company" model="ir.rule">
+            <field name="name">EPC permit: multi-company</field>
+            <field name="model_id" ref="model_epc_hse_permit"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_hse_incident_company" model="ir.rule">
+            <field name="name">EPC incident: multi-company</field>
+            <field name="model_id" ref="model_epc_hse_incident"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_hse_observation_company" model="ir.rule">
+            <field name="name">EPC observation: multi-company</field>
+            <field name="model_id" ref="model_epc_hse_observation"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_qa_inspection_company" model="ir.rule">
+            <field name="name">EPC inspection: multi-company</field>
+            <field name="model_id" ref="model_epc_qa_inspection"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_qa_ncr_company" model="ir.rule">
+            <field name="name">EPC NCR: multi-company</field>
+            <field name="model_id" ref="model_epc_qa_ncr"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_punch_item_company" model="ir.rule">
+            <field name="name">EPC punch item: multi-company</field>
+            <field name="model_id" ref="model_epc_punch_item"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_plant_company" model="ir.rule">
+            <field name="name">EPC plant: multi-company</field>
+            <field name="model_id" ref="model_epc_plant"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_dpr_plant_company" model="ir.rule">
+            <field name="name">EPC plant log: multi-company</field>
+            <field name="model_id" ref="model_epc_dpr_plant"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_holiday_company" model="ir.rule">
+            <field name="name">EPC holiday: multi-company</field>
+            <field name="model_id" ref="model_epc_holiday"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_mto_line_company" model="ir.rule">
+            <field name="name">epc.mto.line: multi-company</field>
+            <field name="model_id" ref="model_epc_mto_line"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_change_order_company" model="ir.rule">
+            <field name="name">epc.change.order: multi-company</field>
+            <field name="model_id" ref="model_epc_change_order"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_change_order_boq_company" model="ir.rule">
+            <field name="name">epc.change.order.boq: multi-company</field>
+            <field name="model_id" ref="model_epc_change_order_boq"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_change_order_activity_company" model="ir.rule">
+            <field name="name">epc.change.order.activity: multi-company</field>
+            <field name="model_id" ref="model_epc_change_order_activity"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_bid_package_company" model="ir.rule">
+            <field name="name">epc.bid.package: multi-company</field>
+            <field name="model_id" ref="model_epc_bid_package"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_bid_package_line_company" model="ir.rule">
+            <field name="name">epc.bid.package.line: multi-company</field>
+            <field name="model_id" ref="model_epc_bid_package_line"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_bid_company" model="ir.rule">
+            <field name="name">epc.bid: multi-company</field>
+            <field name="model_id" ref="model_epc_bid"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_bid_line_company" model="ir.rule">
+            <field name="name">epc.bid.line: multi-company</field>
+            <field name="model_id" ref="model_epc_bid_line"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_epc_external_material_company" model="ir.rule">
+            <field name="name">epc.external.material: multi-company</field>
+            <field name="model_id" ref="model_epc_external_material"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+</odoo>

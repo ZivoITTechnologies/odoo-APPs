@@ -1,0 +1,7 @@
+GENERAL ARRANGEMENT OF TOWER TYPE DA+0
+BILL OF MATERIALS
+SL  DESCRIPTION                     QTY  UNIT
+1   Angle ISA 75x75x6               1200 kg
+2   Hex bolt M16x50 with nut        400 nos
+3.  Stub angle 100x100x8            16.5 MT
+NOTE: ALL DIMENSIONS IN MM

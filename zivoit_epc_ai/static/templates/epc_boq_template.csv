@@ -1,0 +1,4 @@
+project_id,code,name,uom_name,quantity,rate
+220 kV Line,B-1.1,Excavation for tower foundations,m3,1250,450
+220 kV Line,B-1.2,PCC and RCC for tower foundations,m3,640,7800
+220 kV Line,B-2.1,Supply and erection of tower steel,MT,820,98000

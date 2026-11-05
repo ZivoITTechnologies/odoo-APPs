@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_epc_ai_log_list" model="ir.ui.view">
+        <field name="name">epc.ai.log.list</field>
+        <field name="model">epc.ai.log</field>
+        <field name="arch" type="xml">
+            <list string="AI Audit Log" create="0" edit="0" decoration-warning="not success">
+                <field name="create_date"/>
+                <field name="feature"/>
+                <field name="provider"/>
+                <field name="model_name" optional="show"/>
+                <field name="user_id"/>
+                <field name="res_model" optional="hide"/>
+                <field name="res_id" optional="hide"/>
+                <field name="used_fallback"/>
+                <field name="success"/>
+                <field name="duration_ms" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_ai_log_form" model="ir.ui.view">
+        <field name="name">epc.ai.log.form</field>
+        <field name="model">epc.ai.log</field>
+        <field name="arch" type="xml">
+            <form string="AI Call" create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="feature"/>
+                            <field name="provider"/>
+                            <field name="model_name"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="create_date"/>
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                            <field name="success"/>
+                            <field name="used_fallback"/>
+                            <field name="duration_ms"/>
+                        </group>
+                    </group>
+                    <group string="Error" invisible="not error">
+                        <field name="error" nolabel="1" colspan="2"/>
+                    </group>
+                    <notebook>
+                        <page string="Prompt" name="prompt"><field name="prompt"/></page>
+                        <page string="Response" name="response"><field name="response"/></page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_ai_log_search" model="ir.ui.view">
+        <field name="name">epc.ai.log.search</field>
+        <field name="model">epc.ai.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="feature"/>
+                <field name="user_id"/>
+                <filter name="failed" string="Errors" domain="[('success', '=', False)]"/>
+                <filter name="llm" string="Answered by LLM" domain="[('used_fallback', '=', False)]"/>
+                <group>
+                    <filter name="group_feature" string="Feature" context="{'group_by': 'feature'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_ai_logs" model="ir.actions.act_window">
+        <field name="name">AI Audit Log</field>
+        <field name="res_model">epc.ai.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,3 @@
+project_id,item_code,description,quantity,uom_name,boq_line_id,activity_id,vendor_id,estimated_rate
+220 kV Line,TS-01,Tower steel ISA 75x75x6,120,MT,B-2.1,ERC-01,,95000
+220 kV Line,BN-01,Hex bolts M16x50 with nuts,40000,Nos,,ERC-01,,22

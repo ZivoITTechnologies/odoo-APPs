@@ -1,0 +1,3 @@
+project_id,code,external_ref,name,wbs,discipline,duration,boq_line_id,planned_qty,budget
+220 kV Line,FDN-01,A1000,Tower foundations section 1,1.1,civil,45,B-1.2,320,12500000
+220 kV Line,ERC-01,A1010,Tower erection section 1,1.2,structural,30,B-2.1,410,9000000

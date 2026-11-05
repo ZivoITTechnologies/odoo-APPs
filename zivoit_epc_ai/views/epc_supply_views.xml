@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Bid packages -->
+    <record id="view_epc_bid_package_list" model="ir.ui.view">
+        <field name="name">epc.bid.package.list</field>
+        <field name="model">epc.bid.package</field>
+        <field name="arch" type="xml">
+            <list string="Bid Evaluations">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="project_id" optional="show"/>
+                <field name="required_date"/>
+                <field name="bid_count" string="Bids"/>
+                <field name="awarded_bid_id" string="Awarded to"/>
+                <field name="state" widget="badge" decoration-success="state == 'awarded'"
+                       decoration-info="state == 'evaluated'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_bid_package_form" model="ir.ui.view">
+        <field name="name">epc.bid.package.form</field>
+        <field name="model">epc.bid.package</field>
+        <field name="arch" type="xml">
+            <form string="Bid Evaluation">
+                <header>
+                    <button name="action_evaluate" type="object" string="Evaluate Bids" class="btn-primary"
+                            invisible="state not in ('draft', 'evaluated')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('awarded', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,evaluated,awarded"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_bids" icon="fa-balance-scale">
+                            <field name="bid_count" widget="statinfo" string="Bids"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="title" placeholder="e.g. 220 kV tower steel" readonly="state == 'awarded'"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="required_date"/>
+                            <field name="awarded_bid_id" invisible="not awarded_bid_id"/>
+                            <field name="purchase_order_id" invisible="not purchase_order_id"/>
+                        </group>
+                        <group string="Evaluation weights (total 100)">
+                            <field name="weight_price"/>
+                            <field name="weight_delivery"/>
+                            <field name="weight_risk"/>
+                            <field name="weight_technical"/>
+                            <field name="min_technical"/>
+                        </group>
+                    </group>
+                    <div invisible="not recommendation" class="alert alert-info" role="status">
+                        <strong>Recommendation</strong> (<field name="recommendation_source" readonly="1" nolabel="1" class="d-inline"/>)
+                        <field name="recommendation" nolabel="1"/>
+                    </div>
+                    <notebook>
+                        <page string="Comparison" name="bids">
+                            <field name="bid_ids" readonly="state == 'awarded'"
+                                   context="{'default_package_id': id}">
+                                <list decoration-success="rank == 1" decoration-muted="disqualified">
+                                    <field name="rank"/>
+                                    <field name="vendor_id"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="total_price"/>
+                                    <field name="delivery_days"/>
+                                    <field name="technical_compliance"/>
+                                    <field name="vendor_risk"/>
+                                    <field name="price_score" optional="show"/>
+                                    <field name="delivery_score" optional="show"/>
+                                    <field name="risk_score" optional="show"/>
+                                    <field name="total_score"/>
+                                    <field name="disqualified" optional="show"/>
+                                    <button name="action_award" type="object" string="Award" icon="fa-trophy"
+                                            invisible="parent.state != 'evaluated' or disqualified or not rank"
+                                            groups="zivoit_epc_ai.group_epc_manager"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Items" name="items">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="item_no"/>
+                                    <field name="description"/>
+                                    <field name="product_id" optional="hide"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_name"/>
+                                    <field name="activity_id" optional="show"/>
+                                    <field name="mto_line_id" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_epc_bid_packages" model="ir.actions.act_window">
+        <field name="name">Bid Evaluation</field>
+        <field name="res_model">epc.bid.package</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Compare vendor offers</p>
+            <p>Create a package from confirmed MTO lines or by hand, attach each vendor's offer and let AI extract prices,
+               delivery and deviations, then score the bids on price, delivery, supplier risk and technical compliance.</p>
+        </field>
+    </record>
+
+    <record id="view_epc_bid_form" model="ir.ui.view">
+        <field name="name">epc.bid.form</field>
+        <field name="model">epc.bid</field>
+        <field name="arch" type="xml">
+            <form string="Vendor Bid">
+                <header>
+                    <button name="action_ai_extract" type="object" string="AI Read Offer" class="btn-primary"/>
+                    <button name="action_award" type="object" string="Award" groups="zivoit_epc_ai.group_epc_manager"
+                            invisible="disqualified or not rank"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="package_id" options="{'no_create': True}"/>
+                            <field name="vendor_id"/>
+                            <field name="vendor_risk"/>
+                            <field name="offer_file" filename="offer_filename"/>
+                            <field name="offer_filename" invisible="1"/>
+                            <field name="ai_source" invisible="not ai_source"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="total_price"/>
+                            <field name="delivery_days"/>
+                            <field name="technical_compliance"/>
+                            <field name="technically_acceptable"/>
+                            <field name="payment_terms"/>
+                            <field name="validity_days"/>
+                        </group>
+                    </group>
+                    <group string="Scores" invisible="not total_score and not disqualified">
+                        <group>
+                            <field name="rank"/>
+                            <field name="total_score"/>
+                            <field name="disqualified"/>
+                        </group>
+                        <group>
+                            <field name="price_score"/>
+                            <field name="delivery_score"/>
+                            <field name="risk_score"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Prices" name="prices">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="package_line_id" options="{'no_create': True}"/>
+                                    <field name="quantity"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="unit_price"/>
+                                    <field name="amount" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Deviations" name="deviations">
+                            <field name="deviations" placeholder="Technical or commercial deviations from the enquiry"/>
+                        </page>
+                        <page string="Offer text" name="offer">
+                            <field name="offer_text" placeholder="Paste the offer here if there is no file"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_bid_list" model="ir.ui.view">
+        <field name="name">epc.bid.list</field>
+        <field name="model">epc.bid</field>
+        <field name="arch" type="xml">
+            <list string="Bids" decoration-success="rank == 1" decoration-muted="disqualified">
+                <field name="package_id"/>
+                <field name="rank"/>
+                <field name="vendor_id"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="total_price"/>
+                <field name="delivery_days"/>
+                <field name="technical_compliance"/>
+                <field name="total_score"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- MTO: create bid package -->
+    <record id="view_epc_mto_line_list_supply" model="ir.ui.view">
+        <field name="name">epc.mto.line.list.supply</field>
+        <field name="model">epc.mto.line</field>
+        <field name="inherit_id" ref="view_epc_mto_line_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_create_rfqs']" position="after">
+                <button name="action_create_bid_package" type="object" string="Create Bid Package"
+                        groups="zivoit_epc_ai.group_epc_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- External ERP materials -->
+    <record id="view_epc_external_material_list" model="ir.ui.view">
+        <field name="name">epc.external.material.list</field>
+        <field name="model">epc.external.material</field>
+        <field name="arch" type="xml">
+            <list string="External Materials" editable="bottom"
+                  decoration-danger="expedite_status == 'late'" decoration-warning="expedite_status == 'at_risk'">
+                <field name="project_id" options="{'no_create': True}"/>
+                <field name="source_system"/>
+                <field name="external_ref"/>
+                <field name="description"/>
+                <field name="vendor_id" optional="show"/>
+                <field name="vendor_name" optional="hide"/>
+                <field name="quantity"/>
+                <field name="delivered_qty" optional="show"/>
+                <field name="uom_name"/>
+                <field name="activity_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <field name="required_date"/>
+                <field name="promised_date"/>
+                <field name="forecast_date"/>
+                <field name="predicted_delay_days" optional="show"/>
+                <field name="stage"/>
+                <field name="expedite_status" widget="badge" decoration-success="expedite_status in ('on_track', 'received')"
+                       decoration-warning="expedite_status == 'at_risk'" decoration-danger="expedite_status == 'late'"/>
+                <field name="last_sync" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_external_material_search" model="ir.ui.view">
+        <field name="name">epc.external.material.search</field>
+        <field name="model">epc.external.material</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="external_ref"/>
+                <field name="description"/>
+                <field name="project_id"/>
+                <filter name="late" string="Late or at risk" domain="[('expedite_status', 'in', ('late', 'at_risk'))]"/>
+                <filter name="open" string="Not delivered" domain="[('stage', '!=', 'delivered')]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_system" string="Source system" context="{'group_by': 'source_system'}"/>
+                    <filter name="group_stage" string="Stage" context="{'group_by': 'stage'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_external_materials" model="ir.actions.act_window">
+        <field name="name">External ERP Materials</field>
+        <field name="res_model">epc.external.material</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Track materials bought in SAP, Oracle or another ERP</p>
+            <p>Import a CSV or push records through the REST API. Link each line to the activities that need it and the
+               prediction engine will forecast its delivery and its effect on the schedule.</p>
+        </field>
+    </record>
+
+    <!-- Project form -->
+    <record id="view_project_form_epc_supply" model="ir.ui.view">
+        <field name="name">project.project.form.epc.supply</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="view_project_form_epc"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_epc_view_ra_bills']" position="before">
+                <button class="oe_stat_button" type="object" name="action_epc_view_bid_packages" icon="fa-balance-scale"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_bid_package_count" widget="statinfo" string="Bid Evaluations"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Activity form: external materials -->
+    <record id="view_epc_activity_form_supply" model="ir.ui.view">
+        <field name="name">epc.activity.form.supply</field>
+        <field name="model">epc.activity</field>
+        <field name="inherit_id" ref="view_epc_activity_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="External Materials (ERP)" name="external_materials">
+                    <field name="external_material_ids" options="{'no_create': True}"
+                           domain="[('project_id', '=', project_id)]">
+                        <list>
+                            <field name="source_system"/>
+                            <field name="external_ref"/>
+                            <field name="description"/>
+                            <field name="promised_date"/>
+                            <field name="forecast_date"/>
+                            <field name="expedite_status"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Material Take-Off -->
+    <record id="view_epc_mto_line_list" model="ir.ui.view">
+        <field name="name">epc.mto.line.list</field>
+        <field name="model">epc.mto.line</field>
+        <field name="arch" type="xml">
+            <list string="Material Take-Off" editable="bottom" decoration-muted="state == 'cancel'"
+                  decoration-info="state == 'draft'">
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm"/>
+                    <button name="action_create_rfqs" type="object" string="Create RFQs" class="btn-primary"
+                            groups="zivoit_epc_ai.group_epc_manager"/>
+                    <button name="action_cancel" type="object" string="Cancel"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="project_id" optional="hide" options="{'no_create': True}"/>
+                <field name="document_id" optional="show" options="{'no_create': True}"/>
+                <field name="item_code"/>
+                <field name="description"/>
+                <field name="product_id" optional="hide"/>
+                <field name="quantity" sum="Total"/>
+                <field name="uom_name"/>
+                <field name="boq_line_id" optional="show" options="{'no_create': True}"/>
+                <field name="activity_id" optional="show" options="{'no_create': True}"/>
+                <field name="required_date" optional="show"/>
+                <field name="vendor_id" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="estimated_rate" optional="hide"/>
+                <field name="estimated_amount" sum="Total" optional="show"/>
+                <field name="source" optional="show" widget="badge"/>
+                <field name="state" widget="badge" decoration-success="state == 'rfq'"
+                       decoration-info="state == 'confirmed'"/>
+                <field name="purchase_line_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_mto_line_form" model="ir.ui.view">
+        <field name="name">epc.mto.line.form</field>
+        <field name="model">epc.mto.line</field>
+        <field name="arch" type="xml">
+            <form string="MTO Line">
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" invisible="state != 'draft'"/>
+                    <button name="action_create_rfqs" type="object" string="Create RFQ" class="btn-primary"
+                            invisible="state != 'confirmed'" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,rfq"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}"/>
+                            <field name="document_id" options="{'no_create': True}"/>
+                            <field name="item_code"/>
+                            <field name="description"/>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="uom_name"/>
+                        </group>
+                        <group>
+                            <field name="boq_line_id" options="{'no_create': True}"/>
+                            <field name="activity_id" options="{'no_create': True}"/>
+                            <field name="required_date"/>
+                            <field name="vendor_id"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="estimated_rate"/>
+                            <field name="estimated_amount"/>
+                            <field name="source"/>
+                            <field name="purchase_line_id" invisible="not purchase_line_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_mto_line_search" model="ir.ui.view">
+        <field name="name">epc.mto.line.search</field>
+        <field name="model">epc.mto.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="description"/>
+                <field name="item_code"/>
+                <field name="project_id"/>
+                <field name="document_id"/>
+                <field name="vendor_id"/>
+                <filter name="draft" string="To review" domain="[('state', '=', 'draft')]"/>
+                <filter name="confirmed" string="Ready for RFQ" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="no_boq" string="Not in BOQ" domain="[('boq_line_id', '=', False)]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_document" string="Drawing" context="{'group_by': 'document_id'}"/>
+                    <filter name="group_vendor" string="Vendor" context="{'group_by': 'vendor_id'}"/>
+                    <filter name="group_source" string="Source" context="{'group_by': 'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_mto" model="ir.actions.act_window">
+        <field name="name">Material Take-Off</field>
+        <field name="res_model">epc.mto.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No material take-off yet</p>
+            <p>Attach a drawing to a document and click <b>AI Extract MTO</b>, or import a BIM (IFC) model from the project.</p>
+        </field>
+    </record>
+
+    <!-- Document form: drawing file and MTO -->
+    <record id="view_epc_document_form_design" model="ir.ui.view">
+        <field name="name">epc.document.form.design</field>
+        <field name="model">epc.document</field>
+        <field name="inherit_id" ref="view_epc_document_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_ai_extract_mto" type="object" string="AI Extract MTO" invisible="not drawing_file"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button class="oe_stat_button" type="object" name="action_view_mto" icon="fa-cubes">
+                        <field name="mto_count" widget="statinfo" string="MTO Lines"/>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='responsible_id']" position="after">
+                <field name="drawing_file" filename="drawing_filename"/>
+                <field name="drawing_filename" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Material Take-Off" name="mto">
+                    <field name="mto_line_ids" context="{'default_project_id': project_id}">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="project_id" column_invisible="1"/>
+                            <field name="item_code"/>
+                            <field name="description"/>
+                            <field name="quantity"/>
+                            <field name="uom_name"/>
+                            <field name="boq_line_id" options="{'no_create': True}"/>
+                            <field name="activity_id" options="{'no_create': True}"/>
+                            <field name="vendor_id"/>
+                            <field name="source" widget="badge"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- BOQ: design vs contract quantities -->
+    <record id="view_epc_boq_line_list_design" model="ir.ui.view">
+        <field name="name">epc.boq.line.list.design</field>
+        <field name="model">epc.boq.line</field>
+        <field name="inherit_id" ref="view_epc_boq_line_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='executed_qty']" position="before">
+                <field name="mto_qty" optional="show"/>
+                <field name="mto_variance_pct" optional="show"
+                       decoration-danger="mto_variance_pct &gt; 5" decoration-success="mto_variance_pct &lt; -5"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- BIM import wizard -->
+    <record id="view_epc_bim_import_form" model="ir.ui.view">
+        <field name="name">epc.bim.import.form</field>
+        <field name="model">epc.bim.import</field>
+        <field name="arch" type="xml">
+            <form string="Import BIM Model">
+                <p class="text-muted">
+                    Upload an IFC 2x3 / IFC4 model exported from Revit, Tekla, AVEVA, Plant 3D or similar.
+                    Physical elements are grouped by type and turned into Material Take-Off lines using the model's
+                    quantity sets (volume, weight, length or area), or counted when no quantities are present.
+                </p>
+                <group>
+                    <field name="project_id" options="{'no_create': True}"/>
+                    <field name="document_id" options="{'no_create': True}"/>
+                    <field name="ifc_file" filename="ifc_filename"/>
+                    <field name="ifc_filename" invisible="1"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Import" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Change orders -->
+    <record id="view_epc_change_order_list" model="ir.ui.view">
+        <field name="name">epc.change.order.list</field>
+        <field name="model">epc.change.order</field>
+        <field name="arch" type="xml">
+            <list string="Change Orders">
+                <field name="name"/>
+                <field name="project_id" optional="show"/>
+                <field name="title"/>
+                <field name="origin" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="cost_impact" sum="Total"/>
+                <field name="time_impact_days"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'"
+                       decoration-warning="state == 'submitted'" decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_epc_change_order_form" model="ir.ui.view">
+        <field name="name">epc.change.order.form</field>
+        <field name="model">epc.change.order</field>
+        <field name="arch" type="xml">
+            <form string="Change Order">
+                <header>
+                    <button name="action_ai_assess" type="object" string="AI Assess Impact" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_recompute_impact" type="object" string="Recalculate Time Impact"
+                            invisible="state not in ('draft', 'submitted')"/>
+                    <button name="action_submit" type="object" string="Submit" invisible="state != 'draft'"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state != 'submitted'" groups="zivoit_epc_ai.group_epc_manager"
+                            confirm="Approving updates the BOQ quantities, activity durations and the schedule. Continue?"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state not in ('draft', 'submitted')" groups="zivoit_epc_ai.group_epc_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="title" placeholder="e.g. Additional tower foundation at AP-12" readonly="state != 'draft'"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="origin" readonly="state != 'draft'"/>
+                            <field name="document_id" options="{'no_create': True}"/>
+                            <field name="affects_contract_value" readonly="state == 'approved'"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="cost_impact"/>
+                            <field name="time_impact_days"/>
+                            <field name="ai_source" invisible="not ai_source"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Describe the change. Mention BOQ item numbers and activity codes with quantities or days (e.g. 'B-2.1 +40 m3, FDN-12 +6 days') so the AI can size it."
+                           readonly="state != 'draft'"/>
+                    <notebook>
+                        <page string="Quantity Changes" name="boq">
+                            <field name="boq_change_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="boq_line_id" options="{'no_create': True}"/>
+                                    <field name="new_code" optional="show"/>
+                                    <field name="new_name" optional="show"/>
+                                    <field name="new_uom" optional="show"/>
+                                    <field name="qty_delta"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="rate"/>
+                                    <field name="amount" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Schedule Changes" name="schedule">
+                            <field name="activity_change_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="activity_id" options="{'no_create': True}"/>
+                                    <field name="current_duration"/>
+                                    <field name="duration_delta"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="AI Justification" name="ai" invisible="not ai_justification">
+                            <field name="ai_justification"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_epc_change_order_search" model="ir.ui.view">
+        <field name="name">epc.change.order.search</field>
+        <field name="model">epc.change.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="title"/>
+                <field name="project_id"/>
+                <filter name="pending" string="Pending approval" domain="[('state', '=', 'submitted')]"/>
+                <filter name="approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <group>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_origin" string="Origin" context="{'group_by': 'origin'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_epc_change_orders" model="ir.actions.act_window">
+        <field name="name">Change Orders</field>
+        <field name="res_model">epc.change.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record a variation or change order</p>
+            <p>Describe the change and let AI estimate its cost and finish-date impact from the BOQ and schedule.</p>
+        </field>
+    </record>
+
+    <!-- Project form additions -->
+    <record id="view_project_form_epc_design" model="ir.ui.view">
+        <field name="name">project.project.form.epc.design</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="view_project_form_epc"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_epc_import_p6']" position="before">
+                <button name="action_epc_import_bim" type="object" string="Import BIM (IFC)"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_manager"/>
+            </xpath>
+            <xpath expr="//button[@name='action_epc_view_ra_bills']" position="before">
+                <button class="oe_stat_button" type="object" name="action_epc_view_change_orders" icon="fa-exchange"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_change_order_count" widget="statinfo" string="Change Orders"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_epc_view_mto" icon="fa-cubes"
+                        invisible="not is_epc" groups="zivoit_epc_ai.group_epc_user">
+                    <field name="epc_mto_count" widget="statinfo" string="MTO Lines"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

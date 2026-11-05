@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_epc" model="ir.ui.view">
+        <field name="name">res.partner.form.epc</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="epc_supplier_risk" string="Supplier Risk (AI)" invisible="not epc_supplier_risk_date"
+                      groups="zivoit_epc_ai.group_epc_user">
+                    <group>
+                        <group>
+                            <field name="epc_supplier_risk_score"/>
+                            <field name="epc_on_time_rate"/>
+                            <field name="epc_avg_delay_days"/>
+                        </group>
+                        <group>
+                            <field name="epc_delivery_samples"/>
+                            <field name="epc_supplier_risk_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_epc_supplier_list" model="ir.ui.view">
+        <field name="name">res.partner.epc.supplier.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Supplier Risk" create="0" default_order="epc_supplier_risk_score desc">
+                <field name="name"/>
+                <field name="epc_supplier_risk_score" decoration-danger="epc_supplier_risk_score &gt;= 50"
+                       decoration-success="epc_supplier_risk_score &lt; 25"/>
+                <field name="epc_on_time_rate"/>
+                <field name="epc_avg_delay_days"/>
+                <field name="epc_delivery_samples"/>
+                <field name="epc_supplier_risk_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_epc_supplier_risk" model="ir.actions.act_window">
+        <field name="name">Supplier Risk Scores</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_partner_epc_supplier_list"/>
+        <field name="domain">[('epc_supplier_risk_date', '!=', False)]</field>
+    </record>
+</odoo>
