@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_rate_contract_list" model="ir.ui.view">
+        <field name="name">cp.rate.contract.list</field>
+        <field name="model">cp.rate.contract</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('expired', 'cancel')">
+                <field name="name"/>
+                <field name="transporter_id"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="priority" optional="show"/>
+                <field name="line_count" string="Rates" optional="show"/>
+                <field name="has_ltl" widget="boolean" optional="show"/>
+                <field name="diesel_clause" widget="boolean" optional="hide"/>
+                <field name="rfq_id" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'active'"
+                       decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_rate_contract_form" model="ir.ui.view">
+        <field name="name">cp.rate.contract.form</field>
+        <field name="model">cp.rate.contract</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_activate" string="Activate" type="object" class="btn-primary"
+                            invisible="state != 'draft'" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_draft" string="Reset to Draft" type="object"
+                            invisible="state not in ('cancel', 'expired')" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state not in ('draft', 'active')" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="transporter_id" readonly="state != 'draft'"/>
+                            <field name="priority"/>
+                            <field name="rfq_id" invisible="not rfq_id"/>
+                        </group>
+                        <group>
+                            <field name="date_start" readonly="state != 'draft'"/>
+                            <field name="date_end"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lane Rates" name="rates">
+                            <field name="line_ids" readonly="state not in ('draft', 'active')">
+                                <list editable="bottom">
+                                    <field name="lane_id" required="charge_basis not in ('kg', 'box')"/>
+                                    <field name="origin_state_id" optional="hide"/>
+                                    <field name="dest_state_id" optional="show" required="not lane_id"/>
+                                    <field name="vehicle_type_id" optional="show"/>
+                                    <field name="charge_basis"/>
+                                    <field name="rate"/>
+                                    <field name="min_charge" optional="show"/>
+                                    <field name="min_weight_kg" optional="show" invisible="charge_basis != 'kg'"/>
+                                    <field name="min_weight_ton" optional="hide"/>
+                                    <field name="docket_charge" optional="show"/>
+                                    <field name="oda_charge" optional="hide"/>
+                                    <field name="fov_pct" optional="hide"/>
+                                    <field name="fuel_surcharge_pct" optional="hide"/>
+                                    <field name="multi_drop_charge" optional="hide"/>
+                                    <field name="transit_days" optional="show"/>
+                                    <field name="weekly_capacity" optional="show"/>
+                                    <field name="contracted_km" optional="hide"/>
+                                    <field name="detention_per_day" optional="show"/>
+                                    <field name="free_detention_hours" optional="hide"/>
+                                    <field name="loading_charge" optional="hide"/>
+                                    <field name="unloading_charge" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Diesel &amp; Seasons" name="escalation">
+                            <group>
+                                <group string="Diesel escalation clause">
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="diesel_clause"/>
+                                    <field name="base_diesel_price" invisible="not diesel_clause" required="diesel_clause"/>
+                                    <field name="fuel_component_pct" invisible="not diesel_clause"/>
+                                    <field name="diesel_threshold_pct" invisible="not diesel_clause"/>
+                                </group>
+                                <group>
+                                    <div class="text-muted small" colspan="2">Freight moves by the fuel share of any diesel change beyond the threshold. Enter diesel prices under Setup &gt; Diesel Prices.</div>
+                                </group>
+                            </group>
+                            <field name="season_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="date_from"/>
+                                    <field name="date_to"/>
+                                    <field name="surcharge_pct"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Terms" name="terms">
+                            <field name="notes" placeholder="Payment terms, penalties, insurance..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_rate_contract_search" model="ir.ui.view">
+        <field name="name">cp.rate.contract.search</field>
+        <field name="model">cp.rate.contract</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="transporter_id"/>
+                <field name="line_ids" string="Lane" filter_domain="[('line_ids.lane_id', 'ilike', self)]"/>
+                <filter name="active_contracts" string="Active" domain="[('state', '=', 'active')]"/>
+                <filter name="expired" string="Expired" domain="[('state', '=', 'expired')]"/>
+                <group>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_rate_contract" model="ir.actions.act_window">
+        <field name="name">Rate Contracts</field>
+        <field name="res_model">cp.rate.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active_contracts': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record contracted freight rates per lane</p>
+            <p>Active contracts drive automatic vehicle allocation and the freight audit.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_diesel_price_list" model="ir.ui.view">
+        <field name="name">cp.diesel.price.list</field>
+        <field name="model">cp.diesel.price</field>
+        <field name="arch" type="xml">
+            <list editable="top">
+                <field name="date"/>
+                <field name="price"/>
+                <field name="region" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_cp_diesel_price" model="ir.actions.act_window">
+        <field name="name">Diesel Prices</field>
+        <field name="res_model">cp.diesel.price</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record the diesel price</p>
+            <p>Contracts with a diesel escalation clause use the latest price on or before each shipment's date.</p>
+        </field>
+    </record>
+</odoo>

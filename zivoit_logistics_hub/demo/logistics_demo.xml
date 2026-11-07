@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_account_sandbox" model="zivo.logistics.account">
+        <field name="name">Sandbox Courier (API rates)</field>
+        <field name="provider">demo</field>
+        <field name="rate_source">api</field>
+        <field name="extra_config">{"step_minutes": 60}</field>
+        <field name="state">connected</field>
+    </record>
+    <record id="demo_account_ratecard" model="zivo.logistics.account">
+        <field name="name">Sandbox Surface (Rate card)</field>
+        <field name="provider">demo</field>
+        <field name="rate_source">rate_card</field>
+        <field name="fuel_surcharge_pct">10</field>
+        <field name="extra_config">{"step_minutes": 90}</field>
+        <field name="state">connected</field>
+    </record>
+    <record id="demo_rate_local" model="zivo.logistics.rate.card">
+        <field name="account_id" ref="demo_account_ratecard"/>
+        <field name="service_code">SURFACE</field><field name="service_name">Surface Saver</field>
+        <field name="zone">local</field><field name="base_price">25</field><field name="additional_price">20</field>
+        <field name="cod_fixed">25</field><field name="cod_percent">1.5</field><field name="tat_days">2</field>
+    </record>
+    <record id="demo_rate_regional" model="zivo.logistics.rate.card">
+        <field name="account_id" ref="demo_account_ratecard"/>
+        <field name="service_code">SURFACE</field><field name="service_name">Surface Saver</field>
+        <field name="zone">regional</field><field name="base_price">30</field><field name="additional_price">26</field>
+        <field name="cod_fixed">25</field><field name="cod_percent">1.5</field><field name="tat_days">3</field>
+    </record>
+    <record id="demo_rate_any" model="zivo.logistics.rate.card">
+        <field name="account_id" ref="demo_account_ratecard"/>
+        <field name="service_code">SURFACE</field><field name="service_name">Surface Saver</field>
+        <field name="zone">any</field><field name="base_price">38</field><field name="additional_price">34</field>
+        <field name="cod_fixed">30</field><field name="cod_percent">1.75</field><field name="tat_days">6</field>
+    </record>
+
+    <record id="demo_product_delivery" model="product.product">
+        <field name="name">Logistics Hub Shipping</field>
+        <field name="default_code">ZLH-SHIP</field>
+        <field name="type">service</field>
+        <field name="categ_id" ref="delivery.product_category_deliveries"/>
+        <field name="sale_ok" eval="False"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="list_price">0.0</field>
+        <field name="invoice_policy">order</field>
+    </record>
+    <record id="demo_carrier_ai" model="delivery.carrier">
+        <field name="name">Smart Shipping (AI Best Courier)</field>
+        <field name="delivery_type">zivo_hub</field>
+        <field name="zivo_strategy">ai_best</field>
+        <field name="product_id" ref="demo_product_delivery"/>
+        <field name="integration_level">rate_and_ship</field>
+        <field name="allow_cash_on_delivery" eval="True"/>
+    </record>
+
+    <record id="demo_rule_high_risk" model="zivo.logistics.allocation.rule">
+        <field name="name">High-risk COD: most reliable courier only</field>
+        <field name="payment_mode">cod</field>
+        <field name="min_rto_risk">60</field>
+        <field name="strategy">reliable</field>
+        <field name="account_ids" eval="[(4, ref('demo_account_sandbox'))]"/>
+    </record>
+</odoo>

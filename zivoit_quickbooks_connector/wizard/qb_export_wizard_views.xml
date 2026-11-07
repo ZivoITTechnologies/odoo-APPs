@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_qb_export_wizard" model="ir.ui.view">
+        <field name="name">qb.export.wizard.form</field>
+        <field name="model">qb.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export to QuickBooks">
+                <p class="text-muted">Queues every Odoo record that is new or changed since its last export. Leave
+                    entities empty to export everything allowed by the connection settings.</p>
+                <group>
+                    <field name="connection_id" readonly="1"/>
+                    <field name="entity_ids" widget="many2many_tags"/>
+                    <field name="include_history"/>
+                    <field name="run_now"/>
+                </group>
+                <footer>
+                    <button name="action_export" type="object" string="Start Export" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="view_qb_token_wizard" model="ir.ui.view">
+        <field name="name">qb.token.wizard.form</field>
+        <field name="model">qb.token.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Enter QuickBooks Tokens">
+                <p class="text-muted">For servers that Intuit cannot redirect to (e.g. localhost): generate a refresh
+                    token with the <a href="https://developer.intuit.com/app/developer/playground" target="_blank">Intuit
+                    OAuth 2.0 Playground</a> using the same app keys, then paste it here.</p>
+                <group>
+                    <field name="connection_id" readonly="1"/>
+                    <field name="realm_id"/>
+                    <field name="refresh_token" password="True"/>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object" string="Connect" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

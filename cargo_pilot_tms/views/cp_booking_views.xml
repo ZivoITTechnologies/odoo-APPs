@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_booking_form" model="ir.ui.view">
+        <field name="name">cp.booking.form</field>
+        <field name="model">cp.booking</field>
+        <field name="arch" type="xml">
+            <form string="Book a Load" class="cp-booking">
+                <field name="step" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <div invisible="step != 'details'">
+                    <div class="cp-help"><i class="fa fa-info-circle" title="Info"/>Tell us what is moving. Next you will see contract prices and the market option side by side.</div>
+                    <div class="cp-mode-pick">
+                        <field name="shipment_mode" widget="radio" options="{'horizontal': true}" nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="origin_id" string="Pick up from" options="{'no_create': True}" placeholder="Plant or warehouse"/>
+                        </group>
+                        <group>
+                            <field name="destination_id" string="Deliver to" options="{'no_create': True}" placeholder="Depot or customer site"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="vehicle_type_id" options="{'no_create': True}" invisible="shipment_mode == 'ltl'"
+                                   required="shipment_mode == 'ftl'"/>
+                            <field name="vehicle_count" invisible="shipment_mode == 'ltl'"/>
+                            <field name="boxes" invisible="shipment_mode == 'ftl'"/>
+                            <field name="weight_kg" invisible="shipment_mode == 'ftl'"/>
+                            <field name="required_date"/>
+                            <field name="channel"/>
+                        </group>
+                        <group>
+                            <field name="material"/>
+                            <field name="weight_ton" invisible="shipment_mode == 'ltl'"/>
+                            <field name="goods_value"/>
+                            <field name="consignee_id"/>
+                            <field name="reference"/>
+                        </group>
+                    </group>
+                    <label for="order_lines" string="Orders on this load (optional)"/>
+                    <field name="order_lines" placeholder="One per line: order no, invoice no, boxes, kg, value&#10;SO-1001, INV-501, 12, 280, 64000"
+                           class="cp-order-lines"/>
+                </div>
+                <div invisible="step != 'options'">
+                    <div class="cp-help"><i class="fa fa-star" title="Recommended"/>We recommend the best mix of price and on-time record. Pick any option to book it.</div>
+                    <field name="option_ids" nolabel="1" class="cp-booking-options">
+                        <list create="false" delete="false" decoration-bf="recommended" decoration-success="recommended">
+                            <field name="recommended" widget="boolean_favorite" nolabel="1" readonly="1"/>
+                            <field name="kind"/>
+                            <field name="transporter_id" string="Transporter"/>
+                            <field name="price"/>
+                            <field name="performance" widget="progressbar"/>
+                            <field name="transit_hours"/>
+                            <field name="co2_kg"/>
+                            <field name="breakdown" optional="hide"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <button name="action_choose" type="object" string="Book this" class="btn-primary btn-sm"/>
+                        </list>
+                    </field>
+                    <p class="small text-muted">"Open for bidding" shows the average price of recent auctions on this lane. Transporters you invite bid on it live.</p>
+                </div>
+                <footer>
+                    <button name="action_compare" string="Compare options" type="object" class="btn-primary"
+                            invisible="step != 'details'"/>
+                    <button name="action_back" string="Back" type="object" invisible="step != 'options'"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cp_booking" model="ir.actions.act_window">
+        <field name="name">Book a Load</field>
+        <field name="res_model">cp.booking</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

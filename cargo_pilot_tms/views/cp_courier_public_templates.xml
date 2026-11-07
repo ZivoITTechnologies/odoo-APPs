@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cp_parcel_public" name="Parcel Tracking">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="title">Track parcel <t t-esc="parcel.awb or parcel.name"/></t>
+            <div class="cp-track cp-ptrack">
+                <div class="cp-track-head">
+                    <div class="container">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <img t-if="company.logo" t-att-src="'/web/image/res.company/%s/logo/160x60' % company.id"
+                                 alt="Logo" class="cp-track-logo"/>
+                            <span t-else="" class="fw-bold" t-esc="company.name"/>
+                            <span class="small opacity-75">Order <t t-esc="parcel.reference or parcel.name"/></span>
+                        </div>
+                        <h1 class="mt-3 mb-1">
+                            <t t-if="parcel.state == 'delivered'">Delivered</t>
+                            <t t-elif="parcel.state == 'out_for_delivery'">Arriving today</t>
+                            <t t-elif="parcel.state == 'ndr'">We missed you</t>
+                            <t t-elif="parcel.state in ('rto', 'returned')">Returning to sender</t>
+                            <t t-elif="parcel.state == 'cancelled'">Cancelled</t>
+                            <t t-elif="parcel.state in ('picked_up', 'in_transit')">On the way</t>
+                            <t t-else="">Getting ready</t>
+                        </h1>
+                        <div class="cp-track-state">
+                            <t t-if="parcel.state == 'delivered' and parcel.delivered_at">on <span t-field="parcel.delivered_at" t-options="{'widget': 'date'}"/></t>
+                            <t t-elif="parcel.expected_delivery and parcel.state not in ('cancelled', 'returned')">Expected by <span t-field="parcel.expected_delivery" t-options="{'format': 'EEEE, dd MMMM'}"/></t>
+                            <t t-else="">To <t t-esc="parcel.recipient_partner_id.city or parcel.dest_pin"/></t>
+                        </div>
+                    </div>
+                </div>
+                <div class="container cp-track-body">
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="cp-panel">
+                                <ol class="cp-psteps">
+                                    <li t-foreach="steps" t-as="s" t-attf-class="cp-pstep cp-pstep-{{ s['status'] }}">
+                                        <span class="cp-pstep-dot"><i t-attf-class="fa {{ 'fa-check' if s['status'] == 'done' else s['icon'] }}"/></span>
+                                        <span class="cp-pstep-label" t-esc="s['label']"/>
+                                    </li>
+                                </ol>
+                                <div t-if="parcel.state == 'ndr'" class="alert alert-warning mt-3 mb-0">
+                                    The courier could not deliver<t t-if="parcel.ndr_reason">: <t t-esc="parcel.ndr_reason"/></t>.
+                                    They will try again. Keep your phone reachable, or reply to the e-mail from <t t-esc="company.name"/> with a better time.
+                                </div>
+                            </div>
+                            <div class="cp-panel mt-3">
+                                <h6 class="text-uppercase small text-muted">Journey</h6>
+                                <ul class="cp-timeline">
+                                    <li t-foreach="events" t-as="e">
+                                        <span class="cp-timeline-time" t-field="e.event_time" t-options="{'format': 'dd MMM yyyy, HH:mm'}"/>
+                                        <span t-esc="e.description"/>
+                                        <span t-if="e.location" class="text-muted"> · <t t-esc="e.location"/></span>
+                                    </li>
+                                    <li t-if="not events"><span>Your parcel is being packed.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="cp-panel">
+                                <dl class="cp-track-facts mb-0">
+                                    <dt>Courier</dt><dd t-esc="parcel.courier_name or '-'"/>
+                                    <dt>Tracking no.</dt><dd><span class="cp-plate" t-esc="parcel.awb or '-'"/></dd>
+                                    <dt>Boxes</dt><dd t-esc="parcel.piece_count"/>
+                                    <t t-if="parcel.payment_mode == 'cod' and parcel.state not in ('delivered', 'cancelled', 'returned')">
+                                        <dt>Pay on delivery</dt>
+                                        <dd><b t-field="parcel.cod_amount" t-options="{'widget': 'monetary', 'display_currency': parcel.currency_id}"/></dd>
+                                    </t>
+                                    <dt>Deliver to</dt><dd><t t-esc="parcel.recipient_partner_id.city or ''"/> <t t-esc="parcel.dest_pin"/></dd>
+                                    <t t-if="parcel.last_sync_at"><dt>Last update</dt><dd><span t-field="parcel.last_sync_at" t-options="{'format': 'dd MMM, HH:mm'}"/></dd></t>
+                                </dl>
+                                <a t-if="parcel.tracking_url" t-att-href="parcel.tracking_url" target="_blank" rel="noopener"
+                                   class="btn btn-outline-secondary btn-sm mt-3">Open on the courier's site <i class="fa fa-external-link"/></a>
+                            </div>
+                            <p class="small text-muted mt-3">Questions? Contact <t t-esc="company.name"/><t t-if="company.phone"> on <a t-att-href="'tel:%s' % company.phone" t-esc="company.phone"/></t>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_home_cp_parcels" name="Courier Parcels" inherit_id="portal.portal_my_home" priority="42">
+        <div id="portal_common_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/courier/img/portal_parcel.svg'"/>
+                <t t-set="title">Your Parcels</t>
+                <t t-set="url" t-value="'/my/cp/parcels'"/>
+                <t t-set="text">Follow courier parcels sent to you or by you</t>
+                <t t-set="placeholder_count" t-value="'cp_parcel_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_my_cp_parcels" name="Your Parcels">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Your Parcels</t>
+            </t>
+            <p t-if="not parcels" class="text-muted mt-3">No parcels yet.</p>
+            <t t-if="parcels" t-call="portal.portal_table">
+                <thead><tr><th>Order</th><th>Courier</th><th>Tracking no.</th><th>To</th><th>Due</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="parcels" t-as="p">
+                        <td><a t-attf-href="/cp/parcel/#{p.access_token}" t-esc="p.reference or p.name"/></td>
+                        <td t-esc="p.courier_name or ''"/>
+                        <td><span class="cp-plate" t-esc="p.awb or ''"/></td>
+                        <td><t t-esc="p.recipient_partner_id.city or ''"/> <t t-esc="p.dest_pin"/></td>
+                        <td><span t-if="p.expected_delivery and p.state != 'delivered'" t-field="p.expected_delivery"/></td>
+                        <td><span class="cp-pill" t-field="p.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================== Dashboard (kanban) ============================== -->
+    <record id="view_qb_connection_kanban" model="ir.ui.view">
+        <field name="name">qb.connection.kanban</field>
+        <field name="model">qb.connection</field>
+        <field name="arch" type="xml">
+            <kanban class="o_qb_dashboard" create="1" sample="1">
+                <field name="state"/>
+                <field name="health"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card" class="o_qb_card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <field name="name" class="fw-bold fs-5"/>
+                                <div class="text-muted small">
+                                    <field name="qb_company_name"/> · <field name="environment"/>
+                                </div>
+                            </div>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'connected'"
+                                   decoration-warning="state == 'expired'"
+                                   decoration-danger="state == 'error'"
+                                   decoration-muted="state == 'draft'"/>
+                        </div>
+                        <div class="o_qb_stats row g-2 text-center">
+                            <div class="col-3">
+                                <a type="object" name="action_view_pending" class="o_qb_stat">
+                                    <div class="fs-4 fw-bold"><field name="pending_count"/></div>
+                                    <div class="small text-muted">Queued</div>
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                <a type="object" name="action_view_failed" class="o_qb_stat text-danger">
+                                    <div class="fs-4 fw-bold"><field name="failed_count"/></div>
+                                    <div class="small text-muted">Failed</div>
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                <a type="object" name="action_view_failed" class="o_qb_stat text-warning">
+                                    <div class="fs-4 fw-bold"><field name="conflict_count"/></div>
+                                    <div class="small text-muted">Conflicts</div>
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                <a type="object" name="action_view_mappings" class="o_qb_stat text-success">
+                                    <div class="fs-4 fw-bold"><field name="mapping_count"/></div>
+                                    <div class="small text-muted">Linked</div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-2">
+                            Last sync: <field name="last_cdc_sync" widget="datetime"/> ·
+                            <field name="done_today_count"/> done in 24h
+                        </div>
+                        <footer class="mt-2 d-flex gap-1 flex-wrap">
+                            <button name="action_sync_now" type="object" class="btn btn-primary btn-sm"
+                                    invisible="state != 'connected'">Sync Now</button>
+                            <button name="action_connect" type="object" class="btn btn-primary btn-sm"
+                                    invisible="state == 'connected'">Connect</button>
+                            <button name="action_open_import_wizard" type="object" class="btn btn-secondary btn-sm"
+                                    invisible="state != 'connected'">Import</button>
+                            <button name="action_open_integrity_wizard" type="object" class="btn btn-secondary btn-sm"
+                                    invisible="state != 'connected'">Integrity Check</button>
+                            <button name="action_view_logs" type="object" class="btn btn-link btn-sm">Logs</button>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_qb_connection_list" model="ir.ui.view">
+        <field name="name">qb.connection.list</field>
+        <field name="model">qb.connection</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="qb_company_name"/>
+                <field name="realm_id"/>
+                <field name="environment"/>
+                <field name="last_cdc_sync"/>
+                <field name="pending_count"/>
+                <field name="failed_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'"
+                       decoration-warning="state == 'expired'" decoration-danger="state == 'error'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================================== Form ================================== -->
+    <record id="view_qb_connection_form" model="ir.ui.view">
+        <field name="name">qb.connection.form</field>
+        <field name="model">qb.connection</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_connect" type="object" string="Connect to QuickBooks" class="btn-primary"
+                            invisible="state == 'connected'" groups="zivoit_quickbooks_connector.group_qb_manager"/>
+                    <button name="action_sync_now" type="object" string="Sync Now" class="btn-primary"
+                            invisible="state != 'connected'"/>
+                    <button name="action_open_import_wizard" type="object" string="Import from QuickBooks"
+                            invisible="state != 'connected'" groups="zivoit_quickbooks_connector.group_qb_manager"/>
+                    <button name="action_open_export_wizard" type="object" string="Export to QuickBooks"
+                            invisible="state != 'connected'" groups="zivoit_quickbooks_connector.group_qb_manager"/>
+                    <button name="action_smart_match" type="object" string="Smart Match"
+                            invisible="state != 'connected'" groups="zivoit_quickbooks_connector.group_qb_manager"
+                            help="Auto-map QuickBooks accounts, taxes and payment methods to Odoo"/>
+                    <button name="action_open_integrity_wizard" type="object" string="Integrity Check"
+                            invisible="state != 'connected'"/>
+                    <button name="action_run_queue" type="object" string="Run Queue Now"
+                            invisible="state != 'connected' or pending_count == 0"/>
+                    <button name="action_test_connection" type="object" string="Test"
+                            invisible="state == 'draft'" groups="zivoit_quickbooks_connector.group_qb_manager"/>
+                    <button name="action_set_manual_tokens" type="object" string="Enter Tokens Manually"
+                            invisible="state == 'connected'" groups="zivoit_quickbooks_connector.group_qb_manager"/>
+                    <button name="action_disconnect" type="object" string="Disconnect"
+                            invisible="state == 'draft'" groups="zivoit_quickbooks_connector.group_qb_manager"
+                            confirm="Tokens will be revoked at Intuit and deleted from Odoo. Continue?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_pending" type="object" class="oe_stat_button" icon="fa-clock-o">
+                            <field name="pending_count" widget="statinfo" string="Queued"/>
+                        </button>
+                        <button name="action_view_failed" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <field name="failed_count" widget="statinfo" string="Failed"/>
+                        </button>
+                        <button name="action_view_failed" type="object" class="oe_stat_button" icon="fa-random">
+                            <field name="conflict_count" widget="statinfo" string="Conflicts"/>
+                        </button>
+                        <button name="action_view_mappings" type="object" class="oe_stat_button" icon="fa-link">
+                            <field name="mapping_count" widget="statinfo" string="Linked"/>
+                        </button>
+                        <button name="action_view_unmapped" type="object" class="oe_stat_button" icon="fa-question-circle">
+                            <field name="unmapped_count" widget="statinfo" string="To Map"/>
+                        </button>
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-list">
+                            <span class="o_stat_text">Logs</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Sandbox" bg_color="text-bg-warning" invisible="environment != 'sandbox'"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. QuickBooks US"/></h1>
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="state not in ('expired', 'error')">
+                        <strong>Attention: </strong><field name="last_error" class="d-inline"/>
+                        Click <em>Connect to QuickBooks</em> to re-authorize.
+                    </div>
+                    <group>
+                        <group string="QuickBooks Company">
+                            <field name="qb_company_name" invisible="not qb_company_name"/>
+                            <field name="realm_id" readonly="1"/>
+                            <field name="qb_country" invisible="not qb_country"/>
+                            <field name="qb_home_currency" invisible="not qb_home_currency"/>
+                            <field name="qb_multicurrency" invisible="state == 'draft'"/>
+                            <field name="is_us_company" invisible="1"/>
+                        </group>
+                        <group string="Odoo">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="environment"/>
+                            <field name="auto_sync"/>
+                            <field name="sync_interval" invisible="not auto_sync"/>
+                            <field name="last_cdc_sync"/>
+                            <field name="refresh_expiry" invisible="state == 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Credentials" name="credentials" groups="zivoit_quickbooks_connector.group_qb_manager">
+                            <group>
+                                <group>
+                                    <field name="client_id" password="False" required="1"/>
+                                    <field name="client_secret" password="True" required="1"/>
+                                    <field name="webhook_verifier_token" password="True"/>
+                                    <field name="minor_version"/>
+                                </group>
+                                <group>
+                                    <field name="redirect_uri" widget="CopyClipboardChar"/>
+                                    <field name="webhook_url" widget="CopyClipboardChar"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info mt-2" role="status">
+                                <h5>Setup in 4 steps</h5>
+                                <ol class="mb-0">
+                                    <li>Create an app on <a href="https://developer.intuit.com/app/developer/dashboard" target="_blank">developer.intuit.com</a> with the <b>Accounting</b> scope.</li>
+                                    <li>Copy the <b>Client ID / Secret</b> (Development keys for Sandbox, Production keys for Production) here.</li>
+                                    <li>Add the <b>Redirect URI</b> above to the app's Redirect URIs (production requires HTTPS).</li>
+                                    <li>Optional but recommended: in <b>Webhooks</b>, paste the Webhook URL, select the entities, and copy the <b>Verifier Token</b> here for real-time sync.</li>
+                                </ol>
+                            </div>
+                        </page>
+                        <page string="Entities" name="entities">
+                            <field name="entity_config_ids">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="sequence" column_invisible="1"/>
+                                    <field name="name" string="Entity"/>
+                                    <field name="entity" column_invisible="1"/>
+                                    <field name="can_import" column_invisible="1"/>
+                                    <field name="can_export" column_invisible="1"/>
+                                    <field name="direction"/>
+                                    <field name="auto_sync" widget="boolean_toggle"/>
+                                    <field name="import_filter" optional="hide"/>
+                                    <field name="mapped_count" string="Linked"/>
+                                    <field name="error_count" string="Errors"
+                                           decoration-danger="error_count > 0"/>
+                                    <field name="last_import" optional="show"/>
+                                    <field name="last_export" optional="show"/>
+                                    <button name="action_import_now" type="object" icon="fa-download" title="Import now"
+                                            invisible="not can_import or direction in ('export', 'none')"/>
+                                    <button name="action_export_now" type="object" icon="fa-upload" title="Export now"
+                                            invisible="not can_export or direction in ('import', 'none')"/>
+                                    <button name="action_view_mappings" type="object" icon="fa-link" title="Mappings"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sync Rules" name="rules">
+                            <group>
+                                <group string="Conflicts &amp; Deletions">
+                                    <field name="conflict_policy"/>
+                                    <field name="deletion_policy"/>
+                                    <field name="void_policy"/>
+                                    <field name="odoo_delete_policy"/>
+                                    <field name="match_existing"/>
+                                </group>
+                                <group string="Documents">
+                                    <field name="import_start_date"/>
+                                    <field name="export_start_date"/>
+                                    <field name="auto_post"/>
+                                    <field name="auto_export_on_post"/>
+                                    <field name="keep_qb_numbers"/>
+                                    <field name="send_doc_number"/>
+                                    <field name="confirm_accepted_estimates"/>
+                                    <field name="confirm_open_pos"/>
+                                    <field name="fetch_pdf"/>
+                                </group>
+                                <group string="Contacts">
+                                    <field name="share_partners"/>
+                                    <field name="vendor_suffix"/>
+                                </group>
+                                <group string="Taxes">
+                                    <field name="us_send_tax_total" invisible="not is_us_company"/>
+                                    <field name="sales_tax_account_id" invisible="not is_us_company"
+                                           domain="[('company_ids', 'in', company_id)]"/>
+                                    <div class="text-muted" colspan="2" invisible="is_us_company">
+                                        Non-US companies: QuickBooks tax codes are imported as Odoo taxes
+                                        (sales and purchase) and linked automatically. Use Smart Match for existing taxes.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Defaults" name="defaults">
+                            <group>
+                                <group string="Journals">
+                                    <field name="sale_journal_id"/>
+                                    <field name="purchase_journal_id"/>
+                                    <field name="misc_journal_id"/>
+                                    <field name="payment_journal_id"/>
+                                </group>
+                                <group string="Accounts">
+                                    <field name="income_account_id" domain="[('company_ids', 'in', company_id)]"/>
+                                    <field name="expense_account_id" domain="[('company_ids', 'in', company_id)]"/>
+                                    <field name="discount_account_id" domain="[('company_ids', 'in', company_id)]"/>
+                                </group>
+                                <group string="Analytics">
+                                    <field name="class_plan_id"/>
+                                    <field name="location_plan_id"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Advanced" name="advanced" groups="zivoit_quickbooks_connector.group_qb_manager">
+                            <group>
+                                <group>
+                                    <field name="batch_size"/>
+                                    <field name="max_attempts"/>
+                                    <field name="log_api_calls"/>
+                                    <field name="log_retention_days"/>
+                                </group>
+                                <group>
+                                    <field name="access_expiry"/>
+                                    <field name="refresh_expiry"/>
+                                    <field name="last_full_import"/>
+                                    <field name="next_sync"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_qb_connection_search" model="ir.ui.view">
+        <field name="name">qb.connection.search</field>
+        <field name="model">qb.connection</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="qb_company_name"/>
+                <field name="realm_id"/>
+                <filter name="connected" string="Connected" domain="[('state', '=', 'connected')]"/>
+                <filter name="attention" string="Needs attention" domain="[('state', 'in', ('expired', 'error'))]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_qb_connection" model="ir.actions.act_window">
+        <field name="name">QuickBooks Connections</field>
+        <field name="res_model">qb.connection</field>
+        <field name="path">quickbooks</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Odoo to QuickBooks Online</p>
+            <p>Create a connection, paste your Intuit app keys and click <b>Connect to QuickBooks</b>.</p>
+        </field>
+    </record>
+</odoo>

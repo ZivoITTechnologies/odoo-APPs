@@ -318,6 +318,10 @@ class EpcDemo(models.AbstractModel):
         env = self.env(context=dict(self.env.context, epc_ai_force_fallback=True))
         project.write({"epc_external_system": "sap", "epc_external_ref": "DEMO-PS-400-01"})
         acts["ERC1"].external_ref = "A2010"
+        # crash data for the schedule optimiser (shortest duration, cost per day saved)
+        for code, shortest, cost in (("ERC1", 32, 450000), ("ERC2", 32, 450000), ("STR1", 24, 300000),
+                                     ("STR2", 24, 300000), ("TC1", 12, 200000), ("FDN2", 38, 350000)):
+            acts[code].write({"crash_duration": shortest, "crash_cost_per_day": cost})
         acts["STR2"].external_ref = "A3020"
         now = fields.Datetime.now().replace(minute=0, second=0, microsecond=0)
 
@@ -384,7 +388,7 @@ class EpcDemo(models.AbstractModel):
         # Bid evaluation for the bolts from the MTO
         bolts = drawing.mto_line_ids.filtered(lambda l: l.uom_name.lower() == "nos")
         package = env["epc.bid.package"].browse(bolts.action_create_bid_package()["res_id"])
-        package.title = "Bolts and step bolts for DD+3 towers"
+        package.write({"title": "Bolts and step bolts for DD+3 towers", "required_date": today + timedelta(days=45)})
         bolt_vendor = self._partner("Demo Fasteners Ltd", email="sales@fasteners.example.com", supplier_rank=1)
         offers = [
             (bolt_vendor, "1  Hex bolt M16x60 with nut  3600 nos  @ 42.00  151,200.00\n"

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_courier_rate_wizard_form" model="ir.ui.view">
+        <field name="name">cp.courier.rate.wizard.form</field>
+        <field name="model">cp.courier.rate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Choose a courier" class="cp-rate-wizard">
+                <field name="currency_id" invisible="1"/>
+                <field name="error_count" invisible="1"/>
+                <div class="cp-help"><i class="fa fa-balance-scale" title="Compare"/><field name="summary" nolabel="1" class="d-inline"/></div>
+                <field name="line_ids" nolabel="1" class="cp-rate-options">
+                    <list create="false" delete="false" decoration-muted="error" decoration-bf="recommended">
+                        <field name="initials" string=" " widget="badge" class="cp-courier-initials"/>
+                        <field name="courier_name"/>
+                        <field name="service" optional="show"/>
+                        <field name="account_id" optional="hide"/>
+                        <field name="price"/>
+                        <field name="days" string="Days" invisible="not days"/>
+                        <field name="cod" widget="boolean" optional="hide"/>
+                        <field name="recommended" widget="boolean_favorite" nolabel="1" readonly="1" string="Best"/>
+                        <field name="is_cheapest" column_invisible="1"/>
+                        <field name="is_fastest" column_invisible="1"/>
+                        <field name="currency_id" column_invisible="1"/>
+                        <field name="tags" widget="badge" decoration-success="recommended" invisible="not tags"/>
+                        <field name="note" string="Notes" invisible="error" optional="show"/>
+                        <field name="error" string="Problem" class="text-danger" column_invisible="parent.error_count == 0"/>
+                        <button name="action_choose" type="object" string="Book" class="btn-primary btn-sm" invisible="error"/>
+                    </list>
+                </field>
+                <p class="small text-muted mt-2">The star marks the best mix of price, speed and courier rating. "Price from your rate card" means the courier has no price API, so the price uses the slab rates on its account.</p>
+                <footer>
+                    <button name="action_refresh" type="object" string="Refresh prices" class="btn-secondary"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_courier_pickup_wizard_form" model="ir.ui.view">
+        <field name="name">cp.courier.pickup.wizard.form</field>
+        <field name="model">cp.courier.pickup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Request pickup">
+                <div class="cp-help"><i class="fa fa-truck" title="Pickup"/><span><field name="parcel_count" class="d-inline"/> parcel(s) with <field name="account_names" class="d-inline"/>. The courier gets one pickup request per account.</span></div>
+                <group>
+                    <field name="pickup_at"/>
+                    <field name="parcel_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Request pickup" class="btn-primary"/>
+                    <button name="action_print_manifest" type="object" string="Print handover sheet"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_parcel_ndr_wizard_form" model="ir.ui.view">
+        <field name="name">cp.parcel.ndr.wizard.form</field>
+        <field name="model">cp.parcel.ndr.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Delivery failed">
+                <field name="can_ndr" invisible="1"/>
+                <div class="cp-help cp-help-warn"><i class="fa fa-exclamation-circle" title="Failed"/><span>Attempt <field name="attempts" class="d-inline"/>: <field name="reason" class="d-inline"/></span></div>
+                <group>
+                    <field name="action" widget="radio"/>
+                    <field name="new_phone" invisible="action != 'reattempt'"/>
+                    <field name="note" invisible="action != 'reattempt'"/>
+                </group>
+                <p class="small text-muted" invisible="can_ndr">This courier takes these decisions by phone or on its portal. Cargo Pilot records your decision and keeps the issue open until the next update.</p>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_parcel_update_wizard_form" model="ir.ui.view">
+        <field name="name">cp.parcel.update.wizard.form</field>
+        <field name="model">cp.parcel.update.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Add a tracking update">
+                <group>
+                    <group>
+                        <field name="status"/>
+                        <field name="event_time"/>
+                    </group>
+                    <group>
+                        <field name="location"/>
+                        <field name="expected_delivery"/>
+                    </group>
+                </group>
+                <group><field name="description"/></group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Add" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

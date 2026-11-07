@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="cron_cp_easyecom_sync" model="ir.cron">
+        <field name="name">Cargo Pilot: EasyEcom orders, stock and status</field>
+        <field name="model_id" ref="model_cp_easyecom_account"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_sync()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+    </record>
+</odoo>

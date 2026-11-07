@@ -1,0 +1,26 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_user,account user,model_zivo_logistics_account,group_logistics_user,1,0,0,0
+access_account_manager,account manager,model_zivo_logistics_account,group_logistics_manager,1,1,1,1
+access_endpoint_user,endpoint user,model_zivo_logistics_endpoint,group_logistics_user,1,0,0,0
+access_endpoint_manager,endpoint manager,model_zivo_logistics_endpoint,group_logistics_manager,1,1,1,1
+access_rate_card_user,rate card user,model_zivo_logistics_rate_card,group_logistics_user,1,0,0,0
+access_rate_card_manager,rate card manager,model_zivo_logistics_rate_card,group_logistics_manager,1,1,1,1
+access_pincode_user,pincode user,model_zivo_logistics_pincode,group_logistics_user,1,1,1,0
+access_pincode_manager,pincode manager,model_zivo_logistics_pincode,group_logistics_manager,1,1,1,1
+access_shipment_user,shipment user,model_zivo_logistics_shipment,group_logistics_user,1,1,1,0
+access_shipment_manager,shipment manager,model_zivo_logistics_shipment,group_logistics_manager,1,1,1,1
+access_event_user,event user,model_zivo_logistics_tracking_event,group_logistics_user,1,1,1,0
+access_event_manager,event manager,model_zivo_logistics_tracking_event,group_logistics_manager,1,1,1,1
+access_api_log_user,api log user,model_zivo_logistics_api_log,group_logistics_user,1,0,0,0
+access_api_log_manager,api log manager,model_zivo_logistics_api_log,group_logistics_manager,1,1,1,1
+access_job_user,job user,model_zivo_logistics_queue_job,group_logistics_user,1,1,1,0
+access_job_manager,job manager,model_zivo_logistics_queue_job,group_logistics_manager,1,1,1,1
+access_status_map_user,status map user,model_zivo_logistics_status_map,group_logistics_user,1,0,0,0
+access_status_map_manager,status map manager,model_zivo_logistics_status_map,group_logistics_manager,1,1,1,1
+access_rule_user,rule user,model_zivo_logistics_allocation_rule,group_logistics_user,1,0,0,0
+access_rule_manager,rule manager,model_zivo_logistics_allocation_rule,group_logistics_manager,1,1,1,1
+access_rate_shop,rate shop,model_zivo_logistics_rate_shop,group_logistics_user,1,1,1,1
+access_rate_shop_line,rate shop line,model_zivo_logistics_rate_shop_line,group_logistics_user,1,1,1,1
+access_ndr_action,ndr action,model_zivo_logistics_ndr_action,group_logistics_user,1,1,1,1
+access_ai_query,ai query,model_zivo_logistics_ai_query,group_logistics_user,1,1,1,1
+access_bulk_ship,bulk ship,model_zivo_logistics_bulk_ship,group_logistics_user,1,1,1,1

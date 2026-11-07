@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_rule_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.allocation.rule.list</field>
+        <field name="model">zivo.logistics.allocation.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="payment_mode"/>
+                <field name="zone"/>
+                <field name="min_weight" optional="show"/>
+                <field name="max_weight" optional="show"/>
+                <field name="min_rto_risk" optional="show"/>
+                <field name="strategy"/>
+                <field name="account_ids" widget="many2many_tags"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_rule_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.allocation.rule.form</field>
+        <field name="model">zivo.logistics.allocation.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Heavy COD to North-East"/></h1></div>
+                    <group>
+                        <group string="When">
+                            <field name="payment_mode"/>
+                            <field name="zone"/>
+                            <label for="min_weight" string="Weight (kg)"/>
+                            <div class="o_row"><field name="min_weight"/> to <field name="max_weight"/></div>
+                            <label for="min_value" string="Order value"/>
+                            <div class="o_row"><field name="min_value"/> to <field name="max_value"/></div>
+                            <field name="zip_prefixes"/>
+                            <field name="state_ids" widget="many2many_tags"/>
+                            <field name="min_rto_risk"/>
+                        </group>
+                        <group string="Then">
+                            <field name="strategy"/>
+                            <field name="account_ids" widget="many2many_tags"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Internal notes"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_zivo_rule" model="ir.actions.act_window">
+        <field name="name">Allocation Rules</field>
+        <field name="res_model">zivo.logistics.allocation.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Route shipments with rules</p>
+            <p>Example: COD orders above 5 kg to the North-East go only to Delhivery or Blue Dart, prepaid metro orders take the cheapest carrier.
+               Used by delivery methods whose carrier selection is "Allocation rules". First matching rule wins.</p>
+        </field>
+    </record>
+</odoo>

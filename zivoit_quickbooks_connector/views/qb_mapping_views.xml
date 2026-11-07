@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_qb_mapping_list" model="ir.ui.view">
+        <field name="name">qb.mapping.list</field>
+        <field name="model">qb.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="top" decoration-danger="state in ('error', 'conflict')"
+                  decoration-warning="state in ('unmapped', 'dirty')" decoration-muted="state in ('deleted_qb', 'deleted_odoo', 'voided_qb')">
+                <field name="connection_id" optional="hide"/>
+                <field name="qb_entity" readonly="1"/>
+                <field name="qb_id" readonly="1"/>
+                <field name="qb_name" readonly="1"/>
+                <field name="record_ref" string="Odoo Record" options="{'no_create': True}"/>
+                <field name="state" widget="badge" decoration-success="state == 'synced'"
+                       decoration-warning="state in ('unmapped', 'dirty')" decoration-danger="state in ('error', 'conflict')"/>
+                <field name="suggestion_score" optional="hide" widget="progressbar"/>
+                <field name="last_direction" optional="show"/>
+                <field name="last_sync" optional="show"/>
+                <field name="qb_sync_token" optional="hide"/>
+                <button name="action_open_record" type="object" icon="fa-external-link" title="Open record"
+                        invisible="not record_ref"/>
+                <button name="action_reimport" type="object" icon="fa-download" title="Re-import from QuickBooks"/>
+                <button name="action_reexport" type="object" icon="fa-upload" title="Re-export to QuickBooks"
+                        invisible="not record_ref"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_qb_mapping_search" model="ir.ui.view">
+        <field name="name">qb.mapping.search</field>
+        <field name="model">qb.mapping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="qb_id"/>
+                <field name="qb_name"/>
+                <field name="qb_entity"/>
+                <field name="res_model"/>
+                <filter name="unmapped" string="Needs mapping" domain="[('state', '=', 'unmapped')]"/>
+                <filter name="issues" string="Errors &amp; conflicts" domain="[('state', 'in', ('error', 'conflict'))]"/>
+                <filter name="dirty" string="Pending update" domain="[('state', '=', 'dirty')]"/>
+                <filter name="deleted" string="Deleted / voided" domain="[('state', 'in', ('deleted_qb', 'deleted_odoo', 'voided_qb'))]"/>
+                <separator/>
+                <filter name="masters" string="Master data" domain="[('qb_entity', 'in', ('Account', 'TaxCode', 'TaxCodePurchase', 'Term', 'PaymentMethod', 'Class', 'Department', 'Customer', 'Vendor', 'Item', 'ItemCategory'))]"/>
+                <filter name="txns" string="Transactions" domain="[('qb_entity', 'not in', ('Account', 'TaxCode', 'TaxCodePurchase', 'Term', 'PaymentMethod', 'Class', 'Department', 'Customer', 'Vendor', 'Item', 'ItemCategory'))]"/>
+                <group>
+                    <filter name="by_entity" string="Entity" context="{'group_by': 'qb_entity'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_qb_mapping" model="ir.actions.act_window">
+        <field name="name">QuickBooks Mappings</field>
+        <field name="res_model">qb.mapping</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No linked records yet</p>
+            <p>Every Odoo record linked to a QuickBooks object appears here. Use <b>Smart Match</b> on the connection
+               to propose mappings for accounts, taxes and payment methods automatically.</p>
+        </field>
+    </record>
+    <record id="action_qb_mapping_unmapped" model="ir.actions.act_window">
+        <field name="name">Records to Map</field>
+        <field name="res_model">qb.mapping</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_unmapped': 1}</field>
+    </record>
+</odoo>

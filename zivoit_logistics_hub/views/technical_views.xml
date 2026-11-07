@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_api_log_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.api.log.list</field>
+        <field name="model">zivo.logistics.api.log</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="not success">
+                <field name="create_date"/>
+                <field name="account_id"/>
+                <field name="operation"/>
+                <field name="method"/>
+                <field name="url"/>
+                <field name="response_status"/>
+                <field name="duration_ms"/>
+                <field name="success"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_api_log_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.api.log.form</field>
+        <field name="model">zivo.logistics.api.log</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <header>
+                    <button name="action_open_record" type="object" string="Open Record" invisible="not res_id"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="account_id"/>
+                            <field name="provider"/>
+                            <field name="operation"/>
+                            <field name="method"/>
+                            <field name="url"/>
+                        </group>
+                        <group>
+                            <field name="create_date"/>
+                            <field name="response_status"/>
+                            <field name="duration_ms"/>
+                            <field name="success"/>
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                        </group>
+                    </group>
+                    <field name="error" invisible="not error" class="text-danger"/>
+                    <notebook>
+                        <page string="Request"><field name="request_headers"/><field name="request_body" widget="code" options="{'mode': 'javascript'}"/></page>
+                        <page string="Response"><field name="response_body" widget="code" options="{'mode': 'javascript'}"/></page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_api_log_search" model="ir.ui.view">
+        <field name="name">zivo.logistics.api.log.search</field>
+        <field name="model">zivo.logistics.api.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="account_id"/>
+                <field name="operation"/>
+                <field name="url"/>
+                <filter name="failed" string="Failed" domain="[('success', '=', False)]"/>
+                <group>
+                    <filter name="group_account" string="Account" context="{'group_by': 'account_id'}"/>
+                    <filter name="group_operation" string="Operation" context="{'group_by': 'operation'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_api_log" model="ir.actions.act_window">
+        <field name="name">API Logs</field>
+        <field name="res_model">zivo.logistics.api.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_zivo_job_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.queue.job.list</field>
+        <field name="model">zivo.logistics.queue.job</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="state == 'dead'" decoration-warning="state == 'failed'" decoration-success="state == 'done'">
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="operation"/>
+                <field name="account_id"/>
+                <field name="attempts"/>
+                <field name="next_run_at"/>
+                <field name="last_error"/>
+                <field name="state" widget="badge"/>
+                <button name="action_run_now" type="object" string="Run" icon="fa-play" invisible="state in ('done', 'cancelled')"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.queue.job.form</field>
+        <field name="model">zivo.logistics.queue.job</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_run_now" type="object" string="Run Now" class="btn-primary" invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_retry" type="object" string="Retry" invisible="state not in ('dead', 'failed')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('done', 'cancelled')"/>
+                    <button name="action_open_record" type="object" string="Open Record"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="operation"/>
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                            <field name="method"/>
+                        </group>
+                        <group>
+                            <field name="attempts"/>
+                            <field name="max_attempts"/>
+                            <field name="next_run_at"/>
+                            <field name="done_at"/>
+                            <field name="account_id"/>
+                        </group>
+                    </group>
+                    <group string="Payload"><field name="payload" nolabel="1" colspan="2"/></group>
+                    <group string="Last error" invisible="not last_error"><field name="last_error" nolabel="1" colspan="2"/></group>
+                    <group string="Result" invisible="not result"><field name="result" nolabel="1" colspan="2"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_search" model="ir.ui.view">
+        <field name="name">zivo.logistics.queue.job.search</field>
+        <field name="model">zivo.logistics.queue.job</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter name="todo" string="To process" domain="[('state', 'in', ('pending', 'failed'))]"/>
+                <filter name="dead" string="Needs attention" domain="[('state', '=', 'dead')]"/>
+                <group><filter name="group_state" string="State" context="{'group_by': 'state'}"/></group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job" model="ir.actions.act_window">
+        <field name="name">Job Queue</field>
+        <field name="res_model">zivo.logistics.queue.job</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_todo': 1}</field>
+    </record>
+
+    <record id="view_zivo_pincode_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.pincode.list</field>
+        <field name="model">zivo.logistics.pincode</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="account_id"/>
+                <field name="zip"/>
+                <field name="serviceable"/>
+                <field name="cod"/>
+                <field name="prepaid"/>
+                <field name="pickup"/>
+                <field name="tat_days"/>
+                <field name="message"/>
+                <field name="checked_at"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_zivo_pincode" model="ir.actions.act_window">
+        <field name="name">Pincode Serviceability</field>
+        <field name="res_model">zivo.logistics.pincode</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

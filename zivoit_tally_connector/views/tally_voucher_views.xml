@@ -86,15 +86,15 @@
                         <page string="Lines">
                             <field name="line_ids" readonly="1">
                                 <list>
-                                    <field name="line_type"/>
-                                    <field name="ledger"/>
-                                    <field name="item"/>
-                                    <field name="qty"/>
-                                    <field name="unit"/>
-                                    <field name="rate"/>
-                                    <field name="debit" sum="Dr"/>
-                                    <field name="credit" sum="Cr"/>
-                                    <field name="bills"/>
+                                    <field name="line_type" column_invisible="1"/>
+                                    <field name="ledger" string="Ledger / Accounting allocation"/>
+                                    <field name="item" string="Stock item"/>
+                                    <field name="qty" invisible="line_type != 'item'"/>
+                                    <field name="unit" invisible="line_type != 'item'"/>
+                                    <field name="rate" invisible="line_type != 'item'"/>
+                                    <field name="debit" sum="Dr" invisible="not debit"/>
+                                    <field name="credit" sum="Cr" invisible="not credit"/>
+                                    <field name="bills" optional="show"/>
                                 </list>
                             </field>
                         </page>

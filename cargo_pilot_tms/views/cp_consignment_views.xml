@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_cp_consignment_kanban" model="ir.ui.view">
+        <field name="name">cp.consignment.kanban</field>
+        <field name="model">cp.consignment</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="cp-kcard-top">
+                            <field name="name" class="cp-kcard-title"/>
+                            <field name="state" widget="badge"/>
+                        </div>
+                        <div class="cp-kcard-route"><field name="from_location_id"/> → <field name="to_location_id"/></div>
+                        <field name="consignee_id" class="cp-kcard-meta"/>
+                        <footer class="cp-kcard-meta">
+                            <span><field name="total_packages"/> pkgs · <field name="actual_weight_kg"/> kg</span>
+                            <field name="total_amount" widget="monetary" class="ms-auto cp-kcard-amount"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_consignment_list" model="ir.ui.view">
+        <field name="name">cp.consignment.list</field>
+        <field name="model">cp.consignment</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="booking_date"/>
+                <field name="load_type" optional="show"/>
+                <field name="consignor_id"/>
+                <field name="consignee_id"/>
+                <field name="from_location_id"/>
+                <field name="to_location_id"/>
+                <field name="total_packages" optional="show"/>
+                <field name="actual_weight_kg" sum="Weight" optional="show"/>
+                <field name="total_amount" sum="Total"/>
+                <field name="payment_type" optional="show"/>
+                <field name="current_hub_id" optional="hide"/>
+                <field name="vehicle_number" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-info="state == 'booked'"
+                       decoration-warning="state in ('in_transit', 'at_hub')" decoration-success="state in ('delivered', 'invoiced')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_consignment_form" model="ir.ui.view">
+        <field name="name">cp.consignment.form</field>
+        <field name="model">cp.consignment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_book" string="Book" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_create_trip" string="Create FTL Trip" type="object"
+                            invisible="state != 'booked' or trip_id or load_type != 'ftl'"/>
+                    <button name="action_mark_delivered" string="Mark Delivered" type="object"
+                            invisible="state not in ('booked', 'in_transit', 'at_hub')"/>
+                    <button name="action_create_invoice" string="Create Invoice" type="object" class="btn-primary"
+                            invisible="state not in ('booked', 'in_transit', 'at_hub', 'delivered') or invoice_id"
+                            groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="%(action_cp_report_consignment)d" string="Print LR" type="action"
+                            invisible="state == 'draft'"/>
+                    <button name="action_draft" string="Reset to Draft" type="object" invisible="state != 'cancel'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('invoiced', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,booked,in_transit,delivered,invoiced"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Parties">
+                            <field name="consignor_id"/>
+                            <field name="consignee_id"/>
+                            <field name="billing_partner_id"/>
+                            <field name="payment_type"/>
+                        </group>
+                        <group string="Route">
+                            <field name="booking_date"/>
+                            <field name="booking_hub_id"/>
+                            <field name="load_type"/>
+                            <field name="from_location_id"/>
+                            <field name="to_location_id"/>
+                            <field name="trip_id"/>
+                            <field name="current_hub_id" invisible="not current_hub_id"/>
+                        </group>
+                        <group string="Compliance">
+                            <field name="invoice_ref"/>
+                            <field name="goods_value"/>
+                            <field name="eway_bill_no"/>
+                            <field name="pod_received"/>
+                        </group>
+                        <group string="Billing" invisible="not invoice_id">
+                            <field name="invoice_id"/>
+                            <field name="invoice_state" widget="badge"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Goods" name="goods">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="product_id" optional="show"/>
+                                    <field name="description"/>
+                                    <field name="packing_type"/>
+                                    <field name="packages" sum="Packages"/>
+                                    <field name="actual_weight_kg" sum="Actual"/>
+                                    <field name="charged_weight_kg" sum="Charged"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Freight &amp; Charges" name="freight">
+                            <group>
+                                <group>
+                                    <field name="freight_basis"/>
+                                    <field name="freight_rate"/>
+                                    <field name="loading_charge"/>
+                                    <field name="unloading_charge"/>
+                                    <field name="door_collection_charge"/>
+                                    <field name="door_delivery_charge"/>
+                                    <field name="other_charge"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </group>
+                                <group class="oe_subtotal_footer">
+                                    <field name="freight_amount"/>
+                                    <field name="untaxed_amount"/>
+                                    <field name="tax_amount"/>
+                                    <field name="total_amount" class="oe_subtotal_footer_separator"/>
+                                    <field name="advance_received"/>
+                                    <field name="balance_amount"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Challans" name="challans" invisible="not challan_ids">
+                            <field name="challan_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="from_hub_id"/>
+                                    <field name="to_hub_id"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_consignment_search" model="ir.ui.view">
+        <field name="name">cp.consignment.search</field>
+        <field name="model">cp.consignment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="consignor_id"/>
+                <field name="consignee_id"/>
+                <field name="billing_partner_id"/>
+                <field name="eway_bill_no"/>
+                <filter name="to_invoice" string="To Invoice"
+                        domain="[('state', 'in', ('booked', 'in_transit', 'at_hub', 'delivered')), ('invoice_id', '=', False)]"/>
+                <filter name="at_hub" string="At Hub (Stock)" domain="[('state', 'in', ('booked', 'at_hub'))]"/>
+                <filter name="ptl" string="PTL" domain="[('load_type', '=', 'ptl')]"/>
+                <filter name="ftl" string="FTL" domain="[('load_type', '=', 'ftl')]"/>
+                <filter name="booking_date" string="Booking Date" date="booking_date"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_billing" string="Billing Party" context="{'group_by': 'billing_partner_id'}"/>
+                    <filter name="group_hub" string="Current Hub" context="{'group_by': 'current_hub_id'}"/>
+                    <filter name="group_to" string="Destination" context="{'group_by': 'to_location_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_cp_consignment_pivot" model="ir.ui.view">
+        <field name="name">cp.consignment.pivot</field>
+        <field name="model">cp.consignment</field>
+        <field name="arch" type="xml">
+            <pivot string="Consignment Analysis">
+                <field name="billing_partner_id" type="row"/>
+                <field name="booking_date" interval="month" type="col"/>
+                <field name="total_amount" type="measure"/>
+                <field name="actual_weight_kg" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_cp_consignment" model="ir.actions.act_window">
+        <field name="name">Bookings (LR)</field>
+        <field name="res_model">cp.consignment</field>
+        <field name="view_mode">list,kanban,form,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Book your first consignment note</p>
+            <p>Record consignor, consignee, goods and freight. Invoice many LRs of the same party in one click.</p>
+        </field>
+    </record>
+
+    <record id="action_cp_hub_stock" model="ir.actions.act_window">
+        <field name="name">Hub Stock</field>
+        <field name="res_model">cp.consignment</field>
+        <field name="view_mode">list,kanban,pivot,form</field>
+        <field name="domain">[('state', 'in', ('booked', 'at_hub')), ('current_hub_id', '!=', False)]</field>
+        <field name="context">{'search_default_group_hub': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No goods waiting at any hub</p>
+        </field>
+    </record>
+
+    <record id="action_cp_consignment_invoice" model="ir.actions.server">
+        <field name="name">Create Freight Invoice</field>
+        <field name="model_id" ref="model_cp_consignment"/>
+        <field name="binding_model_id" ref="model_cp_consignment"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="group_ids" eval="[(4, ref('cargo_pilot_tms.group_cp_manager'))]"/>
+        <field name="code">action = records.action_create_invoice()</field>
+    </record>
+
+    <!-- Quick entry -->
+    <record id="view_cp_consignment_quick_form" model="ir.ui.view">
+        <field name="name">cp.consignment.quick.form</field>
+        <field name="model">cp.consignment.quick</field>
+        <field name="arch" type="xml">
+            <form string="Quick LR">
+                <p class="text-muted">Type the booking in one line. Example: <em>LR for Acme Steel, 10 tons of steel coils, 12 packages, from Raipur Plant to Chennai Hub, rate 2200 per ton</em></p>
+                <field name="instruction" placeholder="Describe the booking..." nolabel="1"/>
+                <div invisible="not parsed">
+                    <div class="alert alert-info mt-2" role="status"><field name="parse_notes"/></div>
+                    <group>
+                        <group>
+                            <field name="billing_partner_id"/>
+                            <field name="consignee_id"/>
+                            <field name="from_location_id"/>
+                            <field name="to_location_id"/>
+                        </group>
+                        <group>
+                            <field name="material"/>
+                            <field name="packages"/>
+                            <field name="weight_kg"/>
+                            <field name="freight_basis"/>
+                            <field name="freight_rate"/>
+                        </group>
+                    </group>
+                </div>
+                <field name="parsed" invisible="1"/>
+                <footer>
+                    <button name="action_parse" string="Read Booking" type="object" class="btn-primary" invisible="parsed"/>
+                    <button name="action_parse" string="Read Again" type="object" invisible="not parsed"/>
+                    <button name="action_create" string="Create LR" type="object" class="btn-primary" invisible="not parsed"/>
+                    <button string="Discard" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cp_consignment_quick" model="ir.actions.act_window">
+        <field name="name">Quick LR</field>
+        <field name="res_model">cp.consignment.quick</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

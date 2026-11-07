@@ -255,6 +255,47 @@ class TestTallyPull(TallyCommon):
         self.assertEqual(stage.state, 'done', stage.message)
         self.assertIn('1 of 1', wiz.summary)
 
+    def test_17_tax_match_prefers_regular_over_reverse_charge(self):
+        Tax = self.env['account.tax']
+        acc = self.company_data['default_account_tax_sale'][:1] or \
+            self.company_data['default_account_revenue']
+        rep = [(0, 0, {'repartition_type': 'base'}),
+               (0, 0, {'repartition_type': 'tax', 'account_id': acc.id})]
+        rc_c = Tax.create({'name': '9% CGST RC', 'amount': 9, 'type_tax_use': 'none', 'sequence': 1,
+                           'invoice_repartition_line_ids': rep, 'refund_repartition_line_ids': rep})
+        rc_s = Tax.create({'name': '9% SGST RC', 'amount': 9, 'type_tax_use': 'none', 'sequence': 1,
+                           'invoice_repartition_line_ids': rep, 'refund_repartition_line_ids': rep})
+        Tax.create({'name': '18% GST RC', 'amount_type': 'group', 'type_tax_use': 'sale',
+                    'sequence': 1, 'children_tax_ids': [(6, 0, (rc_c | rc_s).ids)]})
+        self.sim.add_ledger('Output CGST RC 9%', 'Duties & Taxes', tax_type='GST',
+                            duty_head='Central Tax', rate='9')
+        self._pull()
+        self.assertEqual(self._map('tax', 'Output CGST 9%').tax_id, self.cgst_s)
+        self.assertEqual(self._map('tax', 'Output CGST RC 9%').tax_id, rc_c)
+        self.assertEqual(self._map('item', 'Hex Bolt M12').product_id.taxes_id, self.gst18_s)
+
+    def test_18_no_false_conflict_after_odoo_activity(self):
+        """Odoo-created party re-read from Tally after more postings must not conflict."""
+        partner = self.env['res.partner'].create({
+            'name': 'Apex Infra Projects', 'is_company': True, 'state_id': self.telangana.id,
+            'country_id': self.india.id, 'vat': make_gstin('36', 'AAKCA7531R')})
+        self.make_invoice(partner=partner)
+        self.run_queue()
+        self.make_invoice(partner=partner, qty=1)   # bumps customer_rank / write_date
+        self.run_queue()
+        self._pull()
+        m = self.env['tally.mapping']._find(self.conn, 'party', record=partner)
+        self.assertEqual(m.state, 'confirmed', m.conflict_data)
+        # a real change on both sides is still a conflict
+        partner.email = 'odoo@apex.in'
+        led = self.sim.company.ledgers[m.tally_name]
+        led['email'] = 'tally@apex.in'
+        self.sim.company.touch(led)
+        self._pull()
+        self.assertEqual(m.state, 'conflict')
+        m.action_resolve_keep_tally()
+        self.assertEqual(partner.email, 'tally@apex.in')
+
     def test_16_same_pan_other_state_suggested(self):
         self.sim.add_ledger('Sri Lakshmi Traders (AP)', 'Sundry Debtors',
                             gstin=make_gstin('37', 'AAACZ1234F'), state='Andhra Pradesh')

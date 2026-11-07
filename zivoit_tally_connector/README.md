@@ -8,7 +8,7 @@ Agent and an AI layer. Built by Zivo IT Technologies (official Odoo partner).
 | Odoo | 19.0 Community & Enterprise · Odoo Online (via agent) · Odoo.sh · On-premise |
 | Tally | TallyPrime 1.x – 7.x (incl. 7.2, Oct 2026) and Tally.ERP 9 (legacy schema option) |
 | Depends | `account`, `product`, `uom`, `mail`, `stock` — no extra Python packages |
-| Tests | 75 automated tests against a TallyPrime protocol simulator, plus a live agent E2E run |
+| Tests | 77 automated tests against a TallyPrime protocol simulator, plus a live agent E2E run |
 | Packaging | One module folder (`zivoit_tally_connector`) — ready for the Odoo App Store |
 
 ## What it syncs
@@ -120,3 +120,8 @@ odoo-bin -d testdb -i zivoit_tally_connector --test-tags /zivoit_tally_connector
   transfer left for manual validation (flagged on the voucher).
 * Validated against a protocol simulator and real-format fixtures; run a pilot on a
   copy of a live Tally company before go-live.
+
+## Support
+
+Zivo IT Technologies · Official Odoo Partner · Cherlapally, Hyderabad, India
+Email: info@zivoit.com · Website: www.zivoit.com

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_cp" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.cargo.pilot</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Cargo Pilot TMS" string="Cargo Pilot TMS" name="cargo_pilot_tms"
+                     groups="cargo_pilot_tms.group_cp_manager">
+                    <block title="Booking &amp; Transporters" name="cp_booking">
+                        <setting string="Transporters accept bookings" help="Each booking is offered to the transporter, who accepts or declines before the deadline. No reply or a decline passes it to the next contracted transporter.">
+                            <field name="cp_require_acceptance"/>
+                            <div class="mt-2" invisible="not cp_require_acceptance">
+                                <label for="cp_acceptance_hours" string="Hours to reply"/>
+                                <field name="cp_acceptance_hours" class="o_light_label ms-2" style="width: 5rem;"/>
+                            </div>
+                        </setting>
+                        <setting string="Bid when everyone declines" help="Open the load for spot bidding when no contracted transporter accepts.">
+                            <field name="cp_auction_on_decline"/>
+                        </setting>
+                        <setting string="Placement grace (hours)" help="A truck reported within this time after the planned placement counts as on time in the scorecard.">
+                            <field name="cp_placement_grace_hours"/>
+                        </setting>
+                        <setting string="Scorecard period (days)" help="Transporter scorecards look at this many days of history.">
+                            <field name="cp_scorecard_days"/>
+                        </setting>
+                    </block>
+                    <block title="Spot Auctions" name="cp_auctions">
+                        <setting string="Default duration" help="How long a new auction stays open, in minutes.">
+                            <field name="cp_auction_default_duration"/>
+                        </setting>
+                        <setting string="Anti-sniping extension" help="A bid in the last N minutes extends the auction by N minutes.">
+                            <field name="cp_auction_extension_minutes"/>
+                        </setting>
+                    </block>
+                    <block title="Freight Audit" name="cp_audit">
+                        <setting string="Distance tolerance (%)" help="Billed km above GPS km by more than this are deducted.">
+                            <field name="cp_audit_distance_tolerance"/>
+                        </setting>
+                        <setting string="Weight tolerance (%)" help="Allowed gap between billed, loaded and delivered weight.">
+                            <field name="cp_audit_weight_tolerance"/>
+                        </setting>
+                    </block>
+                    <block title="Tracking &amp; ePOD" name="cp_tracking">
+                        <setting string="Planning speed (km/h)" help="Used for ETA when the GPS speed is unknown.">
+                            <field name="cp_default_speed_kmph"/>
+                        </setting>
+                        <setting string="Stoppage alert (hours)" help="Raise an alert when a vehicle in transit has not moved for this long.">
+                            <field name="cp_stoppage_alert_hours"/>
+                        </setting>
+                        <setting string="ePOD geofence (m)" help="An ePOD captured farther than this from the destination is an exception.">
+                            <field name="cp_epod_geofence_m"/>
+                        </setting>
+                    </block>
+                    <block title="Fleet" name="cp_fleet">
+                        <setting string="Document alert (days)" help="Warn this many days before a vehicle or driver document expires.">
+                            <field name="cp_document_alert_days"/>
+                        </setting>
+                        <setting string="Fuel anomaly threshold (%)" help="Flag fills whose mileage falls this far below the vehicle benchmark.">
+                            <field name="cp_fuel_anomaly_percent"/>
+                        </setting>
+                    </block>
+                    <block title="Integrations" name="cp_api">
+                        <setting string="API key" help="Send it as the X-CP-API-Key header to /cp/api/v1/* and /cp/api/v2/* endpoints. API reference: /cp/api/v2/openapi.json">
+                            <field name="cp_api_key" password="True"/>
+                            <button name="action_cp_generate_api_key" type="object" string="Generate New Key"
+                                    class="btn-link" icon="fa-key"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_cp_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'cargo_pilot_tms', 'bin_size': False}</field>
+    </record>
+</odoo>

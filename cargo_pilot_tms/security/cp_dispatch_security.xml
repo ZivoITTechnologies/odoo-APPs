@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_cp_dispatch" model="res.groups.privilege">
+        <field name="name">Cargo Pilot Dispatch Roles</field>
+        <field name="sequence">41</field>
+        <field name="category_id" ref="cargo_pilot_tms.module_category_cargo_pilot"/>
+    </record>
+    <record id="group_dispatch_sales" model="res.groups">
+        <field name="name">Sales Coordinator</field>
+        <field name="sequence">5</field>
+        <field name="privilege_id" ref="res_groups_privilege_cp_dispatch"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Creates dispatch plans and follows them; no access to bids, gate or detention.</field>
+    </record>
+    <record id="group_dispatch_gate" model="res.groups">
+        <field name="name">Gate Security</field>
+        <field name="sequence">6</field>
+        <field name="privilege_id" ref="res_groups_privilege_cp_dispatch"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Logs gate-in, inspection, loading and gate-out times.</field>
+    </record>
+    <record id="group_dispatch_ops_head" model="res.groups">
+        <field name="name">Plant Operations Head</field>
+        <field name="sequence">7</field>
+        <field name="privilege_id" ref="res_groups_privilege_cp_dispatch"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Gives the second approval on detention claims.</field>
+    </record>
+
+    <record id="rule_cp_dispatch_plan_company" model="ir.rule">
+        <field name="name">Dispatch plans: own companies</field>
+        <field name="model_id" ref="model_cp_dispatch_plan"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_carrier_check_company" model="ir.rule">
+        <field name="name">Carrier checks: own companies</field>
+        <field name="model_id" ref="model_cp_carrier_check_log"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_detention_company" model="ir.rule">
+        <field name="name">Detention: own companies</field>
+        <field name="model_id" ref="model_cp_detention_record"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_dispatch_pod_company" model="ir.rule">
+        <field name="name">POD: own companies</field>
+        <field name="model_id" ref="model_cp_dispatch_pod"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

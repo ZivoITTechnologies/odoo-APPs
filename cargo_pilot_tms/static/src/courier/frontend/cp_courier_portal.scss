@@ -1,0 +1,52 @@
+// Cargo Pilot Courier - public parcel tracking page
+.cp-ptrack {
+    .cp-psteps {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+    }
+    .cp-pstep {
+        flex: 1 1 0;
+        text-align: center;
+        position: relative;
+        font-size: 0.82rem;
+        &::before {
+            content: "";
+            position: absolute;
+            top: 17px;
+            left: -50%;
+            width: 100%;
+            height: 3px;
+            background: #e2e6ea;
+            z-index: 0;
+        }
+        &:first-child::before { display: none; }
+        &.cp-pstep-done::before, &.cp-pstep-current::before, &.cp-pstep-late::before { background: #2e7d6b; }
+    }
+    .cp-pstep-dot {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #e2e6ea;
+        color: #9aa4ad;
+    }
+    .cp-pstep-label { display: block; margin-top: 6px; font-weight: 600; color: #9aa4ad; }
+    .cp-pstep-done .cp-pstep-dot { background: #2e7d6b; border-color: #2e7d6b; color: #fff; }
+    .cp-pstep-done .cp-pstep-label, .cp-pstep-current .cp-pstep-label { color: #1f2a33; }
+    .cp-pstep-current .cp-pstep-dot { border-color: #2e7d6b; color: #2e7d6b; box-shadow: 0 0 0 5px rgba(46, 125, 107, 0.15); }
+    .cp-pstep-late .cp-pstep-dot { border-color: #c9783b; color: #c9783b; box-shadow: 0 0 0 5px rgba(201, 120, 59, 0.15); }
+    .cp-pstep-late .cp-pstep-label { color: #c9783b; }
+}
+@media (max-width: 575.98px) {
+    .cp-ptrack .cp-pstep { font-size: 0.7rem; }
+    .cp-ptrack .cp-pstep-dot { width: 30px; height: 30px; }
+    .cp-ptrack .cp-pstep::before { top: 14px; }
+}

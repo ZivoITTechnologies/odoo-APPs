@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <function model="cp.easyecom.demo" name="_cp_load_demo"/>
+</odoo>

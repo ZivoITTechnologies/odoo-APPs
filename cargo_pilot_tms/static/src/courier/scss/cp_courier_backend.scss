@@ -1,0 +1,90 @@
+// Cargo Pilot Courier - backend
+$cpc-teal: #2e7d6b;
+$cpc-amber: #c9783b;
+$cpc-red: #b5525b;
+$cpc-muted: #5c6873;
+
+// Neutral initials badge per courier account (no third-party logos)
+.cp-courier-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    color: #fff;
+    background: #5c6873;
+    &.cp-courier-sm { width: 22px; height: 22px; border-radius: 6px; font-size: 0.65rem; }
+    &.cp-courier-delhivery { background: #4a4f57; }
+    &.cp-courier-bluedart { background: #2f5d9b; }
+    &.cp-courier-dtdc { background: #a3423f; }
+    &.cp-courier-shiprocket { background: #6a4fb3; }
+    &.cp-courier-xpressbees { background: #c9783b; }
+    &.cp-courier-clickpost { background: #2b8a9a; }
+    &.cp-courier-manual { background: #7a6a4f; }
+    &.cp-courier-demo { background: $cpc-teal; }
+}
+.cp-chip.cp-chip-green { background: $cpc-teal; }
+
+.o_kanban_view.cp-courier-kanban .o_kanban_record { min-height: 128px; }
+
+.o_form_view .cp-help.cp-help-warn {
+    background: #fdf1e7;
+    border-color: #f1d3b8;
+    i { color: $cpc-amber; }
+}
+
+.o_field_cp_parcel_stepper { display: block; width: 100%; }
+.cp-parcel-stepper .cp-step { flex: 1 1 20%; }
+
+.o_form_view .cp-weightbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    padding: 8px 12px;
+    margin: 8px 0 12px;
+    background: #f6f8f9;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: $cpc-muted;
+    b { color: #1f2a33; }
+}
+
+// Rate comparison
+.cp-rate-wizard {
+    .cp-rate-options .o_data_row.o_row_bf, .cp-rate-options tr.fw-bold { background: #eef6f3; }
+    .cp-courier-initials .badge { background: #5c6873 !important; color: #fff !important; min-width: 30px; }
+}
+
+// Today: courier strip
+.cp-ct-parcels { margin-bottom: 16px; }
+.cp-ct-pstrip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+}
+.cp-ct-pchip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    border: 1px solid var(--cp-line, #e2e6ea);
+    background: #f8faf9;
+    border-radius: 12px;
+    padding: 8px 12px;
+    transition: transform 0.12s ease;
+    &:hover { transform: translateY(-1px); }
+    b { font-size: 1.3rem; line-height: 1.2; }
+    span { font-size: 0.78rem; color: $cpc-muted; }
+    &.cp-ct-pchip-red { background: #fbeef0; border-color: #f0cdd2; b { color: $cpc-red; } }
+    &.cp-ct-pchip-amber { background: #fdf3ea; border-color: #f1d8c0; b { color: $cpc-amber; } }
+}
+
+@media (max-width: 767.98px) {
+    .cp-ct-pstrip { grid-template-columns: repeat(2, 1fr); }
+    .cp-parcel-stepper .cp-step { flex: 0 0 33.33%; }
+}

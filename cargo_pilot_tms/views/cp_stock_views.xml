@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Deliveries -->
+    <record id="view_picking_form_cp" model="ir.ui.view">
+        <field name="name">stock.picking.form.cargo.pilot</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_cp_open_plan_wizard" string="Plan Truck" type="object" icon="fa-truck"
+                        invisible="state in ('done', 'cancel') or cp_indent_id or picking_type_code == 'incoming'"
+                        groups="cargo_pilot_tms.group_cp_user"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_cp_view_trip" type="object" class="oe_stat_button" icon="fa-truck"
+                        invisible="not cp_trip_id" groups="cargo_pilot_tms.group_cp_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value"><field name="cp_trip_state" readonly="1"/></span>
+                        <span class="o_stat_text">Shipment</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="cp_channel" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_indent_id" invisible="not cp_indent_id" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_trip_id" invisible="not cp_trip_id" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_freight_cost" invisible="not cp_trip_id" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_currency_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="vpicktree_cp" model="ir.ui.view">
+        <field name="name">stock.picking.list.cargo.pilot</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_cp_open_plan_wizard" type="object" string="Plan Truck"
+                        groups="cargo_pilot_tms.group_cp_user"/>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="cp_trip_id" optional="show" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_trip_state" optional="hide" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_freight_cost" optional="hide" sum="Total" groups="cargo_pilot_tms.group_cp_user"/>
+                <field name="cp_currency_id" column_invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_cp_picking_plan_wizard_form" model="ir.ui.view">
+        <field name="name">cp.picking.plan.wizard.form</field>
+        <field name="model">cp.picking.plan.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="cp-stat-row">
+                    <div class="cp-stat"><span>Deliveries</span><field name="picking_count"/></div>
+                    <div class="cp-stat"><span>Weight (kg)</span><field name="total_weight_kg"/></div>
+                    <div class="cp-stat"><span>Serial numbers</span><field name="serial_count"/></div>
+                </div>
+                <group>
+                    <field name="shipment_mode" widget="radio" options="{'horizontal': true}"/>
+                    <field name="vehicle_type_id" invisible="shipment_mode != 'ftl'" required="shipment_mode == 'ftl'"/>
+                </group>
+                <div class="text-muted small">Deliveries from the same warehouse to the same address and channel share one
+                    load request. Serial numbers travel with the shipment and are checked on the proof of delivery.</div>
+                <field name="picking_ids" invisible="1"/>
+                <footer>
+                    <button name="action_plan" string="Create Load Requests" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cp_picking_to_plan" model="ir.actions.act_window">
+        <field name="name">Deliveries to Plan</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('picking_type_code', 'in', ('outgoing', 'internal')), ('state', 'not in', ('done', 'cancel', 'draft'))]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No deliveries waiting for a truck</p>
+            <p>Select deliveries and press Plan Truck to group them into FTL or LTL load requests.</p>
+        </field>
+    </record>
+
+    <!-- Load request and shipment lines: pick undelivered sales orders -->
+    <record id="view_cp_indent_form_stock" model="ir.ui.view">
+        <field name="name">cp.indent.form.stock</field>
+        <field name="model">cp.indent</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_indent_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='line_ids']/list/field[@name='order_ref']" position="before">
+                <field name="company_id" column_invisible="1"/>
+                <field name="sale_order_id" string="Order No." options="{'no_create': True}"/>
+                <field name="picking_id" optional="hide" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/list/field[@name='order_ref']" position="attributes">
+                <attribute name="string">Order Ref.</attribute>
+                <attribute name="optional">show</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_cp_trip_form_stock_orders" model="ir.ui.view">
+        <field name="name">cp.trip.form.stock.orders</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_trip_form_ext"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_ids']/list/field[@name='order_ref']" position="before">
+                <field name="company_id" column_invisible="1"/>
+                <field name="sale_order_id" string="Order No." options="{'no_create': True}"/>
+            </xpath>
+            <xpath expr="//field[@name='order_ids']/list/field[@name='order_ref']" position="attributes">
+                <attribute name="string">Order Ref.</attribute>
+                <attribute name="optional">show</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Shipment: deliveries -->
+    <record id="view_cp_trip_form_stock" model="ir.ui.view">
+        <field name="name">cp.trip.form.stock</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_trip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_cp_view_pickings" type="object" class="oe_stat_button" icon="fa-cubes"
+                        invisible="picking_count == 0">
+                    <field name="picking_count" widget="statinfo" string="Deliveries"/>
+                </button>
+            </xpath>
+            <xpath expr="//header/button[@name='action_reset_draft']" position="after">
+                <button name="action_cp_validate_pickings" string="Validate Deliveries" type="object"
+                        invisible="picking_count == 0 or state not in ('delivered', 'closed')"
+                        confirm="Validate the stock deliveries of this shipment?"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sales: freight and margin after freight -->
+    <record id="view_order_form_cp" model="ir.ui.view">
+        <field name="name">sale.order.form.cargo.pilot</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_margin.sale_margin_sale_order"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='margin']/../.." position="after">
+                <div class="d-flex float-end" colspan="2" invisible="cp_freight_cost == 0">
+                    <label for="cp_freight_cost" string="Freight"/>
+                    <div><field name="cp_freight_cost" class="oe_inline"/></div>
+                </div>
+                <div class="d-flex float-end fw-bold" colspan="2" invisible="cp_freight_cost == 0">
+                    <label for="cp_margin_after_freight"/>
+                    <div>
+                        <field name="cp_margin_after_freight" class="oe_inline"
+                               decoration-danger="cp_margin_after_freight &lt; 0"/>
+                        <span class="oe_inline"> (<field name="cp_margin_after_freight_pct" nolabel="1" class="oe_inline"
+                                                         digits="[16, 1]"/> %)</span>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_order_form_cp_channel" model="ir.ui.view">
+        <field name="name">sale.order.form.cargo.pilot.channel</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_cp_view_shipments" type="object" class="oe_stat_button" icon="fa-truck"
+                        invisible="cp_shipment_count == 0" groups="cargo_pilot_tms.group_cp_user">
+                    <field name="cp_shipment_count" widget="statinfo" string="Shipments"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="cp_channel"/>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_cp_allocate_warehouse" string="Choose Warehouse" type="object"
+                        invisible="state not in ('draft', 'sent')" groups="stock.group_stock_multi_warehouses"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_order_tree_cp" model="ir.ui.view">
+        <field name="name">sale.order.list.cargo.pilot</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount_total']" position="after">
+                <field name="cp_channel" optional="hide"/>
+                <field name="cp_freight_cost" optional="show" sum="Total"/>
+                <field name="cp_margin_after_freight" optional="show" sum="Total"/>
+                <field name="cp_margin_after_freight_pct" optional="hide" string="Margin after Freight %"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_cp_sale_margin_pivot" model="ir.ui.view">
+        <field name="name">sale.order.cp.margin.pivot</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Order Margin after Freight" sample="1">
+                <field name="cp_channel" type="row"/>
+                <field name="date_order" interval="month" type="col"/>
+                <field name="amount_untaxed" type="measure"/>
+                <field name="margin" type="measure"/>
+                <field name="cp_freight_cost" type="measure"/>
+                <field name="cp_margin_after_freight" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_cp_sale_margin_graph" model="ir.ui.view">
+        <field name="name">sale.order.cp.margin.graph</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <graph string="Margin after Freight" type="bar" sample="1">
+                <field name="cp_channel"/>
+                <field name="cp_margin_after_freight" type="measure"/>
+                <field name="cp_freight_cost" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="action_cp_sale_margin" model="ir.actions.act_window">
+        <field name="name">Margin after Freight</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="domain">[('state', '=', 'sale')]</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_cp_sale_margin_pivot')}),
+                                      (0, 0, {'view_mode': 'graph', 'view_id': ref('view_cp_sale_margin_graph')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No confirmed sales orders yet</p>
+            <p>Each order's margin minus the freight it carried, by channel and month.</p>
+        </field>
+    </record>
+
+    <!-- Warehouse rules -->
+    <record id="view_cp_allocation_rule_list" model="ir.ui.view">
+        <field name="name">cp.allocation.rule.list</field>
+        <field name="model">cp.allocation.rule</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="state_ids" widget="many2many_tags"/>
+                <field name="channel"/>
+                <field name="partner_ids" widget="many2many_tags" optional="hide"/>
+                <field name="warehouse_id"/>
+                <field name="check_stock"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_cp_allocation_rule" model="ir.actions.act_window">
+        <field name="name">Warehouse Rules</field>
+        <field name="res_model">cp.allocation.rule</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Choose the shipping warehouse automatically</p>
+            <p>For example: orders to Telangana and Andhra Pradesh ship from Hyderabad when it has stock, otherwise from Raipur.</p>
+        </field>
+    </record>
+
+    <!-- Stock 360 -->
+    <record id="view_cp_stock_position_pivot" model="ir.ui.view">
+        <field name="name">cp.stock.position.pivot</field>
+        <field name="model">cp.stock.position</field>
+        <field name="arch" type="xml">
+            <pivot string="Stock 360" sample="1">
+                <field name="product_name" type="row"/>
+                <field name="bucket" type="col"/>
+                <field name="quantity" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_cp_stock_position_list" model="ir.ui.view">
+        <field name="name">cp.stock.position.list</field>
+        <field name="model">cp.stock.position</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <header>
+                    <button name="action_refresh" string="Refresh" type="object" display="always" class="btn-primary"/>
+                </header>
+                <field name="sku"/>
+                <field name="product_name"/>
+                <field name="bucket" widget="badge" decoration-info="bucket == 'incoming'" decoration-success="bucket == 'warehouse'"
+                       decoration-warning="bucket == 'transit'" decoration-primary="bucket == 'channel'"/>
+                <field name="place"/>
+                <field name="quantity" sum="Total"/>
+                <field name="value" sum="Total" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="refreshed_at" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_stock_position_search" model="ir.ui.view">
+        <field name="name">cp.stock.position.search</field>
+        <field name="model">cp.stock.position</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_name"/>
+                <field name="sku"/>
+                <field name="place"/>
+                <filter name="warehouse" string="In Warehouse" domain="[('bucket', '=', 'warehouse')]"/>
+                <filter name="transit" string="On Trucks" domain="[('bucket', '=', 'transit')]"/>
+                <filter name="channel" string="At Channels" domain="[('bucket', '=', 'channel')]"/>
+                <filter name="incoming" string="Incoming" domain="[('bucket', '=', 'incoming')]"/>
+                <group>
+                    <filter name="by_bucket" string="Where" context="{'group_by': 'bucket'}"/>
+                    <filter name="by_place" string="Place" context="{'group_by': 'place'}"/>
+                    <filter name="by_categ" string="Category" context="{'group_by': 'categ_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_stock_position" model="ir.actions.act_window">
+        <field name="name">Stock 360</field>
+        <field name="res_model">cp.stock.position</field>
+        <field name="view_mode">pivot,list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Press Refresh to build Stock 360</p>
+            <p>Incoming from suppliers, on hand in each warehouse, on trucks and at every sales channel, in one place.</p>
+        </field>
+    </record>
+
+    <record id="res_config_settings_view_form_cp_stock" model="ir.ui.view">
+        <field name="name">res.config.settings.cp.stock</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.res_config_settings_view_form_cp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='cp_booking']" position="inside">
+                <setting string="Choose the warehouse on sales orders" help="Use the warehouse rules when a sales order is confirmed.">
+                    <field name="cp_auto_allocate_warehouse"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_warehouse_form_cp" model="ir.ui.view">
+        <field name="name">stock.warehouse.form.cp</field>
+        <field name="model">stock.warehouse</field>
+        <field name="inherit_id" ref="stock.view_warehouse"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']" position="after">
+                <field name="cp_location_id" groups="cargo_pilot_tms.group_cp_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="menu_cp_inventory" name="Inventory" parent="cargo_pilot_tms.menu_cp_root" sequence="35"/>
+    <menuitem id="menu_cp_stock_position" name="Stock 360" parent="menu_cp_inventory" action="action_cp_stock_position" sequence="1"/>
+    <menuitem id="menu_cp_deliveries" name="Deliveries to Plan" parent="menu_cp_inventory" action="action_cp_picking_to_plan" sequence="2"/>
+    <menuitem id="menu_cp_sale_margin" name="Margin after Freight" parent="menu_cp_inventory" action="action_cp_sale_margin" sequence="3"/>
+    <menuitem id="menu_cp_allocation_rule" name="Warehouse Rules" parent="menu_cp_inventory" action="action_cp_allocation_rule" sequence="4"/>
+</odoo>

@@ -77,6 +77,10 @@ class EpcBidPackage(models.Model):
             if not package.line_ids:
                 raise UserError(_("Add the items being bought before evaluating."))
             bids._compute_totals()
+            # make sure every bidder has a learned (or prior) supplier risk score before scoring
+            unscored = bids.mapped("vendor_id").filtered(lambda v: not v.commercial_partner_id.epc_supplier_risk_date)
+            if unscored:
+                self.env["epc.prediction.engine"]._update_supplier_scores(unscored)
             today = fields.Date.context_today(self)
             acceptable = bids.filtered(lambda b: b.technically_acceptable and b.technical_compliance >= package.min_technical
                                        and b.total_price > 0)

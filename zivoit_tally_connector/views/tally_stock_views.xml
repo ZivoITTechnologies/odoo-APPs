@@ -21,8 +21,8 @@
         <field name="model">tally.mapping</field>
         <field name="inherit_id" ref="zivoit_tally_connector.view_tally_mapping_list"/>
         <field name="arch" type="xml">
-            <field name="uom_id" position="after">
-                <field name="location_id" invisible="kind != 'godown'"/>
+            <field name="product_id" position="after">
+                <field name="location_id" optional="hide"/>
             </field>
         </field>
     </record>

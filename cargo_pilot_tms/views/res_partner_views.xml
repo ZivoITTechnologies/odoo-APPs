@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_cp" model="ir.ui.view">
+        <field name="name">res.partner.form.cargo.pilot</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_cp_view_trips" type="object" class="oe_stat_button" icon="fa-truck"
+                        invisible="not cp_is_transporter" groups="cargo_pilot_tms.group_cp_user">
+                    <field name="cp_trip_count" widget="statinfo" string="Trips"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Transport" name="cp_transport" groups="cargo_pilot_tms.group_cp_user">
+                    <group>
+                        <group string="Roles">
+                            <field name="cp_is_transporter"/>
+                            <field name="cp_is_vehicle_owner"/>
+                            <field name="cp_is_driver"/>
+                        </group>
+                        <group string="Transporter" invisible="not cp_is_transporter">
+                            <field name="cp_transporter_code"/>
+                            <field name="cp_vehicle_type_ids" widget="many2many_tags"/>
+                            <field name="cp_lane_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Scorecard" invisible="not cp_is_transporter">
+                            <field name="cp_score_grade" widget="badge" decoration-success="cp_score_grade == 'a'"
+                                   decoration-info="cp_score_grade == 'b'" decoration-warning="cp_score_grade == 'c'"
+                                   decoration-danger="cp_score_grade == 'd'"/>
+                            <field name="cp_score" widget="progressbar"/>
+                            <field name="cp_acceptance_rate" widget="progressbar"/>
+                            <field name="cp_placement_rate" widget="progressbar"/>
+                            <field name="cp_on_time_rate" widget="progressbar"/>
+                            <field name="cp_damage_free_rate" widget="progressbar"/>
+                            <field name="cp_pod_on_time_rate" widget="progressbar"/>
+                            <field name="cp_billing_accuracy" widget="progressbar"/>
+                            <field name="cp_pod_tat_hours"/>
+                            <field name="cp_reply_minutes"/>
+                            <field name="cp_epod_compliance" widget="progressbar"/>
+                            <field name="cp_auction_win_count"/>
+                        </group>
+                        <group string="Driver" invisible="not cp_is_driver">
+                            <field name="cp_license_number"/>
+                            <field name="cp_license_expiry"/>
+                            <field name="cp_safety_score" widget="progressbar"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_cp_transporter_list" model="ir.ui.view">
+        <field name="name">res.partner.cp.transporter.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority">50</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="cp_transporter_code" optional="show"/>
+                <field name="city"/>
+                <field name="phone" optional="show"/>
+                <field name="email" optional="show"/>
+                <field name="cp_trip_count" string="Trips"/>
+                <field name="cp_acceptance_rate" widget="progressbar" string="Accepts" optional="show"/>
+                <field name="cp_placement_rate" widget="progressbar" string="Placement" optional="show"/>
+                <field name="cp_on_time_rate" widget="progressbar" string="On-time"/>
+                <field name="cp_damage_free_rate" widget="progressbar" string="Damage-free" optional="show"/>
+                <field name="cp_billing_accuracy" widget="progressbar" string="Billing" optional="hide"/>
+                <field name="cp_epod_compliance" widget="progressbar" string="ePOD" optional="hide"/>
+                <field name="cp_score" widget="progressbar" string="Score"/>
+                <field name="cp_score_grade" widget="badge" string="Grade"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_cp_transporter" model="ir.actions.act_window">
+        <field name="name">Transporters</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('cp_is_transporter', '=', True)]</field>
+        <field name="context">{'default_cp_is_transporter': True, 'default_is_company': True}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_partner_cp_transporter_list')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your transporters</p>
+            <p>Give them portal access so they can bid, update vehicles and upload ePODs themselves.</p>
+        </field>
+    </record>
+
+    <record id="view_partner_cp_driver_list" model="ir.ui.view">
+        <field name="name">res.partner.cp.driver.list</field>
+        <field name="model">res.partner</field>
+        <field name="priority">51</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="phone"/>
+                <field name="cp_license_number"/>
+                <field name="cp_license_expiry"/>
+                <field name="cp_safety_score" widget="progressbar" string="Safety"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_cp_driver" model="ir.actions.act_window">
+        <field name="name">Drivers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('cp_is_driver', '=', True)]</field>
+        <field name="context">{'default_cp_is_driver': True, 'default_is_company': False}</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_partner_cp_driver_list')})]"/>
+    </record>
+
+    <record id="action_cp_vehicle_owner" model="ir.actions.act_window">
+        <field name="name">Vehicle Owners &amp; Brokers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('cp_is_vehicle_owner', '=', True)]</field>
+        <field name="context">{'default_cp_is_vehicle_owner': True}</field>
+    </record>
+
+    <record id="view_partner_cp_scorecard_kanban" model="ir.ui.view">
+        <field name="name">res.partner.cp.scorecard.kanban</field>
+        <field name="model">res.partner</field>
+        <field name="priority">60</field>
+        <field name="arch" type="xml">
+            <kanban create="false" class="cp-scorecard-kanban" sample="1">
+                <field name="cp_score"/>
+                <field name="cp_score_grade"/>
+                <field name="cp_trip_count"/>
+                <field name="cp_offer_count"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard cp-scorecard">
+                        <div class="d-flex align-items-center gap-3">
+                            <div t-attf-class="cp-grade cp-grade-{{ record.cp_score_grade.raw_value }}">
+                                <t t-if="record.cp_score_grade.raw_value == 'new'">New</t>
+                                <t t-else=""><t t-esc="Math.round(record.cp_score.raw_value)"/></t>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <field name="name" class="fw-bold d-block text-truncate"/>
+                                <span class="cp-kcard-meta"><t t-esc="record.cp_trip_count.raw_value"/> trips, <t t-esc="record.cp_offer_count.raw_value"/> offers</span>
+                            </div>
+                        </div>
+                        <div class="cp-score-rows mt-2">
+                            <div><span>Accepts</span><field name="cp_acceptance_rate" widget="progressbar"/></div>
+                            <div><span>Placed on time</span><field name="cp_placement_rate" widget="progressbar"/></div>
+                            <div><span>Delivered on time</span><field name="cp_on_time_rate" widget="progressbar"/></div>
+                            <div><span>Damage-free</span><field name="cp_damage_free_rate" widget="progressbar"/></div>
+                            <div><span>POD in 48 h</span><field name="cp_pod_on_time_rate" widget="progressbar"/></div>
+                            <div><span>Billing accuracy</span><field name="cp_billing_accuracy" widget="progressbar"/></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="action_cp_scorecard" model="ir.actions.act_window">
+        <field name="name">Transporter Scorecard</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('cp_is_transporter', '=', True), ('is_company', '=', True)]</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_partner_cp_scorecard_kanban')}), (0, 0, {'view_mode': 'list', 'view_id': ref('view_partner_cp_transporter_list')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No transporters yet</p>
+            <p>Each transporter is scored on acceptance, placement, on-time delivery, damage, POD turnaround and billing accuracy.</p>
+        </field>
+    </record>
+</odoo>

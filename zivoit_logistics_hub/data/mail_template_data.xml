@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_shipment_status" model="mail.template">
+        <field name="name">Logistics Hub: Shipment status update</field>
+        <field name="model_id" ref="model_zivo_logistics_shipment"/>
+        <field name="subject">{{ object.company_id.name }}: your order {{ object.sale_id.name or object.name }} is {{ dict(object._fields['state']._description_selection(object.env)).get(object.state) }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="description">Sent to customers when a shipment is out for delivery, delivered or a delivery attempt failed</field>
+        <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-family:Arial,sans-serif;font-size:14px;color:#222">
+    <p>Hello <t t-out="object.partner_id.name or ''"/>,</p>
+    <p t-if="object.state == 'out_for_delivery'">Good news! Your order <b t-out="object.sale_id.name or object.name"/> is out for delivery today.</p>
+    <p t-elif="object.state == 'delivered'">Your order <b t-out="object.sale_id.name or object.name"/> has been delivered. Thank you for shopping with us!</p>
+    <p t-elif="object.state == 'ndr'"><t t-out="object.ndr_customer_message or ''"/></p>
+    <p t-else="">There is an update on your order <b t-out="object.sale_id.name or object.name"/>.</p>
+    <p>Courier: <t t-out="object.courier_name or object.account_id.name"/> · AWB <b t-out="object.tracking_number"/></p>
+    <p><a t-att-href="object.public_tracking_url" style="background:#1f6feb;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none">Track your shipment</a></p>
+    <p style="color:#888;font-size:12px">— <t t-out="object.company_id.name"/></p>
+</div>
+        </field>
+        <field name="auto_delete" eval="True"/>
+    </record>
+</odoo>

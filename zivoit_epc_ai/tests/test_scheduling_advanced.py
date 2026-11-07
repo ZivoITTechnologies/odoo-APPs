@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from odoo.exceptions import UserError
 from odoo.tests import tagged
@@ -106,3 +106,22 @@ class TestScheduleOptimizer(EpcCommon):
         self.assertFalse(wizard.line_ids)
         with self.assertRaises(UserError):
             wizard.action_apply()
+
+    def test_does_not_pay_for_start_critical_activity(self):
+        """X only drives Y through a start-to-start link: shortening X saves nothing, so it must not be crashed."""
+        Activity = self.env["epc.activity"]
+        x = Activity.create({"project_id": self.project.id, "code": "X", "name": "Erection", "duration": 10,
+                             "crash_duration": 5, "crash_cost_per_day": 10})
+        y = Activity.create({"project_id": self.project.id, "code": "Y", "name": "Stringing", "duration": 20,
+                             "crash_duration": 15, "crash_cost_per_day": 1000})
+        Link = self.env["epc.activity.link"]
+        Link.create({"predecessor_id": x.id, "successor_id": y.id, "link_type": "SS", "lag_days": 2})
+        Link.create({"predecessor_id": y.id, "successor_id": self.act_d.id, "link_type": "FS"})
+        self.project.action_epc_compute_schedule()
+        finish = self.act_d.planned_start
+        wizard = self.env["epc.schedule.optimizer"].create({
+            "project_id": self.project.id, "target_finish": finish - timedelta(days=3)})
+        wizard.action_optimise()
+        self.assertTrue(wizard.target_met)
+        self.assertEqual({l.activity_id.code: l.days_saved for l in wizard.line_ids}, {"Y": 2})
+        self.assertEqual(wizard.total_cost, 2000)

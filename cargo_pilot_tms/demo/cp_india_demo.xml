@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_gsp_simulator" model="cp.gsp.account">
+        <field name="name">E-way bill simulator</field>
+        <field name="provider">simulator</field>
+        <field name="gstin">27AAACC1234F1Z5</field>
+    </record>
+    <record id="demo_ulip_simulator" model="cp.ulip.account">
+        <field name="name">ULIP simulator</field>
+        <field name="provider">simulator</field>
+    </record>
+    <record id="demo_sim_simulator" model="cp.sim.provider">
+        <field name="name">SIM tracking simulator</field>
+        <field name="provider">simulator</field>
+    </record>
+    <record id="demo_whatsapp_simulator" model="cp.whatsapp.account">
+        <field name="name">WhatsApp simulator</field>
+        <field name="provider">simulator</field>
+        <field name="verify_token">cargo-pilot-demo</field>
+    </record>
+    <function model="cp.whatsapp.account" name="action_add_default_templates">
+        <value eval="[ref('demo_whatsapp_simulator')]"/>
+    </function>
+</odoo>

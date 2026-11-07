@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_qb" model="ir.ui.view">
+        <field name="name">res.partner.form.quickbooks</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_qb_view_mappings" type="object" class="oe_stat_button" icon="fa-refresh"
+                        groups="zivoit_quickbooks_connector.group_qb_user" invisible="qb_mapping_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">QuickBooks</span>
+                        <field name="qb_sync_state" readonly="1" class="o_stat_text"/>
+                    </div>
+                </button>
+                <button name="action_qb_export" type="object" class="oe_stat_button" icon="fa-cloud-upload"
+                        groups="zivoit_quickbooks_connector.group_qb_user" invisible="qb_mapping_count != 0 or parent_id">
+                    <span class="o_stat_text">Send to QuickBooks</span>
+                </button>
+                <field name="qb_mapping_count" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_partner_list_qb" model="ir.ui.view">
+        <field name="name">res.partner.list.quickbooks</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="qb_sync_state" optional="hide" groups="zivoit_quickbooks_connector.group_qb_user"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_server_partner_qb_export" model="ir.actions.server">
+        <field name="name">Send to QuickBooks</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="binding_model_id" ref="base.model_res_partner"/>
+        <field name="group_ids" eval="[(4, ref('zivoit_quickbooks_connector.group_qb_user'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_qb_export()</field>
+    </record>
+</odoo>

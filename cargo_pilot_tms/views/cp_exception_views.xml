@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_exception_kanban" model="ir.ui.view">
+        <field name="name">cp.exception.kanban</field>
+        <field name="model">cp.exception</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false" sample="1" records_draggable="1">
+                <field name="severity"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard p-0">
+                        <div t-attf-class="cp-sev-bar cp-sev-#{record.severity.raw_value} p-2 ps-3 h-100 d-flex flex-column">
+                        <div class="cp-kcard-top">
+                            <field name="name" class="cp-kcard-title"/>
+                            <span t-attf-class="cp-chip #{record.severity.raw_value == 'critical' ? 'cp-chip-dark' : record.severity.raw_value == 'high' ? 'cp-chip-red' : record.severity.raw_value == 'medium' ? 'cp-chip-amber' : 'cp-chip-grey'}">
+                                <field name="severity"/>
+                            </span>
+                        </div>
+                        <field name="issue_type" class="cp-kcard-meta"/>
+                        <div class="small mt-1 text-success" t-if="record.suggested_action.raw_value">
+                            <i class="fa fa-lightbulb-o" title="Suggestion"/> <field name="suggested_action"/>
+                        </div>
+                        <footer class="cp-kcard-meta">
+                            <field name="trip_id"/>
+                            <div class="ms-auto d-flex align-items-center gap-2">
+                                <field name="detected_at" widget="remaining_days" invisible="1"/>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </footer>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_exception_list" model="ir.ui.view">
+        <field name="name">cp.exception.list</field>
+        <field name="model">cp.exception</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="severity in ('critical', 'high') and state != 'resolved'"
+                  decoration-muted="state == 'resolved'">
+                <field name="detected_at"/>
+                <field name="name"/>
+                <field name="issue_type"/>
+                <field name="severity" widget="badge" decoration-danger="severity in ('critical', 'high')"
+                       decoration-warning="severity == 'medium'"/>
+                <field name="trip_id" optional="show"/>
+                <field name="transporter_id" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="response_minutes" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'resolved'"
+                       decoration-info="state == 'working'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_exception_form" model="ir.ui.view">
+        <field name="name">cp.exception.form</field>
+        <field name="model">cp.exception</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_take" string="I'll handle it" type="object" class="btn-primary"
+                            invisible="state != 'open'"/>
+                    <button name="action_resolve" string="Mark Resolved" type="object" class="btn-primary"
+                            invisible="state == 'resolved'"/>
+                    <button name="action_reopen" string="Reopen" type="object" invisible="state != 'resolved'"/>
+                    <button name="action_open_record" string="Open Related Record" type="object" icon="fa-external-link"/>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <field name="severity" widget="badge" decoration-danger="severity in ('critical', 'high')"
+                               decoration-warning="severity == 'medium'"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <div class="cp-help" invisible="not suggested_action">
+                        <i class="fa fa-lightbulb-o" title="Suggestion"/><strong>Suggested: </strong><field name="suggested_action" class="d-inline"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="issue_type"/>
+                            <field name="severity"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="record_ref"/>
+                        </group>
+                        <group>
+                            <field name="trip_id"/>
+                            <field name="vehicle_id"/>
+                            <field name="transporter_id"/>
+                            <field name="detected_at"/>
+                            <field name="resolved_at" invisible="not resolved_at"/>
+                            <field name="response_minutes" invisible="not resolved_at"/>
+                            <field name="auto_resolved" invisible="not auto_resolved"/>
+                        </group>
+                    </group>
+                    <field name="detail" placeholder="What happened" readonly="1" invisible="not detail"/>
+                    <separator string="Resolution"/>
+                    <field name="resolution" placeholder="What did you do about it?"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_exception_search" model="ir.ui.view">
+        <field name="name">cp.exception.search</field>
+        <field name="model">cp.exception</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="trip_id"/>
+                <field name="transporter_id"/>
+                <filter name="unresolved" string="Not Resolved" domain="[('state', '!=', 'resolved')]"/>
+                <filter name="mine" string="Mine" domain="[('user_id', '=', uid)]"/>
+                <filter name="urgent" string="Critical &amp; High" domain="[('severity', 'in', ('critical', 'high'))]"/>
+                <separator/>
+                <filter name="detected" string="Detected" date="detected_at"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'issue_type'}"/>
+                    <filter name="group_severity" string="Severity" context="{'group_by': 'severity'}"/>
+                    <filter name="group_owner" string="Owner" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_cp_exception_pivot" model="ir.ui.view">
+        <field name="name">cp.exception.pivot</field>
+        <field name="model">cp.exception</field>
+        <field name="arch" type="xml">
+            <pivot string="Issues">
+                <field name="issue_type" type="row"/>
+                <field name="severity" type="col"/>
+                <field name="response_minutes" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_cp_exception" model="ir.actions.act_window">
+        <field name="name">Issues</field>
+        <field name="res_model">cp.exception</field>
+        <field name="view_mode">kanban,list,form,pivot</field>
+        <field name="context">{'search_default_unresolved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">All clear</p>
+            <p>Late or stopped trucks, missing delivery proof, overcharged invoices, expiring documents and fuel anomalies land here automatically, with a suggested fix. Most close themselves once the cause goes away.</p>
+        </field>
+    </record>
+</odoo>

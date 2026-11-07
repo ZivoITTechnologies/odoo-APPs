@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cargo_pilot_tms.ParcelStepper">
+        <div class="cp-stepper cp-parcel-stepper" t-att-class="{'cp-stepper-cancel': cancelled}">
+            <t t-foreach="steps" t-as="s" t-key="s.key">
+                <div t-attf-class="cp-step cp-step-{{ s.status }}">
+                    <div class="cp-step-dot"><i t-attf-class="fa {{ s.status === 'done' ? 'fa-check' : (s.status === 'late' ? 'fa-exclamation' : s.icon) }}"/></div>
+                    <div class="cp-step-text">
+                        <div class="cp-step-label" t-esc="s.label"/>
+                        <div class="cp-step-time" t-if="s.time" t-esc="s.time"/>
+                        <div class="cp-step-time cp-step-late" t-if="s.flag" t-esc="s.flag"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

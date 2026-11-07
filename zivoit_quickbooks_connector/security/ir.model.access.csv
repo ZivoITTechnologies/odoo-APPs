@@ -1,0 +1,19 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_qb_connection_user,qb.connection user,model_qb_connection,group_qb_user,1,0,0,0
+access_qb_connection_manager,qb.connection manager,model_qb_connection,group_qb_manager,1,1,1,1
+access_qb_connection_token_manager,qb.connection.token manager,model_qb_connection_token,base.group_system,1,1,1,1
+access_qb_entity_config_user,qb.entity.config user,model_qb_entity_config,group_qb_user,1,0,0,0
+access_qb_entity_config_manager,qb.entity.config manager,model_qb_entity_config,group_qb_manager,1,1,1,1
+access_qb_mapping_internal,qb.mapping internal,model_qb_mapping,base.group_user,1,0,0,0
+access_qb_mapping_user,qb.mapping user,model_qb_mapping,group_qb_user,1,1,1,0
+access_qb_mapping_manager,qb.mapping manager,model_qb_mapping,group_qb_manager,1,1,1,1
+access_qb_sync_job_internal,qb.sync.job internal,model_qb_sync_job,base.group_user,1,1,1,0
+access_qb_sync_job_manager,qb.sync.job manager,model_qb_sync_job,group_qb_manager,1,1,1,1
+access_qb_sync_log_internal,qb.sync.log internal,model_qb_sync_log,base.group_user,1,0,1,0
+access_qb_sync_log_user,qb.sync.log user,model_qb_sync_log,group_qb_user,1,0,1,0
+access_qb_sync_log_manager,qb.sync.log manager,model_qb_sync_log,group_qb_manager,1,1,1,1
+access_qb_import_wizard,qb.import.wizard,model_qb_import_wizard,group_qb_manager,1,1,1,1
+access_qb_export_wizard,qb.export.wizard,model_qb_export_wizard,group_qb_manager,1,1,1,1
+access_qb_integrity_wizard,qb.integrity.wizard,model_qb_integrity_wizard,group_qb_user,1,1,1,1
+access_qb_integrity_line,qb.integrity.line,model_qb_integrity_line,group_qb_user,1,1,1,1
+access_qb_token_wizard,qb.token.wizard,model_qb_token_wizard,group_qb_manager,1,1,1,1

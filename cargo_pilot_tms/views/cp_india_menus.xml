@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_cp_india" name="India Integrations" parent="cargo_pilot_tms.menu_cp_config" sequence="40"/>
+    <menuitem id="menu_cp_gsp" name="E-way Bill (GSP)" parent="menu_cp_india" action="action_cp_gsp_account" sequence="1"/>
+    <menuitem id="menu_cp_ulip" name="ULIP: FASTag &amp; Vahan" parent="menu_cp_india" action="action_cp_ulip_account" sequence="2"/>
+    <menuitem id="menu_cp_sim" name="SIM Tracking" parent="menu_cp_india" action="action_cp_sim_provider" sequence="3"/>
+    <menuitem id="menu_cp_whatsapp" name="WhatsApp" parent="menu_cp_india" action="action_cp_whatsapp_account" sequence="4"/>
+    <menuitem id="menu_cp_vehicle_check" name="Vahan Checks" parent="menu_cp_india" action="action_cp_vehicle_check" sequence="10"/>
+    <menuitem id="menu_cp_whatsapp_message" name="WhatsApp Messages" parent="menu_cp_india" action="action_cp_whatsapp_message" sequence="11"/>
+    <menuitem id="menu_cp_integration_log" name="Request Log" parent="menu_cp_india" action="action_cp_integration_log" sequence="20"/>
+</odoo>

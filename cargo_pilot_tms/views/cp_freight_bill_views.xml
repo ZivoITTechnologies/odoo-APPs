@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_cp_freight_bill_kanban" model="ir.ui.view">
+        <field name="name">cp.freight.bill.kanban</field>
+        <field name="model">cp.freight.bill</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="state"/>
+                <field name="risk_level"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="cp-kcard-top">
+                            <field name="transporter_id" class="cp-kcard-title"/>
+                            <field name="state" widget="badge"/>
+                        </div>
+                        <div class="cp-kcard-meta">Invoice <field name="bill_number"/> · <field name="bill_date"/></div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Billed <field name="billed_total" widget="monetary"/></span>
+                            <span class="text-danger" t-if="record.deduction_total.raw_value">−<field name="deduction_total" widget="monetary"/></span>
+                        </div>
+                        <footer class="cp-kcard-meta">
+                            <span t-if="record.risk_level.raw_value == 'high'" class="cp-chip cp-chip-red">High risk</span>
+                            <span t-elif="record.risk_level.raw_value == 'medium'" class="cp-chip cp-chip-amber">Medium risk</span>
+                            <span t-elif="record.risk_level.raw_value == 'low'" class="cp-chip">Clean</span>
+                            <span class="ms-auto cp-kcard-amount">Pay <field name="approved_total" widget="monetary"/></span>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_freight_bill_list" model="ir.ui.view">
+        <field name="name">cp.freight.bill.list</field>
+        <field name="model">cp.freight.bill</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="transporter_id"/>
+                <field name="bill_number"/>
+                <field name="bill_date"/>
+                <field name="billed_total" sum="Billed"/>
+                <field name="approved_total" sum="Approved"/>
+                <field name="deduction_total" sum="Deductions" decoration-danger="deduction_total &gt; 0"/>
+                <field name="risk_level" widget="badge" decoration-success="risk_level == 'low'"
+                       decoration-warning="risk_level == 'medium'" decoration-danger="risk_level == 'high'"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'"
+                       decoration-info="state == 'audited'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_freight_bill_form" model="ir.ui.view">
+        <field name="name">cp.freight.bill.form</field>
+        <field name="model">cp.freight.bill</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_load_trips" string="Load Unbilled Trips" type="object"
+                            invisible="state != 'draft'"/>
+                    <button name="action_submit" string="Submit for Audit" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_audit" string="Re-run Audit" type="object"
+                            invisible="state not in ('submitted', 'audited')"/>
+                    <button name="action_approve" string="Approve &amp; Create Vendor Bill" type="object"
+                            class="btn-primary" invisible="state != 'audited'"
+                            groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_draft" string="Back to Draft" type="object" invisible="state not in ('audited', 'cancel')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state == 'cancel'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,audited,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_move" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not move_id">
+                            <span class="o_stat_text">Vendor Bill</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="transporter_id" readonly="state != 'draft'"/>
+                            <field name="bill_number" readonly="state != 'draft'"/>
+                            <field name="bill_date" readonly="state != 'draft'"/>
+                            <field name="move_id" invisible="not move_id"/>
+                        </group>
+                        <group>
+                            <field name="billed_total"/>
+                            <field name="approved_total"/>
+                            <field name="deduction_total" decoration-danger="deduction_total &gt; 0"/>
+                            <field name="held_count" decoration-warning="held_count &gt; 0"/>
+                            <field name="risk_level" widget="badge" invisible="not risk_level"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Trips &amp; Audit" name="lines">
+                            <field name="line_ids" readonly="state not in ('draft', 'submitted', 'audited')">
+                                <list editable="bottom" decoration-danger="risk == 'high'" decoration-warning="risk == 'medium'">
+                                    <field name="trip_id" domain="[('transporter_id', '=', parent.transporter_id)]"/>
+                                    <field name="lane_id" optional="show"/>
+                                    <field name="vehicle_number" optional="hide"/>
+                                    <field name="billed_amount"/>
+                                    <field name="billed_km" optional="show"/>
+                                    <field name="billed_weight_ton" optional="show"/>
+                                    <field name="detention_amount" optional="hide"/>
+                                    <field name="other_charges" optional="hide"/>
+                                    <field name="expected_amount"/>
+                                    <field name="gps_km" optional="show"/>
+                                    <field name="approved_amount"/>
+                                    <field name="deduction_amount" decoration-danger="deduction_amount &gt; 0"/>
+                                    <field name="check_rate" optional="hide"/>
+                                    <field name="check_distance" optional="hide"/>
+                                    <field name="check_weight" optional="hide"/>
+                                    <field name="check_duplicate" optional="hide"/>
+                                    <field name="check_epod" optional="show"/>
+                                    <field name="risk" widget="badge"/>
+                                    <field name="findings" optional="show"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_freight_bill_search" model="ir.ui.view">
+        <field name="name">cp.freight.bill.search</field>
+        <field name="model">cp.freight.bill</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="bill_number"/>
+                <field name="transporter_id"/>
+                <filter name="to_approve" string="To Approve" domain="[('state', '=', 'audited')]"/>
+                <filter name="high_risk" string="High Risk" domain="[('risk_level', '=', 'high')]"/>
+                <filter name="with_deductions" string="With Deductions" domain="[('deduction_total', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'bill_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_freight_bill" model="ir.actions.act_window">
+        <field name="name">Invoice Check</field>
+        <field name="res_model">cp.freight.bill</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Audit a transporter invoice</p>
+            <p>Each trip is checked for contract rate, GPS distance, loaded vs delivered weight, duplicates and ePOD before payment.</p>
+        </field>
+    </record>
+</odoo>

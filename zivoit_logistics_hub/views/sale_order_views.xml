@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_zivo" model="ir.ui.view">
+        <field name="name">sale.order.form.zivo.hub</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_zivo_view_shipments" type="object" class="oe_stat_button" icon="fa-truck"
+                        invisible="not zivo_shipment_count" groups="zivoit_logistics_hub.group_logistics_user">
+                    <field name="zivo_shipment_count" widget="statinfo" string="Shipments"/>
+                </button>
+            </div>
+            <xpath expr="//page[@name='other_information']" position="inside">
+                <group string="Logistics AI" name="zivo_logistics" groups="zivoit_logistics_hub.group_logistics_user">
+                    <group>
+                        <field name="zivo_payment_mode"/>
+                        <field name="zivo_rto_risk" widget="progressbar"/>
+                        <field name="zivo_rto_risk_level" widget="badge" decoration-danger="zivo_rto_risk_level == 'high'"
+                               decoration-warning="zivo_rto_risk_level == 'medium'" decoration-success="zivo_rto_risk_level == 'low'"/>
+                        <field name="zivo_rto_risk_reasons"/>
+                    </group>
+                    <group>
+                        <field name="zivo_address_score" widget="progressbar"/>
+                        <field name="zivo_address_issues"/>
+                        <button name="action_zivo_check_risk" type="object" string="Run AI Risk Check" class="btn-secondary"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_tree_zivo" model="ir.ui.view">
+        <field name="name">sale.order.list.zivo.hub</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="amount_total" position="before">
+                <field name="zivo_rto_risk_level" optional="hide" widget="badge" decoration-danger="zivo_rto_risk_level == 'high'"
+                       decoration-warning="zivo_rto_risk_level == 'medium'" groups="zivoit_logistics_hub.group_logistics_user"/>
+            </field>
+        </field>
+    </record>
+</odoo>

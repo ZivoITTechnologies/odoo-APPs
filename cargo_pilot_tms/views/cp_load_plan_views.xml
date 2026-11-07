@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_load_plan_list" model="ir.ui.view">
+        <field name="name">cp.load.plan.list</field>
+        <field name="model">cp.load.plan</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="vehicle_type_id"/>
+                <field name="indent_id" optional="show"/>
+                <field name="weight_util" widget="progressbar"/>
+                <field name="volume_util" widget="progressbar"/>
+                <field name="unplaced_count" decoration-danger="unplaced_count &gt; 0"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_load_plan_form" model="ir.ui.view">
+        <field name="name">cp.load.plan.form</field>
+        <field name="model">cp.load.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_compute" string="Build Load Plan" type="object" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="vehicle_type_id"/>
+                            <field name="indent_id"/>
+                            <field name="trip_id"/>
+                        </group>
+                        <group invisible="state != 'planned'">
+                            <field name="weight_util" widget="progressbar"/>
+                            <field name="volume_util" widget="progressbar"/>
+                            <field name="front_axle_pct" widget="progressbar"
+                                   decoration-danger="front_axle_pct &lt; 35 or front_axle_pct &gt; 65"/>
+                            <field name="weight_kg"/>
+                            <field name="volume_cbm"/>
+                            <field name="unplaced_count" decoration-danger="unplaced_count &gt; 0"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items to Load" name="items">
+                            <field name="item_ids">
+                                <list editable="bottom">
+                                    <field name="drop_sequence"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="length_m"/>
+                                    <field name="width_m"/>
+                                    <field name="height_m"/>
+                                    <field name="weight_kg"/>
+                                    <field name="stackable"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="3D View" name="preview" invisible="state != 'planned'">
+                            <div class="cp-load-preview">
+                                <field name="preview_svg" nolabel="1"/>
+                            </div>
+                            <p class="text-muted small">Last drop is loaded first, at the cab end, so earlier drops come off without moving other cargo.</p>
+                        </page>
+                        <page string="Placement List" name="boxes" invisible="state != 'planned'">
+                            <field name="box_ids">
+                                <list>
+                                    <field name="item_id"/>
+                                    <field name="x"/>
+                                    <field name="y"/>
+                                    <field name="z"/>
+                                    <field name="length_m"/>
+                                    <field name="width_m"/>
+                                    <field name="height_m"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cp_load_plan" model="ir.actions.act_window">
+        <field name="name">Load Planner</field>
+        <field name="res_model">cp.load.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Plan how cargo fits in a truck</p>
+            <p>Enter item sizes, weights and drop order. The builder stacks them, checks weight and volume use, and shows a 3D view.</p>
+        </field>
+    </record>
+</odoo>

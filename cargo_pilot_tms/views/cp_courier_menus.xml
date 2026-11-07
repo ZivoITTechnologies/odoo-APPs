@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_cp_parcel" name="Courier Parcels" parent="cargo_pilot_tms.menu_cp_execution"
+              action="action_cp_parcel" sequence="2"/>
+    <menuitem id="menu_cp_parcel_new" name="Send a Parcel" parent="cargo_pilot_tms.menu_cp_execution"
+              action="action_cp_parcel_new" sequence="3"/>
+    <menuitem id="menu_cp_parcel_cod" name="COD to Receive" parent="cargo_pilot_tms.menu_cp_finance"
+              action="action_cp_parcel_cod" sequence="5"/>
+    <menuitem id="menu_cp_parcel_analysis" name="Courier Performance" parent="cargo_pilot_tms.menu_cp_reporting"
+              action="action_cp_parcel_analysis" sequence="5"/>
+    <menuitem id="menu_cp_courier_account" name="Courier Accounts" parent="cargo_pilot_tms.menu_cp_config"
+              action="action_cp_courier_account" sequence="5"/>
+    <menuitem id="menu_cp_courier_log" name="Courier API Log" parent="cargo_pilot_tms.menu_cp_config"
+              action="action_cp_courier_log" sequence="95"/>
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_3pl_sahyadri" model="res.partner">
+        <field name="name">Sahyadri Road Carriers</field>
+        <field name="is_company" eval="True"/>
+        <field name="cp_is_3pl_vendor" eval="True"/>
+        <field name="email">bids@sahyadri.example.com</field>
+        <field name="phone">+91 98200 11122</field>
+    </record>
+    <record id="demo_3pl_ganga" model="res.partner">
+        <field name="name">Ganga Freight Lines</field>
+        <field name="is_company" eval="True"/>
+        <field name="cp_is_3pl_vendor" eval="True"/>
+        <field name="email">ops@gangafreight.example.com</field>
+        <field name="phone">+91 98300 44455</field>
+    </record>
+    <record id="demo_term_sahyadri" model="cp.detention.term">
+        <field name="partner_id" ref="demo_3pl_sahyadri"/>
+        <field name="free_hours">2</field>
+        <field name="method">hourly</field>
+        <field name="hourly_rate">300</field>
+    </record>
+    <record id="demo_term_ganga" model="cp.detention.term">
+        <field name="partner_id" ref="demo_3pl_ganga"/>
+        <field name="free_hours">4</field>
+        <field name="method">daily</field>
+        <field name="daily_rate">2500</field>
+    </record>
+    <record id="partner_carrier_dhl" model="res.partner">
+        <field name="cp_max_weight_kg">500</field>
+    </record>
+    <record id="partner_carrier_fedex" model="res.partner">
+        <field name="cp_max_weight_kg">1000</field>
+    </record>
+</odoo>

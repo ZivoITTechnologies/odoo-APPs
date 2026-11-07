@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_trip_form_india" model="ir.ui.view">
+        <field name="name">cp.trip.form.india</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_trip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_whatsapp" type="object" class="oe_stat_button" icon="fa-whatsapp"
+                        invisible="whatsapp_count == 0">
+                    <field name="whatsapp_count" widget="statinfo" string="WhatsApp"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='eway_bill_expiry']" position="after">
+                <field name="consolidated_ewb_no" invisible="not consolidated_ewb_no"/>
+                <field name="partb_updated_at" invisible="not partb_updated_at"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='timeline']" position="before">
+                <page string="Compliance &amp; Tracking" name="india">
+                    <div class="cp-stat-row cp-india-stats mb-3">
+                        <div class="cp-stat">
+                            <span class="cp-stat-label">Part-B</span>
+                            <span class="cp-stat-value text-success" invisible="not partb_updated_at"><i class="fa fa-check" title="Done"/> Updated</span>
+                            <span class="cp-stat-value text-muted" invisible="partb_updated_at">Pending</span>
+                        </div>
+                        <div class="cp-stat">
+                            <span class="cp-stat-label">Vehicle papers</span>
+                            <span class="cp-stat-value text-success" invisible="not vahan_check_id or not vahan_ok"><i class="fa fa-shield" title="OK"/> Valid</span>
+                            <span class="cp-stat-value text-danger" invisible="not vahan_check_id or vahan_ok"><i class="fa fa-exclamation-triangle" title="Problem"/> Problem</span>
+                            <span class="cp-stat-value text-muted" invisible="vahan_check_id">Not checked</span>
+                        </div>
+                        <div class="cp-stat">
+                            <span class="cp-stat-label">SIM consent</span>
+                            <span class="cp-stat-value"><field name="sim_consent" readonly="1"/></span>
+                        </div>
+                        <div class="cp-stat">
+                            <span class="cp-stat-label">Last FASTag sync</span>
+                            <span class="cp-stat-value" invisible="not fastag_last_sync"><field name="fastag_last_sync" readonly="1"/></span>
+                            <span class="cp-stat-value text-muted" invisible="fastag_last_sync">Never</span>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button name="action_ewb_update_part_b" string="Update Part-B" type="object" class="btn btn-secondary"
+                                icon="fa-file-text-o" invisible="not eway_bill_no or not vehicle_number or state in ('cancel', 'closed')"/>
+                        <button name="action_ewb_extend" string="Extend E-way Bill" type="object" class="btn btn-secondary"
+                                icon="fa-clock-o" invisible="not eway_bill_no or state != 'in_transit'"/>
+                        <button name="action_ewb_consolidate" string="Consolidated EWB" type="object" class="btn btn-secondary"
+                                icon="fa-files-o" invisible="order_count &lt; 2 or state in ('cancel', 'closed') or not vehicle_number"/>
+                        <button name="action_vahan_check" string="Check Vehicle Papers" type="object" class="btn btn-secondary"
+                                icon="fa-shield" invisible="not vehicle_number"/>
+                        <button name="action_fastag_sync" string="Fetch FASTag Tolls" type="object" class="btn btn-secondary"
+                                icon="fa-road" invisible="not vehicle_number or state not in ('in_transit', 'arrived')"/>
+                        <button name="action_sim_request_consent" string="Ask Driver for SIM Tracking" type="object" class="btn btn-secondary"
+                                icon="fa-mobile" invisible="not driver_phone or sim_consent in ('requested', 'granted') or state in ('delivered', 'closed', 'cancel')"/>
+                        <button name="action_sim_sync" string="Locate by SIM" type="object" class="btn btn-secondary"
+                                icon="fa-crosshairs" invisible="sim_consent not in ('requested', 'granted') or state in ('delivered', 'closed', 'cancel')"/>
+                    </div>
+                    <field name="vahan_check_id" invisible="not vahan_check_id" readonly="1"/>
+                    <field name="vahan_ok" invisible="1"/>
+                    <separator string="E-way bill updates" invisible="not ewb_action_ids"/>
+                    <field name="ewb_action_ids" readonly="1" invisible="not ewb_action_ids">
+                        <list>
+                            <field name="create_date" string="Time"/>
+                            <field name="action"/>
+                            <field name="ewb_no"/>
+                            <field name="vehicle_number"/>
+                            <field name="valid_upto"/>
+                            <field name="result"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

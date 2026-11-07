@@ -80,6 +80,12 @@ class TallyVoucher(models.Model):
     @api.model
     def _upsert_from_tally(self, conn, v, kind):
         stage = self.search([('connection_id', '=', conn.id), ('guid', '=', v['guid'])], limit=1)
+        if v.get('party') and not (v.get('party_gstin') and v.get('place_of_supply')):
+            pm = self.env['tally.mapping']._find(conn, 'party', tally_name=v['party'])
+            if pm:
+                led = json.loads(pm.tally_data or '{}')
+                v = dict(v, party_gstin=v.get('party_gstin') or pm.tally_gstin or '',
+                         place_of_supply=v.get('place_of_supply') or led.get('state') or '')
         vals = {
             'connection_id': conn.id, 'guid': v['guid'], 'master_id': v['master_id'],
             'alter_id': v['alter_id'], 'date': v['date'], 'vch_type': v['vch_type'],

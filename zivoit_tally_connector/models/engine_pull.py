@@ -420,11 +420,42 @@ class TallyConnectionPull(models.Model):
         dom = [('company_id', '=', self.company_id.id), ('type_tax_use', '=', use),
                ('active', '=', True)]
         rate = float(rate or 0)
-        for t in Tax.search(dom + [('amount_type', '=', 'group')]):
+        groups = Tax.search(dom + [('amount_type', '=', 'group')]).sorted(
+            lambda t: (matching.tax_rank(t.name), t.sequence, t.id))
+        for t in groups:
             if abs(sum(c.amount for c in t.children_tax_ids) - rate) < 0.001:
                 if not self.company_id.state_id or 'igst' not in (t.name or '').lower():
                     return t
-        return Tax.search(dom + [('amount_type', '=', 'percent'), ('amount', '=', rate)], limit=1)
+        return Tax.search(dom + [('amount_type', '=', 'percent'), ('amount', '=', rate)]).sorted(
+            lambda t: (matching.tax_rank(t.name), t.sequence, t.id))[:1]
+
+    @staticmethod
+    def _norm(rec, field, value):
+        cur = rec[field]
+        if hasattr(cur, 'ids'):
+            if isinstance(value, (list, tuple)) and value and isinstance(value[0], (list, tuple)):
+                value = value[0][2] if value[0][0] == 6 else value
+            return sorted(cur.ids), sorted(value if isinstance(value, (list, tuple)) else
+                                           [value] if value else [])
+        if isinstance(cur, float):
+            return round(cur, 2), round(float(value or 0), 2)
+        return (cur or ''), (value or '')
+
+    def _changed_only(self, rec, vals):
+        out = {}
+        for k, v in vals.items():
+            if k not in rec._fields:
+                continue
+            a, b = self._norm(rec, k, v)
+            if a != b:
+                out[k] = v
+        return out
+
+    def _differs(self, rec, vals):
+        """True when the Tally values really disagree with Odoo's current values."""
+        return bool(self._changed_only(rec, {k: v for k, v in vals.items()
+                                             if k not in ('company_id', 'is_company', 'type',
+                                                          'sale_ok', 'purchase_ok')}))
 
     def _apply_master_from_tally(self, mapping, data, force=False):
         """Create/update the Odoo record behind a Tally master, honouring conflicts."""
@@ -437,7 +468,8 @@ class TallyConnectionPull(models.Model):
             vals = self._partner_vals_from_ledger(data)
             partner = mapping.partner_id
             if partner:
-                if not force and mapping._odoo_changed_since_sync():
+                if not force and mapping._odoo_changed_since_sync() and \
+                        self._differs(partner, vals):
                     if self.conflict_policy == 'manual':
                         mapping.write({'state': 'conflict', 'conflict_data': json.dumps(
                             data, default=str)})
@@ -445,13 +477,15 @@ class TallyConnectionPull(models.Model):
                     if self.conflict_policy == 'odoo':
                         return
                 vals.pop('company_id', None)
-                partner.with_context(ctx).write(vals)
+                vals = self._changed_only(partner, vals)
+                if vals:
+                    partner.with_context(ctx).write(vals)
             else:
                 rank = 'supplier_rank' if mapping.tally_role == 'vendor' else 'customer_rank'
                 vals[rank] = 1
                 partner = self.env['res.partner'].with_context(ctx).create(vals)
                 mapping.write({'partner_id': partner.id, 'state': 'confirmed', 'origin': 'tally'})
-            mapping.odoo_write_date = partner.write_date
+            mapping._stamp_synced()
             mapping.last_sync = fields.Datetime.now()
         elif mapping.kind == 'item':
             if not (force or self._dir_allows('sync_items', 'pull')):
@@ -459,7 +493,8 @@ class TallyConnectionPull(models.Model):
             vals = self._product_vals_from_item(data)
             product = mapping.product_id
             if product:
-                if not force and mapping._odoo_changed_since_sync():
+                if not force and mapping._odoo_changed_since_sync() and \
+                        self._differs(product, vals):
                     if self.conflict_policy == 'manual':
                         mapping.write({'state': 'conflict', 'conflict_data': json.dumps(
                             data, default=str)})
@@ -469,9 +504,11 @@ class TallyConnectionPull(models.Model):
                 vals.pop('type', None)
                 if product.product_tmpl_id.product_variant_count > 1:
                     vals.pop('name', None)
-                product.with_context(ctx).write(vals)
+                vals = self._changed_only(product, vals)
+                if vals:
+                    product.with_context(ctx).write(vals)
             else:
                 product = self.env['product.product'].with_context(ctx).create(vals)
                 mapping.write({'product_id': product.id, 'state': 'confirmed', 'origin': 'tally'})
-            mapping.odoo_write_date = product.write_date
+            mapping._stamp_synced()
             mapping.last_sync = fields.Datetime.now()

@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_dispatch_plan_list" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.list</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('closed', 'cancel')" decoration-danger="is_delayed" sample="1">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="warehouse_id" optional="show"/>
+                <field name="dest_city" optional="show"/>
+                <field name="target_date" optional="show"/>
+                <field name="gross_weight_kg" sum="kg" optional="show"/>
+                <field name="vehicle_type_id" optional="show"/>
+                <field name="carrier_type" optional="show"/>
+                <field name="vendor_id" optional="show"/>
+                <field name="booking_ref" optional="hide"/>
+                <field name="freight_amount" sum="Freight" optional="show"/>
+                <field name="detention_approved" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="pod_status" widget="badge" optional="show" decoration-success="pod_status == 'verified'"
+                       decoration-warning="pod_status == 'pending'" decoration-danger="pod_status == 'rejected'"/>
+                <field name="is_delayed" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-info="state in ('ready', 'bidding')"
+                       decoration-warning="state in ('assigned', 'loading')" decoration-primary="state == 'in_transit'"
+                       decoration-success="state in ('pod_verified', 'closed')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_dispatch_plan_kanban" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.kanban</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" sample="1" quick_create="0">
+                <field name="state"/>
+                <field name="carrier_type"/>
+                <field name="is_delayed"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <field name="name" class="fw-bold"/>
+                            <span t-if="record.carrier_type.raw_value == '3pl'" class="badge text-bg-warning">3PL</span>
+                            <span t-elif="record.carrier_type.raw_value == 'regular'" class="badge text-bg-info">Regular</span>
+                        </div>
+                        <field name="partner_id" class="text-truncate"/>
+                        <div class="small text-muted">
+                            <i class="fa fa-map-marker me-1" title="Destination"/><field name="dest_city"/>
+                            <span class="ms-2"><field name="gross_weight_kg"/> kg</span>
+                        </div>
+                        <div class="small" t-if="record.vendor_id.raw_value">
+                            <i class="fa fa-truck me-1" title="Provider"/><field name="vendor_id"/>
+                        </div>
+                        <div class="d-flex justify-content-between small mt-1">
+                            <field name="target_date" widget="date"/>
+                            <field name="freight_amount" widget="monetary" invisible="not freight_amount"/>
+                        </div>
+                        <div t-if="record.is_delayed.raw_value" class="small text-danger fw-bold">
+                            <i class="fa fa-clock-o me-1" title="Delayed"/>Delayed
+                        </div>
+                        <field name="pod_status" widget="badge" invisible="state not in ('delivered', 'pod_verified')"
+                               decoration-success="pod_status == 'verified'" decoration-warning="pod_status == 'pending'"
+                               decoration-danger="pod_status == 'rejected'"/>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_dispatch_plan_board" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.board</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="board_status" class="o_kanban_small_column" create="0" group_create="0"
+                    records_draggable="0">
+                <field name="board_status"/>
+                <field name="is_delayed"/>
+                <field name="tracking_url"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold"/>
+                            <field name="milestone" widget="badge"/>
+                        </div>
+                        <field name="partner_id"/>
+                        <div class="small text-muted"><field name="vendor_id"/> · <field name="booking_ref"/><field name="vehicle_number"/></div>
+                        <div class="small">Due <field name="target_date"/></div>
+                        <a t-if="record.tracking_url.raw_value" t-att-href="record.tracking_url.raw_value" target="_blank"
+                           class="small"><i class="fa fa-external-link me-1" title="Track"/>Track</a>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_dispatch_plan_form" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.form</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_ready" string="Ready for Carrier" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_open_carrier_check" string="Check Regular Partners" type="object"
+                            class="btn-primary" invisible="state != 'ready'" groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_escalate_bid" string="Escalate to 3PL Bidding" type="object"
+                            invisible="state != 'ready' or not regulars_exhausted" groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_record_bid" string="Record Phone / WhatsApp Bid" type="object"
+                            invisible="state != 'bidding'" groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_close_bid_now" string="Close Bid Now" type="object"
+                            invisible="state != 'bidding'" groups="cargo_pilot_tms.group_cp_manager"
+                            confirm="Lock the bid now? No more offers will be accepted."/>
+                    <button name="action_open_award" string="Approve Winner" type="object" class="btn-primary"
+                            invisible="state != 'bidding' or not proposed_bid_id" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_new_gate_entry" string="Gate Entry" type="object" class="btn-primary"
+                            invisible="state not in ('assigned', 'loading') or carrier_type != '3pl'"
+                            groups="cargo_pilot_tms.group_cp_user,cargo_pilot_tms.group_dispatch_gate"/>
+                    <button name="action_mark_picked_up" string="Picked Up by Carrier" type="object" class="btn-primary"
+                            invisible="state not in ('assigned', 'loading') or carrier_type != 'regular'"
+                            groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_out_for_delivery" string="Out for Delivery" type="object"
+                            invisible="state != 'in_transit' or milestone == 'out_for_delivery'"
+                            groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_mark_delivered" string="Delivered" type="object" class="btn-primary"
+                            invisible="state != 'in_transit'" groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_add_pod" string="Add POD" type="object" class="btn-primary"
+                            invisible="state not in ('delivered',) or pod_status == 'pending'" groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_create_vendor_bill" string="Create Vendor Bill" type="object"
+                            invisible="state not in ('delivered', 'pod_verified') or bill_count"
+                            groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice"/>
+                    <button name="action_create_vendor_bill" string="Bill Detention" type="object" class="btn-primary"
+                            invisible="state not in ('delivered', 'pod_verified') or not bill_count or detention_unbilled &lt;= 0"
+                            groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice"/>
+                    <button name="action_close" string="Close" type="object" invisible="state != 'pod_verified'"
+                            groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice"/>
+                    <button name="action_refresh_from_deliveries" string="Refresh from Deliveries" type="object"
+                            invisible="state != 'draft' or not picking_ids"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('in_transit', 'delivered', 'pod_verified', 'closed', 'cancel')"/>
+                    <button name="action_reset_draft" string="Back to Draft" type="object" invisible="state != 'cancel'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,ready,bidding,assigned,loading,in_transit,delivered,pod_verified,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_auctions" type="object" class="oe_stat_button" icon="fa-gavel"
+                                invisible="auction_count == 0" groups="cargo_pilot_tms.group_cp_user">
+                            <field name="auction_count" widget="statinfo" string="Bids"/>
+                        </button>
+                        <button name="action_view_po" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not purchase_order_id" groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice">
+                            <span class="o_stat_text">Freight PO</span>
+                        </button>
+                        <button name="action_view_bills" type="object" class="oe_stat_button" icon="fa-pencil-square-o"
+                                invisible="bill_count == 0" groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice">
+                            <field name="bill_count" widget="statinfo" string="Vendor Bills"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Delayed" bg_color="text-bg-danger" invisible="not is_delayed"/>
+                    <widget name="web_ribbon" title="POD Verified" bg_color="text-bg-success" invisible="pod_status != 'verified'"/>
+                    <div class="oe_title mb-2">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <field name="partner_id" placeholder="Deliver to..." readonly="state not in ('draft',)"
+                               class="fs-5" options="{'no_create': True}"/>
+                    </div>
+                    <field name="is_delayed" invisible="1"/>
+                    <field name="regulars_exhausted" invisible="1"/>
+                    <field name="capacity_ok" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <div class="cp-help cp-help-warn" invisible="capacity_ok">
+                        <i class="fa fa-exclamation-triangle" title="Capacity"/>
+                        <span><field name="capacity_note" class="d-inline"/></span>
+                    </div>
+                    <div class="cp-help cp-help-info" invisible="state != 'ready' or regulars_exhausted">
+                        <i class="fa fa-phone" title="Regular partners"/>
+                        <span>Regular partners first: check DHL, Delhivery, FedEx and the others. 3PL bidding unlocks only when
+                            every one of them is logged as unavailable.
+                            <span invisible="not regulars_pending">Not checked yet: <field name="regulars_pending" class="d-inline fw-bold"/>.</span></span>
+                    </div>
+                    <div class="cp-help cp-help-info" invisible="state != 'bidding'">
+                        <i class="fa fa-hourglass-half" title="Bidding"/>
+                        <span>3PL bid live until <field name="auction_id" class="d-inline" readonly="1" options="{'no_open': False}"/>
+                            closes. <span invisible="not proposed_bid_id">Proposed winner: <field name="proposed_bid_id" class="d-inline fw-bold" readonly="1"/>.</span></span>
+                    </div>
+                    <div class="cp-help cp-help-warn" invisible="not bill_count or detention_unbilled &lt;= 0">
+                        <i class="fa fa-clock-o" title="Detention"/>
+                        <span>Approved detention of <field name="detention_unbilled" class="d-inline fw-bold"/> is not on a vendor bill yet.
+                            Use Bill Detention before closing.</span>
+                    </div>
+                    <div class="cp-help cp-help-warn" invisible="state != 'delivered'">
+                        <i class="fa fa-file-image-o" title="POD"/>
+                        <span>Delivered. Vendor payment stays on hold until the POD is verified (status: <field name="pod_status" class="d-inline fw-bold"/>).</span>
+                    </div>
+                    <div class="cp-stat-row cp-dispatch-stats">
+                        <div class="cp-stat"><span>Weight (kg)</span><field name="gross_weight_kg" readonly="1"/></div>
+                        <div class="cp-stat"><span>Packages</span><field name="package_count" readonly="1"/></div>
+                        <div class="cp-stat"><span>Provider</span><field name="vendor_id" readonly="1" options="{'no_open': True}"/></div>
+                        <div class="cp-stat"><span>Freight</span><field name="freight_amount" readonly="1"/></div>
+                    </div>
+                    <group>
+                        <group string="Route">
+                            <field name="warehouse_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="dest_city" readonly="state != 'draft'"/>
+                            <field name="dest_pincode" readonly="state != 'draft'"/>
+                            <field name="dest_state_id" readonly="state != 'draft'"/>
+                            <field name="movement" invisible="not movement"/>
+                            <field name="target_date"/>
+                            <field name="loading_start"/>
+                            <field name="loading_end"/>
+                        </group>
+                        <group string="Goods">
+                            <field name="goods_category"/>
+                            <field name="gross_weight_kg" readonly="state not in ('draft', 'ready')"/>
+                            <field name="volume_cbm" readonly="state not in ('draft', 'ready')"/>
+                            <field name="package_count" readonly="state not in ('draft', 'ready')"/>
+                            <field name="goods_value"/>
+                            <field name="vehicle_type_id" readonly="state not in ('draft', 'ready')"/>
+                            <field name="suggested_vehicle_type_id" invisible="vehicle_type_id or not suggested_vehicle_type_id"/>
+                            <field name="eway_required" invisible="1"/>
+                            <field name="eway_bill_no" required="eway_required and state in ('loading', 'assigned') and carrier_type == 'regular'"/>
+                        </group>
+                        <group string="People">
+                            <field name="sales_user_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Booking" invisible="not carrier_type">
+                            <field name="carrier_type"/>
+                            <field name="regular_partner_id" invisible="carrier_type != 'regular'"/>
+                            <field name="booking_ref"/>
+                            <field name="purchase_order_id" groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice"/>
+                            <field name="trip_id" groups="cargo_pilot_tms.group_cp_user"/>
+                            <field name="reporting_cutoff" invisible="carrier_type != '3pl'"/>
+                            <field name="tracking_url" widget="url" invisible="not tracking_url"/>
+                        </group>
+                    </group>
+                    <field name="special_handling" placeholder="Special handling: fragile, stacking, temperature..."/>
+                    <notebook>
+                        <page string="Delivery Orders" name="deliveries">
+                            <field name="picking_ids" readonly="state not in ('draft',)" options="{'no_create': True}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="origin"/>
+                                    <field name="scheduled_date"/>
+                                    <field name="cp_weight_kg"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                            <field name="sale_order_ids" widget="many2many_tags" readonly="1" invisible="not sale_order_ids"/>
+                        </page>
+                        <page string="Carrier Selection" name="carriers" groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice">
+                            <field name="check_log_ids" readonly="1">
+                                <list decoration-success="status == 'confirmed' and not superseded" decoration-muted="status != 'confirmed' or superseded">
+                                    <field name="checked_at"/>
+                                    <field name="carrier_id"/>
+                                    <field name="status" widget="badge" decoration-success="status == 'confirmed'"
+                                           decoration-danger="status != 'confirmed'"/>
+                                    <field name="quoted_rate"/>
+                                    <field name="pickup_time" optional="show"/>
+                                    <field name="booking_ref" optional="show"/>
+                                    <field name="note"/>
+                                    <field name="checked_by" optional="show"/>
+                                    <field name="booked" widget="boolean"/>
+                                    <field name="superseded" widget="boolean" optional="show"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group string="3PL Bid" invisible="not auction_id">
+                                <group>
+                                    <field name="auction_id"/>
+                                    <field name="target_rate"/>
+                                    <field name="proposed_bid_id"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Gate &amp; Loading" name="gate" invisible="carrier_type != '3pl'">
+                            <group>
+                                <group>
+                                    <field name="vehicle_number"/>
+                                    <field name="driver_name"/>
+                                    <field name="driver_phone" widget="phone"/>
+                                    <field name="reported_on_time" invisible="not gate_in_time"/>
+                                </group>
+                                <group>
+                                    <field name="gate_in_time"/>
+                                    <field name="loading_start_time"/>
+                                    <field name="loading_end_time"/>
+                                    <field name="gate_out_time"/>
+                                </group>
+                            </group>
+                            <field name="gate_entry_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="vehicle_number"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="gate_in_time"/>
+                                    <field name="gate_out_time"/>
+                                    <field name="turnaround_min"/>
+                                    <field name="inspection_ok" widget="boolean"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Detention" name="detention" invisible="not detention_ids"
+                              groups="cargo_pilot_tms.group_cp_user,cargo_pilot_tms.group_dispatch_ops_head,account.group_account_invoice">
+                            <field name="detention_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="tat_hours"/>
+                                    <field name="free_hours"/>
+                                    <field name="gross_waiting_hours"/>
+                                    <field name="delay_reason"/>
+                                    <field name="calculated_amount"/>
+                                    <field name="approved_amount"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer"><field name="detention_approved"/><field name="detention_unbilled"/><field name="total_freight_cost"/></group>
+                        </page>
+                        <page string="Tracking" name="tracking" invisible="state in ('draft', 'ready', 'bidding')">
+                            <group>
+                                <group>
+                                    <field name="milestone"/>
+                                    <field name="picked_up_at"/>
+                                    <field name="delivered_at"/>
+                                    <field name="tracking_url" widget="url"/>
+                                </group>
+                                <group>
+                                    <field name="on_time_delivery" invisible="not delivered_at"/>
+                                    <field name="board_status"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Proof of Delivery" name="pod" invisible="state not in ('in_transit', 'delivered', 'pod_verified', 'closed')">
+                            <field name="pod_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="create_date" string="Received"/>
+                                    <field name="source"/>
+                                    <field name="receiver_name"/>
+                                    <field name="document_count" string="Files"/>
+                                    <field name="status" widget="badge" decoration-success="status == 'verified'"
+                                           decoration-warning="status == 'pending'" decoration-danger="status == 'rejected'"/>
+                                    <field name="reject_reason" optional="show"/>
+                                    <field name="verified_by" optional="show"/>
+                                </list>
+                            </field>
+                            <group><field name="pod_status"/><field name="pod_tat_hours" invisible="pod_status != 'verified'"/></group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_dispatch_plan_search" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.search</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('booking_ref', 'ilike', self), ('picking_ids.origin', 'ilike', self)]" string="Dispatch / AWB / Order"/>
+                <field name="partner_id"/>
+                <field name="vendor_id"/>
+                <field name="warehouse_id"/>
+                <filter name="to_book" string="To Book" domain="[('state', 'in', ('draft', 'ready', 'bidding'))]"/>
+                <filter name="moving" string="On the Way" domain="[('state', 'in', ('assigned', 'loading', 'in_transit'))]"/>
+                <filter name="delayed" string="Delayed" domain="[('is_delayed', '=', True)]"/>
+                <filter name="pod_pending" string="POD Pending" domain="[('state', '=', 'delivered')]"/>
+                <separator/>
+                <filter name="regular" string="Regular Partners" domain="[('carrier_type', '=', 'regular')]"/>
+                <filter name="third" string="3PL" domain="[('carrier_type', '=', '3pl')]"/>
+                <separator/>
+                <filter name="this_month" string="This Month" domain="[('create_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="by_vendor" string="Provider" context="{'group_by': 'vendor_id'}"/>
+                    <filter name="by_type" string="Carrier Type" context="{'group_by': 'carrier_type'}"/>
+                    <filter name="by_wh" string="Warehouse" context="{'group_by': 'warehouse_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_cp_dispatch_plan_pivot" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.pivot</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="arch" type="xml">
+            <pivot string="Dispatch Analysis" sample="1">
+                <field name="carrier_type" type="row"/>
+                <field name="create_date" interval="month" type="col"/>
+                <field name="freight_amount" type="measure"/>
+                <field name="gross_weight_kg" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_cp_dispatch_plan_graph" model="ir.ui.view">
+        <field name="name">cp.dispatch.plan.graph</field>
+        <field name="model">cp.dispatch.plan</field>
+        <field name="arch" type="xml">
+            <graph string="Dispatches" type="bar" sample="1">
+                <field name="vendor_id"/>
+                <field name="freight_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_cp_dispatch_plan" model="ir.actions.act_window">
+        <field name="name">Dispatch Plans</field>
+        <field name="res_model">cp.dispatch.plan</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_cp_dispatch_plan_kanban')}),
+                                      (0, 0, {'view_mode': 'list', 'view_id': ref('view_cp_dispatch_plan_list')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a dispatch plan</p>
+            <p>Pick the delivery orders of confirmed sales orders. The logistics team checks DHL, Delhivery and FedEx first,
+                then runs a 10-20 minute 3PL bid if none has capacity.</p>
+        </field>
+    </record>
+    <record id="action_cp_dispatch_board" model="ir.actions.act_window">
+        <field name="name">Transit Board</field>
+        <field name="res_model">cp.dispatch.plan</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('board_status', '!=', False)]</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_cp_dispatch_plan_board')})]"/>
+    </record>
+    <record id="action_cp_dispatch_pod_pending" model="ir.actions.act_window">
+        <field name="name">Outstanding PODs</field>
+        <field name="res_model">cp.dispatch.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'delivered')]</field>
+    </record>
+    <record id="action_cp_dispatch_analysis" model="ir.actions.act_window">
+        <field name="name">Dispatch Analysis</field>
+        <field name="res_model">cp.dispatch.plan</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+    <!-- Wizards -->
+    <record id="view_cp_carrier_check_wizard_form" model="ir.ui.view">
+        <field name="name">cp.carrier.check.wizard.form</field>
+        <field name="model">cp.carrier.check.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="cp-help cp-help-info">
+                    <i class="fa fa-info-circle" title="Info"/>
+                    <span>Record what each regular partner said for <field name="plan_id" class="d-inline fw-bold" readonly="1"/>
+                        (<field name="gross_weight_kg" class="d-inline" readonly="1"/> kg to PIN <field name="dest_pincode" class="d-inline" readonly="1"/>).
+                        Partners outside their weight, volume or PIN code limits are pre-filled.</span>
+                </div>
+                <field name="line_ids">
+                    <list editable="bottom" create="0" delete="0">
+                        <field name="carrier_id"/>
+                        <field name="status" required="book"/>
+                        <field name="quoted_rate"/>
+                        <field name="pickup_time" optional="show"/>
+                        <field name="booking_ref" optional="show"/>
+                        <field name="note"/>
+                        <field name="auto_reason" optional="show"/>
+                        <field name="book" widget="boolean_toggle"/>
+                        <field name="currency_id" column_invisible="1"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_book" string="Book Regular Carrier" type="object" class="btn-primary"/>
+                    <button name="action_save_and_escalate" string="Save &amp; Escalate to 3PL" type="object"/>
+                    <button name="action_save" string="Save Checks" type="object"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_bid_launch_wizard_form" model="ir.ui.view">
+        <field name="name">cp.bid.launch.wizard.form</field>
+        <field name="model">cp.bid.launch.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group string="Requirement">
+                        <field name="plan_id" readonly="1"/>
+                        <field name="vehicle_type_id" options="{'no_create': True}"/>
+                        <field name="pickup_slot"/>
+                    </group>
+                    <group string="Rules">
+                        <field name="duration_minutes"/>
+                        <field name="bidding_mode" widget="radio"/>
+                        <field name="target_price" required="bidding_mode == 'target_price'"/>
+                        <field name="ceiling_price" invisible="bidding_mode != 'reverse_auction'"/>
+                        <field name="currency_id" invisible="1"/>
+                    </group>
+                </group>
+                <div class="text-muted small mb-2">Approved 3PL vendors for this truck type and destination zone are invited.
+                    They get an e-mail (and SMS / WhatsApp where set up) with the portal link and a live countdown.</div>
+                <field name="vendor_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <footer>
+                    <button name="action_launch" string="Start Bid" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_bid_award_wizard_form" model="ir.ui.view">
+        <field name="name">cp.bid.award.wizard.form</field>
+        <field name="model">cp.bid.award.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="plan_id" readonly="1"/>
+                    <field name="auction_id" invisible="1"/>
+                    <field name="proposed_bid_id" readonly="1"/>
+                    <field name="bid_id" options="{'no_create': True}"/>
+                    <field name="is_override" invisible="1"/>
+                    <field name="justification" required="is_override" invisible="not is_override"
+                           placeholder="For example: reports two hours earlier"/>
+                </group>
+                <div class="text-muted small">Approving creates the purchase order for the agreed freight and tells the winner and
+                    the other bidders.</div>
+                <footer>
+                    <button name="action_award" string="Approve &amp; Book" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_bid_record_wizard_form" model="ir.ui.view">
+        <field name="name">cp.bid.record.wizard.form</field>
+        <field name="model">cp.bid.record.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="plan_id" readonly="1"/>
+                    <field name="auction_id" readonly="1"/>
+                    <field name="invited_ids" invisible="1"/>
+                    <field name="bidding_mode" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="vendor_id" options="{'no_create': True}" required="1"/>
+                    <field name="rate" invisible="bidding_mode == 'target_price'" required="bidding_mode != 'target_price'"/>
+                    <field name="target_price" readonly="1" invisible="bidding_mode != 'target_price'"
+                           string="Vendor Accepts Target Price"/>
+                    <field name="channel" widget="radio" options="{'horizontal': true}"/>
+                    <field name="note" placeholder="Spoke to Ramesh; truck available from 4 pm"/>
+                </group>
+                <div class="text-muted small">The offer enters the live bid like a portal bid, under the vendor's name, with
+                    your name and the channel in the bid note. Only vendors invited to this bid can be chosen.</div>
+                <footer>
+                    <button name="action_record" string="Record Bid" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

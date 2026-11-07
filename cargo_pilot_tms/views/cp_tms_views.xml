@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_consignment_form_courier" model="ir.ui.view">
+        <field name="name">cp.consignment.form.courier</field>
+        <field name="model">cp.consignment</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_consignment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_book']" position="after">
+                <button name="action_ship_by_courier" type="object" string="Send by courier" icon="fa-cube"
+                        invisible="state in ('draft', 'cancel', 'delivered', 'invoiced') or parcel_count"/>
+            </xpath>
+            <xpath expr="//sheet/div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_parcels" type="object" class="oe_stat_button" icon="fa-cube"
+                            invisible="not parcel_count">
+                        <field name="parcel_count" widget="statinfo" string="Courier Parcels"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cp_consignment_list_courier" model="ir.ui.view">
+        <field name="name">cp.consignment.list.courier</field>
+        <field name="model">cp.consignment</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_consignment_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="parcel_awb" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

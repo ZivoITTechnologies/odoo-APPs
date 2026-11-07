@@ -1,0 +1,17 @@
+.o_form_view .cp-stat-row.cp-india-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    .cp-stat span.cp-stat-value, .cp-stat span.cp-stat-value span {
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-transform: none;
+        letter-spacing: 0;
+        color: inherit;
+    }
+    .cp-stat span.cp-stat-value.text-success { color: #1f9d55; }
+    .cp-stat span.cp-stat-value.text-danger { color: #d64545; }
+    .cp-stat span.cp-stat-value.text-muted { color: #8a94a0; font-weight: 500; }
+    .cp-stat .o_field_widget { font-size: 1.05rem; }
+}
+@media (max-width: 767.98px) {
+    .o_form_view .cp-stat-row.cp-india-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

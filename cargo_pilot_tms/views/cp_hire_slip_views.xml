@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_cp_hire_slip_kanban" model="ir.ui.view">
+        <field name="name">cp.hire.slip.kanban</field>
+        <field name="model">cp.hire.slip</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="cp-kcard-top">
+                            <span class="cp-plate-box cp-plate"><field name="vehicle_number"/></span>
+                            <field name="state" widget="badge"/>
+                        </div>
+                        <field name="owner_id" class="cp-kcard-route"/>
+                        <field name="lane_id" class="cp-kcard-meta"/>
+                        <footer class="cp-kcard-meta">
+                            <span>Hire <field name="total_hire" widget="monetary"/></span>
+                            <span class="ms-auto cp-kcard-amount" t-if="record.balance_due.raw_value">Due <field name="balance_due" widget="monetary"/></span>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_hire_slip_list" model="ir.ui.view">
+        <field name="name">cp.hire.slip.list</field>
+        <field name="model">cp.hire.slip</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="balance_due &gt; 0 and state == 'confirmed'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="trip_id"/>
+                <field name="owner_id"/>
+                <field name="vehicle_number"/>
+                <field name="total_hire" sum="Hire"/>
+                <field name="paid_amount" sum="Paid"/>
+                <field name="balance_due" sum="Balance"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'settled'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_hire_slip_form" model="ir.ui.view">
+        <field name="name">cp.hire.slip.form</field>
+        <field name="model">cp.hire.slip</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_create_bill" string="Create Vendor Bill" type="object"
+                            invisible="state != 'confirmed' or move_id" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_settle" string="Settle" type="object" invisible="state != 'confirmed'"/>
+                    <button name="%(action_cp_report_hire_slip)d" string="Print" type="action" invisible="state == 'draft'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('settled', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,settled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Vehicle">
+                            <field name="trip_id"/>
+                            <field name="lane_id"/>
+                            <field name="owner_id"/>
+                            <field name="owner_pan"/>
+                            <field name="vehicle_number"/>
+                            <field name="date"/>
+                        </group>
+                        <group string="Amounts" class="oe_subtotal_footer">
+                            <field name="hire_amount"/>
+                            <field name="detention_amount"/>
+                            <field name="extra_amount"/>
+                            <field name="deduction_amount"/>
+                            <field name="deduction_note" invisible="not deduction_amount"/>
+                            <field name="total_hire" class="oe_subtotal_footer_separator"/>
+                            <field name="paid_amount"/>
+                            <field name="balance_due" decoration-danger="balance_due &gt; 0"/>
+                            <field name="move_id" invisible="not move_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Advances &amp; Payments" name="payments">
+                            <field name="payment_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="payment_type"/>
+                                    <field name="amount" sum="Paid"/>
+                                    <field name="payment_mode"/>
+                                    <field name="reference"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_hire_slip_search" model="ir.ui.view">
+        <field name="name">cp.hire.slip.search</field>
+        <field name="model">cp.hire.slip</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="owner_id"/>
+                <field name="vehicle_number"/>
+                <filter name="outstanding" string="Balance Due" domain="[('balance_due', '&gt;', 0), ('state', '=', 'confirmed')]"/>
+                <group>
+                    <filter name="group_owner" string="Owner" context="{'group_by': 'owner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_hire_slip" model="ir.actions.act_window">
+        <field name="name">Hired Trucks</field>
+        <field name="res_model">cp.hire.slip</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Hire a market vehicle</p>
+            <p>Record the hire, pay advances, add detention or deductions and settle the balance with the owner.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_expense_list" model="ir.ui.view">
+        <field name="name">cp.trip.expense.list</field>
+        <field name="model">cp.trip.expense</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="date"/>
+                <field name="trip_id"/>
+                <field name="expense_type"/>
+                <field name="amount" sum="Total"/>
+                <field name="payment_mode"/>
+                <field name="paid_to"/>
+                <field name="settled"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_expense_search" model="ir.ui.view">
+        <field name="name">cp.trip.expense.search</field>
+        <field name="model">cp.trip.expense</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="trip_id"/>
+                <field name="paid_to"/>
+                <filter name="unsettled" string="Driver Advances to Settle"
+                        domain="[('expense_type', '=', 'driver_advance'), ('settled', '=', False)]"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'expense_type'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_trip_expense" model="ir.actions.act_window">
+        <field name="name">Trip Expenses</field>
+        <field name="res_model">cp.trip.expense</field>
+        <field name="view_mode">list,pivot</field>
+    </record>
+</odoo>

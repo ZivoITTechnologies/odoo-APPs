@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Locations -->
+    <record id="demo_loc_raipur" model="cp.location">
+        <field name="name">Raipur Plant</field><field name="code">RPR</field><field name="location_type">plant</field>
+        <field name="city">Raipur</field><field name="latitude">21.2514</field><field name="longitude">81.6296</field>
+        <field name="geofence_radius">1500</field>
+    </record>
+    <record id="demo_loc_nagpur" model="cp.location">
+        <field name="name">Nagpur Hub</field><field name="code">NGP</field><field name="location_type">hub</field>
+        <field name="city">Nagpur</field><field name="latitude">21.1458</field><field name="longitude">79.0882</field>
+    </record>
+    <record id="demo_loc_hyderabad" model="cp.location">
+        <field name="name">Hyderabad Depot</field><field name="code">HYD</field><field name="location_type">warehouse</field>
+        <field name="city">Hyderabad</field><field name="latitude">17.3850</field><field name="longitude">78.4867</field>
+    </record>
+    <record id="demo_loc_chennai" model="cp.location">
+        <field name="name">Chennai Hub</field><field name="code">MAA</field><field name="location_type">hub</field>
+        <field name="city">Chennai</field><field name="latitude">13.0827</field><field name="longitude">80.2707</field>
+    </record>
+    <record id="demo_loc_pune" model="cp.location">
+        <field name="name">Pune Distributor</field><field name="code">PNQ</field><field name="location_type">customer</field>
+        <field name="city">Pune</field><field name="latitude">18.5204</field><field name="longitude">73.8567</field>
+    </record>
+    <record id="demo_loc_mumbai" model="cp.location">
+        <field name="name">Mumbai Warehouse</field><field name="code">BOM</field><field name="location_type">warehouse</field>
+        <field name="city">Mumbai</field><field name="latitude">19.0760</field><field name="longitude">72.8777</field>
+    </record>
+    <record id="demo_dock_1" model="cp.dock"><field name="name">Dock 1</field><field name="location_id" ref="demo_loc_raipur"/></record>
+    <record id="demo_dock_2" model="cp.dock"><field name="name">Dock 2</field><field name="location_id" ref="demo_loc_raipur"/></record>
+
+    <!-- Vehicle types -->
+    <record id="demo_vt_19ft" model="cp.vehicle.type">
+        <field name="name">19 ft Container (7 t)</field><field name="body_type">closed</field>
+        <field name="capacity_ton">7</field><field name="emission_factor">110</field><field name="length_m">5.8</field><field name="width_m">2.3</field><field name="height_m">2.3</field>
+    </record>
+    <record id="demo_vt_32ft" model="cp.vehicle.type">
+        <field name="name">32 ft MXL Container (15 t)</field><field name="body_type">closed</field>
+        <field name="capacity_ton">15</field><field name="emission_factor">75</field><field name="length_m">9.75</field><field name="width_m">2.4</field><field name="height_m">2.6</field>
+    </record>
+    <record id="demo_vt_open" model="cp.vehicle.type">
+        <field name="name">10 Wheeler Open (21 t)</field><field name="body_type">open</field>
+        <field name="capacity_ton">21</field><field name="emission_factor">68</field><field name="length_m">7.3</field><field name="width_m">2.5</field><field name="height_m">1.8</field>
+    </record>
+
+    <!-- Lanes -->
+    <record id="demo_lane_rpr_hyd" model="cp.lane">
+        <field name="origin_id" ref="demo_loc_raipur"/><field name="destination_id" ref="demo_loc_hyderabad"/>
+        <field name="distance_km">785</field><field name="transit_hours">30</field>
+    </record>
+    <record id="demo_lane_rpr_pnq" model="cp.lane">
+        <field name="origin_id" ref="demo_loc_raipur"/><field name="destination_id" ref="demo_loc_pune"/>
+        <field name="distance_km">815</field><field name="transit_hours">32</field>
+    </record>
+    <record id="demo_lane_rpr_ngp" model="cp.lane">
+        <field name="origin_id" ref="demo_loc_raipur"/><field name="destination_id" ref="demo_loc_nagpur"/>
+        <field name="distance_km">290</field><field name="transit_hours">8</field>
+    </record>
+    <record id="demo_lane_ngp_bom" model="cp.lane">
+        <field name="origin_id" ref="demo_loc_nagpur"/><field name="destination_id" ref="demo_loc_mumbai"/>
+        <field name="distance_km">830</field><field name="transit_hours">30</field>
+    </record>
+    <record id="demo_lane_ngp_maa" model="cp.lane">
+        <field name="origin_id" ref="demo_loc_nagpur"/><field name="destination_id" ref="demo_loc_chennai"/>
+        <field name="distance_km">1150</field><field name="transit_hours">42</field>
+    </record>
+
+    <!-- Partners -->
+    <record id="demo_tr_vega" model="res.partner">
+        <field name="name">Vega Roadlines</field><field name="is_company" eval="True"/><field name="cp_is_transporter" eval="True"/>
+        <field name="cp_transporter_code">TR-001</field><field name="city">Raipur</field>
+        <field name="email">dispatch@vegaroadlines.example.com</field><field name="phone">+91 98260 11111</field>
+        <field name="cp_lane_ids" eval="[(6, 0, [ref('demo_lane_rpr_hyd'), ref('demo_lane_rpr_pnq')])]"/>
+    </record>
+    <record id="demo_tr_sahyadri" model="res.partner">
+        <field name="name">Sahyadri Carriers</field><field name="is_company" eval="True"/><field name="cp_is_transporter" eval="True"/>
+        <field name="cp_transporter_code">TR-002</field><field name="city">Pune</field>
+        <field name="email">ops@sahyadricarriers.example.com</field><field name="phone">+91 98220 22222</field>
+        <field name="cp_vehicle_type_ids" eval="[(6, 0, [ref('demo_vt_32ft')])]"/>
+    </record>
+    <record id="demo_tr_deccan" model="res.partner">
+        <field name="name">Deccan Freight Movers</field><field name="is_company" eval="True"/><field name="cp_is_transporter" eval="True"/>
+        <field name="cp_transporter_code">TR-003</field><field name="city">Hyderabad</field>
+        <field name="email">bids@deccanfreight.example.com</field><field name="phone">+91 98490 33333</field>
+        <field name="cp_vehicle_type_ids" eval="[(6, 0, [ref('demo_vt_32ft'), ref('demo_vt_open')])]"/>
+    </record>
+    <record id="demo_owner_balaji" model="res.partner">
+        <field name="name">Balaji Fleet Owners</field><field name="is_company" eval="True"/><field name="cp_is_vehicle_owner" eval="True"/>
+        <field name="phone">+91 90090 44444</field>
+    </record>
+    <record id="demo_driver_ramesh" model="res.partner">
+        <field name="name">Ramesh Yadav</field><field name="cp_is_driver" eval="True"/><field name="phone">+91 99770 55555</field>
+        <field name="cp_license_number">CG04 2015 0098765</field>
+        <field name="cp_license_expiry" eval="(DateTime.today() + relativedelta(months=14)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_driver_suresh" model="res.partner">
+        <field name="name">Suresh Patil</field><field name="cp_is_driver" eval="True"/><field name="phone">+91 99220 66666</field>
+        <field name="cp_license_number">MH12 2012 0045678</field>
+        <field name="cp_license_expiry" eval="(DateTime.today() + relativedelta(days=20)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_cust_kaveri" model="res.partner">
+        <field name="name">Kaveri Building Supplies</field><field name="is_company" eval="True"/><field name="city">Hyderabad</field>
+        <field name="phone">+91 40 2345 6789</field>
+    </record>
+    <record id="demo_cust_shakti" model="res.partner">
+        <field name="name">Shakti Steels</field><field name="is_company" eval="True"/><field name="city">Raipur</field>
+    </record>
+
+    <!-- Own fleet -->
+    <record id="demo_brand" model="fleet.vehicle.model.brand"><field name="name">Roadmaster</field></record>
+    <record id="demo_model" model="fleet.vehicle.model">
+        <field name="name">RM 3718 MXL</field><field name="brand_id" ref="demo_brand"/>
+    </record>
+    <record id="demo_vehicle_1" model="fleet.vehicle">
+        <field name="model_id" ref="demo_model"/><field name="license_plate">CG04 MK 4521</field>
+        <field name="driver_id" ref="demo_driver_ramesh"/><field name="cp_vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="cp_device_id">DEV-1001</field><field name="cp_mileage_benchmark">4.0</field>
+    </record>
+    <record id="demo_vehicle_2" model="fleet.vehicle">
+        <field name="model_id" ref="demo_model"/><field name="license_plate">MH12 RT 9087</field>
+        <field name="driver_id" ref="demo_driver_suresh"/><field name="cp_vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="cp_device_id">DEV-1002</field><field name="cp_mileage_benchmark">4.2</field>
+    </record>
+
+    <!-- Contract -->
+    <record id="demo_contract_vega" model="cp.rate.contract">
+        <field name="transporter_id" ref="demo_tr_vega"/>
+        <field name="date_start" eval="(DateTime.today() - relativedelta(months=2)).strftime('%Y-%m-%d')"/>
+        <field name="date_end" eval="(DateTime.today() + relativedelta(months=10)).strftime('%Y-%m-%d')"/>
+        <field name="state">active</field><field name="priority">1</field>
+    </record>
+    <record id="demo_contract_vega_l1" model="cp.rate.contract.line">
+        <field name="contract_id" ref="demo_contract_vega"/><field name="lane_id" ref="demo_lane_rpr_hyd"/>
+        <field name="vehicle_type_id" ref="demo_vt_32ft"/><field name="charge_basis">trip</field>
+        <field name="rate">52000</field><field name="contracted_km">785</field><field name="detention_per_day">2500</field>
+    </record>
+    <record id="demo_contract_vega_l2" model="cp.rate.contract.line">
+        <field name="contract_id" ref="demo_contract_vega"/><field name="lane_id" ref="demo_lane_rpr_pnq"/>
+        <field name="vehicle_type_id" ref="demo_vt_32ft"/><field name="charge_basis">ton</field>
+        <field name="rate">3600</field><field name="contracted_km">815</field>
+    </record>
+
+    <!-- Indents -->
+    <record id="demo_indent_1" model="cp.indent">
+        <field name="lane_id" ref="demo_lane_rpr_hyd"/><field name="vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="vehicle_count">2</field><field name="consignee_id" ref="demo_cust_kaveri"/>
+        <field name="required_date" eval="(DateTime.now() - relativedelta(days=1)).strftime('%Y-%m-%d 08:00:00')"/>
+        <field name="delivery_deadline" eval="(DateTime.now() + relativedelta(days=1)).strftime('%Y-%m-%d 18:00:00')"/>
+        <field name="origin">SO/2026/0412</field><field name="state">allocated</field>
+        <field name="line_ids" eval="[(0, 0, {'description': 'OPC 53 cement, 50 kg bags', 'quantity': 560, 'uom_label': 'Bags', 'weight_ton': 28.0})]"/>
+    </record>
+    <record id="demo_indent_2" model="cp.indent">
+        <field name="lane_id" ref="demo_lane_rpr_pnq"/><field name="vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="vehicle_count">3</field><field name="priority">1</field>
+        <field name="required_date" eval="(DateTime.now() + relativedelta(days=1)).strftime('%Y-%m-%d 07:00:00')"/>
+        <field name="origin">SO/2026/0431</field><field name="state">sourcing</field>
+        <field name="line_ids" eval="[(0, 0, {'description': 'TMT bars 12 mm', 'quantity': 42, 'uom_label': 'Bundles', 'weight_ton': 42.0})]"/>
+    </record>
+    <record id="demo_indent_3" model="cp.indent">
+        <field name="lane_id" ref="demo_lane_rpr_ngp"/><field name="vehicle_type_id" ref="demo_vt_open"/>
+        <field name="vehicle_count">1</field>
+        <field name="required_date" eval="(DateTime.now() + relativedelta(days=2)).strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="state">confirmed</field>
+        <field name="line_ids" eval="[(0, 0, {'description': 'Fly ash bricks', 'quantity': 6000, 'uom_label': 'Nos', 'weight_ton': 18.0})]"/>
+    </record>
+    <record id="demo_indent_4" model="cp.indent">
+        <field name="lane_id" ref="demo_lane_ngp_bom"/><field name="vehicle_type_id" ref="demo_vt_19ft"/>
+        <field name="vehicle_count">1</field>
+        <field name="required_date" eval="(DateTime.now() + relativedelta(days=3)).strftime('%Y-%m-%d 10:00:00')"/>
+    </record>
+
+    <!-- Live auction on indent 2 -->
+    <record id="demo_auction_1" model="cp.auction">
+        <field name="indent_id" ref="demo_indent_2"/><field name="vehicle_count">3</field>
+        <field name="date_start" eval="(DateTime.now() - relativedelta(minutes=40)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="date_end" eval="(DateTime.now() + relativedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="ceiling_price">54000</field><field name="state">live</field>
+        <field name="transporter_ids" eval="[(6, 0, [ref('demo_tr_vega'), ref('demo_tr_sahyadri'), ref('demo_tr_deccan')])]"/>
+    </record>
+    <record id="demo_bid_1" model="cp.auction.bid">
+        <field name="auction_id" ref="demo_auction_1"/><field name="transporter_id" ref="demo_tr_sahyadri"/>
+        <field name="rate">48500</field><field name="vehicle_count">2</field><field name="channel">portal</field>
+    </record>
+    <record id="demo_bid_2" model="cp.auction.bid">
+        <field name="auction_id" ref="demo_auction_1"/><field name="transporter_id" ref="demo_tr_deccan"/>
+        <field name="rate">49800</field><field name="vehicle_count">3</field><field name="channel">whatsapp</field>
+    </record>
+    <record id="demo_bid_3" model="cp.auction.bid">
+        <field name="auction_id" ref="demo_auction_1"/><field name="transporter_id" ref="demo_tr_vega"/>
+        <field name="rate">50200</field><field name="vehicle_count">1</field><field name="channel">portal</field>
+    </record>
+
+    <!-- Trips -->
+    <record id="demo_trip_1" model="cp.trip">
+        <field name="indent_id" ref="demo_indent_1"/><field name="lane_id" ref="demo_lane_rpr_hyd"/>
+        <field name="vehicle_type_id" ref="demo_vt_32ft"/><field name="transporter_id" ref="demo_tr_vega"/>
+        <field name="contract_line_id" ref="demo_contract_vega_l1"/><field name="consignee_id" ref="demo_cust_kaveri"/>
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="vehicle_number">CG04 MK 4521</field>
+        <field name="driver_id" ref="demo_driver_ramesh"/><field name="driver_name">Ramesh Yadav</field><field name="driver_phone">+91 99770 55555</field>
+        <field name="planned_dispatch" eval="(DateTime.now() - relativedelta(hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="actual_dispatch" eval="(DateTime.now() - relativedelta(hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="promised_delivery" eval="(DateTime.now() + relativedelta(hours=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="eta" eval="(DateTime.now() + relativedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="loaded_weight_ton">14.0</field><field name="agreed_freight">52000</field>
+        <field name="eway_bill_no">3510 4471 2290</field>
+        <field name="eway_bill_expiry" eval="(DateTime.now() + relativedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="state">in_transit</field><field name="has_left_origin" eval="True"/>
+        <field name="last_latitude">19.0748</field><field name="last_longitude">79.5612</field><field name="last_speed">46</field>
+        <field name="last_ping_time" eval="(DateTime.now() - relativedelta(minutes=6)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="last_moved_time" eval="(DateTime.now() - relativedelta(minutes=6)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="gps_distance_km">472</field><field name="remaining_km">318</field>
+    </record>
+    <record id="demo_trip_2" model="cp.trip">
+        <field name="indent_id" ref="demo_indent_1"/><field name="lane_id" ref="demo_lane_rpr_hyd"/>
+        <field name="vehicle_type_id" ref="demo_vt_32ft"/><field name="transporter_id" ref="demo_tr_vega"/>
+        <field name="contract_line_id" ref="demo_contract_vega_l1"/><field name="consignee_id" ref="demo_cust_kaveri"/>
+        <field name="vehicle_number">CG07 TA 7710</field><field name="driver_name">Mahesh Sahu</field>
+        <field name="driver_phone">+91 99070 77777</field>
+        <field name="planned_dispatch" eval="(DateTime.now() - relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="actual_dispatch" eval="(DateTime.now() - relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="promised_delivery" eval="(DateTime.now() - relativedelta(days=1, hours=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="actual_arrival" eval="(DateTime.now() - relativedelta(days=1, hours=14)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="actual_delivery" eval="(DateTime.now() - relativedelta(days=1, hours=12)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="loaded_weight_ton">14.0</field><field name="delivered_weight_ton">14.0</field>
+        <field name="agreed_freight">52000</field><field name="gps_distance_km">802</field>
+        <field name="state">delivered</field>
+    </record>
+    <record id="demo_trip_3" model="cp.trip">
+        <field name="lane_id" ref="demo_lane_ngp_maa"/><field name="vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="transporter_id" ref="demo_tr_deccan"/>
+        <field name="vehicle_number">TS09 UB 3301</field><field name="driver_name">Anil Kumar</field>
+        <field name="planned_dispatch" eval="(DateTime.now() - relativedelta(hours=30)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="actual_dispatch" eval="(DateTime.now() - relativedelta(hours=28)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="promised_delivery" eval="(DateTime.now() + relativedelta(hours=4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="eta" eval="(DateTime.now() + relativedelta(hours=11)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="agreed_freight">71000</field><field name="loaded_weight_ton">12.5</field>
+        <field name="state">in_transit</field><field name="is_stopped" eval="True"/>
+        <field name="last_latitude">16.5062</field><field name="last_longitude">80.6480</field>
+        <field name="last_ping_time" eval="(DateTime.now() - relativedelta(hours=4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="last_moved_time" eval="(DateTime.now() - relativedelta(hours=4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="gps_distance_km">690</field><field name="remaining_km">520</field>
+    </record>
+    <record id="demo_trip_4" model="cp.trip">
+        <field name="lane_id" ref="demo_lane_rpr_ngp"/><field name="vehicle_type_id" ref="demo_vt_open"/>
+        <field name="transporter_id" ref="demo_tr_sahyadri"/>
+        <field name="planned_dispatch" eval="(DateTime.now() + relativedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="agreed_freight">21500</field>
+    </record>
+    <record id="demo_trip_5" model="cp.trip">
+        <field name="lane_id" ref="demo_lane_rpr_ngp"/><field name="vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="vehicle_id" ref="demo_vehicle_2"/><field name="vehicle_number">MH12 RT 9087</field>
+        <field name="driver_id" ref="demo_driver_suresh"/><field name="driver_name">Suresh Patil</field>
+        <field name="planned_dispatch" eval="(DateTime.now() + relativedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="state">loading</field><field name="loaded_weight_ton">9.2</field>
+    </record>
+
+    <record id="demo_epod_2" model="cp.epod">
+        <field name="trip_id" ref="demo_trip_2"/><field name="channel">driver</field>
+        <field name="receiver_name">P. Srinivas (Stores)</field>
+        <field name="received_weight_ton">14.0</field><field name="received_packages">280</field>
+        <field name="latitude">17.3861</field><field name="longitude">78.4879</field>
+        <field name="check_signature" eval="True"/><field name="check_photo" eval="True"/>
+        <field name="check_location" eval="True"/><field name="check_weight" eval="True"/><field name="check_condition" eval="True"/>
+        <field name="state">verified</field>
+    </record>
+
+    <record id="demo_expense_1" model="cp.trip.expense">
+        <field name="trip_id" ref="demo_trip_1"/><field name="expense_type">toll</field><field name="amount">4850</field>
+        <field name="payment_mode">fastag</field>
+    </record>
+    <record id="demo_expense_2" model="cp.trip.expense">
+        <field name="trip_id" ref="demo_trip_1"/><field name="expense_type">driver_bata</field><field name="amount">1500</field>
+    </record>
+
+    <!-- Freight bill for the delivered trip -->
+    <record id="demo_bill_1" model="cp.freight.bill">
+        <field name="transporter_id" ref="demo_tr_vega"/><field name="bill_number">VR/26-27/0188</field>
+        <field name="line_ids" eval="[(0, 0, {'trip_id': ref('demo_trip_2'), 'billed_amount': 54500, 'billed_km': 860, 'billed_weight_ton': 14.0})]"/>
+    </record>
+
+    <function model="cp.freight.bill" name="action_submit" eval="[[ref('demo_bill_1')]]"/>
+
+    <!-- Transporter ERP -->
+    <record id="demo_lr_1" model="cp.consignment">
+        <field name="consignor_id" ref="demo_cust_shakti"/><field name="consignee_id" ref="demo_cust_kaveri"/>
+        <field name="billing_partner_id" ref="demo_cust_shakti"/><field name="load_type">ptl</field>
+        <field name="booking_hub_id" ref="demo_loc_nagpur"/>
+        <field name="from_location_id" ref="demo_loc_nagpur"/><field name="to_location_id" ref="demo_loc_chennai"/>
+        <field name="freight_basis">kg</field><field name="freight_rate">4.2</field><field name="door_delivery_charge">600</field>
+        <field name="eway_bill_no">3610 2281 9901</field><field name="state">booked</field>
+        <field name="current_hub_id" ref="demo_loc_nagpur"/>
+        <field name="line_ids" eval="[(0, 0, {'description': 'MS angles', 'packing_type': 'loose', 'packages': 40, 'actual_weight_kg': 2400, 'charged_weight_kg': 2400})]"/>
+    </record>
+    <record id="demo_lr_2" model="cp.consignment">
+        <field name="consignor_id" ref="demo_cust_shakti"/><field name="consignee_id" ref="demo_cust_kaveri"/>
+        <field name="billing_partner_id" ref="demo_cust_shakti"/><field name="load_type">ptl</field>
+        <field name="booking_hub_id" ref="demo_loc_nagpur"/>
+        <field name="from_location_id" ref="demo_loc_nagpur"/><field name="to_location_id" ref="demo_loc_chennai"/>
+        <field name="freight_basis">package</field><field name="freight_rate">180</field>
+        <field name="state">booked</field><field name="current_hub_id" ref="demo_loc_nagpur"/>
+        <field name="line_ids" eval="[(0, 0, {'description': 'Bearings, boxed', 'packing_type': 'box', 'packages': 25, 'actual_weight_kg': 620, 'charged_weight_kg': 750})]"/>
+    </record>
+    <record id="demo_lr_3" model="cp.consignment">
+        <field name="consignor_id" ref="demo_cust_shakti"/><field name="consignee_id" ref="demo_cust_kaveri"/>
+        <field name="billing_partner_id" ref="demo_cust_shakti"/><field name="load_type">ftl</field>
+        <field name="from_location_id" ref="demo_loc_raipur"/><field name="to_location_id" ref="demo_loc_hyderabad"/>
+        <field name="freight_basis">fixed</field><field name="freight_rate">61000</field>
+        <field name="trip_id" ref="demo_trip_1"/><field name="state">in_transit</field>
+        <field name="line_ids" eval="[(0, 0, {'description': 'OPC 53 cement', 'packing_type': 'bag', 'packages': 280, 'actual_weight_kg': 14000, 'charged_weight_kg': 14000})]"/>
+    </record>
+    <record id="demo_hire_1" model="cp.hire.slip">
+        <field name="trip_id" ref="demo_trip_3"/><field name="owner_id" ref="demo_owner_balaji"/>
+        <field name="vehicle_number">TS09 UB 3301</field><field name="hire_amount">58000</field>
+        <field name="state">confirmed</field>
+        <field name="payment_ids" eval="[(0, 0, {'payment_type': 'advance', 'amount': 35000, 'payment_mode': 'bank', 'reference': 'UTR 662210'})]"/>
+    </record>
+
+    <!-- Fleet ops -->
+    <record id="demo_fuel_1" model="cp.fuel.log">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="odometer">84200</field><field name="litres">180</field>
+        <field name="price_per_litre">92.5</field><field name="station">Highway Fuels, Raipur</field>
+        <field name="date" eval="(DateTime.now() - relativedelta(days=9)).strftime('%Y-%m-%d 09:00:00')"/>
+    </record>
+    <record id="demo_fuel_2" model="cp.fuel.log">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="odometer">84920</field><field name="litres">176</field>
+        <field name="price_per_litre">92.8</field><field name="station">Adilabad Bypass Fuels</field>
+        <field name="date" eval="(DateTime.now() - relativedelta(days=5)).strftime('%Y-%m-%d 14:00:00')"/>
+    </record>
+    <record id="demo_fuel_3" model="cp.fuel.log">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="odometer">85480</field><field name="litres">182</field>
+        <field name="price_per_litre">92.6</field><field name="station">Nirmal Service Station</field>
+        <field name="date" eval="(DateTime.now() - relativedelta(days=1)).strftime('%Y-%m-%d 07:30:00')"/>
+    </record>
+    <record id="demo_doc_1" model="cp.document">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="doc_type">insurance</field><field name="name">POL-77812290</field>
+        <field name="expiry_date" eval="(DateTime.today() + relativedelta(days=9)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_doc_2" model="cp.document">
+        <field name="vehicle_id" ref="demo_vehicle_2"/><field name="doc_type">puc</field><field name="name">PUC-55120</field>
+        <field name="expiry_date" eval="(DateTime.today() - relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_doc_3" model="cp.document">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="doc_type">permit</field><field name="name">NP-CG-22871</field>
+        <field name="expiry_date" eval="(DateTime.today() + relativedelta(months=7)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_maint_1" model="cp.maintenance.plan">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="name">Engine oil and filter change</field>
+        <field name="interval_km">20000</field><field name="interval_days">90</field>
+        <field name="last_done_odometer">66000</field>
+        <field name="last_done_date" eval="(DateTime.today() - relativedelta(days=80)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="demo_tyre_1" model="cp.tyre">
+        <field name="name">TY-4410021</field><field name="brand">Generic Radial</field><field name="size">295/80 R22.5</field>
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="position">fl</field><field name="state">fitted</field>
+        <field name="fitted_odometer">40000</field><field name="cost">28500</field>
+    </record>
+    <record id="demo_event_1" model="cp.driving.event">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="driver_id" ref="demo_driver_ramesh"/>
+        <field name="trip_id" ref="demo_trip_1"/><field name="event_type">overspeed</field><field name="severity">medium</field>
+        <field name="speed">88</field>
+    </record>
+    <record id="demo_event_2" model="cp.driving.event">
+        <field name="vehicle_id" ref="demo_vehicle_1"/><field name="driver_id" ref="demo_driver_ramesh"/>
+        <field name="trip_id" ref="demo_trip_1"/><field name="event_type">harsh_brake</field><field name="severity">high</field>
+        <field name="speed">54</field>
+    </record>
+
+    <!-- Load plan -->
+    <record id="demo_load_plan" model="cp.load.plan">
+        <field name="vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="item_ids" eval="[
+            (0, 0, {'name': 'Pallet - Pune drop', 'quantity': 6, 'length_m': 1.2, 'width_m': 1.0, 'height_m': 1.1, 'weight_kg': 650, 'drop_sequence': 2}),
+            (0, 0, {'name': 'Pallet - Nagpur drop', 'quantity': 8, 'length_m': 1.2, 'width_m': 1.0, 'height_m': 1.1, 'weight_kg': 600, 'drop_sequence': 1}),
+            (0, 0, {'name': 'Machine crate', 'quantity': 2, 'length_m': 2.0, 'width_m': 1.2, 'height_m': 1.6, 'weight_kg': 1400, 'drop_sequence': 2, 'stackable': False})]"/>
+    </record>
+    <function model="cp.load.plan" name="action_compute" eval="[[ref('demo_load_plan')]]"/>
+
+    <!-- Issues inbox -->
+    <function model="cp.trip" name="_cp_check_late" eval="[[ref('demo_trip_3')]]"/>
+    <record id="demo_issue_stopped" model="cp.exception">
+        <field name="name">TS09 UB 3301 has not moved for 4 h</field>
+        <field name="issue_type">stopped</field><field name="severity">high</field>
+        <field name="detail">Last position near Vijayawada bypass.</field>
+        <field name="suggested_action">Check for breakdown, rest stop or GPS fault.</field>
+        <field name="res_model">cp.trip</field><field name="res_id" ref="demo_trip_3"/>
+        <field name="trip_id" ref="demo_trip_3"/><field name="transporter_id" ref="demo_tr_deccan"/>
+        <field name="detected_at" eval="(DateTime.now() - relativedelta(minutes=50)).strftime('%Y-%m-%d %H:%M:%S')"/>
+    </record>
+    <function model="cp.document" name="_cron_document_expiry"/>
+    <record id="demo_customer_user_partner" model="res.partner">
+        <field name="name">Kaveri Logistics Desk</field>
+        <field name="parent_id" ref="demo_cust_kaveri"/>
+        <field name="email">logistics@kaveri.example.com</field>
+    </record>
+    <record id="demo_indent_portal" model="cp.indent">
+        <field name="lane_id" ref="demo_lane_rpr_hyd"/><field name="vehicle_type_id" ref="demo_vt_32ft"/>
+        <field name="vehicle_count">1</field><field name="customer_id" ref="demo_cust_kaveri"/>
+        <field name="consignee_id" ref="demo_cust_kaveri"/><field name="source_channel">portal</field>
+        <field name="origin">KBS/PO/7781</field>
+        <field name="required_date" eval="(DateTime.now() + relativedelta(days=2)).strftime('%Y-%m-%d 06:00:00')"/>
+        <field name="line_ids" eval="[(0, 0, {'description': 'PPC cement', 'quantity': 1, 'uom_label': 'Lot', 'weight_ton': 15.0})]"/>
+    </record>
+
+    <!-- Gate -->
+    <record id="demo_gate_1" model="cp.gate.entry">
+        <field name="location_id" ref="demo_loc_raipur"/><field name="trip_id" ref="demo_trip_5"/>
+        <field name="vehicle_number">MH12 RT 9087</field><field name="dock_id" ref="demo_dock_1"/>
+        <field name="state">at_dock</field><field name="tare_weight_kg">11800</field>
+        <field name="gate_in_time" eval="(DateTime.now() - relativedelta(minutes=95)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="dock_in_time" eval="(DateTime.now() - relativedelta(minutes=70)).strftime('%Y-%m-%d %H:%M:%S')"/>
+    </record>
+</odoo>

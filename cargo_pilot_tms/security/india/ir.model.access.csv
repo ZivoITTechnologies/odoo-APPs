@@ -1,0 +1,19 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cp_integration_log_user,cp.integration.log user,model_cp_integration_log,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_integration_log_manager,cp.integration.log manager,model_cp_integration_log,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_gsp_account_user,cp.gsp.account user,model_cp_gsp_account,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_gsp_account_manager,cp.gsp.account manager,model_cp_gsp_account,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_ewaybill_action_user,cp.ewaybill.action user,model_cp_ewaybill_action,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_ewaybill_action_manager,cp.ewaybill.action manager,model_cp_ewaybill_action,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_ulip_account_user,cp.ulip.account user,model_cp_ulip_account,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_ulip_account_manager,cp.ulip.account manager,model_cp_ulip_account,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_vehicle_check_user,cp.vehicle.check user,model_cp_vehicle_check,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_vehicle_check_manager,cp.vehicle.check manager,model_cp_vehicle_check,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_sim_provider_user,cp.sim.provider user,model_cp_sim_provider,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_sim_provider_manager,cp.sim.provider manager,model_cp_sim_provider,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_whatsapp_account_user,cp.whatsapp.account user,model_cp_whatsapp_account,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_whatsapp_account_manager,cp.whatsapp.account manager,model_cp_whatsapp_account,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_whatsapp_template_user,cp.whatsapp.template user,model_cp_whatsapp_template,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_whatsapp_template_manager,cp.whatsapp.template manager,model_cp_whatsapp_template,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_whatsapp_message_user,cp.whatsapp.message user,model_cp_whatsapp_message,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_whatsapp_message_manager,cp.whatsapp.message manager,model_cp_whatsapp_message,cargo_pilot_tms.group_cp_manager,1,1,1,1

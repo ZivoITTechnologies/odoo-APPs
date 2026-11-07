@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Addresses -->
+    <record id="demo_partner_warehouse" model="res.partner">
+        <field name="name">Cargo Pilot Warehouse Raipur</field>
+        <field name="is_company" eval="True"/>
+        <field name="street">Plot 14, Urla Industrial Area</field>
+        <field name="city">Raipur</field>
+        <field name="zip">492003</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="phone">+91 98260 11111</field>
+        <field name="email">dispatch@example.com</field>
+    </record>
+    <record id="demo_partner_asha" model="res.partner">
+        <field name="name">Asha Retail</field>
+        <field name="is_company" eval="True"/>
+        <field name="street">22 FC Road, Shivajinagar</field>
+        <field name="city">Pune</field>
+        <field name="zip">411005</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="phone">+91 98220 45671</field>
+        <field name="email">asha.retail@example.com</field>
+    </record>
+    <record id="demo_partner_kiran" model="res.partner">
+        <field name="name">Kiran Stores</field>
+        <field name="is_company" eval="True"/>
+        <field name="street">88 100 Feet Road, Indiranagar</field>
+        <field name="city">Bengaluru</field>
+        <field name="zip">560038</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="phone">+91 99000 23456</field>
+    </record>
+    <record id="demo_partner_meera" model="res.partner">
+        <field name="name">Meera Iyer</field>
+        <field name="street">5 Besant Nagar 2nd Avenue</field>
+        <field name="city">Chennai</field>
+        <field name="zip">600090</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="phone">+91 98400 77770</field>
+    </record>
+    <record id="demo_partner_rohan" model="res.partner">
+        <field name="name">Rohan Traders</field>
+        <field name="is_company" eval="True"/>
+        <field name="street">Shop 9, Sitabuldi Main Road</field>
+        <field name="city">Nagpur</field>
+        <field name="zip">440012</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="phone">+91 98230 55443</field>
+    </record>
+    <record id="demo_partner_neha" model="res.partner">
+        <field name="name">Neha Kapoor</field>
+        <field name="street">B-41 Lajpat Nagar II</field>
+        <field name="city">New Delhi</field>
+        <field name="zip">110024</field>
+        <field name="country_id" ref="base.in"/>
+        <field name="phone">+91 98110 33221</field>
+        <field name="email">neha.k@example.com</field>
+    </record>
+
+    <!-- Courier accounts -->
+    <record id="demo_awb_sequence_maruti" model="ir.sequence">
+        <field name="name">Shree Maruti docket book</field>
+        <field name="code">cp.demo.maruti</field>
+        <field name="prefix">SM</field>
+        <field name="padding">9</field>
+        <field name="number_next">700100</field>
+    </record>
+    <record id="demo_account_swift" model="cp.courier.account">
+        <field name="name">Swift Express (demo simulator)</field>
+        <field name="provider">demo</field>
+        <field name="sequence">1</field>
+        <field name="state">ok</field>
+        <field name="last_check_message">Simulator ready. No real parcels are booked.</field>
+        <field name="pickup_partner_id" ref="demo_partner_warehouse"/>
+        <field name="rate_first_slab">42</field>
+        <field name="rate_additional_slab">36</field>
+        <field name="notify_customer" eval="False"/>
+    </record>
+    <record id="demo_account_maruti" model="cp.courier.account">
+        <field name="name">Shree Maruti (counter booking)</field>
+        <field name="provider">manual</field>
+        <field name="sequence">5</field>
+        <field name="state">ok</field>
+        <field name="courier_display_name">Shree Maruti Courier</field>
+        <field name="awb_sequence_id" ref="demo_awb_sequence_maruti"/>
+        <field name="pickup_partner_id" ref="demo_partner_warehouse"/>
+        <field name="rate_first_slab">38</field>
+        <field name="rate_additional_slab">30</field>
+        <field name="rate_card_days">5</field>
+        <field name="notify_customer" eval="False"/>
+    </record>
+    <record id="demo_account_delhivery" model="cp.courier.account">
+        <field name="name">Delhivery (add your API token)</field>
+        <field name="provider">delhivery</field>
+        <field name="sequence">10</field>
+        <field name="active" eval="False"/>
+        <field name="service_code">Surface</field>
+        <field name="pickup_location_name">RAIPUR-WH</field>
+        <field name="pickup_partner_id" ref="demo_partner_warehouse"/>
+    </record>
+    <record id="demo_account_shiprocket" model="cp.courier.account">
+        <field name="name">Shiprocket (add your API user)</field>
+        <field name="provider">shiprocket</field>
+        <field name="sequence">11</field>
+        <field name="active" eval="False"/>
+        <field name="pickup_location_name">Primary</field>
+        <field name="pickup_partner_id" ref="demo_partner_warehouse"/>
+    </record>
+
+    <!-- Parcels -->
+    <record id="demo_parcel_draft" model="cp.parcel">
+        <field name="reference">SO/2026/0412</field>
+        <field name="sender_partner_id" ref="demo_partner_warehouse"/>
+        <field name="recipient_partner_id" ref="demo_partner_asha"/>
+        <field name="account_id" ref="demo_account_swift"/>
+        <field name="declared_value">6800</field>
+        <field name="contents">Spare parts</field>
+        <field name="package_ids" eval="[(0, 0, {'name': 'Carton', 'quantity': 2, 'weight_kg': 3.2, 'length_cm': 40, 'width_cm': 30, 'height_cm': 25})]"/>
+    </record>
+
+    <record id="demo_parcel_transit" model="cp.parcel">
+        <field name="reference">SO/2026/0398</field>
+        <field name="sender_partner_id" ref="demo_partner_warehouse"/>
+        <field name="recipient_partner_id" ref="demo_partner_kiran"/>
+        <field name="account_id" ref="demo_account_swift"/>
+        <field name="courier_name">Swift</field>
+        <field name="service">Swift Air</field>
+        <field name="awb">SW4410028811</field>
+        <field name="state">in_transit</field>
+        <field name="status_text">Departed origin hub</field>
+        <field name="last_location">Raipur</field>
+        <field name="booked_at" eval="(DateTime.now() - relativedelta(days=1, hours=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="picked_up_at" eval="(DateTime.now() - relativedelta(hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="last_sync_at" eval="(DateTime.now() - relativedelta(minutes=35)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="expected_delivery" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="shipping_cost">186</field>
+        <field name="declared_value">12400</field>
+        <field name="contents">Electrical fittings</field>
+        <field name="package_ids" eval="[(0, 0, {'name': 'Carton', 'quantity': 1, 'weight_kg': 4.5, 'length_cm': 45, 'width_cm': 35, 'height_cm': 30})]"/>
+    </record>
+    <record id="demo_ev_t1" model="cp.parcel.event">
+        <field name="parcel_id" ref="demo_parcel_transit"/>
+        <field name="event_time" eval="(DateTime.now() - relativedelta(days=1, hours=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="description">Booked with Swift, AWB SW4410028811</field>
+        <field name="location">Raipur</field>
+        <field name="status">booked</field>
+        <field name="source">system</field>
+    </record>
+    <record id="demo_ev_t2" model="cp.parcel.event">
+        <field name="parcel_id" ref="demo_parcel_transit"/>
+        <field name="event_time" eval="(DateTime.now() - relativedelta(hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="description">Shipment picked up</field>
+        <field name="location">Raipur</field>
+        <field name="status">picked_up</field>
+    </record>
+    <record id="demo_ev_t3" model="cp.parcel.event">
+        <field name="parcel_id" ref="demo_parcel_transit"/>
+        <field name="event_time" eval="(DateTime.now() - relativedelta(hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="description">Departed origin hub</field>
+        <field name="location">Raipur</field>
+        <field name="status">in_transit</field>
+    </record>
+
+    <record id="demo_parcel_ofd" model="cp.parcel">
+        <field name="reference">SO/2026/0391</field>
+        <field name="sender_partner_id" ref="demo_partner_warehouse"/>
+        <field name="recipient_partner_id" ref="demo_partner_neha"/>
+        <field name="account_id" ref="demo_account_swift"/>
+        <field name="courier_name">Swift</field>
+        <field name="service">Swift Surface</field>
+        <field name="awb">SW4410027305</field>
+        <field name="state">out_for_delivery</field>
+        <field name="status_text">Out for delivery</field>
+        <field name="last_location">New Delhi</field>
+        <field name="payment_mode">cod</field>
+        <field name="cod_amount">2499</field>
+        <field name="declared_value">2499</field>
+        <field name="booked_at" eval="(DateTime.now() - relativedelta(days=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="picked_up_at" eval="(DateTime.now() - relativedelta(days=3, hours=-4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="expected_delivery" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        <field name="shipping_cost">118</field>
+        <field name="contents">Kitchen appliance</field>
+        <field name="package_ids" eval="[(0, 0, {'name': 'Box', 'quantity': 1, 'weight_kg': 2.1, 'length_cm': 35, 'width_cm': 25, 'height_cm': 20})]"/>
+    </record>
+    <record id="demo_ev_o1" model="cp.parcel.event">
+        <field name="parcel_id" ref="demo_parcel_ofd"/>
+        <field name="event_time" eval="(DateTime.now() - relativedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="description">Out for delivery</field>
+        <field name="location">New Delhi</field>
+        <field name="status">out_for_delivery</field>
+    </record>
+
+    <record id="demo_parcel_ndr" model="cp.parcel">
+        <field name="reference">SO/2026/0377</field>
+        <field name="sender_partner_id" ref="demo_partner_warehouse"/>
+        <field name="recipient_partner_id" ref="demo_partner_meera"/>
+        <field name="account_id" ref="demo_account_swift"/>
+        <field name="courier_name">Swift</field>
+        <field name="service">Swift Surface</field>
+        <field name="awb">SW4410025190</field>
+        <field name="state">ndr</field>
+        <field name="status_text">Delivery attempted - receiver not available</field>
+        <field name="ndr_reason">Receiver not available</field>
+        <field name="ndr_attempts">1</field>
+        <field name="last_location">Chennai</field>
+        <field name="payment_mode">cod</field>
+        <field name="cod_amount">1850</field>
+        <field name="declared_value">1850</field>
+        <field name="booked_at" eval="(DateTime.now() - relativedelta(days=4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="expected_delivery" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="shipping_cost">142</field>
+        <field name="contents">Clothing</field>
+    </record>
+    <record id="demo_ev_n1" model="cp.parcel.event">
+        <field name="parcel_id" ref="demo_parcel_ndr"/>
+        <field name="event_time" eval="(DateTime.now() - relativedelta(hours=6)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="description">Delivery attempted - receiver not available</field>
+        <field name="location">Chennai</field>
+        <field name="status">ndr</field>
+    </record>
+    <record id="demo_issue_ndr" model="cp.exception">
+        <field name="name">Delivery failed: SW4410025190 to Meera Iyer</field>
+        <field name="issue_type">ndr</field>
+        <field name="severity">high</field>
+        <field name="detail">Receiver not available</field>
+        <field name="suggested_action">Call the receiver, then choose Re-attempt or Return to sender.</field>
+        <field name="res_model">cp.parcel</field>
+        <field name="res_id" ref="demo_parcel_ndr"/>
+    </record>
+
+    <record id="demo_parcel_delivered" model="cp.parcel">
+        <field name="reference">SO/2026/0360</field>
+        <field name="sender_partner_id" ref="demo_partner_warehouse"/>
+        <field name="recipient_partner_id" ref="demo_partner_rohan"/>
+        <field name="account_id" ref="demo_account_swift"/>
+        <field name="courier_name">Swift</field>
+        <field name="service">Swift Surface</field>
+        <field name="awb">SW4410021187</field>
+        <field name="state">delivered</field>
+        <field name="status_text">Delivered to receiver</field>
+        <field name="payment_mode">cod</field>
+        <field name="cod_amount">5400</field>
+        <field name="declared_value">5400</field>
+        <field name="booked_at" eval="(DateTime.now() - relativedelta(days=5)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="picked_up_at" eval="(DateTime.now() - relativedelta(days=5, hours=-3)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="delivered_at" eval="(DateTime.now() - relativedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="shipping_cost">164</field>
+        <field name="contents">Hardware</field>
+    </record>
+
+    <record id="demo_parcel_maruti" model="cp.parcel">
+        <field name="reference">SO/2026/0405</field>
+        <field name="sender_partner_id" ref="demo_partner_warehouse"/>
+        <field name="recipient_partner_id" ref="demo_partner_rohan"/>
+        <field name="account_id" ref="demo_account_maruti"/>
+        <field name="courier_name">Shree Maruti Courier</field>
+        <field name="awb">SM000700099</field>
+        <field name="state">booked</field>
+        <field name="status_text">Booked at the Raipur counter</field>
+        <field name="booked_at" eval="(DateTime.now() - relativedelta(hours=4)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="expected_delivery" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+        <field name="shipping_cost">98</field>
+        <field name="declared_value">3100</field>
+        <field name="contents">Documents and samples</field>
+    </record>
+</odoo>

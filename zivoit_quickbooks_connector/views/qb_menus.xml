@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_qb_root" name="QuickBooks" sequence="45"
+              web_icon="zivoit_quickbooks_connector,static/description/icon.png"
+              groups="zivoit_quickbooks_connector.group_qb_user"/>
+    <menuitem id="menu_qb_dashboard" name="Dashboard" parent="menu_qb_root" sequence="1"
+              action="action_qb_connection"/>
+    <menuitem id="menu_qb_operations" name="Synchronization" parent="menu_qb_root" sequence="10"/>
+    <menuitem id="menu_qb_jobs" name="Sync Queue" parent="menu_qb_operations" sequence="1" action="action_qb_sync_job"/>
+    <menuitem id="menu_qb_logs" name="Sync Logs" parent="menu_qb_operations" sequence="2" action="action_qb_sync_log"/>
+    <menuitem id="menu_qb_mappings" name="Linked Records" parent="menu_qb_operations" sequence="3" action="action_qb_mapping"/>
+    <menuitem id="menu_qb_to_map" name="Records to Map" parent="menu_qb_operations" sequence="4" action="action_qb_mapping_unmapped"/>
+    <menuitem id="menu_qb_reporting" name="Reporting" parent="menu_qb_root" sequence="20"/>
+    <menuitem id="menu_qb_analysis" name="Sync Analysis" parent="menu_qb_reporting" sequence="1" action="action_qb_sync_report"/>
+    <menuitem id="menu_qb_integrity" name="Integrity Check" parent="menu_qb_reporting" sequence="2" action="action_qb_integrity_wizard"/>
+    <menuitem id="menu_qb_config" name="Configuration" parent="menu_qb_root" sequence="90"
+              groups="zivoit_quickbooks_connector.group_qb_manager"/>
+    <menuitem id="menu_qb_connections" name="Connections" parent="menu_qb_config" sequence="1" action="action_qb_connection"/>
+    <menuitem id="menu_qb_entities" name="Entity Settings" parent="menu_qb_config" sequence="2" action="action_qb_entity_config"/>
+</odoo>

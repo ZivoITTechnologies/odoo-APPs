@@ -31,6 +31,10 @@ class TallyMapping(models.Model):
         res['godown'] = 'location_id'
         return res
 
+    @api.depends('location_id')
+    def _compute_odoo_record(self):
+        return super()._compute_odoo_record()
+
 
 class TallyConnection(models.Model):
     _inherit = 'tally.connection'

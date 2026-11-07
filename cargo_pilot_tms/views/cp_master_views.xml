@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Locations -->
+    <record id="view_cp_location_list" model="ir.ui.view">
+        <field name="name">cp.location.list</field>
+        <field name="model">cp.location</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="location_type" widget="badge"/>
+                <field name="city"/>
+                <field name="state_id" optional="show"/>
+                <field name="geofence_radius" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_location_form" model="ir.ui.view">
+        <field name="name">cp.location.form</field>
+        <field name="model">cp.location</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Raipur Plant"/></h1>
+                    </div>
+                    <group>
+                        <group string="Site">
+                            <field name="code"/>
+                            <field name="location_type"/>
+                            <field name="partner_id"/>
+                            <field name="city"/>
+                            <field name="state_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Geofence">
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="geofence_radius"/>
+                            <field name="pincode"/>
+                            <field name="is_oda"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Docks" name="docks">
+                            <field name="dock_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="dock_type"/>
+                                    <field name="occupied"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_location_search" model="ir.ui.view">
+        <field name="name">cp.location.search</field>
+        <field name="model">cp.location</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="city"/>
+                <filter name="hubs" string="Hubs" domain="[('location_type', '=', 'hub')]"/>
+                <filter name="plants" string="Plants" domain="[('location_type', '=', 'plant')]"/>
+                <filter name="customers" string="Customer Sites" domain="[('location_type', '=', 'customer')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'location_type'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_location" model="ir.actions.act_window">
+        <field name="name">Locations</field>
+        <field name="res_model">cp.location</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your plants, depots, hubs and customer sites</p>
+            <p>Coordinates and a geofence radius let trips change status automatically when vehicles arrive or leave.</p>
+        </field>
+    </record>
+
+    <!-- Vehicle types -->
+    <record id="view_cp_vehicle_type_list" model="ir.ui.view">
+        <field name="name">cp.vehicle.type.list</field>
+        <field name="model">cp.vehicle.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="body_type"/>
+                <field name="capacity_ton"/>
+                <field name="emission_factor" optional="show"/>
+                <field name="length_m"/>
+                <field name="width_m"/>
+                <field name="height_m"/>
+                <field name="volume_cbm"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_cp_vehicle_type" model="ir.actions.act_window">
+        <field name="name">Vehicle Types</field>
+        <field name="res_model">cp.vehicle.type</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Define the truck types you plan with</p>
+            <p>Capacity and deck dimensions drive the load builder and auction requirements.</p>
+        </field>
+    </record>
+
+    <!-- Lanes -->
+    <record id="view_cp_lane_list" model="ir.ui.view">
+        <field name="name">cp.lane.list</field>
+        <field name="model">cp.lane</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="origin_id"/>
+                <field name="destination_id"/>
+                <field name="name" readonly="1" optional="show"/>
+                <field name="distance_km"/>
+                <field name="movement" widget="badge" optional="show"/>
+                <field name="transit_hours"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_lane_search" model="ir.ui.view">
+        <field name="name">cp.lane.search</field>
+        <field name="model">cp.lane</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="origin_id"/>
+                <field name="destination_id"/>
+                <group>
+                    <filter name="group_origin" string="Origin" context="{'group_by': 'origin_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_lane" model="ir.actions.act_window">
+        <field name="name">Lanes</field>
+        <field name="res_model">cp.lane</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create origin to destination lanes</p>
+            <p>Distance is estimated from coordinates; overwrite it with your road distance.</p>
+        </field>
+    </record>
+</odoo>

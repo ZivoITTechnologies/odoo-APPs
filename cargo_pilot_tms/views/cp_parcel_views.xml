@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_parcel_search" model="ir.ui.view">
+        <field name="name">cp.parcel.search</field>
+        <field name="model">cp.parcel</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="awb"/>
+                <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('reference', 'ilike', self), ('awb', 'ilike', self)]" string="Parcel / reference"/>
+                <field name="recipient_partner_id"/>
+                <field name="dest_pin"/>
+                <field name="account_id"/>
+                <field name="courier_name"/>
+                <filter name="to_book" string="To book" domain="[('state', '=', 'draft')]"/>
+                <filter name="moving" string="Moving" domain="[('state', 'in', ('booked', 'picked_up', 'in_transit', 'out_for_delivery'))]"/>
+                <filter name="needs_action" string="Needs action" domain="['|', '|', ('state', 'in', ('ndr', 'rto')), ('is_delayed', '=', True), ('state', '=', 'lost')]"/>
+                <filter name="delayed" string="Late" domain="[('is_delayed', '=', True)]"/>
+                <separator/>
+                <filter name="cod" string="Cash on delivery" domain="[('payment_mode', '=', 'cod')]"/>
+                <filter name="cod_collected" string="COD to receive" domain="[('cod_state', '=', 'collected')]"/>
+                <separator/>
+                <filter name="delivered" string="Delivered" domain="[('state', '=', 'delivered')]"/>
+                <filter name="booked_date" string="Booked" date="booked_at"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_account" string="Courier account" context="{'group_by': 'account_id'}"/>
+                    <filter name="group_courier" string="Courier" context="{'group_by': 'courier_name'}"/>
+                    <filter name="group_dest" string="Destination PIN" context="{'group_by': 'dest_pin'}"/>
+                    <filter name="group_booked" string="Booked on" context="{'group_by': 'booked_at:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_cp_parcel_list" model="ir.ui.view">
+        <field name="name">cp.parcel.list</field>
+        <field name="model">cp.parcel</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state in ('ndr', 'lost')" decoration-warning="state == 'rto' or is_delayed"
+                  decoration-muted="state in ('cancelled', 'returned')" multi_edit="1">
+                <header>
+                    <button name="action_request_pickup" type="object" string="Request pickup"/>
+                    <button name="action_print_label" type="object" string="Print labels"/>
+                    <button name="action_track_now" type="object" string="Update tracking"/>
+                    <button name="action_mark_cod_remitted" type="object" string="COD received"/>
+                </header>
+                <field name="name"/>
+                <field name="reference" optional="show"/>
+                <field name="recipient_partner_id"/>
+                <field name="dest_pin" optional="show"/>
+                <field name="recipient_city" optional="hide"/>
+                <field name="courier_name" optional="show"/>
+                <field name="awb" optional="show"/>
+                <field name="booked_at" optional="hide"/>
+                <field name="expected_delivery" optional="show"/>
+                <field name="payment_mode" optional="hide"/>
+                <field name="cod_amount" sum="COD" optional="show"/>
+                <field name="shipping_cost" sum="Cost" optional="show"/>
+                <field name="cod_state" widget="badge" optional="hide" decoration-success="cod_state == 'remitted'" decoration-warning="cod_state == 'collected'"/>
+                <field name="is_delayed" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="status_text" optional="hide"/>
+                <field name="state" widget="badge" decoration-info="state in ('booked', 'picked_up')"
+                       decoration-warning="state in ('in_transit', 'out_for_delivery', 'rto')"
+                       decoration-success="state == 'delivered'" decoration-danger="state in ('ndr', 'lost')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_parcel_kanban" model="ir.ui.view">
+        <field name="name">cp.parcel.kanban</field>
+        <field name="model">cp.parcel</field>
+        <field name="arch" type="xml">
+            <kanban quick_create="false" class="cp-parcel-kanban" sample="1">
+                <field name="state"/>
+                <field name="is_delayed"/>
+                <field name="payment_mode"/>
+                <field name="awb"/>
+                <field name="provider"/>
+                <field name="account_id"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="cp-kcard-top">
+                            <field name="recipient_partner_id" class="cp-kcard-title text-truncate"/>
+                            <div class="text-nowrap">
+                                <span t-if="record.state.raw_value == 'ndr'" class="cp-chip cp-chip-red">Failed</span>
+                                <span t-elif="record.is_delayed.raw_value" class="cp-chip cp-chip-amber">Late</span>
+                                <span t-if="record.payment_mode.raw_value == 'cod'" class="cp-chip cp-chip-dark ms-1">COD</span>
+                            </div>
+                        </div>
+                        <div class="cp-kcard-meta">
+                            <field name="origin_pin"/> → <field name="dest_pin" class="fw-semibold"/>
+                            <span class="ms-1"><field name="recipient_city"/></span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-1" t-if="record.awb.raw_value">
+                            <span t-attf-class="cp-courier-badge cp-courier-sm cp-courier-{{ record.provider.raw_value }}"><i class="fa fa-cube" title="Courier"/></span>
+                            <field name="courier_name" class="small fw-semibold"/>
+                            <span class="cp-plate small"><field name="awb"/></span>
+                        </div>
+                        <field name="status_text" class="cp-kcard-meta text-truncate d-block mt-1"/>
+                        <footer class="cp-kcard-meta align-items-center">
+                            <field name="state" widget="badge" decoration-info="state in ('draft', 'booked', 'picked_up')"
+                                   decoration-warning="state in ('in_transit', 'out_for_delivery', 'rto')"
+                                   decoration-success="state == 'delivered'" decoration-danger="state in ('ndr', 'lost')"/>
+                            <span class="ms-2"><field name="name"/></span>
+                            <span class="ms-auto" t-if="record.expected_delivery.raw_value and !['delivered', 'cancelled', 'returned'].includes(record.state.raw_value)">Due <field name="expected_delivery"/></span>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_parcel_form" model="ir.ui.view">
+        <field name="name">cp.parcel.form</field>
+        <field name="model">cp.parcel</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_compare_rates" type="object" string="Compare &amp; book" class="btn-primary"
+                            invisible="state != 'draft'" icon="fa-balance-scale"/>
+                    <button name="action_book" type="object" string="Book with this account"
+                            invisible="state != 'draft' or not account_id"/>
+                    <button name="action_print_label" type="object" string="Print label" class="btn-primary"
+                            invisible="state in ('draft', 'cancelled')" icon="fa-print"/>
+                    <button name="action_ndr" type="object" string="Decide: deliver again or return" class="btn-primary"
+                            invisible="state != 'ndr'" icon="fa-reply"/>
+                    <button name="action_track_now" type="object" string="Update tracking" icon="fa-refresh"
+                            invisible="state not in ('booked', 'picked_up', 'in_transit', 'out_for_delivery', 'ndr', 'rto') or not can_track"/>
+                    <button name="action_request_pickup" type="object" string="Request pickup"
+                            invisible="state != 'booked' or not can_pickup or pickup_ref"/>
+                    <button name="action_add_update" type="object" string="Add update"
+                            invisible="state in ('draft', 'cancelled', 'delivered', 'returned')"/>
+                    <button name="action_share_tracking" type="object" string="Tracking link" icon="fa-share-alt"
+                            invisible="state == 'draft'"/>
+                    <button name="action_mark_cod_remitted" type="object" string="COD received"
+                            invisible="cod_state != 'collected'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state not in ('draft', 'booked')"
+                            confirm="Cancel this shipment with the courier?"/>
+                    <button name="action_reset_draft" type="object" string="Back to draft" invisible="state != 'cancelled'"/>
+                    <button name="action_duplicate_to_draft" type="object" string="Reship" invisible="state not in ('returned', 'lost')"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_issues" type="object" class="oe_stat_button" icon="fa-flag"
+                                invisible="issue_count == 0">
+                            <field name="issue_count" widget="statinfo" string="Open Issues"/>
+                        </button>
+                        <button name="action_open_courier_page" type="object" class="oe_stat_button" icon="fa-external-link"
+                                invisible="not tracking_url">
+                            <span class="o_stat_text">Courier page</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Late" bg_color="text-bg-warning" invisible="not is_delayed"/>
+                    <widget name="web_ribbon" title="Delivered" bg_color="text-bg-success" invisible="state != 'delivered'"/>
+                    <widget name="web_ribbon" title="Failed" bg_color="text-bg-danger" invisible="state != 'ndr'"/>
+                    <field name="is_delayed" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="can_track" invisible="1"/>
+                    <field name="can_pickup" invisible="1"/>
+                    <field name="tracking_url" invisible="1"/>
+                    <field name="has_label" invisible="1"/>
+                    <div class="oe_title mb-1">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="cp-hero">
+                        <div class="cp-hero-route">
+                            <i class="fa fa-map-marker text-muted me-2" title="Route"/>
+                            <span><field name="origin_pin" readonly="1" class="d-inline"/> → <field name="dest_pin" readonly="1" class="d-inline"/></span>
+                            <span class="text-muted ms-2 fw-normal"><field name="recipient_city" class="d-inline"/></span>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="not awb">
+                            <span>AWB</span><field name="awb" class="cp-plate" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="not courier_name">
+                            <span>Courier</span><field name="courier_name" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="not expected_delivery or state in ('delivered', 'returned', 'cancelled')">
+                            <span>Due</span><field name="expected_delivery" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="state != 'delivered'">
+                            <span>Delivered</span><field name="delivered_at" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi">
+                            <span>Charged weight</span><div><field name="chargeable_weight_kg" class="d-inline"/> kg</div>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="not shipping_cost">
+                            <span>Cost</span><field name="shipping_cost" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="payment_mode != 'cod'">
+                            <span>Collect</span><field name="cod_amount" readonly="1"/>
+                        </div>
+                    </div>
+                    <field name="state" widget="cp_parcel_stepper" nolabel="1" readonly="1"/>
+                    <div class="cp-help cp-help-warn" invisible="state != 'ndr'">
+                        <i class="fa fa-exclamation-circle" title="Delivery failed"/>
+                        <span>Delivery failed<span invisible="not ndr_reason">: <field name="ndr_reason" class="d-inline"/></span>.
+                            Attempt <field name="ndr_attempts" class="d-inline"/>. <span invisible="not ndr_action">Your decision: <field name="ndr_action" class="d-inline"/>.</span></span>
+                    </div>
+                    <div class="cp-help" invisible="state in ('draft', 'ndr') or not status_text">
+                        <i class="fa fa-info-circle" title="Courier status"/>
+                        <span><field name="status_text" class="d-inline"/><span invisible="not last_location"> · <field name="last_location" class="d-inline"/></span>
+                            <span class="text-muted" invisible="not last_sync_at"> · checked <field name="last_sync_at" widget="relative_time" class="d-inline"/></span></span>
+                    </div>
+                    <group>
+                        <group string="Deliver to">
+                            <field name="recipient_partner_id" context="{'show_address': 1}" options="{'always_reload': True}"
+                                   readonly="state != 'draft'" nolabel="1" colspan="2"/>
+                            <field name="recipient_phone" string="Phone" readonly="state not in ('draft', 'ndr')"/>
+                            <field name="note" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Pick up from">
+                            <field name="sender_partner_id" context="{'show_address': 1}" options="{'always_reload': True}"
+                                   readonly="state != 'draft'" nolabel="1" colspan="2"/>
+                            <field name="account_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="service" readonly="1" invisible="not service"/>
+                            <field name="pickup_ref" invisible="not pickup_ref"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Boxes &amp; payment" name="boxes">
+                            <field name="package_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="weight_kg"/>
+                                    <field name="length_cm"/>
+                                    <field name="width_cm"/>
+                                    <field name="height_cm"/>
+                                </list>
+                            </field>
+                            <div class="cp-weightbar">
+                                <span>Boxes <b><field name="piece_count" class="d-inline"/></b></span>
+                                <span>Actual <b><field name="total_weight_kg" class="d-inline"/> kg</b></span>
+                                <span>Volumetric <b><field name="volumetric_weight_kg" class="d-inline"/> kg</b></span>
+                                <span>Charged <b><field name="chargeable_weight_kg" class="d-inline"/> kg</b></span>
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="payment_mode" widget="radio" options="{'horizontal': true}" readonly="state != 'draft'"/>
+                                    <field name="cod_amount" invisible="payment_mode != 'cod'" required="payment_mode == 'cod'" readonly="state != 'draft'"/>
+                                    <field name="declared_value" readonly="state != 'draft'"/>
+                                    <field name="cod_state" invisible="payment_mode != 'cod'"/>
+                                    <field name="cod_remit_ref" invisible="cod_state not in ('collected', 'remitted')"/>
+                                    <field name="cod_remit_date" invisible="cod_state != 'remitted'"/>
+                                </group>
+                                <group>
+                                    <field name="reference" readonly="state != 'draft'"/>
+                                    <field name="contents" readonly="state != 'draft'"/>
+                                    <field name="invoice_number" readonly="state != 'draft'"/>
+                                    <field name="invoice_date" readonly="state != 'draft'"/>
+                                    <field name="eway_bill_no" readonly="state != 'draft'"/>
+                                    <field name="hsn_code" readonly="state != 'draft'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Tracking history" name="events" invisible="state == 'draft'">
+                            <field name="event_ids" nolabel="1" readonly="1" class="cp-timeline-list">
+                                <list create="false" delete="false">
+                                    <field name="event_time" string="When"/>
+                                    <field name="description" string="What happened"/>
+                                    <field name="location"/>
+                                    <field name="status" widget="badge" optional="show"
+                                           decoration-success="status == 'delivered'" decoration-danger="status in ('ndr', 'lost')"
+                                           decoration-warning="status in ('rto', 'out_for_delivery')"/>
+                                    <field name="source" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Links" name="links">
+                            <group>
+                                <group>
+                                    <field name="public_url" widget="CopyClipboardChar" string="Customer tracking link"/>
+                                    <field name="tracking_url" widget="url" string="Courier page" invisible="not tracking_url"/>
+                                    <field name="label_attachment_id" invisible="not label_attachment_id"/>
+                                </group>
+                                <group>
+                                    <field name="consignment_id" invisible="not consignment_id"/>
+                                    <field name="provider_ref" invisible="not provider_ref"/>
+                                    <field name="booked_at" invisible="not booked_at"/>
+                                    <field name="picked_up_at" invisible="not picked_up_at"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_parcel_pivot" model="ir.ui.view">
+        <field name="name">cp.parcel.pivot</field>
+        <field name="model">cp.parcel</field>
+        <field name="arch" type="xml">
+            <pivot string="Courier performance" sample="1">
+                <field name="courier_name" type="row"/>
+                <field name="state" type="col"/>
+                <field name="shipping_cost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_cp_parcel_graph" model="ir.ui.view">
+        <field name="name">cp.parcel.graph</field>
+        <field name="model">cp.parcel</field>
+        <field name="arch" type="xml">
+            <graph string="Parcels" type="bar" stacked="1" sample="1">
+                <field name="courier_name"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_cp_parcel" model="ir.actions.act_window">
+        <field name="name">Courier Parcels</field>
+        <field name="res_model">cp.parcel</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="context">{'search_default_moving': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Send your first parcel</p>
+            <p>Add the receiver and the boxes, compare every connected courier side by side, and book the best one. Labels, pickups, tracking and failed deliveries are handled from here.</p>
+        </field>
+    </record>
+
+    <record id="action_cp_parcel_attention" model="ir.actions.act_window">
+        <field name="name">Parcels Needing Action</field>
+        <field name="res_model">cp.parcel</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_needs_action': 1}</field>
+    </record>
+
+    <record id="action_cp_parcel_cod" model="ir.actions.act_window">
+        <field name="name">COD to Receive</field>
+        <field name="res_model">cp.parcel</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('payment_mode', '=', 'cod')]</field>
+        <field name="context">{'search_default_cod_collected': 1, 'search_default_group_account': 1}</field>
+    </record>
+
+    <record id="action_cp_parcel_analysis" model="ir.actions.act_window">
+        <field name="name">Courier Performance</field>
+        <field name="res_model">cp.parcel</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="domain">[('state', '!=', 'draft')]</field>
+    </record>
+
+    <record id="action_cp_parcel_new" model="ir.actions.act_window">
+        <field name="name">Send a Parcel</field>
+        <field name="res_model">cp.parcel</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+</odoo>

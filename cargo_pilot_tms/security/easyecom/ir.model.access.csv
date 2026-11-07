@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cp_easyecom_account_user,cp.easyecom.account user,model_cp_easyecom_account,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_easyecom_account_manager,cp.easyecom.account manager,model_cp_easyecom_account,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_easyecom_warehouse_user,cp.easyecom.warehouse user,model_cp_easyecom_warehouse,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_easyecom_warehouse_manager,cp.easyecom.warehouse manager,model_cp_easyecom_warehouse,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_easyecom_log_user,cp.easyecom.log user,model_cp_easyecom_log,cargo_pilot_tms.group_cp_user,1,0,1,0
+access_cp_easyecom_log_manager,cp.easyecom.log manager,model_cp_easyecom_log,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_channel_order_user,cp.channel.order user,model_cp_channel_order,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_channel_order_manager,cp.channel.order manager,model_cp_channel_order,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_channel_order_line_user,cp.channel.order.line user,model_cp_channel_order_line,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_channel_stock_user,cp.channel.stock user,model_cp_channel_stock,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_channel_stock_manager,cp.channel.stock manager,model_cp_channel_stock,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_channel_plan_wizard_user,cp.channel.plan.wizard user,model_cp_channel_plan_wizard,cargo_pilot_tms.group_cp_user,1,1,1,1

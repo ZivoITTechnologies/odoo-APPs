@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- E-way bill GSP -->
+    <record id="view_cp_gsp_account_list" model="ir.ui.view">
+        <field name="name">cp.gsp.account.list</field>
+        <field name="model">cp.gsp.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="gstin"/>
+                <field name="provider"/>
+                <field name="auto_part_b"/>
+                <field name="auto_extend"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_gsp_account_form" model="ir.ui.view">
+        <field name="name">cp.gsp.account.form</field>
+        <field name="model">cp.gsp.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test" string="Check Settings" type="object" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-help cp-help-info">
+                        <i class="fa fa-info-circle" title="Info"/>
+                        <span>E-way bills are generated in your ERP (Zoho Books, Tally or the portal). Cargo Pilot keeps them valid:
+                            it updates Part-B when a truck is assigned, extends validity for trucks still on the road and makes a
+                            consolidated e-way bill for trucks carrying several orders. Use the simulator to try it without a GSP.</span>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="provider" widget="radio"/>
+                            <field name="gstin"/>
+                            <field name="base_url" invisible="provider == 'simulator'" required="provider == 'gsp'"
+                                   placeholder="https://api.your-gsp.in/ewaybill"/>
+                            <field name="auth_style" invisible="provider == 'simulator'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Automation">
+                            <field name="auto_part_b"/>
+                            <field name="auto_extend"/>
+                            <field name="last_message" invisible="not last_message"/>
+                        </group>
+                    </group>
+                    <notebook invisible="provider == 'simulator'">
+                        <page string="Credentials" name="credentials">
+                            <group>
+                                <group invisible="auth_style != 'headers'">
+                                    <field name="client_code"/>
+                                    <field name="user_code"/>
+                                    <field name="password" password="True"/>
+                                </group>
+                                <group invisible="auth_style != 'bearer'">
+                                    <field name="client_code"/>
+                                    <field name="client_secret" password="True"/>
+                                    <field name="token" password="True"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="API Paths" name="paths">
+                            <group>
+                                <field name="path_update_vehicle"/>
+                                <field name="path_extend"/>
+                                <field name="path_consolidated"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_gsp_account" model="ir.actions.act_window">
+        <field name="name">E-way Bill (GSP)</field>
+        <field name="res_model">cp.gsp.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect your e-way bill GSP</p>
+            <p>Update Part-B, extend validity and consolidate e-way bills straight from shipments.</p>
+        </field>
+    </record>
+
+    <!-- ULIP -->
+    <record id="view_cp_ulip_account_list" model="ir.ui.view">
+        <field name="name">cp.ulip.account.list</field>
+        <field name="model">cp.ulip.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="environment"/>
+                <field name="use_fastag"/>
+                <field name="check_vahan"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_ulip_account_form" model="ir.ui.view">
+        <field name="name">cp.ulip.account.form</field>
+        <field name="model">cp.ulip.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test" string="Test Connection" type="object" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-help cp-help-info">
+                        <i class="fa fa-road" title="ULIP"/>
+                        <span>ULIP is the Government of India logistics data platform. FASTag shows the toll plazas a truck crossed,
+                            so market trucks without GPS still appear on the map. Vahan checks fitness, insurance, PUC, permit and
+                            road tax when a truck is assigned. Register at goulip.in to get a username and password.</span>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="provider" widget="radio"/>
+                            <field name="environment" invisible="provider == 'simulator'"/>
+                            <field name="username" invisible="provider == 'simulator'"/>
+                            <field name="password" password="True" invisible="provider == 'simulator'"/>
+                            <field name="base_url_override" invisible="provider == 'simulator'" placeholder="Leave empty for the standard address"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Use">
+                            <field name="use_fastag"/>
+                            <field name="fastag_all_trips" invisible="not use_fastag"/>
+                            <field name="check_vahan"/>
+                            <field name="token_expiry" invisible="not token_expiry"/>
+                            <field name="last_message" invisible="not last_message"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_ulip_account" model="ir.actions.act_window">
+        <field name="name">ULIP (FASTag &amp; Vahan)</field>
+        <field name="res_model">cp.ulip.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_cp_vehicle_check_list" model="ir.ui.view">
+        <field name="name">cp.vehicle.check.list</field>
+        <field name="model">cp.vehicle.check</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="not ok">
+                <field name="checked_at"/>
+                <field name="vehicle_number"/>
+                <field name="trip_id"/>
+                <field name="owner_name" optional="show"/>
+                <field name="rc_status"/>
+                <field name="fitness_upto"/>
+                <field name="insurance_upto"/>
+                <field name="puc_upto"/>
+                <field name="permit_upto"/>
+                <field name="tax_upto" optional="hide"/>
+                <field name="ok" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_vehicle_check_form" model="ir.ui.view">
+        <field name="name">cp.vehicle.check.form</field>
+        <field name="model">cp.vehicle.check</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <sheet>
+                    <widget name="web_ribbon" title="Papers OK" bg_color="text-bg-success" invisible="not ok"/>
+                    <widget name="web_ribbon" title="Problem" bg_color="text-bg-danger" invisible="ok"/>
+                    <div class="oe_title"><h1><field name="vehicle_number" class="cp-plate" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="owner_name"/>
+                            <field name="rc_status"/>
+                            <field name="vehicle_class"/>
+                            <field name="trip_id"/>
+                            <field name="checked_at"/>
+                        </group>
+                        <group>
+                            <field name="fitness_upto"/>
+                            <field name="insurance_upto"/>
+                            <field name="puc_upto"/>
+                            <field name="permit_upto"/>
+                            <field name="tax_upto"/>
+                        </group>
+                    </group>
+                    <field name="problems" invisible="not problems" class="text-danger"/>
+                    <field name="ok" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_vehicle_check_search" model="ir.ui.view">
+        <field name="name">cp.vehicle.check.search</field>
+        <field name="model">cp.vehicle.check</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_number"/>
+                <field name="trip_id"/>
+                <filter name="problem" string="With Problems" domain="[('ok', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_vehicle_check" model="ir.actions.act_window">
+        <field name="name">Vahan Checks</field>
+        <field name="res_model">cp.vehicle.check</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- SIM -->
+    <record id="view_cp_sim_provider_list" model="ir.ui.view">
+        <field name="name">cp.sim.provider.list</field>
+        <field name="model">cp.sim.provider</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="base_url"/>
+                <field name="interval_minutes"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_sim_provider_form" model="ir.ui.view">
+        <field name="name">cp.sim.provider.form</field>
+        <field name="model">cp.sim.provider</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test" string="Test Connection" type="object" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-help cp-help-info">
+                        <i class="fa fa-mobile" title="SIM"/>
+                        <span>For market trucks without GPS: the driver approves location sharing once by SMS and the truck is
+                            tracked from the phone network. Set the tracking of a shipment to "SIM" and the consent SMS goes out
+                            when the truck is assigned. Enter the paths and field names your provider documents.</span>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="provider" widget="radio"/>
+                            <field name="base_url" invisible="provider == 'simulator'" required="provider == 'http'"/>
+                            <field name="api_key" password="True" invisible="provider == 'simulator'"/>
+                            <field name="auth_header" invisible="provider == 'simulator'"/>
+                            <field name="auth_prefix" invisible="provider == 'simulator'"/>
+                            <field name="interval_minutes"/>
+                            <field name="last_message" invisible="not last_message"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Provider Mapping" invisible="provider == 'simulator'">
+                            <field name="consent_path"/>
+                            <field name="status_path"/>
+                            <field name="location_path"/>
+                            <field name="key_consent"/>
+                            <field name="key_lat"/>
+                            <field name="key_lon"/>
+                            <field name="key_time"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_sim_provider" model="ir.actions.act_window">
+        <field name="name">SIM Tracking</field>
+        <field name="res_model">cp.sim.provider</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- WhatsApp -->
+    <record id="view_cp_whatsapp_account_list" model="ir.ui.view">
+        <field name="name">cp.whatsapp.account.list</field>
+        <field name="model">cp.whatsapp.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="phone_number_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_whatsapp_account_form" model="ir.ui.view">
+        <field name="name">cp.whatsapp.account.form</field>
+        <field name="model">cp.whatsapp.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test" string="Test Connection" type="object" class="btn-primary"/>
+                    <button name="action_add_default_templates" string="Add Standard Templates" type="object"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_messages" type="object" class="oe_stat_button" icon="fa-whatsapp">
+                            <field name="message_count" widget="statinfo" string="Messages"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-help cp-help-info">
+                        <i class="fa fa-whatsapp" title="WhatsApp"/>
+                        <span>Transporters get booking offers with an accept link, drivers get their trip page, customers hear
+                            when goods leave and arrive, and transporters are reminded about missing PODs. Each event uses a
+                            template approved in WhatsApp Manager; list the values in the order of {{1}}, {{2}}...</span>
+                    </div>
+                    <group>
+                        <group string="Meta WhatsApp Cloud API">
+                            <field name="provider" widget="radio"/>
+                            <field name="phone_number_id" invisible="provider == 'simulator'" required="provider == 'meta'"/>
+                            <field name="access_token" password="True" invisible="provider == 'simulator'"/>
+                            <field name="api_version" invisible="provider == 'simulator'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Delivery Receipts" invisible="provider == 'simulator'">
+                            <field name="webhook_url" widget="CopyClipboardChar"/>
+                            <field name="verify_token"/>
+                            <field name="app_secret" password="True"/>
+                        </group>
+                    </group>
+                    <field name="template_ids">
+                        <list editable="bottom">
+                            <field name="event"/>
+                            <field name="template_name"/>
+                            <field name="language"/>
+                            <field name="params"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </list>
+                    </field>
+                    <field name="last_message" invisible="not last_message" class="text-muted"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_whatsapp_account" model="ir.actions.act_window">
+        <field name="name">WhatsApp</field>
+        <field name="res_model">cp.whatsapp.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_cp_whatsapp_message_list" model="ir.ui.view">
+        <field name="name">cp.whatsapp.message.list</field>
+        <field name="model">cp.whatsapp.message</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="state == 'failed'" decoration-muted="state == 'queued'">
+                <field name="create_date" string="Time"/>
+                <field name="event"/>
+                <field name="phone"/>
+                <field name="partner_id" optional="show"/>
+                <field name="trip_id"/>
+                <field name="template_name" optional="hide"/>
+                <field name="body" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state in ('delivered', 'read')"
+                       decoration-info="state == 'sent'" decoration-danger="state == 'failed'"/>
+                <field name="error" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_whatsapp_message_search" model="ir.ui.view">
+        <field name="name">cp.whatsapp.message.search</field>
+        <field name="model">cp.whatsapp.message</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="phone"/>
+                <field name="trip_id"/>
+                <field name="partner_id"/>
+                <filter name="failed" string="Failed" domain="[('state', '=', 'failed')]"/>
+                <filter name="read" string="Read" domain="[('state', '=', 'read')]"/>
+                <group>
+                    <filter name="by_event" string="Event" context="{'group_by': 'event'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_whatsapp_message" model="ir.actions.act_window">
+        <field name="name">WhatsApp Messages</field>
+        <field name="res_model">cp.whatsapp.message</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Request log -->
+    <record id="view_cp_integration_log_list" model="ir.ui.view">
+        <field name="name">cp.integration.log.list</field>
+        <field name="model">cp.integration.log</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="not success">
+                <field name="create_date" string="Time"/>
+                <field name="service"/>
+                <field name="operation"/>
+                <field name="method"/>
+                <field name="url" optional="hide"/>
+                <field name="status_code"/>
+                <field name="duration_ms" optional="show"/>
+                <field name="success" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_integration_log_form" model="ir.ui.view">
+        <field name="name">cp.integration.log.form</field>
+        <field name="model">cp.integration.log</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group><field name="service"/><field name="operation"/><field name="method"/><field name="url"/></group>
+                        <group><field name="status_code"/><field name="duration_ms"/><field name="success"/><field name="res_model"/><field name="res_id"/></group>
+                    </group>
+                    <group string="Request"><field name="request_body" nolabel="1" colspan="2"/></group>
+                    <group string="Response"><field name="response_body" nolabel="1" colspan="2"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_integration_log_search" model="ir.ui.view">
+        <field name="name">cp.integration.log.search</field>
+        <field name="model">cp.integration.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="operation"/>
+                <filter name="failed" string="Failed" domain="[('success', '=', False)]"/>
+                <group>
+                    <filter name="by_service" string="Service" context="{'group_by': 'service'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_integration_log" model="ir.actions.act_window">
+        <field name="name">India Request Log</field>
+        <field name="res_model">cp.integration.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

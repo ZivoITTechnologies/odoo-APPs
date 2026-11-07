@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_qb" model="ir.ui.view">
+        <field name="name">account.move.form.quickbooks</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_qb_view_mappings" type="object" class="oe_stat_button" icon="fa-refresh"
+                        groups="zivoit_quickbooks_connector.group_qb_user" invisible="qb_mapping_count == 0">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">QuickBooks</span>
+                        <field name="qb_sync_state" readonly="1" class="o_stat_text"/>
+                    </div>
+                </button>
+                <field name="qb_mapping_count" invisible="1"/>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_qb_export" type="object" string="Send to QuickBooks"
+                        groups="zivoit_quickbooks_connector.group_qb_user"
+                        invisible="state != 'posted' or qb_sync_state == 'synced'"/>
+                <button name="action_qb_send_email" type="object" string="E-mail via QuickBooks"
+                        groups="zivoit_quickbooks_connector.group_qb_user"
+                        invisible="qb_mapping_count == 0 or move_type not in ('out_invoice', 'out_refund') or state != 'posted'"/>
+                <button name="action_qb_fetch_pdf" type="object" string="QuickBooks PDF"
+                        groups="zivoit_quickbooks_connector.group_qb_user"
+                        invisible="qb_mapping_count == 0 or move_type not in ('out_invoice', 'out_refund')"/>
+                <button name="action_qb_refresh" type="object" string="Refresh from QuickBooks"
+                        groups="zivoit_quickbooks_connector.group_qb_manager" invisible="qb_mapping_count == 0"/>
+            </xpath>
+            <xpath expr="//field[@name='payment_reference']" position="after">
+                <field name="qb_payment_link" widget="url" invisible="not qb_payment_link"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_invoice_list_qb" model="ir.ui.view">
+        <field name="name">account.move.list.quickbooks</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="qb_sync_state" optional="show" widget="badge" groups="zivoit_quickbooks_connector.group_qb_user"
+                       decoration-success="qb_sync_state == 'synced'" decoration-warning="qb_sync_state in ('dirty', 'conflict')"
+                       decoration-danger="qb_sync_state == 'error'"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_move_search_qb" model="ir.ui.view">
+        <field name="name">account.move.search.quickbooks</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter name="qb_synced" string="In QuickBooks" domain="[('qb_sync_state', '=', 'synced')]"/>
+                <filter name="qb_not_synced" string="Not in QuickBooks" domain="[('qb_sync_state', '=', 'not_synced')]"/>
+                <filter name="qb_error" string="QuickBooks errors" domain="[('qb_sync_state', 'in', ('error', 'conflict'))]"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_server_move_qb_export" model="ir.actions.server">
+        <field name="name">Send to QuickBooks</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="group_ids" eval="[(4, ref('zivoit_quickbooks_connector.group_qb_user'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.filtered(lambda m: m.state == 'posted').action_qb_export()</field>
+    </record>
+</odoo>

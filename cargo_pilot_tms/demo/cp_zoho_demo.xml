@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_zoho_simulator" model="cp.zoho.account">
+        <field name="name">Zoho (simulator)</field>
+        <field name="provider">simulator</field>
+        <field name="skip_odoo_bill" eval="False"/>
+        <field name="organization_id">60012345678</field>
+        <field name="use_creator" eval="True"/>
+        <field name="creator_owner">acme</field>
+        <field name="creator_app">dispatch-board</field>
+        <field name="push_invoice_freight" eval="True"/>
+        <field name="invoice_customfield_id">1234567000000098765</field>
+    </record>
+</odoo>

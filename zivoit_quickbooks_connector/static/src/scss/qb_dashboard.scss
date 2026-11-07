@@ -1,0 +1,11 @@
+.o_qb_dashboard {
+    .o_kanban_record { border-radius: 10px; }
+    .o_qb_stat {
+        display: block;
+        padding: 6px 2px;
+        border-radius: 8px;
+        background: rgba(44, 160, 28, 0.06);
+        text-decoration: none;
+        &:hover { background: rgba(44, 160, 28, 0.14); }
+    }
+}

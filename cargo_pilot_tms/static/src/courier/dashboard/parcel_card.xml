@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="cargo_pilot_tms.ControlTower" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('cp-ct-tiles')]" position="after">
+            <div t-if="d.parcels and d.parcels.enabled" class="cp-ct-card cp-ct-parcels">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0"><i class="fa fa-cube me-1"/>Courier parcels</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="small text-muted d-none d-md-inline" t-if="d.parcels.delivered_month">
+                            <t t-esc="d.parcels.delivered_month"/> delivered this month · <t t-esc="d.parcels.success_pct"/>% first time
+                        </span>
+                        <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.sendParcel()">
+                            <i class="fa fa-plus me-1"/>Send a parcel
+                        </button>
+                    </div>
+                </div>
+                <div class="cp-ct-pstrip">
+                    <button class="cp-ct-pchip" t-on-click="() => this.onTile('parcels_draft')" t-if="d.parcels.to_book">
+                        <b t-esc="d.parcels.to_book"/><span>To book</span>
+                    </button>
+                    <button class="cp-ct-pchip" t-on-click="() => this.onTile('parcels_active')">
+                        <b t-esc="d.parcels.active"/><span>On the way</span>
+                    </button>
+                    <button class="cp-ct-pchip" t-on-click="() => this.onTile('parcels_ofd')">
+                        <b t-esc="d.parcels.out_for_delivery"/><span>Out for delivery</span>
+                    </button>
+                    <button class="cp-ct-pchip" t-att-class="{'cp-ct-pchip-red': d.parcels.ndr}" t-on-click="() => this.onTile('parcels_ndr')">
+                        <b t-esc="d.parcels.ndr"/><span>Delivery failed</span>
+                    </button>
+                    <button class="cp-ct-pchip" t-att-class="{'cp-ct-pchip-amber': d.parcels.delayed}" t-on-click="() => this.onTile('parcels_late')">
+                        <b t-esc="d.parcels.delayed"/><span>Late</span>
+                    </button>
+                    <button class="cp-ct-pchip" t-on-click="() => this.onTile('parcels_cod')">
+                        <b t-esc="money(d.parcels.cod_due)"/><span>COD to receive</span>
+                    </button>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

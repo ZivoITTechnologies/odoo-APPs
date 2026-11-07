@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Orders -->
+    <record id="view_cp_channel_order_list" model="ir.ui.view">
+        <field name="name">cp.channel.order.list</field>
+        <field name="model">cp.channel.order</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-muted="state in ('delivered', 'cancel')" decoration-info="state == 'new'">
+                <header>
+                    <button name="action_open_wizard" string="Plan Transport" type="object" class="btn-primary"/>
+                    <button name="action_push_tracking" string="Send Status" type="object"/>
+                </header>
+                <field name="order_date"/>
+                <field name="reference"/>
+                <field name="invoice_ref" optional="hide"/>
+                <field name="marketplace"/>
+                <field name="channel" optional="show"/>
+                <field name="customer_name" optional="show"/>
+                <field name="city"/>
+                <field name="state_id" optional="hide"/>
+                <field name="origin_id" optional="show"/>
+                <field name="boxes" optional="hide"/>
+                <field name="weight_kg" sum="Total"/>
+                <field name="order_value" sum="Total"/>
+                <field name="awb_number" optional="show"/>
+                <field name="trip_id" optional="show"/>
+                <field name="freight_cost" optional="hide" sum="Total"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-info="state == 'new'" decoration-warning="state == 'planned'"
+                       decoration-primary="state == 'shipped'" decoration-success="state == 'delivered'"/>
+                <field name="push_error" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_channel_order_kanban" model="ir.ui.view">
+        <field name="name">cp.channel.order.kanban</field>
+        <field name="model">cp.channel.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" create="0" group_create="0" records_draggable="0">
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="reference" class="fw-bold"/>
+                            <field name="channel" widget="badge"/>
+                        </div>
+                        <div class="text-muted small"><field name="marketplace"/> · <field name="customer_name"/></div>
+                        <div class="small"><i class="fa fa-map-marker me-1" title="To"/><field name="city"/> <field name="pincode"/></div>
+                        <div class="d-flex justify-content-between small mt-1">
+                            <span><field name="weight_kg"/> kg</span>
+                            <field name="order_value" widget="monetary"/>
+                        </div>
+                        <field name="currency_id" invisible="1"/>
+                        <div class="small text-primary" invisible="not trip_id"><i class="fa fa-truck me-1" title="Shipment"/><field name="trip_id"/></div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="view_cp_channel_order_form" model="ir.ui.view">
+        <field name="name">cp.channel.order.form</field>
+        <field name="model">cp.channel.order</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_open_wizard" string="Plan Transport" type="object" class="btn-primary"
+                            invisible="state != 'new'"/>
+                    <button name="action_push_tracking" string="Send Status to EasyEcom" type="object"
+                            invisible="not trip_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,planned,shipped,delivered"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_trip" type="object" class="oe_stat_button" icon="fa-truck" invisible="not trip_id">
+                            <span class="o_stat_text">Shipment</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="reference" readonly="1"/></h1>
+                        <div class="text-muted"><field name="marketplace" readonly="1"/> · <field name="channel"/></div>
+                    </div>
+                    <group>
+                        <group string="Deliver To">
+                            <field name="customer_name"/>
+                            <field name="phone" widget="phone"/>
+                            <field name="address"/>
+                            <field name="city"/>
+                            <field name="state_id"/>
+                            <field name="pincode"/>
+                            <field name="destination_id"/>
+                        </group>
+                        <group string="Order">
+                            <field name="external_id"/>
+                            <field name="order_date"/>
+                            <field name="invoice_ref"/>
+                            <field name="location_key"/>
+                            <field name="origin_id"/>
+                            <field name="boxes"/>
+                            <field name="weight_kg"/>
+                            <field name="order_value"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="eway_bill_no"/>
+                        </group>
+                        <group string="Transport">
+                            <field name="indent_id"/>
+                            <field name="trip_id"/>
+                            <field name="awb_number"/>
+                            <field name="freight_cost"/>
+                            <field name="last_push"/>
+                            <field name="last_push_status"/>
+                            <field name="push_error" invisible="not push_error" class="text-danger"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items" name="items">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sku"/>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Serial Numbers" name="serials" invisible="not serial_numbers">
+                            <field name="serial_numbers"/>
+                        </page>
+                        <page string="EasyEcom Data" name="raw">
+                            <field name="raw"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_channel_order_search" model="ir.ui.view">
+        <field name="name">cp.channel.order.search</field>
+        <field name="model">cp.channel.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reference" filter_domain="['|', '|', ('reference', 'ilike', self), ('invoice_ref', 'ilike', self), ('awb_number', 'ilike', self)]"/>
+                <field name="customer_name"/>
+                <field name="marketplace"/>
+                <field name="account_id"/>
+                <filter name="to_plan" string="To Plan" domain="[('state', '=', 'new')]"/>
+                <filter name="on_way" string="On the Way" domain="[('state', 'in', ('planned', 'shipped'))]"/>
+                <filter name="push_failed" string="Status Not Sent" domain="[('push_error', '!=', False)]"/>
+                <separator/>
+                <filter name="marketplace_ch" string="Marketplaces" domain="[('channel', '=', 'marketplace')]"/>
+                <filter name="retail_ch" string="Modern Retail" domain="[('channel', '=', 'modern_retail')]"/>
+                <group>
+                    <filter name="by_channel" string="Channel" context="{'group_by': 'channel'}"/>
+                    <filter name="by_origin" string="Ship From" context="{'group_by': 'origin_id'}"/>
+                    <filter name="by_state_id" string="Delivery State" context="{'group_by': 'state_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_channel_order" model="ir.actions.act_window">
+        <field name="name">Channel Orders</field>
+        <field name="res_model">cp.channel.order</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_to_plan': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders from EasyEcom yet</p>
+            <p>Orders arrive every 15 minutes, by webhook, or when EasyEcom books Cargo Pilot as the carrier.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_channel_plan_wizard_form" model="ir.ui.view">
+        <field name="name">cp.channel.plan.wizard.form</field>
+        <field name="model">cp.channel.plan.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="cp-stat-row">
+                    <div class="cp-stat"><span>Orders</span><field name="order_count"/></div>
+                    <div class="cp-stat"><span>Weight (kg)</span><field name="total_weight_kg"/></div>
+                    <div class="cp-stat"><span>Value</span><field name="total_value"/></div>
+                </div>
+                <group>
+                    <field name="shipment_mode" widget="radio" options="{'horizontal': true}"/>
+                    <field name="vehicle_type_id" invisible="shipment_mode != 'ftl'" required="shipment_mode == 'ftl'"/>
+                </group>
+                <div class="text-muted small">Orders from the same warehouse to the same place and channel share one load request.</div>
+                <field name="order_ids" invisible="1"/>
+                <footer>
+                    <button name="action_plan" string="Create Load Requests" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Stock -->
+    <record id="view_cp_channel_stock_list" model="ir.ui.view">
+        <field name="name">cp.channel.stock.list</field>
+        <field name="model">cp.channel.stock</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="sku"/>
+                <field name="product_name"/>
+                <field name="product_id" optional="hide"/>
+                <field name="warehouse_name"/>
+                <field name="location_key" optional="hide"/>
+                <field name="available_qty" sum="Total"/>
+                <field name="reserved_qty" sum="Total" optional="show"/>
+                <field name="virtual_qty" optional="hide"/>
+                <field name="updated_at"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_channel_stock_search" model="ir.ui.view">
+        <field name="name">cp.channel.stock.search</field>
+        <field name="model">cp.channel.stock</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="sku"/>
+                <field name="product_name"/>
+                <field name="warehouse_name"/>
+                <field name="account_id"/>
+                <filter name="out" string="Out of Stock" domain="[('available_qty', '&lt;=', 0)]"/>
+                <group>
+                    <filter name="by_wh" string="Warehouse" context="{'group_by': 'warehouse_name'}"/>
+                    <filter name="by_sku" string="SKU" context="{'group_by': 'sku'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_channel_stock" model="ir.actions.act_window">
+        <field name="name">Channel Stock</field>
+        <field name="res_model">cp.channel.stock</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Connection -->
+    <record id="view_cp_easyecom_account_list" model="ir.ui.view">
+        <field name="name">cp.easyecom.account.list</field>
+        <field name="model">cp.easyecom.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="base_url"/>
+                <field name="last_order_sync"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_easyecom_account_form" model="ir.ui.view">
+        <field name="name">cp.easyecom.account.form</field>
+        <field name="model">cp.easyecom.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test" string="Test Connection" type="object" class="btn-primary"/>
+                    <button name="action_pull_orders" string="Get Orders Now" type="object" invisible="provider == 'simulator'"/>
+                    <button name="action_pull_inventory" string="Get Stock Now" type="object" invisible="provider == 'simulator'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_cp_channel_order)d" type="action" class="oe_stat_button" icon="fa-shopping-cart"
+                                context="{'search_default_account_id': id}">
+                            <field name="order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <button name="%(action_cp_channel_stock)d" type="action" class="oe_stat_button" icon="fa-cubes"
+                                context="{'search_default_account_id': id}">
+                            <field name="stock_count" widget="statinfo" string="Stock Lines"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-help cp-help-info">
+                        <i class="fa fa-shopping-cart" title="EasyEcom"/>
+                        <span>EasyEcom keeps orders and stock of every marketplace, retail chain and website. Cargo Pilot takes
+                            the orders that need a truck, plans FTL or LTL loads, and sends the docket, status and delivery back
+                            so EasyEcom and the marketplaces stay up to date. EasyEcom can also book Cargo Pilot directly as a
+                            custom carrier.</span>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="provider" widget="radio"/>
+                            <field name="base_url" invisible="provider == 'simulator'"/>
+                            <field name="api_key" password="True" invisible="provider == 'simulator'"/>
+                            <field name="email" invisible="provider == 'simulator'"/>
+                            <field name="password" password="True" invisible="provider == 'simulator'"/>
+                            <field name="location_key" invisible="provider == 'simulator'"/>
+                            <field name="jwt_expiry" invisible="not jwt_expiry"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="last_message" invisible="not last_message"/>
+                        </group>
+                        <group string="What to Sync">
+                            <field name="pull_orders" widget="boolean_toggle"/>
+                            <field name="order_status_filter" invisible="not pull_orders"/>
+                            <field name="pull_inventory" widget="boolean_toggle"/>
+                            <field name="push_tracking" widget="boolean_toggle"/>
+                            <field name="carrier_mode"/>
+                            <field name="plan_grouping"/>
+                            <field name="plan_split_channel"/>
+                            <field name="last_order_sync"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Warehouses" name="warehouses">
+                            <div class="text-muted small mb-2">Link each EasyEcom warehouse (location key) to the Cargo Pilot location trucks load at.</div>
+                            <field name="warehouse_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="location_key"/>
+                                    <field name="location_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Calls from EasyEcom" name="inbound">
+                            <group>
+                                <group string="Custom Carrier">
+                                    <field name="carrier_url" widget="CopyClipboardChar"/>
+                                    <div class="text-muted small" colspan="2">EasyEcom calls /create_shipment and /cancel_shipment
+                                        under this address.</div>
+                                </group>
+                                <group string="Webhooks">
+                                    <field name="webhook_order_url" widget="CopyClipboardChar"/>
+                                    <field name="webhook_inventory_url" widget="CopyClipboardChar"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="inbound_token" widget="CopyClipboardChar"/>
+                                    <button name="action_new_token" string="New Token" type="object" class="btn-link"
+                                            confirm="EasyEcom must be updated with the new token. Continue?"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Advanced" name="advanced">
+                            <group>
+                                <group string="API Paths">
+                                    <field name="path_token"/>
+                                    <field name="path_orders"/>
+                                    <field name="path_inventory"/>
+                                    <field name="path_tracking"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Shipment Status to EasyEcom">
+                                    <field name="status_map" widget="code" options="{'mode': 'json'}" nolabel="1" colspan="2"/>
+                                </group>
+                                <group string="Marketplace to Channel">
+                                    <field name="channel_map" widget="code" options="{'mode': 'json'}" nolabel="1" colspan="2"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_easyecom_account" model="ir.actions.act_window">
+        <field name="name">EasyEcom</field>
+        <field name="res_model">cp.easyecom.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_cp_easyecom_log_list" model="ir.ui.view">
+        <field name="name">cp.easyecom.log.list</field>
+        <field name="model">cp.easyecom.log</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="not success">
+                <field name="create_date" string="Time"/>
+                <field name="operation"/>
+                <field name="method"/>
+                <field name="url" optional="hide"/>
+                <field name="status_code"/>
+                <field name="duration_ms"/>
+                <field name="success" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_easyecom_log_form" model="ir.ui.view">
+        <field name="name">cp.easyecom.log.form</field>
+        <field name="model">cp.easyecom.log</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <group>
+                        <group><field name="operation"/><field name="method"/><field name="url"/></group>
+                        <group><field name="status_code"/><field name="duration_ms"/><field name="success"/></group>
+                    </group>
+                    <group string="Request"><field name="request_body" nolabel="1" colspan="2"/></group>
+                    <group string="Response"><field name="response_body" nolabel="1" colspan="2"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_easyecom_log" model="ir.actions.act_window">
+        <field name="name">EasyEcom Request Log</field>
+        <field name="res_model">cp.easyecom.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Shipment: orders from EasyEcom -->
+    <record id="view_cp_trip_form_easyecom" model="ir.ui.view">
+        <field name="name">cp.trip.form.easyecom</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_trip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page[@name='timeline']" position="before">
+                <page string="EasyEcom" name="easyecom" invisible="not channel_order_ids">
+                    <field name="channel_order_ids" readonly="1">
+                        <list>
+                            <field name="reference"/>
+                            <field name="marketplace"/>
+                            <field name="awb_number"/>
+                            <field name="state" widget="badge"/>
+                            <field name="last_push"/>
+                            <field name="last_push_status"/>
+                            <field name="push_error"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="menu_cp_channel_orders" name="Channel Orders" parent="cargo_pilot_tms.menu_cp_freight"
+              action="action_cp_channel_order" sequence="0"/>
+    <menuitem id="menu_cp_easyecom" name="EasyEcom" parent="cargo_pilot_tms.menu_cp_config" sequence="42"/>
+    <menuitem id="menu_cp_easyecom_account" name="Connection" parent="menu_cp_easyecom" action="action_cp_easyecom_account" sequence="1"/>
+    <menuitem id="menu_cp_channel_stock" name="Channel Stock" parent="menu_cp_easyecom" action="action_cp_channel_stock" sequence="2"/>
+    <menuitem id="menu_cp_easyecom_log" name="Request Log" parent="menu_cp_easyecom" action="action_cp_easyecom_log" sequence="3"/>
+</odoo>

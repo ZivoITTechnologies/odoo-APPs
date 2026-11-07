@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_cp_indent" model="ir.sequence">
+            <field name="name">Indent</field>
+            <field name="code">cp.indent</field>
+            <field name="prefix">IND/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_rfq" model="ir.sequence">
+            <field name="name">Freight RFQ</field>
+            <field name="code">cp.rfq</field>
+            <field name="prefix">RFQ/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_auction" model="ir.sequence">
+            <field name="name">Spot Auction</field>
+            <field name="code">cp.auction</field>
+            <field name="prefix">AUC/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_trip" model="ir.sequence">
+            <field name="name">Trip</field>
+            <field name="code">cp.trip</field>
+            <field name="prefix">TRP/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_epod" model="ir.sequence">
+            <field name="name">ePOD</field>
+            <field name="code">cp.epod</field>
+            <field name="prefix">POD/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_freight_bill" model="ir.sequence">
+            <field name="name">Freight Bill Audit</field>
+            <field name="code">cp.freight.bill</field>
+            <field name="prefix">FBA/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_gate_entry" model="ir.sequence">
+            <field name="name">Gate Entry</field>
+            <field name="code">cp.gate.entry</field>
+            <field name="prefix">GATE/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_consignment" model="ir.sequence">
+            <field name="name">Consignment Note</field>
+            <field name="code">cp.consignment</field>
+            <field name="prefix">LR/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_challan" model="ir.sequence">
+            <field name="name">Challan</field>
+            <field name="code">cp.challan</field>
+            <field name="prefix">CHL/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_hire_slip" model="ir.sequence">
+            <field name="name">Hire Slip</field>
+            <field name="code">cp.hire.slip</field>
+            <field name="prefix">HIRE/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_rate_contract" model="ir.sequence">
+            <field name="name">Rate Contract</field>
+            <field name="code">cp.rate.contract</field>
+            <field name="prefix">RC/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_cp_load_plan" model="ir.sequence">
+            <field name="name">Load Plan</field>
+            <field name="code">cp.load.plan</field>
+            <field name="prefix">LP/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

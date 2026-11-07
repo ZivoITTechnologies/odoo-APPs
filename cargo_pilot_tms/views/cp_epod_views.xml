@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_cp_epod_kanban" model="ir.ui.view">
+        <field name="name">cp.epod.kanban</field>
+        <field name="model">cp.epod</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="state"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="cp-kcard-top">
+                            <field name="trip_id" class="cp-kcard-title"/>
+                            <span t-if="record.state.raw_value == 'verified'" class="cp-chip">Verified</span>
+                            <span t-elif="record.state.raw_value == 'exception'" class="cp-chip cp-chip-red">Check</span>
+                            <span t-else="" class="cp-chip cp-chip-grey"><field name="state"/></span>
+                        </div>
+                        <div class="cp-kcard-meta">Received by <field name="receiver_name"/></div>
+                        <div class="small text-danger" t-if="record.state.raw_value == 'exception'"><field name="exception_reason"/></div>
+                        <footer class="cp-kcard-meta">
+                            <field name="transporter_id"/>
+                            <field name="received_time" widget="datetime" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_epod_list" model="ir.ui.view">
+        <field name="name">cp.epod.list</field>
+        <field name="model">cp.epod</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'exception'">
+                <field name="name"/>
+                <field name="trip_id"/>
+                <field name="transporter_id"/>
+                <field name="received_time"/>
+                <field name="receiver_name"/>
+                <field name="channel" optional="show"/>
+                <field name="fault_party" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'verified'"
+                       decoration-danger="state in ('exception', 'rejected')" decoration-warning="state == 'submitted'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_epod_form" model="ir.ui.view">
+        <field name="name">cp.epod.form</field>
+        <field name="model">cp.epod</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit" string="Submit &amp; Validate" type="object" class="btn-primary"
+                            invisible="state not in ('draft', 'rejected')"/>
+                    <button name="action_recheck" string="Re-run Checks" type="object"
+                            invisible="state not in ('submitted', 'exception')"/>
+                    <button name="action_verify" string="Verify Anyway" type="object"
+                            invisible="state not in ('submitted', 'exception')"
+                            confirm="Accept this ePOD even though some checks failed?"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            invisible="state not in ('submitted', 'exception')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,verified"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="state != 'exception'">
+                        <strong>Exception (<field name="fault_party" class="d-inline"/> fault)</strong>
+                        <field name="exception_reason" class="d-block mt-1"/>
+                    </div>
+                    <group>
+                        <group string="Delivery">
+                            <field name="trip_id" readonly="state not in ('draft',)"/>
+                            <field name="consignee_id"/>
+                            <field name="receiver_name"/>
+                            <field name="receiver_phone" widget="phone"/>
+                            <field name="received_time"/>
+                            <field name="channel"/>
+                        </group>
+                        <group string="Quantities">
+                            <field name="received_weight_ton"/>
+                            <field name="received_packages"/>
+                            <field name="shortage_packages"/>
+                            <field name="damaged_packages"/>
+                            <field name="refused_by_consignee"/>
+                            <field name="grn_number"/>
+                        </group>
+                        <group string="Evidence">
+                            <field name="signature" widget="signature"/>
+                            <field name="photo_ids" widget="many2many_binary"/>
+                        </group>
+                        <group string="Location">
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="distance_from_site_m"/>
+                        </group>
+                    </group>
+                    <group string="Automatic Checks" invisible="state == 'draft'">
+                        <group>
+                            <field name="check_signature" string="Signature"/>
+                            <field name="check_photo" string="Photo"/>
+                            <field name="check_location" string="Within Geofence"/>
+                        </group>
+                        <group>
+                            <field name="check_weight" string="Weight Matches"/>
+                            <field name="check_condition" string="No Shortage / Damage"/>
+                            <field name="check_serials" string="Serials Match"/>
+                            <field name="check_grn" string="GRN Present"/>
+                        </group>
+                    </group>
+                    <group string="Serial numbers">
+                        <group>
+                            <field name="scanned_serials" placeholder="Scan or type the serial numbers delivered, one per line"/>
+                        </group>
+                        <group invisible="not missing_serials and not extra_serials">
+                            <field name="missing_serials" invisible="not missing_serials"/>
+                            <field name="extra_serials" invisible="not extra_serials"/>
+                        </group>
+                    </group>
+                    <field name="remarks" placeholder="Receiver remarks..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_epod_search" model="ir.ui.view">
+        <field name="name">cp.epod.search</field>
+        <field name="model">cp.epod</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="trip_id"/>
+                <field name="transporter_id"/>
+                <filter name="to_review" string="To Review" domain="[('state', 'in', ('submitted', 'exception'))]"/>
+                <filter name="exceptions" string="Exceptions" domain="[('state', '=', 'exception')]"/>
+                <filter name="carrier_fault" string="Carrier Fault" domain="[('fault_party', '=', 'carrier')]"/>
+                <group>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                    <filter name="group_fault" string="Fault" context="{'group_by': 'fault_party'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_epod" model="ir.actions.act_window">
+        <field name="name">Delivery Proofs</field>
+        <field name="res_model">cp.epod</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_to_review': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No proofs of delivery to review</p>
+            <p>Drivers and transporters upload signature, photos and location. Each ePOD is checked against the destination geofence and loaded weight.</p>
+        </field>
+    </record>
+</odoo>

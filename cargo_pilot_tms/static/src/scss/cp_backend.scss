@@ -1,0 +1,279 @@
+// Cargo Pilot TMS - backend look and feel
+$cp-teal: #2e7d6b;
+$cp-teal-dark: #1f5a4d;
+$cp-amber: #c9783b;
+$cp-red: #b5525b;
+$cp-muted: #5c6873;
+
+// ------------------------------------------------------------------
+// Hero header on documents: route, plate and key numbers at a glance
+// ------------------------------------------------------------------
+.o_form_view .cp-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    padding: 14px 18px;
+    margin: 4px 0 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(46, 125, 107, 0.10), rgba(46, 125, 107, 0.02));
+    border: 1px solid rgba(46, 125, 107, 0.18);
+
+    .cp-hero-route {
+        flex: 1 1 280px;
+        min-width: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        .o_field_widget a, .o_field_widget span { font-weight: 600; }
+    }
+    .cp-hero-kpi {
+        min-width: 110px;
+        > span {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: $cp-muted;
+        }
+        .o_field_widget { font-size: 1.05rem; font-weight: 700; }
+    }
+}
+
+.o_form_view .cp-stat {
+    background: var(--gray-100, #f6f8f9);
+    border-radius: 10px;
+    padding: 8px 12px;
+    > span {
+        display: block;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: $cp-muted;
+    }
+    .o_field_widget { font-size: 1.1rem; font-weight: 600; }
+}
+
+.cp-plate, .o_field_widget.cp-plate span, .o_field_widget.cp-plate input {
+    font-family: var(--font-monospace, monospace);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+.cp-plate-box {
+    display: inline-block;
+    border: 1.5px solid #1f2a33;
+    border-radius: 4px;
+    padding: 0 6px;
+    background: #fffbe6;
+    color: #1f2a33;
+}
+
+.cp-help {
+    border-radius: 10px;
+    background: rgba(46, 125, 107, 0.07);
+    color: $cp-teal-dark;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    .fa { margin-right: 6px; }
+}
+
+// ------------------------------------------------------------------
+// Milestone stepper
+// ------------------------------------------------------------------
+.o_field_cp_trip_stepper { display: block; width: 100%; }
+.cp-stepper {
+    display: flex;
+    width: 100%;
+    margin: 4px 0 16px;
+}
+.cp-step {
+    position: relative;
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 0;
+    &::before {
+        content: "";
+        position: absolute;
+        top: 17px;
+        left: -50%;
+        width: 100%;
+        height: 3px;
+        background: #dfe4e8;
+        z-index: 0;
+    }
+    &:first-child::before { display: none; }
+    &.cp-step-done::before, &.cp-step-current::before, &.cp-step-late::before { background: $cp-teal; }
+}
+.cp-step-dot {
+    position: relative;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 2px solid #dfe4e8;
+    color: #9aa4ad;
+    font-size: 0.95rem;
+}
+.cp-step-done .cp-step-dot { background: $cp-teal; border-color: $cp-teal; color: #fff; }
+.cp-step-current .cp-step-dot {
+    border-color: $cp-teal;
+    color: $cp-teal;
+    box-shadow: 0 0 0 5px rgba(46, 125, 107, 0.15);
+}
+.cp-step-late .cp-step-dot {
+    border-color: $cp-red;
+    color: $cp-red;
+    box-shadow: 0 0 0 5px rgba(181, 82, 91, 0.15);
+}
+.cp-step-text { margin-top: 6px; padding: 0 4px; }
+.cp-step-label { font-size: 0.8rem; font-weight: 600; }
+.cp-step-todo .cp-step-label { color: #9aa4ad; font-weight: 500; }
+.cp-step-time { font-size: 0.72rem; color: $cp-muted; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-step-late.cp-step-time, .cp-step-time.cp-step-late { color: $cp-red; font-weight: 600; }
+.cp-stepper-cancel { opacity: 0.45; filter: grayscale(1); }
+
+// ------------------------------------------------------------------
+// Kanban cards
+// ------------------------------------------------------------------
+.o_kanban_view .cp-kcard {
+    .cp-kcard-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+    .cp-kcard-title { font-weight: 700; font-size: 1rem; }
+    .cp-kcard-route { font-weight: 600; margin-top: 2px; }
+    .cp-kcard-meta { font-size: 0.8rem; color: $cp-muted; }
+    .cp-kcard-amount { font-weight: 700; }
+}
+.cp-chip {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 8px;
+    color: #fff;
+    background: $cp-teal;
+    white-space: nowrap;
+    &.cp-chip-red { background: $cp-red; }
+    &.cp-chip-amber { background: $cp-amber; }
+    &.cp-chip-grey { background: #8a96a3; }
+    &.cp-chip-dark { background: #8e2430; }
+}
+.o_kanban_record .cp-sev-bar { border-left: 4px solid transparent; }
+.o_kanban_record .cp-sev-critical { border-left-color: #8e2430; }
+.o_kanban_record .cp-sev-high { border-left-color: $cp-red; }
+.o_kanban_record .cp-sev-medium { border-left-color: $cp-amber; }
+.o_kanban_record .cp-sev-low { border-left-color: #8a96a3; }
+
+// ------------------------------------------------------------------
+// Load planner preview
+// ------------------------------------------------------------------
+.cp-load-preview {
+    background: var(--gray-100, #f6f8f9);
+    border-radius: 12px;
+    padding: 12px;
+    svg { display: block; margin: 0 auto; max-height: 520px; width: 100%; }
+}
+
+// ------------------------------------------------------------------
+// Booking wizard
+// ------------------------------------------------------------------
+.cp-booking {
+    .cp-booking-route {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 12px;
+        align-items: end;
+        .fa-long-arrow-right { font-size: 1.4rem; color: $cp-teal; margin-bottom: 10px; }
+    }
+    .cp-booking-options .o_data_row.cp-recommended td { background: rgba(46, 125, 107, 0.08); }
+}
+
+// ------------------------------------------------------------------
+// Phones
+// ------------------------------------------------------------------
+@media (max-width: 767.98px) {
+    .cp-stepper { flex-wrap: wrap; row-gap: 14px; }
+    .cp-step { flex: 0 0 33.33%; }
+    .cp-step:nth-child(4)::before { display: none; }
+    .o_form_view .cp-hero { padding: 12px; gap: 10px 16px; }
+    .o_form_view .cp-hero .cp-hero-route { font-size: 1.05rem; flex-basis: 100%; }
+    .o_form_view .cp-hero .cp-hero-kpi { min-width: 40%; }
+    .cp-booking .cp-booking-route { grid-template-columns: 1fr; .fa-long-arrow-right { transform: rotate(90deg); margin: 0 auto; } }
+}
+
+// ------------------------------------------------------------------
+// Shipper additions: banners, chips, scorecard, capacity
+// ------------------------------------------------------------------
+.o_form_view .cp-help.cp-help-info {
+    background: #eef5fb;
+    border-color: #cfe2f1;
+    i { color: #3d7fb0; }
+}
+.o_form_view .cp-help.cp-help-warn {
+    background: #fdf1e7;
+    border-color: #f1d3b8;
+    i { color: $cp-amber; }
+}
+.cp-chip.cp-chip-blue { background: #4b8fb8; }
+
+.o_kanban_view .cp-scorecard {
+    .cp-grade {
+        flex: 0 0 auto;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #fff;
+        background: #8a96a3;
+        &.cp-grade-a { background: $cp-teal; }
+        &.cp-grade-b { background: #4b8fb8; }
+        &.cp-grade-c { background: $cp-amber; }
+        &.cp-grade-d { background: $cp-red; }
+        &.cp-grade-new { font-size: 0.75rem; }
+    }
+    .cp-score-rows > div {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: $cp-muted;
+        .o_progressbar { margin: 0; }
+    }
+}
+
+.o_form_view .cp-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 8px 0 16px;
+    .cp-stat {
+        border: 1px solid #e2e6ea;
+        border-radius: 12px;
+        padding: 10px 14px;
+        span { display: block; font-size: 0.75rem; color: $cp-muted; text-transform: uppercase; letter-spacing: 0.04em; }
+        .o_field_widget { font-size: 1.5rem; font-weight: 700; }
+        &.cp-stat-alert .o_field_widget { color: $cp-red; }
+    }
+}
+
+.cp-booking {
+    .cp-mode-pick {
+        margin: 4px 0 8px;
+        .o_radio_item { padding: 8px 14px; border: 1px solid #e2e6ea; border-radius: 999px; margin-right: 8px; }
+    }
+    .cp-order-lines textarea { min-height: 70px; font-family: var(--font-monospace, monospace); font-size: 0.85rem; }
+}
+
+@media (max-width: 767.98px) {
+    .o_form_view .cp-stat-row { grid-template-columns: 1fr; }
+}

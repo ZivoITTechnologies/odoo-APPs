@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cp_zoho_account_user,cp.zoho.account user,model_cp_zoho_account,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_zoho_account_manager,cp.zoho.account manager,model_cp_zoho_account,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_zoho_sync_user,cp.zoho.sync user,model_cp_zoho_sync,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_zoho_sync_manager,cp.zoho.sync manager,model_cp_zoho_sync,cargo_pilot_tms.group_cp_manager,1,1,1,1

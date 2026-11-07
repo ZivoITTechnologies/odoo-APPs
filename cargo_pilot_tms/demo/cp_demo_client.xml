@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- LTL rate card, diesel prices, peak season, channel rules, orders on trucks, part load, capacity plan -->
+    <function model="cp.demo" name="_cp_load_client_demo"/>
+</odoo>

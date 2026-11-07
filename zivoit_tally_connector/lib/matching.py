@@ -183,6 +183,22 @@ def classify_ledger_by_name(name):
     return ''
 
 
+SPECIAL_TAX_MARKERS = ('rc', 'reverse', 'exp', 'export', 'sez', 'lut', 'imp', 'import',
+                       'deemed', 'composition', 'exempt', 'nil')
+
+
+def special_tax_markers(name):
+    """Markers like RC / EXP / SEZ found in a tax or ledger name (word-level)."""
+    words = set(re.findall(r'[a-z]+', (name or '').lower()))
+    return {m for m in SPECIAL_TAX_MARKERS if m in words}
+
+
+def tax_rank(tax_name, wanted_name=''):
+    """Lower is better: prefer taxes whose special markers equal the Tally ledger's."""
+    have, want = special_tax_markers(tax_name), special_tax_markers(wanted_name)
+    return len(have ^ want)
+
+
 def gst_head_and_rate(ledger_name):
     """'Output CGST @9%' -> ('CGST', 9.0).  Returns (head, rate or None)."""
     n = (ledger_name or '').upper()

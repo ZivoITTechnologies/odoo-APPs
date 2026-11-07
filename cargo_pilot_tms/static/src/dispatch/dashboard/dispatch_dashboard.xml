@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cargo_pilot_tms.Dashboard">
+        <div class="o_action cp-ct cp-in cp-dd h-100 overflow-auto">
+            <div t-if="!state.data" class="p-5 text-center text-muted">Loading…</div>
+            <t t-else="">
+                <t t-set="d" t-value="state.data"/>
+                <t t-set="k" t-value="d.kpis"/>
+                <div class="cp-ct-head">
+                    <div>
+                        <h2 class="mb-0">Dispatch Dashboard</h2>
+                        <div class="cp-ct-sub">Regular partners first, 3PL bids as backup, POD before payment</div>
+                    </div>
+                    <div class="cp-in-periods" role="group">
+                        <button t-foreach="periods" t-as="p" t-key="p.key" class="btn btn-sm"
+                                t-att-class="state.period === p.key ? 'btn-primary' : 'btn-light'"
+                                t-on-click="() => this.load(p.key)" t-esc="p.label"/>
+                    </div>
+                </div>
+
+                <div class="cp-in-kpis">
+                    <button class="cp-in-kpi cp-in-kpi-main" t-att-class="{'cp-in-warn': k.regular_share &lt; k.regular_target and k.plans}"
+                            t-on-click="() => this.openPlans([['carrier_type', '!=', false]])">
+                        <span class="cp-in-label">Regular partner share</span>
+                        <span class="cp-in-value"><t t-esc="k.regular_share"/>%</span>
+                        <span class="cp-in-foot">target &gt; <t t-esc="k.regular_target"/>% · <t t-esc="k.plans"/> dispatches</span>
+                    </button>
+                    <button class="cp-in-kpi" t-on-click="() => this.openBids()">
+                        <span class="cp-in-label">3PL bid savings</span>
+                        <span class="cp-in-value" t-esc="money(k.savings)"/>
+                        <span class="cp-in-foot"><t t-esc="k.savings_pct"/>% below target · <t t-esc="k.bids"/> bids, <t t-esc="k.participation"/>% took part</span>
+                    </button>
+                    <button class="cp-in-kpi" t-on-click="() => this.openDetention()">
+                        <span class="cp-in-label">Detention approved</span>
+                        <span class="cp-in-value" t-esc="money(k.detention)"/>
+                        <span class="cp-in-foot"><t t-esc="money(k.detention_pending)"/> awaiting approval · freight <t t-esc="money(k.freight)"/></span>
+                    </button>
+                    <button class="cp-in-kpi" t-att-class="{'cp-in-warn': k.on_time_reporting &lt; 90 and k.on_time_reporting}"
+                            t-on-click="() => this.openPlans([['carrier_type', '=', '3pl'], ['gate_in_time', '!=', false]])">
+                        <span class="cp-in-label">Trucks reported on time</span>
+                        <span class="cp-in-value"><t t-esc="k.on_time_reporting"/>%</span>
+                        <span class="cp-in-foot">3PL vehicles at the gate</span>
+                    </button>
+                    <button class="cp-in-kpi" t-on-click="() => this.openPlans([['delivered_at', '!=', false]])">
+                        <span class="cp-in-label">Delivered on time</span>
+                        <span class="cp-in-value"><t t-esc="k.transit_compliance"/>%</span>
+                        <span class="cp-in-foot">POD turnaround <t t-esc="k.pod_tat"/> h</span>
+                    </button>
+                    <button class="cp-in-kpi" t-att-class="{'cp-in-alert': k.pod_pending}" t-on-click="() => this.openBoard('delivered')">
+                        <span class="cp-in-label">Outstanding PODs</span>
+                        <span class="cp-in-value" t-esc="k.pod_pending"/>
+                        <span class="cp-in-foot" t-on-click.stop="() => this.openBills()"><t t-esc="k.bills_on_hold"/> vendor bills on hold</span>
+                    </button>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-xl-6">
+                        <div class="cp-ct-card h-100">
+                            <h6>Shipments right now</h6>
+                            <div class="cp-dd-board">
+                                <button t-foreach="d.board" t-as="b" t-key="b.key" class="cp-dd-col" t-on-click="() => this.openBoard(b.key)">
+                                    <span class="cp-dd-count" t-esc="b.count"/>
+                                    <span class="cp-dd-bar" t-att-class="'cp-dd-' + b.key" t-attf-style="height: {{ boardHeight(b) }}px"/>
+                                    <span class="cp-in-bar-label" t-esc="b.label"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="cp-ct-card h-100">
+                            <h6>Detention by cause</h6>
+                            <p t-if="!d.detention.length" class="cp-in-note">No detention in this period.</p>
+                            <div t-foreach="d.detention" t-as="r" t-key="r.reason" class="cp-in-row">
+                                <span class="cp-in-row-name" t-att-title="r.reason" t-esc="r.reason"/>
+                                <span class="cp-in-row-bar"><div t-attf-style="width: {{ detentionWidth(r) }}%"/></span>
+                                <span class="cp-in-row-val" t-esc="money(r.amount)"/>
+                                <span/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="cp-ct-card">
+                            <h6>Carriers and vendors</h6>
+                            <p t-if="!d.vendors.length" class="cp-in-note">No bookings in this period.</p>
+                            <table t-else="" class="table table-sm align-middle mb-0">
+                                <thead><tr><th>Provider</th><th>Type</th><th class="text-end">Dispatches</th>
+                                    <th class="text-end">Freight</th><th class="text-end">Reported on time</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="d.vendors" t-as="v" t-key="v.name">
+                                        <td class="fw-semibold" t-esc="v.name"/>
+                                        <td><span class="cp-in-pill" t-esc="v.type"/></td>
+                                        <td class="text-end" t-esc="v.count"/>
+                                        <td class="text-end" t-esc="money(v.freight)"/>
+                                        <td class="text-end"><t t-if="v.reported"><t t-esc="v.on_time_pct"/>%</t><t t-else="">-</t></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

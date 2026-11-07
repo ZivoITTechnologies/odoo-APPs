@@ -125,6 +125,9 @@ class TallyRequest(models.Model):
                     continue
                 if req.purpose == 'push_move' and not conn._refresh_move_request(req):
                     continue
+                if req.purpose in MASTER_PUSH_PURPOSES and req.res_model == 'tally.mapping' \
+                        and not conn._refresh_master_request(req):
+                    continue
                 req._execute_direct()
         conn.last_push_date = fields.Datetime.now()
 
@@ -156,6 +159,9 @@ class TallyRequest(models.Model):
                                  or conn._refresh_move_request(j))
             if self.search_count(self._ready_domain(conn) + [('priority', '<', 50)]):
                 return self.browse()  # newly required masters go first
+        jobs = jobs.filtered(lambda j: j.purpose not in MASTER_PUSH_PURPOSES
+                             or j.res_model != 'tally.mapping'
+                             or conn._refresh_master_request(j))
         for j in jobs:
             j.write({'state': 'sent', 'sent_at': fields.Datetime.now(),
                      'attempts': j.attempts + 1})

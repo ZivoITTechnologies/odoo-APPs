@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_zivo_root" name="Logistics Hub" web_icon="zivoit_logistics_hub,static/description/icon.png"
+              sequence="45" groups="zivoit_logistics_hub.group_logistics_user"/>
+
+    <menuitem id="menu_zivo_operations" name="Operations" parent="menu_zivo_root" sequence="10"/>
+    <menuitem id="menu_zivo_board" name="Shipment Board" parent="menu_zivo_operations" action="action_zivo_shipment_board" sequence="5"/>
+    <menuitem id="menu_zivo_shipments" name="Shipments" parent="menu_zivo_operations" action="action_zivo_shipment" sequence="10"/>
+    <menuitem id="menu_zivo_ndr" name="NDR Queue" parent="menu_zivo_operations" action="action_zivo_ndr" sequence="20"/>
+    <menuitem id="menu_zivo_ai_query" name="Ask Logistics AI" parent="menu_zivo_operations" action="action_zivo_ai_query" sequence="30"/>
+    <menuitem id="menu_zivo_deliveries" name="Delivery Orders" parent="menu_zivo_operations" action="stock.action_picking_tree_outgoing" sequence="40"/>
+
+    <menuitem id="menu_zivo_reporting" name="Reporting" parent="menu_zivo_root" sequence="20"/>
+    <menuitem id="menu_zivo_analysis" name="Carrier Performance" parent="menu_zivo_reporting" action="action_zivo_analysis" sequence="10"/>
+    <menuitem id="menu_zivo_weight" name="Weight Disputes" parent="menu_zivo_reporting" action="action_zivo_weight_dispute" sequence="20"/>
+
+    <menuitem id="menu_zivo_config" name="Configuration" parent="menu_zivo_root" sequence="90" groups="zivoit_logistics_hub.group_logistics_manager"/>
+    <menuitem id="menu_zivo_settings" name="Settings" parent="menu_zivo_config" action="action_zivo_settings" sequence="1"/>
+    <menuitem id="menu_zivo_accounts" name="Carrier Accounts" parent="menu_zivo_config" action="action_zivo_account" sequence="5"/>
+    <menuitem id="menu_zivo_methods" name="Delivery Methods" parent="menu_zivo_config" action="action_zivo_delivery_methods" sequence="10"/>
+    <menuitem id="menu_zivo_rules" name="Allocation Rules" parent="menu_zivo_config" action="action_zivo_rule" sequence="20"/>
+    <menuitem id="menu_zivo_status_map" name="Status Mapping" parent="menu_zivo_config" action="action_zivo_status_map" sequence="30"/>
+
+    <menuitem id="menu_zivo_technical" name="Technical" parent="menu_zivo_config" sequence="99"/>
+    <menuitem id="menu_zivo_api_logs" name="API Logs" parent="menu_zivo_technical" action="action_zivo_api_log" sequence="10"/>
+    <menuitem id="menu_zivo_jobs" name="Job Queue" parent="menu_zivo_technical" action="action_zivo_job" sequence="20"/>
+    <menuitem id="menu_zivo_pincodes" name="Pincode Cache" parent="menu_zivo_technical" action="action_zivo_pincode" sequence="30"/>
+</odoo>

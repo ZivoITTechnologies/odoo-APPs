@@ -64,6 +64,7 @@ class TallyMapping(models.Model):
     match_reason = fields.Char()
     alternatives = fields.Text('Other candidates')
     synced_to_tally = fields.Boolean(copy=False)
+    odoo_hash = fields.Char(copy=False, help='Fingerprint of the synced Odoo values at last sync.')
     pending_name = fields.Char(copy=False, help='New Tally name waiting to be applied (rename).')
     last_sync = fields.Datetime(copy=False)
     odoo_write_date = fields.Datetime('Odoo version synced', copy=False)
@@ -113,10 +114,45 @@ class TallyMapping(models.Model):
         vals = dict(vals, connection_id=conn.id, kind=kind, tally_name=tally_name)
         return self.create(vals)
 
+    # Odoo fields that are actually exchanged with Tally, per master kind.  A change to
+    # any other field (customer rank, followers, computed totals…) is not a conflict.
+    SYNC_FIELDS = {
+        'party': ('name', 'vat', 'street', 'street2', 'city', 'zip', 'state_id', 'country_id',
+                  'email', 'phone'),
+        'item': ('name', 'default_code', 'list_price', 'uom_id', 'taxes_id'),
+    }
+
+    def _odoo_fingerprint(self):
+        self.ensure_one()
+        rec = self._target()
+        names = self.SYNC_FIELDS.get(self.kind)
+        if not rec or not names:
+            return False
+        parts = []
+        for f in names:
+            if f not in rec._fields:
+                continue
+            v = rec[f]
+            if hasattr(v, 'ids'):
+                v = sorted(v.ids)
+            parts.append('%s=%s' % (f, v))
+        import hashlib
+        return hashlib.sha1('|'.join(parts).encode()).hexdigest()
+
+    def _stamp_synced(self):
+        for m in self:
+            rec = m._target()
+            m.write({'odoo_hash': m._odoo_fingerprint(),
+                     'odoo_write_date': rec.write_date if rec else fields.Datetime.now()})
+
     def _odoo_changed_since_sync(self):
         self.ensure_one()
         rec = self._target()
-        return bool(rec and self.odoo_write_date and rec.write_date
+        if not rec:
+            return False
+        if self.odoo_hash:
+            return self._odoo_fingerprint() != self.odoo_hash
+        return bool(self.odoo_write_date and rec.write_date
                     and rec.write_date > self.odoo_write_date)
 
     # ------------------------------------------------------------------

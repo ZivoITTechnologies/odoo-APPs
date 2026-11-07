@@ -1,6 +1,6 @@
 # ZivoIT EPC AI — EPC Project Controls with AI for Odoo 19
 
-**Technical name:** `zivoit_epc_ai` · **Version:** 19.0.2.0.0 · **Licence:** OPL-1 · **Author:** Zivo IT Technologies
+**Technical name:** `zivoit_epc_ai` · **Version:** 19.0.2.0.2 · **Licence:** OPL-1 · **Author:** Zivo IT Technologies
 
 An Odoo 19 vertical for Engineering, Procurement & Construction (EPC) contractors in power,
 transmission & distribution, renewables, infrastructure, oil & gas and industrial projects. It covers
@@ -159,7 +159,7 @@ Errors: 400 bad JSON, 401 bad key, 403 missing role, 404 unknown project, 422 va
 
 Sequences: `DPR/`, `RAB/`, `TRN/`, `PTW/`, `INC/`, `IR/`, `NCR/`, `CO/`, `BID/`. Crons: daily predictions, weekly learning.
 
-**Tests:** 99 automated tests in `tests/` (CPM and calendars, EVM, DPR, prediction, Monte Carlo, optimiser,
+**Tests:** 100 automated tests in `tests/` (CPM and calendars, EVM, DPR, prediction, Monte Carlo, optimiser,
 supply chain and ERP materials, bid evaluation, MTO/BIM/change orders, HSE/quality/plant, photo review,
 RA billing, AI provider calls (mocked), contract review, P6, documents, REST API over HTTP, access rights and multi-company).
 

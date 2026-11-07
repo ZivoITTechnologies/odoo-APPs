@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rule_cp_integration_log_company" model="ir.rule">
+        <field name="name">cp.integration.log: own companies</field>
+        <field name="model_id" ref="model_cp_integration_log"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_gsp_account_company" model="ir.rule">
+        <field name="name">cp.gsp.account: own companies</field>
+        <field name="model_id" ref="model_cp_gsp_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_ulip_account_company" model="ir.rule">
+        <field name="name">cp.ulip.account: own companies</field>
+        <field name="model_id" ref="model_cp_ulip_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_sim_provider_company" model="ir.rule">
+        <field name="name">cp.sim.provider: own companies</field>
+        <field name="model_id" ref="model_cp_sim_provider"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_whatsapp_account_company" model="ir.rule">
+        <field name="name">cp.whatsapp.account: own companies</field>
+        <field name="model_id" ref="model_cp_whatsapp_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_whatsapp_message_company" model="ir.rule">
+        <field name="name">cp.whatsapp.message: own companies</field>
+        <field name="model_id" ref="model_cp_whatsapp_message"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

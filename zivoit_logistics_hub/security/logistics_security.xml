@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_logistics_hub" model="res.groups.privilege">
+        <field name="name">Logistics Hub</field>
+        <field name="category_id" ref="base.module_category_supply_chain"/>
+    </record>
+
+    <record id="group_logistics_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_logistics_hub"/>
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]"/>
+    </record>
+
+    <record id="group_logistics_manager" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_logistics_hub"/>
+        <field name="implied_ids" eval="[(4, ref('group_logistics_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Every stock manager administers couriers, every stock user can ship -->
+    <record id="stock.group_stock_manager" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_logistics_manager'))]"/>
+    </record>
+    <record id="stock.group_stock_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_logistics_user'))]"/>
+    </record>
+
+    <record id="rule_account_company" model="ir.rule">
+        <field name="name">Logistics accounts: multi-company</field>
+        <field name="model_id" ref="model_zivo_logistics_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_shipment_company" model="ir.rule">
+        <field name="name">Shipments: multi-company</field>
+        <field name="model_id" ref="model_zivo_logistics_shipment"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_rule_company" model="ir.rule">
+        <field name="name">Allocation rules: multi-company</field>
+        <field name="model_id" ref="model_zivo_logistics_allocation_rule"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

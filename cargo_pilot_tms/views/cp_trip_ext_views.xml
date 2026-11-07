@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shipment form: modes, orders, acceptance, appointments, containers -->
+    <record id="view_cp_trip_form_ext" model="ir.ui.view">
+        <field name="name">cp.trip.form.ext</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="view_cp_trip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_assign']" position="before">
+                <button name="action_accept_offer" string="Accept for Transporter" type="object" class="btn-primary"
+                        invisible="acceptance_state != 'pending'" icon="fa-check"/>
+                <button name="action_decline_offer" string="Declined" type="object"
+                        invisible="acceptance_state != 'pending'"/>
+                <button name="action_resend_offer" string="Offer Again" type="object"
+                        invisible="acceptance_state not in ('declined', 'expired') or state != 'draft'"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_assign']" position="attributes">
+                <attribute name="string">Assign Truck / Docket</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_reset_draft']" position="after">
+                <button name="action_mark_empty_returned" string="Empty Returned" type="object"
+                        invisible="not container_number or empty_returned_at or state == 'cancel'"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_orders" type="object" class="oe_stat_button" icon="fa-list-ul"
+                        invisible="order_count == 0">
+                    <field name="order_count" widget="statinfo" string="Orders"/>
+                </button>
+            </xpath>
+            <xpath expr="//div[hasclass('cp-hero')]" position="inside">
+                <div class="cp-hero-kpi">
+                    <span>Mode</span><field name="shipment_mode" readonly="1"/>
+                </div>
+                <div class="cp-hero-kpi" invisible="not docket_number">
+                    <span>Docket</span><field name="docket_number" class="cp-plate" readonly="1"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='state'][@widget='cp_trip_stepper']" position="before">
+                <field name="acceptance_state" invisible="1"/>
+                <div class="cp-help cp-help-info" invisible="acceptance_state != 'pending'">
+                    <i class="fa fa-hourglass-half" title="Waiting"/>
+                    <span>Waiting for <field name="transporter_id" readonly="1" class="d-inline fw-bold" options="{'no_open': True}"/>
+                        to accept. Reply by <field name="offer_deadline" readonly="1" class="d-inline"/>; after that the load passes to the next transporter.</span>
+                </div>
+                <div class="cp-help cp-help-warn" invisible="acceptance_state not in ('declined', 'expired') or state != 'draft'">
+                    <i class="fa fa-exclamation-triangle" title="Declined"/>
+                    <span>No contracted transporter accepted this load. Offer it again, assign a market truck or open it for bidding.</span>
+                </div>
+                <div class="cp-help cp-help-warn" invisible="appointment_status not in ('missing', 'at_risk')">
+                    <i class="fa fa-calendar-times-o" title="Appointment"/>
+                    <span invisible="appointment_status != 'missing'">This customer only receives in a booked slot. Enter the appointment below.</span>
+                    <span invisible="appointment_status != 'at_risk'">The ETA is after the appointment slot. Ask the retailer for a later slot.</span>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='vehicle_number']" position="attributes">
+                <attribute name="required">state not in ('draft', 'cancel') and shipment_mode == 'ftl'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='vehicle_number']" position="before">
+                <field name="docket_number" required="state not in ('draft', 'cancel') and shipment_mode == 'ltl' and not vehicle_number"/>
+            </xpath>
+            <xpath expr="//field[@name='driver_phone']" position="after">
+                <field name="tracking_method"/>
+            </xpath>
+            <xpath expr="//field[@name='customer_ref']" position="before">
+                <field name="shipment_mode" readonly="state not in ('draft',)"/>
+                <field name="channel"/>
+                <field name="movement" invisible="not movement"/>
+            </xpath>
+            <xpath expr="//field[@name='planned_dispatch']" position="after">
+                <field name="reported_at" invisible="not reported_at"/>
+                <field name="placement_delay_hours" invisible="not reported_at and not actual_dispatch"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='timeline']" position="before">
+                <page string="Orders &amp; Freight" name="orders">
+                    <field name="order_ids">
+                        <list editable="bottom">
+                            <field name="order_ref"/>
+                            <field name="invoice_ref" optional="show"/>
+                            <field name="channel" optional="hide"/>
+                            <field name="customer_id" optional="show"/>
+                            <field name="description" optional="hide"/>
+                            <field name="quantity" sum="Boxes"/>
+                            <field name="weight_kg" sum="kg"/>
+                            <field name="volume_cbm" optional="hide" sum="m3"/>
+                            <field name="order_value" sum="Value"/>
+                            <field name="serial_numbers" optional="hide"/>
+                            <field name="serial_count" optional="show"/>
+                            <field name="eway_bill_no" optional="hide"/>
+                            <field name="share_pct" optional="show"/>
+                            <field name="freight_cost" sum="Freight"/>
+                            <field name="freight_pct" optional="show"/>
+                            <field name="currency_id" column_invisible="1"/>
+                        </list>
+                    </field>
+                    <group>
+                        <group string="Freight cost">
+                            <field name="allocation_basis"/>
+                            <field name="agreed_freight" readonly="1" string="Agreed"/>
+                            <field name="billed_amount" invisible="not billed_amount"/>
+                            <field name="freight_variance" invisible="not billed_amount"/>
+                            <field name="freight_cost_total" string="Cost to Split"/>
+                        </group>
+                        <group string="Load">
+                            <field name="box_count"/>
+                            <field name="order_weight_kg"/>
+                            <field name="order_value"/>
+                            <field name="cost_per_kg"/>
+                            <field name="freight_pct"/>
+                            <field name="drop_count"/>
+                            <field name="serial_count" invisible="not serial_count"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Delivery Requirements" name="delivery_req">
+                    <group>
+                        <group string="Customer appointment">
+                            <field name="appointment_required"/>
+                            <field name="appointment_ref"/>
+                            <field name="appointment_start"/>
+                            <field name="appointment_end"/>
+                            <field name="appointment_status" widget="badge"
+                                   decoration-success="appointment_status == 'met'"
+                                   decoration-danger="appointment_status in ('missed', 'at_risk')"
+                                   decoration-warning="appointment_status == 'missing'"/>
+                        </group>
+                        <group string="Proof of delivery">
+                            <field name="grn_required"/>
+                            <field name="serial_scan_required"/>
+                            <field name="pod_age_bucket" widget="badge"
+                                   decoration-danger="pod_age_bucket in ('d3', 'd7')"
+                                   decoration-success="pod_age_bucket == 'done'"/>
+                            <field name="epod_tat_hours" invisible="not epod_tat_hours"/>
+                        </group>
+                        <group string="Import container" name="container">
+                            <field name="container_number"/>
+                            <field name="container_size"/>
+                            <field name="shipping_line"/>
+                            <field name="bill_of_entry"/>
+                            <field name="free_days"/>
+                            <field name="container_picked_at"/>
+                            <field name="empty_return_due" invisible="not empty_return_due"/>
+                            <field name="empty_returned_at"/>
+                            <field name="container_detention_days" invisible="not empty_return_due"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+            <xpath expr="//notebook/page[@name='tracking']" position="after">
+                <page string="Offers" name="offers" invisible="not offer_ids">
+                    <field name="offer_ids" readonly="1">
+                        <list>
+                            <field name="transporter_id"/>
+                            <field name="price"/>
+                            <field name="offered_at"/>
+                            <field name="deadline"/>
+                            <field name="responded_at"/>
+                            <field name="response_minutes" optional="show"/>
+                            <field name="decline_reason" optional="show"/>
+                            <field name="channel" optional="show"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="state" widget="badge" decoration-success="state == 'accepted'"
+                                   decoration-danger="state in ('declined', 'expired')" decoration-info="state == 'pending'"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//field[@name='ping_ids']/list/field[@name='source']" position="after">
+                <field name="place" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_list_ext" model="ir.ui.view">
+        <field name="name">cp.trip.list.ext</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="view_cp_trip_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='lane_id']" position="after">
+                <field name="shipment_mode" widget="badge" decoration-info="shipment_mode == 'ltl'" optional="show"/>
+                <field name="channel" optional="hide"/>
+                <field name="movement" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='vehicle_number']" position="after">
+                <field name="docket_number" optional="hide"/>
+                <field name="acceptance_state" widget="badge" optional="show" decoration-info="acceptance_state == 'pending'"
+                       decoration-danger="acceptance_state in ('declined', 'expired')" decoration-success="acceptance_state == 'accepted'"/>
+            </xpath>
+            <xpath expr="//field[@name='agreed_freight']" position="after">
+                <field name="freight_cost_total" sum="Freight cost" optional="hide"/>
+                <field name="cost_per_kg" optional="hide"/>
+                <field name="pod_age_bucket" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_kanban_ext" model="ir.ui.view">
+        <field name="name">cp.trip.kanban.ext</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="view_cp_trip_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='open_issue_count']" position="after">
+                <field name="shipment_mode"/>
+                <field name="acceptance_state"/>
+                <field name="docket_number"/>
+            </xpath>
+            <xpath expr="//span[hasclass('cp-plate-box')]" position="replace">
+                <span class="cp-plate-box cp-plate" t-if="record.vehicle_number.raw_value"><field name="vehicle_number"/></span>
+                <span class="cp-plate-box cp-plate" t-elif="record.docket_number.raw_value"><field name="docket_number"/></span>
+            </xpath>
+            <xpath expr="//span[hasclass('cp-chip-dark')]" position="before">
+                <span t-if="record.shipment_mode.raw_value == 'ltl'" class="cp-chip cp-chip-blue ms-1">LTL</span>
+                <span t-if="record.acceptance_state.raw_value == 'pending'" class="cp-chip cp-chip-grey ms-1">Awaiting reply</span>
+                <span t-if="['declined', 'expired'].includes(record.acceptance_state.raw_value)" class="cp-chip cp-chip-red ms-1">Declined</span>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_search_ext" model="ir.ui.view">
+        <field name="name">cp.trip.search.ext</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="view_cp_trip_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="filter_domain">['|', '|', '|', '|', '|', '|', ('name', 'ilike', self), ('vehicle_number', 'ilike', self), ('customer_ref', 'ilike', self), ('eway_bill_no', 'ilike', self), ('consignment_ids.name', 'ilike', self), ('docket_number', 'ilike', self), ('order_ids.order_ref', 'ilike', self)]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='indent_id']" position="after">
+                <field name="order_ids" string="Order / Invoice" filter_domain="['|', ('order_ids.order_ref', 'ilike', self), ('order_ids.invoice_ref', 'ilike', self)]"/>
+                <field name="order_ids" string="Serial Number" filter_domain="[('order_ids.serial_numbers', 'ilike', self)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='market']" position="after">
+                <separator/>
+                <filter name="ftl" string="FTL" domain="[('shipment_mode', '=', 'ftl')]"/>
+                <filter name="ltl" string="LTL" domain="[('shipment_mode', '=', 'ltl')]"/>
+                <filter name="interstate" string="Interstate" domain="[('movement', '=', 'interstate')]"/>
+                <separator/>
+                <filter name="awaiting" string="Awaiting Transporter" domain="[('acceptance_state', '=', 'pending')]"/>
+                <filter name="declined" string="Declined by All" domain="[('acceptance_state', 'in', ('declined', 'expired')), ('state', '=', 'draft')]"/>
+                <filter name="appointment_risk" string="Appointment at Risk" domain="[('appointment_status', 'in', ('missing', 'at_risk'))]"/>
+                <filter name="pod_old" string="POD over 3 Days" domain="[('pod_age_bucket', 'in', ('d3', 'd7'))]"/>
+                <filter name="containers" string="Containers Out" domain="[('container_number', '!=', False), ('empty_returned_at', '=', False)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='group_day']" position="after">
+                <filter name="group_mode" string="Mode" context="{'group_by': 'shipment_mode'}"/>
+                <filter name="group_channel" string="Channel" context="{'group_by': 'channel'}"/>
+                <filter name="group_pod_age" string="POD Age" context="{'group_by': 'pod_age_bucket'}"/>
+                <filter name="group_movement" string="Inter / Intrastate" context="{'group_by': 'movement'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_pivot_freight" model="ir.ui.view">
+        <field name="name">cp.trip.pivot.freight</field>
+        <field name="model">cp.trip</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <pivot string="Freight Cost">
+                <field name="lane_id" type="row"/>
+                <field name="shipment_mode" type="col"/>
+                <field name="freight_cost_total" type="measure"/>
+                <field name="cost_per_kg" type="measure"/>
+                <field name="order_weight_kg" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_cp_trip_pod_ageing" model="ir.actions.act_window">
+        <field name="name">POD Ageing</field>
+        <field name="res_model">cp.trip</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('state', 'in', ('arrived', 'delivered', 'closed')), ('epod_state', '!=', 'verified')]</field>
+        <field name="context">{'search_default_group_pod_age': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Every delivered shipment has its proof</p>
+        </field>
+    </record>
+
+    <record id="action_cp_trip_freight" model="ir.actions.act_window">
+        <field name="name">Freight Cost by Lane</field>
+        <field name="res_model">cp.trip</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="view_id" ref="view_cp_trip_pivot_freight"/>
+        <field name="domain">[('state', '!=', 'cancel')]</field>
+    </record>
+
+    <!-- Orders on shipments: freight cost per order -->
+    <record id="view_cp_trip_order_list" model="ir.ui.view">
+        <field name="name">cp.trip.order.list</field>
+        <field name="model">cp.trip.order</field>
+        <field name="arch" type="xml">
+            <list create="false">
+                <field name="order_ref"/>
+                <field name="invoice_ref" optional="show"/>
+                <field name="channel" optional="show"/>
+                <field name="customer_id"/>
+                <field name="trip_id"/>
+                <field name="shipment_mode" optional="show"/>
+                <field name="lane_id" optional="hide"/>
+                <field name="transporter_id" optional="hide"/>
+                <field name="planned_dispatch" optional="show"/>
+                <field name="quantity" sum="Units"/>
+                <field name="weight_kg" sum="kg"/>
+                <field name="order_value" sum="Value"/>
+                <field name="freight_cost" sum="Freight"/>
+                <field name="freight_per_unit" optional="show"/>
+                <field name="freight_pct" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="trip_state" widget="badge" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_trip_order_form" model="ir.ui.view">
+        <field name="name">cp.trip.order.form</field>
+        <field name="model">cp.trip.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title"><h1><field name="order_ref"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="trip_id"/>
+                            <field name="invoice_ref"/>
+                            <field name="channel"/>
+                            <field name="customer_id"/>
+                            <field name="drop_point"/>
+                            <field name="product_id"/>
+                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="quantity"/>
+                            <field name="weight_kg"/>
+                            <field name="volume_cbm"/>
+                            <field name="order_value"/>
+                            <field name="eway_bill_no"/>
+                            <field name="share_pct"/>
+                            <field name="freight_cost"/>
+                            <field name="freight_per_unit"/>
+                            <field name="freight_pct"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <label for="serial_numbers"/>
+                    <field name="serial_numbers" placeholder="One serial number per line"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_trip_order_search" model="ir.ui.view">
+        <field name="name">cp.trip.order.search</field>
+        <field name="model">cp.trip.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="order_ref" filter_domain="['|', ('order_ref', 'ilike', self), ('invoice_ref', 'ilike', self)]" string="Order / Invoice"/>
+                <field name="customer_id"/>
+                <field name="trip_id"/>
+                <field name="serial_numbers" string="Serial Number"/>
+                <filter name="delivered" string="Delivered" domain="[('trip_state', 'in', ('delivered', 'closed'))]"/>
+                <filter name="ftl" string="FTL" domain="[('shipment_mode', '=', 'ftl')]"/>
+                <filter name="ltl" string="LTL" domain="[('shipment_mode', '=', 'ltl')]"/>
+                <filter name="dispatch" string="Dispatch Date" date="planned_dispatch"/>
+                <group>
+                    <filter name="group_channel" string="Channel" context="{'group_by': 'channel'}"/>
+                    <filter name="group_customer" string="Customer" context="{'group_by': 'customer_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'planned_dispatch:month'}"/>
+                    <filter name="group_mode" string="Mode" context="{'group_by': 'shipment_mode'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_cp_trip_order_pivot" model="ir.ui.view">
+        <field name="name">cp.trip.order.pivot</field>
+        <field name="model">cp.trip.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Freight per Order">
+                <field name="channel" type="row"/>
+                <field name="planned_dispatch" interval="month" type="col"/>
+                <field name="freight_cost" type="measure"/>
+                <field name="order_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_cp_trip_order_graph" model="ir.ui.view">
+        <field name="name">cp.trip.order.graph</field>
+        <field name="model">cp.trip.order</field>
+        <field name="arch" type="xml">
+            <graph string="Freight per Order" type="bar">
+                <field name="channel"/>
+                <field name="freight_cost" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="action_cp_trip_order" model="ir.actions.act_window">
+        <field name="name">Freight per Order</field>
+        <field name="res_model">cp.trip.order</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders on shipments yet</p>
+            <p>Orders arrive with load requests (screen, API, EasyEcom or Odoo deliveries). Each shipment's freight is split across its orders by weight, volume, value or units.</p>
+        </field>
+    </record>
+
+    <!-- Offers -->
+    <record id="view_cp_trip_offer_list" model="ir.ui.view">
+        <field name="name">cp.trip.offer.list</field>
+        <field name="model">cp.trip.offer</field>
+        <field name="arch" type="xml">
+            <list create="false">
+                <field name="trip_id"/>
+                <field name="lane_id"/>
+                <field name="transporter_id"/>
+                <field name="price"/>
+                <field name="offered_at"/>
+                <field name="deadline"/>
+                <field name="response_minutes"/>
+                <field name="decline_reason" optional="show"/>
+                <field name="channel" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'accepted'"
+                       decoration-danger="state in ('declined', 'expired')" decoration-info="state == 'pending'"/>
+                <button name="action_accept" type="object" string="Accept" invisible="state != 'pending'" class="btn-link"/>
+                <button name="action_open_decline_wizard" type="object" string="Decline" invisible="state != 'pending'" class="btn-link"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_trip_offer_search" model="ir.ui.view">
+        <field name="name">cp.trip.offer.search</field>
+        <field name="model">cp.trip.offer</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="trip_id"/>
+                <field name="transporter_id"/>
+                <filter name="pending" string="Waiting" domain="[('state', '=', 'pending')]"/>
+                <filter name="declined" string="Declined / No Reply" domain="[('state', 'in', ('declined', 'expired'))]"/>
+                <group>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_reason" string="Reason" context="{'group_by': 'decline_reason'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_trip_offer" model="ir.actions.act_window">
+        <field name="name">Booking Offers</field>
+        <field name="res_model">cp.trip.offer</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+    <record id="view_cp_offer_decline_form" model="ir.ui.view">
+        <field name="name">cp.offer.decline.form</field>
+        <field name="model">cp.offer.decline</field>
+        <field name="arch" type="xml">
+            <form string="Decline booking">
+                <group>
+                    <field name="offer_id" readonly="1"/>
+                    <field name="reason" widget="radio"/>
+                    <field name="note"/>
+                </group>
+                <p class="text-muted small">The load passes to the next contracted transporter straight away.</p>
+                <footer>
+                    <button name="action_confirm" type="object" string="Decline" class="btn-primary"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

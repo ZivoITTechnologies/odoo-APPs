@@ -1,0 +1,297 @@
+// Cargo Pilot TMS - portal, tracking and driver pages
+$cp-ink: #1f2a33;
+$cp-muted: #5c6873;
+$cp-line: #e2e6ea;
+$cp-teal: #2e7d6b;
+$cp-teal-dark: #1f5a4d;
+$cp-amber: #c9783b;
+$cp-red: #b5525b;
+
+.cp-portal {
+    color: $cp-ink;
+}
+
+.cp-card {
+    background: #fff;
+    border: 1px solid $cp-line;
+    border-radius: 12px;
+    padding: 16px;
+    color: $cp-ink;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    &:hover {
+        border-color: $cp-teal;
+        box-shadow: 0 2px 10px rgba(31, 42, 51, 0.08);
+        color: $cp-ink;
+    }
+}
+
+.cp-card-id {
+    font-size: 0.8rem;
+    color: $cp-muted;
+    font-family: monospace;
+}
+
+.cp-card-lane {
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.cp-panel {
+    background: #fff;
+    border: 1px solid $cp-line;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.cp-stat {
+    background: #f6f8f9;
+    border-radius: 10px;
+    padding: 10px 12px;
+    span {
+        display: block;
+        font-size: 0.75rem;
+        color: $cp-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    strong {
+        font-size: 1.05rem;
+        white-space: nowrap;
+        * { display: inline; font-size: inherit; font-weight: inherit; }
+    }
+}
+
+.cp-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #e8f1ef;
+    color: $cp-teal-dark;
+    white-space: nowrap;
+}
+.cp-pill-lg {
+    font-size: 0.9rem;
+    padding: 6px 14px;
+}
+.cp-pill-live {
+    background: $cp-red;
+    color: #fff;
+    animation: cp-pulse 1.8s ease-in-out infinite;
+}
+.cp-pill-won {
+    background: $cp-teal;
+    color: #fff;
+}
+.cp-pill-muted {
+    background: #eef0f2;
+    color: $cp-muted;
+}
+
+@keyframes cp-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.cp-plate {
+    display: inline-block;
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1.5px solid $cp-ink;
+    border-radius: 4px;
+    padding: 0 6px;
+    background: #fffbe6;
+    color: $cp-ink;
+}
+.cp-plate-light {
+    border-color: rgba(255, 255, 255, 0.8);
+    background: transparent;
+    color: #fff;
+}
+
+.cp-timeline {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    li {
+        position: relative;
+        padding: 0 0 12px 22px;
+        border-left: 2px solid $cp-line;
+        margin-left: 6px;
+        &::before {
+            content: "";
+            position: absolute;
+            left: -7px;
+            top: 3px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: $cp-teal;
+            border: 2px solid #fff;
+        }
+        &:last-child {
+            border-left-color: transparent;
+        }
+    }
+}
+.cp-timeline-time {
+    display: block;
+    font-size: 0.75rem;
+    color: $cp-muted;
+}
+
+.cp-signature-pad {
+    width: 100%;
+    height: 150px;
+    border: 1.5px dashed #b7c0c9;
+    border-radius: 8px;
+    background: #fbfcfd;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+// Public tracking
+.cp-track {
+    background: #f3f5f6;
+    min-height: 100vh;
+}
+.cp-track-head {
+    background: linear-gradient(135deg, $cp-teal-dark, $cp-teal);
+    color: #fff;
+    padding: 20px 0 56px;
+    h1 {
+        font-weight: 700;
+    }
+}
+.cp-track-logo {
+    max-height: 36px;
+    background: #fff;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+.cp-track-state {
+    font-size: 1.1rem;
+    opacity: 0.92;
+}
+.cp-track-body {
+    margin-top: -36px;
+    padding-bottom: 40px;
+}
+.cp-track-progress {
+    height: 10px;
+    background: #e6eaed;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.cp-track-bar {
+    height: 100%;
+    background: $cp-teal;
+    border-radius: 999px;
+}
+.cp-track-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    margin: 0;
+    dt {
+        font-weight: 400;
+        color: $cp-muted;
+    }
+    dd {
+        margin: 0;
+        font-weight: 600;
+    }
+}
+.cp-track-map {
+    width: 100%;
+    height: 420px;
+    border: 0;
+    display: block;
+}
+
+// Driver page
+.cp-driver {
+    background: #f3f5f6;
+    min-height: 100vh;
+    .btn-lg {
+        padding: 14px;
+        font-weight: 600;
+    }
+}
+.cp-driver-head {
+    background: $cp-teal-dark;
+    color: #fff;
+    padding: 18px 16px;
+}
+
+@media (max-width: 575.98px) {
+    .cp-track-map {
+        height: 300px;
+    }
+}
+
+// Leaflet map containers
+.cp-leaflet { min-height: 420px; z-index: 0; }
+
+// Customer booking
+.cp-book-route {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: end;
+    .fa-long-arrow-right { font-size: 1.5rem; color: $cp-teal; margin-bottom: 12px; }
+}
+
+// Dock appointment
+.cp-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    .btn { border-radius: 999px; }
+    .btn-check:checked + .btn { background: $cp-teal; border-color: $cp-teal; color: #fff; }
+}
+.cp-appt {
+    border-left: 4px solid $cp-teal;
+    padding: 6px 12px;
+    background: #f1f7f5;
+    border-radius: 6px;
+}
+.cp-appt-when { font-size: 1.15rem; font-weight: 700; }
+
+// Driver install banner
+.cp-install {
+    align-items: center;
+    gap: 12px;
+    background: $cp-teal-dark;
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+// Phones
+@media (max-width: 767.98px) {
+    .cp-book-route { grid-template-columns: 1fr; }
+    .cp-leaflet { min-height: 300px; }
+    .cp-portal h2 { font-size: 1.4rem; }
+    .cp-panel { padding: 14px; }
+    .cp-stat strong { font-size: 0.95rem; }
+}
+
+// Booking offer box on the transporter portal
+.cp-offer-box {
+    border: 2px solid $cp-teal;
+    background: rgba(46, 125, 107, 0.06);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+.cp-offer-page .cp-track-facts dd { font-weight: 600; }
+.cp-scan-video {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: #000;
+}

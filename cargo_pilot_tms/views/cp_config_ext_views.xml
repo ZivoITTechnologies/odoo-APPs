@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Channel rules -->
+    <record id="view_cp_channel_rule_list" model="ir.ui.view">
+        <field name="name">cp.channel.rule.list</field>
+        <field name="model">cp.channel.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="channel"/>
+                <field name="customer_id"/>
+                <field name="promise_hours"/>
+                <field name="appointment_required" widget="boolean"/>
+                <field name="grn_required" widget="boolean"/>
+                <field name="serial_scan_required" widget="boolean"/>
+                <field name="allowed_transporter_ids" widget="many2many_tags" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_channel_rule_form" model="ir.ui.view">
+        <field name="name">cp.channel.rule.form</field>
+        <field name="model">cp.channel.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Modern retail DCs"/></h1></div>
+                    <group>
+                        <group string="Applies to">
+                            <field name="channel"/>
+                            <field name="customer_id"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Delivery promise">
+                            <field name="promise_hours"/>
+                            <field name="appointment_required"/>
+                            <field name="grn_required"/>
+                            <field name="serial_scan_required"/>
+                        </group>
+                    </group>
+                    <group string="Approved transporters">
+                        <field name="allowed_transporter_ids" widget="many2many_tags" nolabel="1" colspan="2"
+                               placeholder="Leave empty to allow every contracted transporter"/>
+                    </group>
+                    <field name="note" placeholder="Packing rules, labelling, documents to carry..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_channel_rule" model="ir.actions.act_window">
+        <field name="name">Channel Rules</field>
+        <field name="res_model">cp.channel.rule</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Tell Cargo Pilot what each channel expects</p>
+            <p>Delivery promise, appointments at retail DCs, GRN with the POD, serial scans and approved transporters, per channel or key account.</p>
+        </field>
+    </record>
+
+    <!-- Capacity plan -->
+    <record id="view_cp_capacity_plan_form" model="ir.ui.view">
+        <field name="name">cp.capacity.plan.form</field>
+        <field name="model">cp.capacity.plan</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_suggest" type="object" string="Suggest from History" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-stat-row">
+                        <div class="cp-stat"><span>Trucks needed</span><field name="total_forecast"/></div>
+                        <div class="cp-stat"><span>Committed by contracts</span><field name="total_committed"/></div>
+                        <div class="cp-stat cp-stat-alert"><span>Shortfall</span><field name="total_gap"/></div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="weeks"/>
+                        </group>
+                        <group>
+                            <field name="growth_pct"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom" decoration-danger="gap &gt; 0" decoration-success="gap &lt;= 0">
+                            <field name="week_start"/>
+                            <field name="lane_id"/>
+                            <field name="vehicle_type_id"/>
+                            <field name="history_trucks"/>
+                            <field name="forecast_trucks" sum="Needed"/>
+                            <field name="committed_trucks" sum="Committed"/>
+                            <field name="gap" sum="Shortfall"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_capacity_plan_list" model="ir.ui.view">
+        <field name="name">cp.capacity.plan.list</field>
+        <field name="model">cp.capacity.plan</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="weeks"/>
+                <field name="total_forecast"/>
+                <field name="total_committed"/>
+                <field name="total_gap"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_capacity_line_graph" model="ir.ui.view">
+        <field name="name">cp.capacity.line.graph</field>
+        <field name="model">cp.capacity.line</field>
+        <field name="arch" type="xml">
+            <graph string="Capacity" type="bar">
+                <field name="week_start" interval="week"/>
+                <field name="forecast_trucks" type="measure"/>
+                <field name="committed_trucks" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="view_cp_capacity_line_pivot" model="ir.ui.view">
+        <field name="name">cp.capacity.line.pivot</field>
+        <field name="model">cp.capacity.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Capacity">
+                <field name="lane_id" type="row"/>
+                <field name="week_start" interval="week" type="col"/>
+                <field name="gap" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_cp_capacity_plan" model="ir.actions.act_window">
+        <field name="name">Capacity Plans</field>
+        <field name="res_model">cp.capacity.plan</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Plan trucks for the next peak</p>
+            <p>Start from the same weeks last year plus growth, compare with the weekly capacity your contracts commit, and close the shortfall before the season.</p>
+        </field>
+    </record>
+    <record id="action_cp_capacity_line" model="ir.actions.act_window">
+        <field name="name">Capacity by Week</field>
+        <field name="res_model">cp.capacity.line</field>
+        <field name="view_mode">graph,pivot</field>
+    </record>
+
+    <!-- Webhooks -->
+    <record id="view_cp_webhook_list" model="ir.ui.view">
+        <field name="name">cp.webhook.list</field>
+        <field name="model">cp.webhook</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="url"/>
+                <field name="sent_count"/>
+                <field name="failed_count" decoration-danger="failed_count &gt; 0"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_webhook_form" model="ir.ui.view">
+        <field name="name">cp.webhook.form</field>
+        <field name="model">cp.webhook</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_send_test" type="object" string="Send Test" class="btn-primary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_deliveries" type="object" class="oe_stat_button" icon="fa-paper-plane">
+                            <field name="sent_count" widget="statinfo" string="Sent"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Zoho Creator flow"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="url" placeholder="https://..."/>
+                            <field name="secret" password="True"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Events">
+                            <field name="event_shipment_created"/>
+                            <field name="event_shipment_status"/>
+                            <field name="event_pod_verified"/>
+                            <field name="event_bill_approved"/>
+                            <field name="event_order_freight"/>
+                        </group>
+                    </group>
+                    <div class="cp-help"><i class="fa fa-lock" title="Signed"/>Every request carries <code>X-CP-Signature: sha256=&lt;HMAC of the body with the secret&gt;</code> and <code>X-CP-Event</code>. Failed deliveries are retried for about a day.</div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_webhook_delivery_list" model="ir.ui.view">
+        <field name="name">cp.webhook.delivery.list</field>
+        <field name="model">cp.webhook.delivery</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-danger="state == 'failed'" decoration-muted="state == 'sent'">
+                <field name="create_date" string="Created"/>
+                <field name="webhook_id"/>
+                <field name="event"/>
+                <field name="attempts"/>
+                <field name="response_code"/>
+                <field name="next_attempt" optional="hide"/>
+                <field name="state" widget="badge"/>
+                <button name="action_retry" type="object" string="Retry" invisible="state == 'sent'" class="btn-link"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_webhook_delivery_form" model="ir.ui.view">
+        <field name="name">cp.webhook.delivery.form</field>
+        <field name="model">cp.webhook.delivery</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group><field name="webhook_id"/><field name="event"/><field name="state"/></group>
+                        <group><field name="attempts"/><field name="response_code"/><field name="next_attempt"/></group>
+                    </group>
+                    <label for="payload"/>
+                    <field name="payload" widget="ace" options="{'mode': 'text'}"/>
+                    <label for="response_body"/>
+                    <field name="response_body"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_webhook" model="ir.actions.act_window">
+        <field name="name">Webhooks</field>
+        <field name="res_model">cp.webhook</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Send shipment events to your other systems</p>
+            <p>Zoho Creator, EasyEcom, a data warehouse or any URL receives signed JSON when a shipment is created, changes status, gets its POD or has its freight bill approved.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_cp_parcel" model="ir.sequence">
+            <field name="name">Courier Parcel</field>
+            <field name="code">cp.parcel</field>
+            <field name="prefix">PCL/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="cron_cp_parcel_tracking" model="ir.cron">
+            <field name="name">Cargo Pilot: update courier tracking</field>
+            <field name="model_id" ref="model_cp_parcel"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_sync_tracking()</field>
+            <field name="interval_number">2</field>
+            <field name="interval_type">hours</field>
+        </record>
+
+        <record id="mail_template_parcel_booked" model="mail.template">
+            <field name="name">Cargo Pilot: Parcel on its way</field>
+            <field name="model_id" ref="model_cp_parcel"/>
+            <field name="subject">Your parcel from {{ object.company_id.name }} is booked ({{ object.courier_name }} {{ object.awb }})</field>
+            <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.recipient_partner_id.email_formatted }}</field>
+            <field name="description">Sent to the receiver when a parcel is booked with a courier</field>
+            <field name="body_html" type="html">
+<div style="font-family: Arial, sans-serif; font-size: 14px; color: #1f2a33;">
+    <p>Hello <t t-out="object.recipient_partner_id.name or ''">Customer</t>,</p>
+    <p>Your parcel <strong t-out="object.reference or object.name">REF</strong> is booked with
+        <strong t-out="object.courier_name or ''">Courier</strong>.</p>
+    <table style="border-collapse: collapse; margin: 12px 0;">
+        <tr><td style="padding: 4px 12px 4px 0; color: #55606b;">Tracking number</td><td t-out="object.awb or ''">AWB</td></tr>
+        <tr t-if="object.expected_delivery"><td style="padding: 4px 12px 4px 0; color: #55606b;">Expected by</td><td t-out="format_date(object.expected_delivery) or ''">Date</td></tr>
+        <tr t-if="object.payment_mode == 'cod'"><td style="padding: 4px 12px 4px 0; color: #55606b;">Pay on delivery</td><td t-out="format_amount(object.cod_amount, object.currency_id) or ''">0</td></tr>
+    </table>
+    <p>
+        <a t-att-href="object.public_url"
+           style="background: #2E7D6B; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px;">Track your parcel</a>
+    </p>
+</div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>

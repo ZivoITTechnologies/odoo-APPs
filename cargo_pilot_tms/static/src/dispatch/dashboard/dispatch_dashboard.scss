@@ -1,0 +1,25 @@
+.cp-dd {
+    .cp-dd-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; height: 190px; padding-top: 10px; }
+    .cp-dd-col {
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;
+        border: 0; background: transparent; padding: 0; cursor: pointer;
+        &:hover .cp-dd-bar { filter: brightness(0.92); }
+    }
+    .cp-dd-count { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+    .cp-dd-bar { width: 70%; max-width: 46px; border-radius: 6px 6px 0 0; background: var(--cp-teal, #1f7a6b); }
+    .cp-dd-assigned, .cp-dd-loading { background: #7fb8a9; }
+    .cp-dd-delayed { background: var(--cp-red, #d64545); }
+    .cp-dd-out_for_delivery { background: var(--cp-amber, #e0a100); }
+    .cp-dd-delivered { background: #8a94a0; }
+}
+.o_form_view .cp-stat-row.cp-dispatch-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    .cp-stat .o_field_widget, .cp-stat .o_field_widget span {
+        display: block; font-size: 1.05rem; font-weight: 700; text-transform: none; letter-spacing: 0;
+        color: inherit; overflow-wrap: anywhere;
+    }
+}
+@media (max-width: 767.98px) {
+    .cp-dd .cp-dd-board { grid-template-columns: repeat(3, 1fr); height: auto; row-gap: 16px; }
+    .o_form_view .cp-stat-row.cp-dispatch-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

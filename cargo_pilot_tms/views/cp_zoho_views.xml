@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_zoho_account_list" model="ir.ui.view">
+        <field name="name">cp.zoho.account.list</field>
+        <field name="model">cp.zoho.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="data_center"/>
+                <field name="use_books"/>
+                <field name="use_creator"/>
+                <field name="failed_job_count" string="Failed Jobs"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_zoho_account_form" model="ir.ui.view">
+        <field name="name">cp.zoho.account.form</field>
+        <field name="model">cp.zoho.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test" string="Test Connection" type="object" class="btn-primary"/>
+                    <button name="action_sync_transporters" string="Send Transporters as Vendors" type="object"
+                            invisible="not use_books"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_jobs" type="object" class="oe_stat_button" icon="fa-refresh">
+                            <field name="job_count" widget="statinfo" string="Sync Jobs"/>
+                        </button>
+                        <button name="action_view_jobs" type="object" class="oe_stat_button text-danger" icon="fa-exclamation-circle"
+                                invisible="failed_job_count == 0">
+                            <field name="failed_job_count" widget="statinfo" string="Failed"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <div class="cp-help cp-help-info">
+                        <i class="fa fa-exchange" title="Zoho"/>
+                        <span>Zoho Books stays your books of account: transporters become vendors, audited freight bills become
+                            vendor bills (with reverse charge and TDS) and every sales invoice can carry its freight cost.
+                            Zoho Creator gets a live record of every shipment. Changes are queued and retried, so work never
+                            waits for Zoho.</span>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="provider" widget="radio"/>
+                            <field name="data_center" invisible="provider == 'simulator'"/>
+                            <field name="client_id" invisible="provider == 'simulator'"/>
+                            <field name="client_secret" password="True" invisible="provider == 'simulator'"/>
+                            <field name="refresh_token" password="True" invisible="provider == 'simulator'"/>
+                            <field name="token_expiry" invisible="not token_expiry"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="last_message" invisible="not last_message"/>
+                        </group>
+                        <group string="Apps">
+                            <field name="use_books" widget="boolean_toggle"/>
+                            <field name="use_creator" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Zoho Books" name="books" invisible="not use_books">
+                            <group>
+                                <group string="Vendor Bills">
+                                    <field name="organization_id" required="use_books and provider == 'zoho'"/>
+                                    <field name="skip_odoo_bill"/>
+                                    <field name="expense_account_id"/>
+                                    <field name="tax_id"/>
+                                    <field name="reverse_charge"/>
+                                    <field name="tds_tax_id"/>
+                                    <field name="hsn_sac"/>
+                                </group>
+                                <group string="Freight per Invoice">
+                                    <field name="push_invoice_freight"/>
+                                    <field name="invoice_customfield_id" invisible="not push_invoice_freight"
+                                           required="push_invoice_freight and provider == 'zoho'"/>
+                                    <div class="text-muted small" colspan="2" invisible="not push_invoice_freight">
+                                        When a freight bill is approved, the freight share of every order on those shipments is
+                                        written to the invoice with the same number in Zoho Books.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Zoho Creator" name="creator" invisible="not use_creator">
+                            <group>
+                                <group>
+                                    <field name="creator_owner" required="use_creator and provider == 'zoho'"/>
+                                    <field name="creator_app" required="use_creator and provider == 'zoho'"/>
+                                    <field name="creator_form"/>
+                                    <field name="creator_report"/>
+                                </group>
+                                <group>
+                                    <div class="text-muted small" colspan="2">
+                                        Each shipment becomes one record in the form; later changes update it through the report.
+                                        Map your Creator field link names to Cargo Pilot values below.
+                                    </div>
+                                </group>
+                            </group>
+                            <field name="creator_field_map" widget="code" options="{'mode': 'json'}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_zoho_account" model="ir.actions.act_window">
+        <field name="name">Zoho Books &amp; Creator</field>
+        <field name="res_model">cp.zoho.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Zoho Books and Zoho Creator</p>
+            <p>Send audited freight bills, vendors and freight per invoice to Zoho Books and live shipments to Creator.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_zoho_sync_list" model="ir.ui.view">
+        <field name="name">cp.zoho.sync.list</field>
+        <field name="model">cp.zoho.sync</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="state == 'failed'" decoration-muted="state == 'done'">
+                <field name="create_date" string="Queued"/>
+                <field name="kind"/>
+                <field name="record_name"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-warning="state == 'pending'"
+                       decoration-danger="state == 'failed'"/>
+                <field name="attempts"/>
+                <field name="next_try" invisible="state != 'pending'"/>
+                <field name="zoho_id" optional="show"/>
+                <field name="error" optional="show"/>
+                <button name="action_retry" string="Retry" type="object" icon="fa-repeat" invisible="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_zoho_sync_form" model="ir.ui.view">
+        <field name="name">cp.zoho.sync.form</field>
+        <field name="model">cp.zoho.sync</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_retry" string="Retry Now" type="object" class="btn-primary" invisible="state == 'done'"/>
+                    <button name="action_open_record" string="Open Record" type="object"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group><field name="kind"/><field name="record_name"/><field name="account_id"/><field name="zoho_id"/></group>
+                        <group><field name="attempts"/><field name="next_try"/><field name="done_at"/><field name="error"/></group>
+                    </group>
+                    <group string="Last request"><field name="last_request" nolabel="1" colspan="2"/></group>
+                    <group string="Last answer"><field name="last_response" nolabel="1" colspan="2"/></group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_zoho_sync_search" model="ir.ui.view">
+        <field name="name">cp.zoho.sync.search</field>
+        <field name="model">cp.zoho.sync</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="record_name"/>
+                <filter name="pending" string="Waiting" domain="[('state', '=', 'pending')]"/>
+                <filter name="failed" string="Failed" domain="[('state', '=', 'failed')]"/>
+                <group>
+                    <filter name="by_kind" string="Type" context="{'group_by': 'kind'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_cp_zoho_sync" model="ir.actions.act_window">
+        <field name="name">Zoho Sync Jobs</field>
+        <field name="res_model">cp.zoho.sync</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Links on Cargo Pilot records -->
+    <record id="view_cp_freight_bill_form_zoho" model="ir.ui.view">
+        <field name="name">cp.freight.bill.form.zoho</field>
+        <field name="model">cp.freight.bill</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_freight_bill_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_approve']" position="after">
+                <button name="action_send_zoho" string="Send to Zoho Books" type="object" icon="fa-paper-plane"
+                        invisible="state != 'approved' or zoho_state == 'done'"/>
+            </xpath>
+            <xpath expr="//field[@name='move_id']" position="after">
+                <field name="zoho_state" widget="badge" decoration-success="zoho_state == 'done'"
+                       decoration-warning="zoho_state == 'pending'" decoration-danger="zoho_state == 'failed'"
+                       invisible="state != 'approved'"/>
+                <field name="zoho_bill_id" invisible="not zoho_bill_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_cp_trip_form_zoho" model="ir.ui.view">
+        <field name="name">cp.trip.form.zoho</field>
+        <field name="model">cp.trip</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_trip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='indent_id']" position="after">
+                <field name="zoho_creator_id" invisible="not zoho_creator_id"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_partner_form_zoho" model="ir.ui.view">
+        <field name="name">res.partner.form.zoho</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_partner_form_cp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='cp_transporter_code']" position="after">
+                <field name="zoho_vendor_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="menu_cp_zoho" name="Zoho" parent="cargo_pilot_tms.menu_cp_config" sequence="41"/>
+    <menuitem id="menu_cp_zoho_account" name="Connection" parent="menu_cp_zoho" action="action_cp_zoho_account" sequence="1"/>
+    <menuitem id="menu_cp_zoho_sync" name="Sync Jobs" parent="menu_cp_zoho" action="action_cp_zoho_sync" sequence="2"/>
+</odoo>

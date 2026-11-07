@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_cp_root" name="Cargo Pilot" web_icon="cargo_pilot_tms,static/description/icon.png"
+              sequence="45" groups="group_cp_user"/>
+
+    <!-- Today: the home screen -->
+    <menuitem id="menu_cp_control_tower" name="Today" parent="menu_cp_root" action="action_cp_control_tower" sequence="1"/>
+
+    <!-- Plan: decide what moves and who moves it -->
+    <menuitem id="menu_cp_freight" name="Plan" parent="menu_cp_root" sequence="10"/>
+    <menuitem id="menu_cp_booking" name="Book a Load" parent="menu_cp_freight" action="action_cp_booking" sequence="1"/>
+    <menuitem id="menu_cp_indent" name="Load Requests" parent="menu_cp_freight" action="action_cp_indent" sequence="2"/>
+    <menuitem id="menu_cp_auction" name="Load Bidding" parent="menu_cp_freight" action="action_cp_auction" sequence="3"/>
+    <menuitem id="menu_cp_load_plan" name="Load Planner" parent="menu_cp_freight" action="action_cp_load_plan" sequence="4"/>
+    <menuitem id="menu_cp_rfq" name="Rate Requests" parent="menu_cp_freight" action="action_cp_rfq" sequence="5"/>
+    <menuitem id="menu_cp_rate_contract" name="Rate Contracts" parent="menu_cp_freight" action="action_cp_rate_contract" sequence="6"/>
+    <menuitem id="menu_cp_transporter" name="Transporters" parent="menu_cp_freight" action="action_cp_transporter" sequence="7"/>
+    <menuitem id="menu_cp_capacity_plan" name="Capacity Plans" parent="menu_cp_freight" action="action_cp_capacity_plan" sequence="8"/>
+
+    <!-- Move: everything on the road right now -->
+    <menuitem id="menu_cp_execution" name="Move" parent="menu_cp_root" sequence="20"/>
+    <menuitem id="menu_cp_trip" name="Shipments" parent="menu_cp_execution" action="action_cp_trip" sequence="1"/>
+    <menuitem id="menu_cp_exception" name="Issues" parent="menu_cp_execution" action="action_cp_exception" sequence="2"/>
+    <menuitem id="menu_cp_offers" name="Awaiting Transporters" parent="menu_cp_execution" action="action_cp_trip_offer" sequence="2"/>
+    <menuitem id="menu_cp_epod" name="Delivery Proofs" parent="menu_cp_execution" action="action_cp_epod" sequence="3"/>
+    <menuitem id="menu_cp_pod_ageing" name="POD Ageing" parent="menu_cp_execution" action="action_cp_trip_pod_ageing" sequence="4"/>
+    <menuitem id="menu_cp_gate" name="Gate &amp; Docks" parent="menu_cp_execution" action="action_cp_gate_entry" sequence="4"/>
+
+    <!-- Carrier office: the transporter's own books -->
+    <menuitem id="menu_cp_erp" name="Carrier Office" parent="menu_cp_root" sequence="30"/>
+    <menuitem id="menu_cp_consignment" name="Bookings (LR)" parent="menu_cp_erp" action="action_cp_consignment" sequence="1"/>
+    <menuitem id="menu_cp_consignment_quick" name="Quick LR" parent="menu_cp_erp" action="action_cp_consignment_quick" sequence="2"/>
+    <menuitem id="menu_cp_challan" name="Hub Transfers" parent="menu_cp_erp" action="action_cp_challan" sequence="3"/>
+    <menuitem id="menu_cp_hub_stock" name="Goods at Hubs" parent="menu_cp_erp" action="action_cp_hub_stock" sequence="4"/>
+    <menuitem id="menu_cp_hire_slip" name="Hired Trucks" parent="menu_cp_erp" action="action_cp_hire_slip" sequence="5"/>
+    <menuitem id="menu_cp_trip_expense" name="Trip Expenses" parent="menu_cp_erp" action="action_cp_trip_expense" sequence="6"/>
+
+    <!-- Fleet -->
+    <menuitem id="menu_cp_fleet" name="Fleet" parent="menu_cp_root" sequence="40"/>
+    <menuitem id="menu_cp_vehicles" name="Trucks" parent="menu_cp_fleet" action="fleet.fleet_vehicle_action" sequence="1"/>
+    <menuitem id="menu_cp_fuel" name="Fuel" parent="menu_cp_fleet" action="action_cp_fuel_log" sequence="2"/>
+    <menuitem id="menu_cp_maintenance" name="Service Schedule" parent="menu_cp_fleet" action="action_cp_maintenance_plan" sequence="3"/>
+    <menuitem id="menu_cp_tyre" name="Tyres" parent="menu_cp_fleet" action="action_cp_tyre" sequence="4"/>
+    <menuitem id="menu_cp_document" name="Papers &amp; Permits" parent="menu_cp_fleet" action="action_cp_document" sequence="5"/>
+    <menuitem id="menu_cp_safety" name="Driver Safety" parent="menu_cp_fleet" action="action_cp_driving_event" sequence="6"/>
+
+    <!-- Pay -->
+    <menuitem id="menu_cp_finance" name="Pay" parent="menu_cp_root" sequence="50"/>
+    <menuitem id="menu_cp_freight_bill" name="Invoice Check" parent="menu_cp_finance" action="action_cp_freight_bill" sequence="1"/>
+    <menuitem id="menu_cp_trip_order_pay" name="Freight per Order" parent="menu_cp_finance" action="action_cp_trip_order" sequence="3"/>
+
+    <!-- Insights -->
+    <menuitem id="menu_cp_reporting" name="Insights" parent="menu_cp_root" sequence="60"/>
+    <menuitem id="menu_cp_insights" name="Freight Insights" parent="menu_cp_reporting" action="action_cp_insights" sequence="0"/>
+    <menuitem id="menu_cp_scorecard" name="Transporter Scorecard" parent="menu_cp_reporting" action="action_cp_scorecard" sequence="1"/>
+    <menuitem id="menu_cp_trip_order" name="Freight per Order" parent="menu_cp_reporting" action="action_cp_trip_order" sequence="2"/>
+    <menuitem id="menu_cp_trip_freight" name="Freight by Lane" parent="menu_cp_reporting" action="action_cp_trip_freight" sequence="3"/>
+    <menuitem id="menu_cp_trip_analysis" name="Shipment Analysis" parent="menu_cp_reporting" action="action_cp_trip_all" sequence="4"/>
+    <menuitem id="menu_cp_issue_analysis" name="Issue Analysis" parent="menu_cp_reporting" action="action_cp_exception" sequence="5"/>
+    <menuitem id="menu_cp_capacity_line" name="Capacity by Week" parent="menu_cp_reporting" action="action_cp_capacity_line" sequence="6"/>
+
+    <!-- Setup -->
+    <menuitem id="menu_cp_config" name="Setup" parent="menu_cp_root" sequence="90" groups="group_cp_manager"/>
+    <menuitem id="menu_cp_settings" name="Settings" parent="menu_cp_config" action="action_cp_settings" sequence="1"/>
+    <menuitem id="menu_cp_location" name="Locations" parent="menu_cp_config" action="action_cp_location" sequence="10"/>
+    <menuitem id="menu_cp_lane" name="Lanes" parent="menu_cp_config" action="action_cp_lane" sequence="11"/>
+    <menuitem id="menu_cp_vehicle_type" name="Truck Types" parent="menu_cp_config" action="action_cp_vehicle_type" sequence="12"/>
+    <menuitem id="menu_cp_dock" name="Docks" parent="menu_cp_config" action="action_cp_dock" sequence="13"/>
+    <menuitem id="menu_cp_driver" name="Drivers" parent="menu_cp_config" action="action_cp_driver" sequence="20"/>
+    <menuitem id="menu_cp_owner" name="Truck Owners &amp; Brokers" parent="menu_cp_config" action="action_cp_vehicle_owner" sequence="21"/>
+    <menuitem id="menu_cp_channel_rule" name="Channel Rules" parent="menu_cp_config" action="action_cp_channel_rule" sequence="30"/>
+    <menuitem id="menu_cp_diesel_price" name="Diesel Prices" parent="menu_cp_config" action="action_cp_diesel_price" sequence="31"/>
+    <menuitem id="menu_cp_webhook" name="Webhooks" parent="menu_cp_config" action="action_cp_webhook" sequence="80"/>
+</odoo>

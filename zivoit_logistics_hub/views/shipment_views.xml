@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_shipment_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.list</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state in ('ndr', 'exception', 'lost')" decoration-warning="state in ('rto_initiated', 'rto_in_transit')"
+                  decoration-success="state == 'delivered'" decoration-muted="state == 'cancelled'" sample="1">
+                <field name="name"/>
+                <field name="tracking_number"/>
+                <field name="account_id"/>
+                <field name="courier_name" optional="hide"/>
+                <field name="partner_id"/>
+                <field name="sale_id" optional="show"/>
+                <field name="picking_id" optional="hide"/>
+                <field name="dest_city" optional="show"/>
+                <field name="dest_zip" optional="hide"/>
+                <field name="payment_mode" optional="show"/>
+                <field name="cod_amount" optional="hide" sum="Total COD"/>
+                <field name="actual_price" optional="show" sum="Total Shipping"/>
+                <field name="rto_risk" optional="show" widget="progressbar"/>
+                <field name="booked_at" optional="hide"/>
+                <field name="edd" optional="show"/>
+                <field name="ai_edd" optional="hide"/>
+                <field name="is_delayed" optional="hide"/>
+                <field name="weight_dispute" optional="hide"/>
+                <field name="ndr_count" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'delivered'" decoration-danger="state in ('ndr', 'exception', 'lost')"
+                       decoration-warning="state in ('rto_initiated', 'rto_in_transit', 'rto_delivered')" decoration-info="state in ('in_transit', 'out_for_delivery', 'picked_up')"/>
+                <field name="company_id" column_invisible="True"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_kanban" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.kanban</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" records_draggable="0" group_create="0" quick_create="0" sample="1">
+                <field name="rto_risk_level"/>
+                <field name="is_delayed"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold"/>
+                            <field name="payment_mode" widget="badge"/>
+                        </div>
+                        <field name="tracking_number" class="text-muted"/>
+                        <field name="partner_id"/>
+                        <div class="text-muted"><field name="dest_city"/> <field name="dest_zip"/></div>
+                        <div class="text-muted"><field name="account_id"/></div>
+                        <footer class="pt-1">
+                            <span t-if="record.is_delayed.raw_value" class="badge text-bg-danger me-1">Delayed</span>
+                            <span t-if="record.rto_risk_level.raw_value == 'high'" class="badge text-bg-warning me-1">High RTO risk</span>
+                            <field name="activity_ids" widget="kanban_activity" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.form</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_track" type="object" string="Track Now" class="btn-primary"
+                            invisible="is_final or not tracking_number"/>
+                    <button name="action_ndr" type="object" string="Resolve NDR" class="btn-primary"
+                            invisible="ndr_state != 'open'"/>
+                    <button name="action_print_label" type="object" string="Label" invisible="state in ('draft', 'cancelled')"/>
+                    <button name="action_schedule_pickup" type="object" string="Schedule Pickup" invisible="state != 'booked'"/>
+                    <button name="action_refresh_ai" type="object" string="Refresh AI Insights"/>
+                    <button name="action_cancel_shipment" type="object" string="Cancel Shipment"
+                            invisible="state not in ('booked', 'pickup_scheduled')"
+                            confirm="Cancel this shipment with the carrier?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="booked,picked_up,in_transit,out_for_delivery,delivered"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_public_tracking" type="object" class="oe_stat_button" icon="fa-map-marker" string="Tracking Page"/>
+                        <button name="action_open_carrier_tracking" type="object" class="oe_stat_button" icon="fa-external-link"
+                                string="Carrier Site" invisible="not tracking_link"/>
+                    </div>
+                    <widget name="web_ribbon" title="Delayed" bg_color="text-bg-danger" invisible="not is_delayed"/>
+                    <widget name="web_ribbon" title="Weight dispute" bg_color="text-bg-warning" invisible="not weight_dispute or is_delayed"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="tracking_number" placeholder="AWB"/></h3>
+                    </div>
+                    <group>
+                        <group string="Shipment">
+                            <field name="account_id"/>
+                            <field name="courier_name"/>
+                            <field name="service_code"/>
+                            <field name="carrier_reference"/>
+                            <field name="raw_status"/>
+                            <field name="status_description"/>
+                            <field name="tracking_link" widget="url" invisible="not tracking_link"/>
+                            <field name="is_final" invisible="1"/>
+                            <field name="is_delayed" invisible="1"/>
+                            <field name="ndr_state" invisible="1"/>
+                        </group>
+                        <group string="Order">
+                            <field name="partner_id"/>
+                            <field name="sale_id"/>
+                            <field name="picking_id"/>
+                            <field name="payment_mode"/>
+                            <field name="cod_amount" invisible="payment_mode != 'cod'"/>
+                            <field name="declared_value"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Dates">
+                            <field name="booked_at"/>
+                            <field name="picked_at"/>
+                            <field name="edd"/>
+                            <field name="ai_edd"/>
+                            <field name="ai_edd_basis" class="text-muted"/>
+                            <field name="delivered_at"/>
+                            <field name="transit_days"/>
+                        </group>
+                        <group string="Weight &amp; Charges">
+                            <field name="weight_kg"/>
+                            <field name="volumetric_weight"/>
+                            <field name="chargeable_weight"/>
+                            <field name="charged_weight"/>
+                            <field name="weight_dispute"/>
+                            <field name="quoted_price"/>
+                            <field name="actual_price"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tracking" name="tracking">
+                            <field name="event_ids" readonly="1">
+                                <list>
+                                    <field name="event_time"/>
+                                    <field name="normalized_status" widget="badge"/>
+                                    <field name="raw_status"/>
+                                    <field name="description"/>
+                                    <field name="location"/>
+                                    <field name="source" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="AI Insights" name="ai">
+                            <group>
+                                <group string="RTO Risk">
+                                    <field name="rto_risk" widget="progressbar"/>
+                                    <field name="rto_risk_level" widget="badge" decoration-danger="rto_risk_level == 'high'"
+                                           decoration-warning="rto_risk_level == 'medium'" decoration-success="rto_risk_level == 'low'"/>
+                                    <field name="rto_risk_reasons" nolabel="1" colspan="2"/>
+                                </group>
+                                <group string="Address Quality">
+                                    <field name="address_score" widget="progressbar"/>
+                                    <field name="address_issues" nolabel="1" colspan="2"/>
+                                </group>
+                            </group>
+                            <group string="Why this carrier">
+                                <field name="ai_recommendation" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Failed Delivery (NDR)" name="ndr" invisible="not ndr_count">
+                            <group>
+                                <group>
+                                    <field name="ndr_count"/>
+                                    <field name="ndr_reason"/>
+                                    <field name="ndr_category"/>
+                                    <field name="ndr_suggested_action"/>
+                                </group>
+                                <group>
+                                    <field name="ndr_advice"/>
+                                </group>
+                            </group>
+                            <group string="Customer message (AI draft)">
+                                <field name="ndr_customer_message" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Destination" name="destination">
+                            <group>
+                                <group>
+                                    <field name="dest_city"/>
+                                    <field name="dest_state_id"/>
+                                    <field name="dest_zip"/>
+                                    <field name="dest_phone"/>
+                                </group>
+                                <group>
+                                    <field name="origin_zip"/>
+                                    <field name="zone"/>
+                                    <field name="package_count"/>
+                                    <field name="pickup_reference"/>
+                                    <field name="label_url" widget="url"/>
+                                    <field name="label_attachment_id"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_search" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.search</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tracking_number"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="sale_id"/>
+                <field name="account_id"/>
+                <field name="dest_city"/>
+                <field name="dest_zip"/>
+                <filter name="filter_open" string="Open" domain="[('is_final', '=', False), ('state', '!=', 'draft')]"/>
+                <filter name="filter_delayed" string="Delayed" domain="[('is_delayed', '=', True)]"/>
+                <filter name="filter_ndr" string="NDR action needed" domain="[('ndr_state', '=', 'open')]"/>
+                <filter name="filter_rto" string="RTO" domain="[('state', 'in', ('rto_initiated', 'rto_in_transit', 'rto_delivered'))]"/>
+                <filter name="filter_delivered" string="Delivered" domain="[('state', '=', 'delivered')]"/>
+                <separator/>
+                <filter name="filter_cod" string="COD" domain="[('payment_mode', '=', 'cod')]"/>
+                <filter name="filter_prepaid" string="Prepaid" domain="[('payment_mode', '=', 'prepaid')]"/>
+                <filter name="filter_high_risk" string="High RTO risk" domain="[('rto_risk_level', '=', 'high')]"/>
+                <filter name="filter_weight" string="Weight disputes" domain="[('weight_dispute', '=', True)]"/>
+                <separator/>
+                <filter name="filter_booked_date" string="Booked" date="booked_at"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_account" string="Carrier" context="{'group_by': 'account_id'}"/>
+                    <filter name="group_state_dest" string="Destination State" context="{'group_by': 'dest_state_id'}"/>
+                    <filter name="group_zone" string="Zone" context="{'group_by': 'zone'}"/>
+                    <filter name="group_day" string="Booking Day" context="{'group_by': 'booked_at:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_pivot" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.pivot</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="arch" type="xml">
+            <pivot sample="1">
+                <field name="account_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="actual_price" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_graph" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.graph</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="arch" type="xml">
+            <graph type="bar" stacked="True" sample="1">
+                <field name="account_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_zivo_shipment" model="ir.actions.act_window">
+        <field name="name">Shipments</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="context">{'search_default_filter_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No shipments yet</p>
+            <p>Validate a delivery order that uses a <b>ZivoIT Logistics Hub</b> delivery method: the best courier is
+               booked automatically, the label is attached and tracking starts.</p>
+        </field>
+    </record>
+
+    <record id="action_zivo_shipment_board" model="ir.actions.act_window">
+        <field name="name">Shipment Board</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_filter_open': 1}</field>
+    </record>
+
+    <record id="action_zivo_ndr" model="ir.actions.act_window">
+        <field name="name">NDR Queue</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_ndr': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No failed deliveries to handle</p>
+            <p>Failed delivery attempts appear here with an AI classified reason, a suggested action and a customer message draft.</p>
+        </field>
+    </record>
+
+    <record id="action_zivo_analysis" model="ir.actions.act_window">
+        <field name="name">Carrier Performance</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{}</field>
+    </record>
+
+    <record id="action_zivo_weight_dispute" model="ir.actions.act_window">
+        <field name="name">Weight Disputes</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_weight': 1}</field>
+    </record>
+
+    <record id="action_server_track_shipments" model="ir.actions.server">
+        <field name="name">Track now</field>
+        <field name="model_id" ref="model_zivo_logistics_shipment"/>
+        <field name="binding_model_id" ref="model_zivo_logistics_shipment"/>
+        <field name="state">code</field>
+        <field name="code">records.action_track()</field>
+    </record>
+</odoo>

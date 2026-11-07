@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_zivo" model="ir.ui.view">
+        <field name="name">stock.picking.form.zivo.hub</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock_delivery.view_picking_withcarrier_out_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="zivo_is_hub" invisible="1"/>
+                <button name="action_zivo_rate_shop" type="object" string="Compare Rates (AI)"
+                        invisible="not zivo_is_hub or carrier_tracking_ref or picking_type_code == 'incoming' or state == 'cancel'"
+                        groups="zivoit_logistics_hub.group_logistics_user"/>
+                <button name="action_zivo_print_labels" type="object" string="Print Label"
+                        invisible="not zivo_shipment_id" groups="zivoit_logistics_hub.group_logistics_user"/>
+                <button name="action_zivo_track" type="object" string="Track"
+                        invisible="not zivo_shipment_id" groups="zivoit_logistics_hub.group_logistics_user"/>
+            </xpath>
+            <div name="button_box" position="inside">
+                <button name="action_zivo_view_shipments" type="object" class="oe_stat_button" icon="fa-truck"
+                        invisible="not zivo_shipment_count" groups="zivoit_logistics_hub.group_logistics_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value"><field name="zivo_state"/></span>
+                        <span class="o_stat_text">Shipment</span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//group[@name='carrier_data']" position="inside">
+                <field name="zivo_shipment_id" invisible="1"/>
+                <field name="zivo_shipment_count" invisible="1"/>
+                <field name="zivo_selected_account_id" invisible="not zivo_is_hub" readonly="carrier_tracking_ref"/>
+                <field name="zivo_selected_service_code" invisible="not zivo_selected_account_id" readonly="carrier_tracking_ref"/>
+                <field name="zivo_ewaybill" invisible="not zivo_is_hub"/>
+                <field name="zivo_rto_risk" widget="progressbar" invisible="not zivo_shipment_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_server_bulk_ship" model="ir.actions.act_window">
+        <field name="name">Bulk Ship &amp; Labels</field>
+        <field name="res_model">zivo.logistics.bulk.ship</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+    </record>
+</odoo>

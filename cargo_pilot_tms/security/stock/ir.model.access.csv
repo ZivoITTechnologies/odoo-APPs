@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cp_allocation_rule_user,cp.allocation.rule user,model_cp_allocation_rule,base.group_user,1,0,0,0
+access_cp_allocation_rule_manager,cp.allocation.rule manager,model_cp_allocation_rule,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_allocation_rule_sale,cp.allocation.rule sales manager,model_cp_allocation_rule,sales_team.group_sale_manager,1,1,1,1
+access_cp_stock_position_user,cp.stock.position user,model_cp_stock_position,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_stock_position_stock,cp.stock.position stock,model_cp_stock_position,stock.group_stock_user,1,1,1,1
+access_cp_picking_plan_wizard_user,cp.picking.plan.wizard user,model_cp_picking_plan_wizard,cargo_pilot_tms.group_cp_user,1,1,1,1

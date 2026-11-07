@@ -1,50 +1,350 @@
-<section class="oe_container" style="font-family:Inter,Arial,sans-serif;color:#1f2937">
-  <div style="background:linear-gradient(135deg,#0F4C81,#1E88E5);color:#fff;padding:48px 32px;border-radius:16px;text-align:center">
-    <h1 style="font-size:40px;margin:0 0 8px;color:#fff">ZivoIT Tally Connector AI</h1>
-    <p style="font-size:20px;margin:0;color:#E3F2FD">Real-time two-way Odoo 19 ⇄ TallyPrime 7.x — works with Odoo Online through a secure Bridge Agent</p>
-    <p style="margin-top:16px;color:#FFD54F;font-weight:600">Masters · All 8 voucher types · Bill-wise · GST · AI matching · AI anomaly guard · Self-healing</p>
-  </div>
+<section class="container" style="font-family:'Poppins','Inter','Segoe UI',Arial,sans-serif;color:#1f2a44;">
 
-  <div style="display:flex;flex-wrap:wrap;gap:16px;margin:32px 0">
-    <div style="flex:1 1 260px;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-      <h3 style="color:#0F4C81">Cloud Odoo ⇄ office Tally</h3>
-      <p>The Bridge Agent on the Tally PC only makes outbound HTTPS calls with an Odoo API key. No port forwarding, VPN or static IP. Direct LAN and offline XML modes included.</p>
-    </div>
-    <div style="flex:1 1 260px;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-      <h3 style="color:#0F4C81">Truly two-way</h3>
-      <p>Parties, ledgers, taxes, banks, stock items, units and Sales, Purchase, Credit/Debit Notes, Receipts, Payments, Journals, Contra — with bill-wise references and automatic reconciliation.</p>
-    </div>
-    <div style="flex:1 1 260px;border:1px solid #e5e7eb;border-radius:12px;padding:20px">
-      <h3 style="color:#0F4C81">AI built in</h3>
-      <p>GSTIN/PAN-aware master matching, GST place-of-supply and arithmetic checks, duplicate and outlier detection, Tally error doctor with auto-heal. Optional Claude / OpenAI / Gemini / Ollama.</p>
+  <!-- ===================== HERO ===================== -->
+  <div class="row">
+    <div class="col-12" style="padding:0;">
+      <img src="hero.jpg" class="img-fluid" alt="ZivoIT Tally Connector AI — two-way Tally ⇄ Odoo 19 sync with AI" style="width:100%;border-radius:14px;"/>
     </div>
   </div>
 
-  <h2 style="color:#0F4C81">Engineered for zero surprises</h2>
-  <ul style="line-height:1.8">
-    <li>Incremental pulls by Tally AlterID, idempotent pushes by REMOTEID, echo-loop prevention</li>
-    <li>Queue with masters-first ordering, exponential back-off, full XML audit log</li>
-    <li>Conflict policies: hold for review, Tally wins, Odoo wins</li>
-    <li>Party balance reconciliation Odoo vs Tally with mismatch hints</li>
-    <li>Historical migration in both directions with dry run</li>
-    <li>TallyPrime 3.0+ schema and legacy Tally.ERP 9 schema</li>
-    <li>Cost centres ↔ analytic accounts, godowns ↔ locations, batches ↔ lots with expiry</li>
-    <li>Real stock moves for Tally invoices; deletions in Tally detected with a mass-deletion guard</li>
-    <li>75 automated tests against a TallyPrime protocol simulator (included)</li>
-  </ul>
+  <div class="row" style="margin-top:34px;">
+    <div class="col-md-8 offset-md-2 text-center">
+      <h1 style="font-size:34px;font-weight:700;color:#0b2147;margin-bottom:10px;">ZivoIT Tally Connector AI</h1>
+      <p style="font-size:19px;color:#14a8ba;font-weight:600;margin-bottom:14px;">Real-time, two-way TallyPrime ⇄ Odoo 19 integration — with an AI layer that checks every voucher before it lands.</p>
+      <p style="font-size:16px;color:#4a5b78;line-height:1.7;">
+        Keep your accountants in TallyPrime and your operations in Odoo, with both sets of books in step.
+        Parties, ledgers, taxes, stock items, godowns, batches, cost centres and all eight Tally voucher types sync automatically, in both directions.
+        It works with <b>Odoo Online, Odoo.sh and on-premise</b>. A small Bridge Agent on the Tally computer connects them, with no port forwarding or VPN.
+      </p>
+    </div>
+  </div>
 
-  <h2 style="color:#0F4C81">How it compares</h2>
-  <table style="width:100%;border-collapse:collapse;font-size:14px">
-    <tr style="background:#0F4C81;color:#fff"><th style="padding:8px;text-align:left">Capability</th><th>ZivoIT AI</th><th>Typical Tally apps</th></tr>
-    <tr><td style="padding:8px">Odoo Online ↔ office Tally live sync</td><td style="text-align:center">✔ Bridge Agent</td><td style="text-align:center">File import/export only</td></tr>
-    <tr style="background:#f9fafb"><td style="padding:8px">Voucher types</td><td style="text-align:center">All 8, both ways</td><td style="text-align:center">Often sales/receipts only</td></tr>
-    <tr><td style="padding:8px">AI matching &amp; anomaly guard</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
-    <tr style="background:#f9fafb"><td style="padding:8px">Self-healing missing masters</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
-    <tr><td style="padding:8px">Conflict handling</td><td style="text-align:center">✔ 3 policies</td><td style="text-align:center">Not described</td></tr>
-    <tr><td style="padding:8px">Godowns, batches, cost centres; stock moves from Tally invoices</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
-    <tr><td style="padding:8px">Deletion detection</td><td style="text-align:center">✔ with guard</td><td style="text-align:center">—</td></tr>
-    <tr style="background:#f9fafb"><td style="padding:8px">Balance reconciliation</td><td style="text-align:center">✔</td><td style="text-align:center">—</td></tr>
-  </table>
+  <!-- key numbers -->
+  <div class="row text-center" style="margin-top:22px;">
+    <div class="col-6 col-md-3" style="margin-bottom:14px;">
+      <div style="border:1px solid #dbe5f1;border-radius:12px;padding:18px 8px;">
+        <div style="font-size:32px;font-weight:700;color:#0b2147;">8</div>
+        <div style="font-size:14px;color:#4a5b78;">Tally voucher types,<br/>both directions</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3" style="margin-bottom:14px;">
+      <div style="border:1px solid #dbe5f1;border-radius:12px;padding:18px 8px;">
+        <div style="font-size:32px;font-weight:700;color:#0b2147;">3</div>
+        <div style="font-size:14px;color:#4a5b78;">Transports: Direct,<br/>Bridge Agent, Offline XML</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3" style="margin-bottom:14px;">
+      <div style="border:1px solid #dbe5f1;border-radius:12px;padding:18px 8px;">
+        <div style="font-size:32px;font-weight:700;color:#0b2147;">10+</div>
+        <div style="font-size:14px;color:#4a5b78;">AI checks on every<br/>voucher (GST, duplicates…)</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3" style="margin-bottom:14px;">
+      <div style="border:1px solid #dbe5f1;border-radius:12px;padding:18px 8px;">
+        <div style="font-size:32px;font-weight:700;color:#0b2147;">77</div>
+        <div style="font-size:14px;color:#4a5b78;">automated tests<br/>shipped with the app</div>
+      </div>
+    </div>
+  </div>
 
-  <p style="margin-top:32px;text-align:center;color:#6b7280">Zivo IT Technologies · Official Odoo Partner · Hyderabad, India</p>
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12">
+      <img src="architecture.png" class="img-fluid" alt="How it works: Odoo 19 ⇄ Direct / Bridge Agent / Offline XML ⇄ TallyPrime, with an AI layer" style="width:100%;border:1px solid #e6edf5;border-radius:14px;"/>
+    </div>
+  </div>
+
+  <!-- ===================== QUICK FEATURE GRID ===================== -->
+  <div class="row" style="margin-top:44px;">
+    <div class="col-12 text-center"><h2 style="font-size:28px;font-weight:700;color:#0b2147;">Everything a Tally-using business needs</h2>
+      <p style="color:#4a5b78;font-size:16px;">Each feature below is shown with a real screen from the app.</p></div>
+  </div>
+  <div class="row" style="margin-top:8px;">
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #14a8ba;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Truly two-way</b><br/><span style="font-size:14px;color:#4a5b78;">Sales, Purchase, Credit &amp; Debit Notes, Receipts, Payments, Journals and Contra go both ways, with bill-wise references.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #14a8ba;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Cloud ready</b><br/><span style="font-size:14px;color:#4a5b78;">The Bridge Agent links Odoo Online or Odoo.sh to office Tally over outbound HTTPS only.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #14a8ba;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">AI master matching</b><br/><span style="font-size:14px;color:#4a5b78;">Matches Tally ledgers and items to Odoo using GSTIN, PAN, part number, HSN and fuzzy names, and shows the reason for each match.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #e5484d;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">AI anomaly guard</b><br/><span style="font-size:14px;color:#4a5b78;">Holds vouchers with the wrong IGST/CGST for the place of supply, wrong GST maths, duplicates, outliers or lock-date issues.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #e5484d;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Self-healing</b><br/><span style="font-size:14px;color:#4a5b78;">If Tally reports a missing ledger, item, unit, godown or cost centre, the app creates it and retries automatically.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #e5484d;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Conflicts &amp; deletions</b><br/><span style="font-size:14px;color:#4a5b78;">Detects vouchers that were changed or deleted in Tally and applies your policy, with a guard against mass deletion.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #714b67;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Godowns &amp; batches</b><br/><span style="font-size:14px;color:#4a5b78;">Tally godowns map to Odoo locations, and batches map to lots and serials with expiry dates.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #714b67;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Real stock moves</b><br/><span style="font-size:14px;color:#4a5b78;">Each Tally invoice creates and validates the matching delivery, receipt or return in Odoo Inventory.</span></div></div>
+    <div class="col-md-4" style="margin-bottom:16px;"><div style="border:1px solid #dbe5f1;border-left:5px solid #714b67;border-radius:10px;padding:16px;height:100%;">
+      <b style="color:#0b2147;font-size:16px;">Cost centres</b><br/><span style="font-size:14px;color:#4a5b78;">Tally cost centres map to Odoo analytic accounts, and cost categories to analytic plans, with line-level splits.</span></div></div>
+  </div>
+
+  <!-- ===================== FEATURE SECTIONS WITH SCREENS ===================== -->
+
+  <div class="row" style="margin-top:50px;">
+    <div class="col-12"><h2 style="font-size:26px;font-weight:700;color:#0b2147;border-bottom:3px solid #14a8ba;padding-bottom:8px;">1 · Dashboard: every Tally connection at a glance</h2></div>
+    <div class="col-md-4" style="margin-top:14px;">
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>Run as many Tally companies as you need (head office, branches), each with its own settings.</li>
+        <li>Live counters: synced today, queued, failed, vouchers to review.</li>
+        <li><b>Sync now</b>, <b>Test</b> and <b>Mappings</b> are one click away.</li>
+        <li>An auto-sync runs every 2 minutes, and multi-company is supported.</li>
+      </ul>
+    </div>
+    <div class="col-md-8" style="margin-top:14px;"><img src="screens/01_dashboard.jpg" class="img-fluid" alt="Tally connections dashboard" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-md-8" style="margin-top:14px;"><img src="screens/02_connection.jpg" class="img-fluid" alt="Connection settings with AI health summary" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+    <div class="col-md-4" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">2 · Connection, scope and AI health check</h3>
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>Choose the direction separately for parties, ledgers, items, each voucher family and cost centres: Tally → Odoo, Odoo → Tally, or two-way.</li>
+        <li>Supports both the TallyPrime 3.0+ XML schema and the legacy Tally.ERP 9 schema.</li>
+        <li>The <b>AI health check</b> summarises failures, vouchers to review, unmapped masters and balance differences.</li>
+        <li>Buttons for <b>Reconcile balances</b>, <b>Detect deletions</b> and <b>Full re-sync</b>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-md-4" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">3 · Bridge Agent for Odoo Online &amp; Odoo.sh</h3>
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>A small Python agent runs on the Tally PC and only makes <b>outbound HTTPS</b> calls to Odoo.</li>
+        <li>No static IP, VPN or port forwarding is needed.</li>
+        <li>It uses Odoo's standard API key and a per-connection token.</li>
+        <li><b>Download agent package</b> gives you a pre-filled config and a Windows service installer.</li>
+        <li>The connection shows whether the agent is online and whether it can reach Tally.</li>
+      </ul>
+    </div>
+    <div class="col-md-8" style="margin-top:14px;"><img src="screens/04_agent.jpg" class="img-fluid" alt="Bridge agent status" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-md-8" style="margin-top:14px;"><img src="screens/05_mappings.jpg" class="img-fluid" alt="AI master mapping with confidence and reason" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+    <div class="col-md-4" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">4 · AI master matching, with the reason shown</h3>
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>Matches on GSTIN (checksum-validated), same PAN in another state, e-mail and phone, part number and HSN.</li>
+        <li>Name matching understands M/s., Pvt Ltd and common abbreviations.</li>
+        <li>Confident matches are confirmed automatically. Unclear ones are left as suggestions for you to confirm.</li>
+        <li>An LLM is optional (Claude, OpenAI, Gemini or Ollama) and is only asked about unclear matches. It is sent names only.</li>
+        <li>Masters not found in Odoo are created automatically: contacts, products, analytic accounts and locations.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-md-4" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">5 · Vouchers from Tally: staged, checked, posted</h3>
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>Only new or changed vouchers are read, using Tally's AlterID.</li>
+        <li>Item invoices become Odoo invoices with your Odoo taxes. Other vouchers are imported as exact journal entries.</li>
+        <li>Custom voucher types (e.g. "GST Sales") are recognised automatically.</li>
+        <li>"Agst Ref" bill allocations reconcile receipts and payments with their invoices.</li>
+        <li>Each voucher gets a risk score and a clear status.</li>
+      </ul>
+    </div>
+    <div class="col-md-8" style="margin-top:14px;"><img src="screens/06_vouchers.jpg" class="img-fluid" alt="Vouchers from Tally" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12"><h2 style="font-size:26px;font-weight:700;color:#0b2147;border-bottom:3px solid #e5484d;padding-bottom:8px;">6 · AI anomaly guard, in both directions</h2>
+      <p style="font-size:15px;color:#3b4a66;margin-top:10px;">Every voucher is checked before it is posted in Odoo or sent to Tally. Blocking findings hold the voucher and explain why.
+      An accountant can review and override.</p></div>
+    <div class="col-md-6" style="margin-top:10px;"><img src="screens/07_voucher_anomaly.jpg" class="img-fluid" alt="Tally voucher held: CGST/SGST on inter-state supply" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p class="text-center" style="font-size:13px;color:#6b7a94;margin-top:6px;">From Tally: CGST/SGST on an inter-state sale is held. IGST was expected.</p></div>
+    <div class="col-md-6" style="margin-top:10px;"><img src="screens/11_invoice_held.jpg" class="img-fluid" alt="Odoo invoice held before push" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p class="text-center" style="font-size:13px;color:#6b7a94;margin-top:6px;">To Tally: an IGST invoice for an intra-state supply is held before it is sent.</p></div>
+    <div class="col-12" style="margin-top:8px;">
+      <table class="table table-sm" style="font-size:14px;">
+        <tr><td style="border-top:1px solid #e6edf5;"><b>GST place of supply</b> — IGST vs CGST+SGST</td><td style="border-top:1px solid #e6edf5;"><b>GST arithmetic</b> — tax = taxable × rate</td><td style="border-top:1px solid #e6edf5;"><b>Missing SGST</b> for a CGST line</td></tr>
+        <tr><td><b>Duplicates</b> — same party, amount and date</td><td><b>Outliers</b> — unusual amount for this party (robust z-score)</td><td><b>Lock dates</b> — posting into a closed period</td></tr>
+        <tr><td><b>GSTIN checksum</b> validation</td><td><b>Missing HSN/SAC</b> on goods lines</td><td><b>Unbalanced vouchers</b>, large round amounts</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12"><h2 style="font-size:26px;font-weight:700;color:#0b2147;border-bottom:3px solid #e5484d;padding-bottom:8px;">7 · Conflicts and deletions handled safely</h2></div>
+    <div class="col-md-6" style="margin-top:14px;"><img src="screens/08_voucher_conflict.jpg" class="img-fluid" alt="Voucher altered in Tally after import" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p style="font-size:14px;color:#3b4a66;margin-top:8px;"><b>Altered in Tally after import?</b> Choose <i>Apply Tally version</i> or <i>Keep Odoo version</i>, or set a policy: hold for review, Tally wins or Odoo wins.
+      A conflict is only raised when the synced values actually differ, not when Odoo merely touched the record.</p></div>
+    <div class="col-md-6" style="margin-top:14px;"><img src="screens/16_deleted.jpg" class="img-fluid" alt="Voucher deleted in Tally" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p style="font-size:14px;color:#3b4a66;margin-top:8px;"><b>Deleted in Tally?</b> Tally does not report deletions, so a lightweight scheduled check finds them for vouchers, ledgers and items.
+      The Odoo entry is cancelled and its stock reversed, or kept, depending on your policy. A mass-deletion guard changes nothing if too much disappears at once.</p></div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12"><h2 style="font-size:26px;font-weight:700;color:#0b2147;border-bottom:3px solid #714b67;padding-bottom:8px;">8 · Godowns, batches and real stock moves</h2></div>
+    <div class="col-md-6" style="margin-top:14px;"><img src="screens/09_voucher_stock.jpg" class="img-fluid" alt="Tally voucher with linked transfer" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+    <div class="col-md-6" style="margin-top:14px;"><img src="screens/10_transfer_lots.jpg" class="img-fluid" alt="Delivery with Tally godowns and batches as Odoo locations and lots" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+    <div class="col-12" style="margin-top:12px;">
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>Tally <b>godowns ↔ Odoo locations</b>: "Main Location" maps to warehouse stock, and new godowns are created as locations.</li>
+        <li>Tally <b>batches ↔ Odoo lots/serials</b>, including expiry dates. Tracked products are created in Tally with "Maintain in batches" switched on.</li>
+        <li>Sales, purchases and credit/debit notes from Tally create and validate the <b>delivery, receipt or return</b> in the right godowns and lots.
+            The example above shows 3 drums from WH/Stock lot PD-2610-A and 2 from Hyderabad WH lot PD-2610-B.</li>
+        <li>Odoo → Tally: invoice lines carry the real godown and lot split from the delivery. If a voucher is altered, cancelled or deleted, its stock is reversed.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12"><h2 style="font-size:26px;font-weight:700;color:#0b2147;border-bottom:3px solid #714b67;padding-bottom:8px;">9 · Cost centres ↔ analytic accounts</h2></div>
+    <div class="col-md-6" style="margin-top:14px;"><img src="screens/15_cost_centres.jpg" class="img-fluid" alt="Payment with Tally cost centre split as analytic distribution" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p class="text-center" style="font-size:13px;color:#6b7a94;margin-top:6px;">Tally payment split 30,000 / 18,000 across cost centres → 62.5% / 37.5% analytic distribution in Odoo.</p></div>
+    <div class="col-md-6" style="margin-top:14px;"><img src="screens/12_invoice_synced.jpg" class="img-fluid" alt="Odoo invoice with analytic split pushed to Tally" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p class="text-center" style="font-size:13px;color:#6b7a94;margin-top:6px;">Odoo invoice split 50% / 50% → Tally cost-centre allocations on the same voucher.</p></div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-md-6" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">10 · Full audit log and self-healing</h3>
+      <img src="screens/13_activity.jpg" class="img-fluid" alt="Activity log" style="border:1px solid #dbe5f1;border-radius:10px;margin-top:6px;"/>
+      <ul style="font-size:14px;line-height:1.7;color:#3b4a66;padding-left:18px;margin-top:10px;">
+        <li>Every request and response is kept as XML, with timing and counts.</li>
+        <li>Masters are always sent before vouchers. Failures retry with back-off.</li>
+        <li>The <b>Error doctor</b> turns Tally error messages into plain fixes, and missing masters are created and retried automatically.</li>
+      </ul>
+    </div>
+    <div class="col-md-6" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">11 · Party balance reconciliation</h3>
+      <img src="screens/14_recon.jpg" class="img-fluid" alt="Balance reconciliation Odoo vs Tally" style="border:1px solid #dbe5f1;border-radius:10px;margin-top:6px;"/>
+      <ul style="font-size:14px;line-height:1.7;color:#3b4a66;padding-left:18px;margin-top:10px;">
+        <li>Compares each party's closing balance in Tally with Odoo.</li>
+        <li>Flags parties that exist on only one side and suggests the likely cause of each difference.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:40px;">
+    <div class="col-md-4" style="margin-top:14px;">
+      <h3 style="font-size:20px;font-weight:700;color:#0b2147;">12 · Tally status on every invoice</h3>
+      <ul style="font-size:15px;line-height:1.8;color:#3b4a66;padding-left:18px;">
+        <li>Shows whether each document is <i>In Tally</i>, <i>From Tally</i>, <i>Queued</i>, <i>Held by AI guard</i>, <i>Tally error</i> or <i>Deleted in Tally</i>.</li>
+        <li>Invoices push automatically when posted. Re-posting updates the same Tally voucher instead of creating a duplicate.</li>
+        <li>Vouchers that came from Tally are never sent back to it.</li>
+        <li><b>Push to Tally</b> is also available as a bulk action on invoices, contacts and products.</li>
+      </ul>
+    </div>
+    <div class="col-md-8" style="margin-top:14px;"><img src="screens/17_invoices_list.jpg" class="img-fluid" alt="Invoices list with Tally state" style="border:1px solid #dbe5f1;border-radius:10px;"/></div>
+  </div>
+
+  <!-- ===================== COMPARISON ===================== -->
+  <div class="row" style="margin-top:54px;">
+    <div class="col-12 text-center"><h2 style="font-size:28px;font-weight:700;color:#0b2147;">How it compares</h2>
+      <p style="color:#4a5b78;font-size:15px;">Feature by feature, against the Tally connectors listed for Odoo 19 on the Odoo Apps store.</p></div>
+    <div class="col-12">
+      <table class="table table-bordered" style="font-size:14.5px;">
+        <thead>
+          <tr style="color:#0b2147;">
+            <th style="padding:10px;border-bottom:3px solid #14a8ba;">Capability</th>
+            <th class="text-center" style="padding:10px;border-bottom:3px solid #14a8ba;width:24%;">ZivoIT Tally Connector AI</th>
+            <th class="text-center" style="padding:10px;border-bottom:3px solid #14a8ba;width:24%;">Other Tally connectors*</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Two-way sync of all 8 voucher types</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Usually partial</td></tr>
+          <tr><td>Odoo Online / Odoo.sh ⇄ office Tally live (agent)</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Rare</td></tr>
+          <tr><td>Direct LAN + Bridge Agent + Offline XML in one app</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Usually one or two</td></tr>
+          <tr><td>AI master matching (GSTIN / PAN / HSN / fuzzy, with reasons)</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#b91c1c;">Not offered</td></tr>
+          <tr><td>AI GST anomaly guard (place of supply, GST maths, duplicates, outliers)</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#b91c1c;">Not offered</td></tr>
+          <tr><td>Self-healing: missing Tally masters created and the voucher retried</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#b91c1c;">Not offered</td></tr>
+          <tr><td>Conflict policies (review / Tally wins / Odoo wins)</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Rare</td></tr>
+          <tr><td>Deletion detection with mass-deletion guard</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#b91c1c;">Not offered</td></tr>
+          <tr><td>Godowns ↔ locations, batches ↔ lots with expiry</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Rare</td></tr>
+          <tr><td>Validated stock moves for invoices imported from Tally</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Rare</td></tr>
+          <tr><td>Cost centres ↔ analytic accounts, both ways</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Rare</td></tr>
+          <tr><td>Party balance reconciliation Odoo vs Tally</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#b91c1c;">Not offered</td></tr>
+          <tr><td>Incremental pulls (AlterID) and duplicate-proof pushes</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#6b7a94;">Varies</td></tr>
+          <tr><td>Automated test suite + TallyPrime simulator included</td><td class="text-center" style="color:#16a34a;font-weight:700;">✔</td><td class="text-center" style="color:#b91c1c;">Not offered</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12.5px;color:#6b7a94;">* Based on ZivoIT's review of the Tally connector listings for Odoo 19 on the Odoo Apps store in November 2026. "Rare" = offered by one or two of the listings reviewed; "Not offered" = not described by any of them.</p>
+    </div>
+  </div>
+
+  <!-- ===================== WHAT SYNCS ===================== -->
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12 text-center"><h2 style="font-size:28px;font-weight:700;color:#0b2147;">What syncs, and in which direction</h2></div>
+    <div class="col-12">
+      <table class="table table-sm table-bordered" style="font-size:14px;">
+        <thead><tr style="color:#0b2147;"><th style="padding:8px;">Tally</th><th style="padding:8px;">Odoo</th><th class="text-center" style="padding:8px;">Direction</th></tr></thead>
+        <tbody>
+          <tr><td>Party ledgers (Sundry Debtors / Creditors)</td><td>Contacts with GSTIN, address, state, e-mail, phone</td><td class="text-center">⇄</td></tr>
+          <tr><td>Income, expense, asset and liability ledgers</td><td>Chart of accounts</td><td class="text-center">⇄</td></tr>
+          <tr><td>Duties &amp; Taxes ledgers (CGST, SGST, IGST, Cess)</td><td>Taxes and tax groups</td><td class="text-center">⇄</td></tr>
+          <tr><td>Bank and cash ledgers</td><td>Bank and cash journals</td><td class="text-center">⇄</td></tr>
+          <tr><td>Stock items and units</td><td>Products (HSN, GST rate, part no., price) and units of measure</td><td class="text-center">⇄</td></tr>
+          <tr><td>Godowns / batches</td><td>Locations / lots and serials with expiry</td><td class="text-center">⇄</td></tr>
+          <tr><td>Cost centres / cost categories</td><td>Analytic accounts / analytic plans</td><td class="text-center">⇄</td></tr>
+          <tr><td>Sales, Purchase, Credit Note, Debit Note</td><td>Invoices, bills, refunds, plus stock transfers</td><td class="text-center">⇄</td></tr>
+          <tr><td>Receipt, Payment, Journal, Contra</td><td>Payments and journal entries with bill-wise reconciliation</td><td class="text-center">⇄</td></tr>
+          <tr><td>Cancellations and deletions</td><td>Cancelled entries and reversed stock (per policy)</td><td class="text-center">⇄</td></tr>
+          <tr><td>Groups and voucher types</td><td>Used for classification (e.g. "GST Sales" → Sales)</td><td class="text-center">→ Odoo</td></tr>
+          <tr><td>Party closing balances</td><td>Reconciliation report</td><td class="text-center">compare</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===================== SETUP ===================== -->
+  <div class="row" style="margin-top:40px;">
+    <div class="col-12 text-center"><h2 style="font-size:28px;font-weight:700;color:#0b2147;">Live in about 10 minutes</h2></div>
+    <div class="col-md-6" style="margin-top:10px;">
+      <ol style="font-size:15px;line-height:1.9;color:#3b4a66;">
+        <li><b>TallyPrime:</b> F1 › Settings › Connectivity › <i>TallyPrime acts as</i> = <b>Both</b>, port <b>9000</b>. Keep the company open.</li>
+        <li><b>Odoo:</b> install the app, open <i>Tally › Configuration › Connections › New</i>, enter the exact Tally company name.</li>
+        <li><b>Pick a transport.</b> Direct if Odoo can reach the Tally PC. Bridge Agent for Odoo Online or Odoo.sh: click <i>Download agent package</i>, unzip it on the Tally PC, paste an API key and run the installer.</li>
+        <li>Click <b>Test connection</b>, then <b>Sync now</b>.</li>
+        <li>Review <b>Mappings</b> (AI pre-fills them) and <b>Vouchers from Tally</b>. Optionally run <b>Historical migration</b> with a dry run first.</li>
+      </ol>
+    </div>
+    <div class="col-md-6" style="margin-top:10px;">
+      <img src="screens/03_connection_ai.jpg" class="img-fluid" alt="AI settings" style="border:1px solid #dbe5f1;border-radius:10px;"/>
+      <p class="text-center" style="font-size:13px;color:#6b7a94;margin-top:6px;">AI settings: the built-in engine works offline. An LLM provider is optional, and amounts are only shared if you allow it.</p>
+    </div>
+  </div>
+
+  <!-- ===================== COMPATIBILITY ===================== -->
+  <div class="row" style="margin-top:34px;">
+    <div class="col-md-4" style="margin-bottom:14px;"><div style="border:1px solid #dbe5f1;border-radius:12px;padding:16px;height:100%;">
+      <b style="color:#0b2147;">Odoo</b><br/><span style="font-size:14px;color:#4a5b78;">19.0 Community &amp; Enterprise · Odoo Online (via agent), Odoo.sh, on-premise · multi-company</span></div></div>
+    <div class="col-md-4" style="margin-bottom:14px;"><div style="border:1px solid #dbe5f1;border-radius:12px;padding:16px;height:100%;">
+      <b style="color:#0b2147;">Tally</b><br/><span style="font-size:14px;color:#4a5b78;">TallyPrime 1.x – 7.x (incl. 7.2) · Tally.ERP 9 via the legacy schema · Silver, Gold, Edit Log</span></div></div>
+    <div class="col-md-4" style="margin-bottom:14px;"><div style="border:1px solid #dbe5f1;border-radius:12px;padding:16px;height:100%;">
+      <b style="color:#0b2147;">Requirements</b><br/><span style="font-size:14px;color:#4a5b78;">Depends on Invoicing and Inventory · no extra Python packages · the agent needs Python 3.8+ on the Tally PC</span></div></div>
+  </div>
+
+  <!-- ===================== FAQ ===================== -->
+  <div class="row" style="margin-top:34px;">
+    <div class="col-12"><h2 style="font-size:26px;font-weight:700;color:#0b2147;">FAQ</h2></div>
+    <div class="col-md-6" style="font-size:14.5px;color:#3b4a66;line-height:1.7;">
+      <p><b>Does it work with Odoo Online?</b><br/>Yes. Odoo Online cannot reach a PC in your office, so the Bridge Agent on the Tally computer connects outward to Odoo over HTTPS and relays the requests.</p>
+      <p><b>Will vouchers be duplicated if I re-post an invoice?</b><br/>No. Each Odoo document has a stable Tally ID, so re-posting alters the same Tally voucher. Vouchers that came from Tally are never pushed back.</p>
+      <p><b>Is an AI subscription required?</b><br/>No. Matching, the GST guard, the error doctor and reconciliation all run inside Odoo. An LLM is optional and only used for unclear matches and plain-language explanations.</p>
+    </div>
+    <div class="col-md-6" style="font-size:14.5px;color:#3b4a66;line-height:1.7;">
+      <p><b>What happens if Tally is closed?</b><br/>Requests wait in the queue and retry with back-off, and nothing is lost. Posting in Odoo never fails because Tally is unavailable.</p>
+      <p><b>Can I bring in past years?</b><br/>Yes. Use <i>Tools › Historical migration</i> in either direction for any date range. A dry run shows what would happen first.</p>
+      <p><b>What is not covered?</b><br/>Stock and manufacturing journals, and delivery or receipt notes that have no invoice in Tally. Deletion checks run on a schedule (default every 6 hours), not instantly.</p>
+    </div>
+  </div>
+
+  <!-- ===================== FOOTER ===================== -->
+  <div class="row" style="margin-top:40px;margin-bottom:20px;">
+    <div class="col-md-8 offset-md-2 text-center" style="border-top:1px solid #e6edf5;padding-top:26px;">
+      <img src="zivoit_logo.png" alt="ZivoIT Technologies" style="height:110px;"/>
+      <p style="font-size:15px;color:#0b2147;font-weight:600;margin-top:12px;margin-bottom:2px;">Zivo IT Technologies · Official Odoo Partner</p>
+      <p style="font-size:14px;color:#6b7a94;">Cherlapally, Hyderabad, India · Implementation, customisation and support for Odoo 19</p>
+      <p style="font-size:14px;color:#4a5b78;">Need help setting it up? We'll help you configure your first Tally company.</p>
+      <p style="font-size:15px;margin-top:6px;">
+        <b style="color:#0b2147;">Email:</b> <a href="mailto:info@zivoit.com" style="color:#14a8ba;font-weight:600;">info@zivoit.com</a>
+        &#160;·&#160; <b style="color:#0b2147;">Website:</b> <span style="color:#14a8ba;font-weight:600;">www.zivoit.com</span>
+      </p>
+    </div>
+  </div>
 </section>

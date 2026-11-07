@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_cp_dispatch" name="Dispatches" inherit_id="cargo_pilot_tms.portal_my_home_cp" priority="45">
+        <div id="portal_vendor_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/img/portal_trip.svg'"/>
+                <t t-set="title">My Dispatches</t>
+                <t t-set="url" t-value="'/my/cp/dispatches'"/>
+                <t t-set="text">Gate times, POD upload and invoices</t>
+                <t t-set="placeholder_count" t-value="'cp_dispatch_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- Live countdown and target-price acceptance on the bid page -->
+    <template id="portal_my_cp_auction_dispatch" name="Dispatch Bid Timer" inherit_id="cargo_pilot_tms.portal_my_cp_auction">
+        <xpath expr="//span[hasclass('cp-pill-live')]" position="replace">
+            <span t-if="auction.state == 'live' and auction.dispatch_plan_id" class="cp-pill cp-pill-live cp-pill-lg cp-countdown"
+                  t-att-data-seconds="auction.seconds_left" t-att-data-live-url="'/my/cp/auctions/%s/live' % auction.id">
+                Live · <span class="cp-countdown-clock"><t t-esc="'%02d:%02d' % (auction.seconds_left // 60, auction.seconds_left % 60)"/></span> left
+            </span>
+            <span t-elif="auction.state == 'live'" class="cp-pill cp-pill-live cp-pill-lg">Live · ends in <t t-esc="auction.time_left or '&lt;1m'"/></span>
+        </xpath>
+        <xpath expr="//p[contains(., 'Each new bid must be')]" position="attributes">
+            <attribute name="t-if">not auction.dispatch_plan_id</attribute>
+        </xpath>
+        <xpath expr="//form[contains(@t-attf-action, '/bid')]" position="attributes">
+            <attribute name="t-if">auction.bidding_mode != 'target_price'</attribute>
+        </xpath>
+        <xpath expr="//form[contains(@t-attf-action, '/bid')]" position="after">
+            <form t-if="auction.bidding_mode == 'target_price' and auction.state == 'live'" t-attf-action="/my/cp/auctions/#{auction.id}/bid" method="post">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="rate" t-att-value="auction.target_price"/>
+                <input type="hidden" name="vehicles" value="1"/>
+                <p class="mb-2">Fixed price for this load:
+                    <strong t-field="auction.target_price" t-options="{'widget': 'monetary', 'display_currency': auction.currency_id}"/>.
+                    The first vendor to accept wins the booking.</p>
+                <button type="submit" class="btn btn-success btn-lg w-100">Accept target price</button>
+            </form>
+            <p t-if="auction.dispatch_plan_id and auction.reporting_cutoff" class="small text-muted mt-2 mb-0">
+                The winner must report the truck by <span t-field="auction.reporting_cutoff"/>.
+            </p>
+        </xpath>
+    </template>
+
+    <template id="portal_my_cp_dispatches" name="My Dispatches">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Dispatches</t>
+            </t>
+            <p t-if="not plans" class="text-muted mt-3">No dispatches assigned to you yet.</p>
+            <t t-if="plans" t-call="portal.portal_table">
+                <thead><tr><th>Dispatch</th><th>From</th><th>To</th><th>Report by</th><th class="text-end">Freight</th><th>POD</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="plans" t-as="p">
+                        <td><a t-attf-href="/my/cp/dispatches/#{p.id}" t-esc="p.name"/></td>
+                        <td t-esc="p.warehouse_id.name"/>
+                        <td><t t-esc="p.dest_city"/> <t t-esc="p.dest_pincode"/></td>
+                        <td><span t-field="p.reporting_cutoff"/></td>
+                        <td class="text-end"><span t-field="p.freight_amount" t-options="{'widget': 'monetary', 'display_currency': p.currency_id}"/></td>
+                        <td><span class="cp-pill" t-field="p.pod_status"/></td>
+                        <td><span class="cp-pill" t-field="p.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_cp_dispatch" name="Dispatch">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <t t-call="cargo_pilot_tms.cp_portal_flash"/>
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <h2 class="mb-0"><t t-esc="plan.name"/></h2>
+                        <div class="text-muted"><t t-esc="plan.warehouse_id.name"/> to <t t-esc="plan.dest_city or plan.partner_id.city"/> · <t t-esc="plan.vehicle_type_id.name"/></div>
+                    </div>
+                    <span class="cp-pill cp-pill-lg" t-field="plan.state"/>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Report by</span><strong t-field="plan.reporting_cutoff"/></div></div>
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Freight (PO)</span>
+                        <strong t-field="plan.freight_amount" t-options="{'widget': 'monetary', 'display_currency': plan.currency_id}"/></div></div>
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Purchase order</span><strong t-esc="plan.purchase_order_id.name or '-'"/></div></div>
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>POD</span><strong t-field="plan.pod_status"/></div></div>
+                </div>
+                <div class="row g-4 mt-1">
+                    <div class="col-lg-6">
+                        <div class="cp-panel">
+                            <h5>Gate times</h5>
+                            <table class="table table-sm mb-0">
+                                <tr><td>Vehicle</td><td class="text-end"><span class="cp-plate" t-esc="plan.vehicle_number or '-'"/></td></tr>
+                                <tr><td>Gate-in (T0)</td><td class="text-end"><span t-field="plan.gate_in_time"/></td></tr>
+                                <tr><td>Loading start (T1)</td><td class="text-end"><span t-field="plan.loading_start_time"/></td></tr>
+                                <tr><td>Loading end (T2)</td><td class="text-end"><span t-field="plan.loading_end_time"/></td></tr>
+                                <tr><td>Gate-out (T3)</td><td class="text-end"><span t-field="plan.gate_out_time"/></td></tr>
+                                <tr t-foreach="plan.detention_ids.filtered(lambda d: d.state != 'rejected')" t-as="d">
+                                    <td>Detention <t t-esc="d.name"/> (<t t-esc="d.gross_waiting_hours"/> h)</td>
+                                    <td class="text-end"><span t-field="d.approved_amount" t-options="{'widget': 'monetary', 'display_currency': plan.currency_id}"/>
+                                        <span class="cp-pill" t-field="d.state"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="cp-panel">
+                            <h5>Proof of delivery</h5>
+                            <ul class="list-unstyled small" t-if="plan.pod_ids">
+                                <li t-foreach="plan.pod_ids" t-as="pod"><t t-esc="pod.name"/> · <span t-field="pod.status"/>
+                                    <span t-if="pod.reject_reason" class="text-danger"> - <t t-esc="pod.reject_reason"/></span></li>
+                            </ul>
+                            <form t-if="plan.state in ('in_transit', 'delivered') and plan.pod_status != 'verified'"
+                                  t-attf-action="/my/cp/dispatches/#{plan.id}/pod" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <label class="form-label small" for="cp_pod_files">Signed POD, LR or delivery challan (photo or PDF)</label>
+                                <input id="cp_pod_files" type="file" name="pod_files" multiple="multiple" accept="image/*,application/pdf"
+                                       capture="environment" class="form-control" required="1"/>
+                                <input type="text" name="receiver_name" class="form-control mt-2" placeholder="Received by (name)"/>
+                                <button type="submit" class="btn btn-primary w-100 mt-2">Upload POD</button>
+                            </form>
+                            <p t-elif="plan.pod_status == 'verified'" class="text-success mb-0">POD verified.</p>
+                        </div>
+                        <t t-set="open_bills" t-value="bills.filtered(lambda b: b.state != 'cancel')"/>
+                        <div class="cp-panel mt-3" t-if="plan.state in ('delivered', 'pod_verified') and (not open_bills or plan.detention_unbilled &gt; 0)">
+                            <h5 t-if="not open_bills">Submit your invoice</h5>
+                            <h5 t-else="">Submit your detention invoice</h5>
+                            <p t-if="open_bills" class="small text-muted">Detention of
+                                <strong t-esc="plan.detention_unbilled" t-options="{'widget': 'monetary', 'display_currency': plan.currency_id}"/>
+                                was approved after your freight invoice.</p>
+                            <form t-attf-action="/my/cp/dispatches/#{plan.id}/invoice" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="text" name="bill_ref" class="form-control" placeholder="Invoice number" required="1"/>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-6" t-if="not open_bills"><input type="number" step="0.01" min="0" name="freight" class="form-control"
+                                                              placeholder="Freight" t-att-value="plan.freight_amount" required="1"/></div>
+                                    <div t-attf-class="#{'col-6' if not open_bills else 'col-12'}"><input type="number" step="0.01" min="0" name="detention" class="form-control"
+                                                              placeholder="Detention" t-att-value="plan.detention_unbilled if open_bills else plan.detention_approved"
+                                                              t-att-required="'1' if open_bills else None"/></div>
+                                </div>
+                                <input type="file" name="invoice_file" accept="application/pdf,image/*" class="form-control mt-2"/>
+                                <button type="submit" class="btn btn-primary w-100 mt-2">Submit invoice</button>
+                                <p class="small text-muted mt-2 mb-0">Payment is released once the POD is verified and the amounts match the
+                                    purchase order and approved detention.</p>
+                            </form>
+                        </div>
+                        <div class="cp-panel mt-3" t-if="bills">
+                            <h5>Your invoices</h5>
+                            <table class="table table-sm mb-0">
+                                <tr t-foreach="bills" t-as="b"><td t-esc="b.ref"/>
+                                    <td class="text-end"><span t-field="b.amount_total" t-options="{'widget': 'monetary', 'display_currency': b.currency_id}"/></td>
+                                    <td><span class="cp-pill" t-esc="'Paid' if b.payment_state in ('paid', 'in_payment') else ('Approved' if b.state == 'posted' else 'Under review')"/></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="delivery_carrier_cp_swift" model="delivery.carrier">
+        <field name="name">Courier - best price (Cargo Pilot)</field>
+        <field name="delivery_type">cp_courier</field>
+        <field name="cp_account_id" ref="cargo_pilot_tms.demo_account_swift"/>
+        <field name="cp_choice">best</field>
+        <field name="product_id" ref="product_cp_courier_shipping"/>
+        <field name="integration_level">rate_and_ship</field>
+    </record>
+</odoo>

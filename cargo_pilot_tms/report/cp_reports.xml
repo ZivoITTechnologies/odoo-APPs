@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_cp_report_consignment" model="ir.actions.report">
+        <field name="name">Consignment Note (LR)</field>
+        <field name="model">cp.consignment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_pilot_tms.report_cp_consignment</field>
+        <field name="report_file">cargo_pilot_tms.report_cp_consignment</field>
+        <field name="print_report_name">'LR - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_cp_consignment"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_cp_report_challan" model="ir.actions.report">
+        <field name="name">Loading Challan</field>
+        <field name="model">cp.challan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_pilot_tms.report_cp_challan</field>
+        <field name="report_file">cargo_pilot_tms.report_cp_challan</field>
+        <field name="print_report_name">'Challan - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_cp_challan"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_cp_report_hire_slip" model="ir.actions.report">
+        <field name="name">Hire Slip</field>
+        <field name="model">cp.hire.slip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_pilot_tms.report_cp_hire_slip</field>
+        <field name="report_file">cargo_pilot_tms.report_cp_hire_slip</field>
+        <field name="print_report_name">'Hire Slip - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_cp_hire_slip"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_cp_report_trip" model="ir.actions.report">
+        <field name="name">Trip Sheet</field>
+        <field name="model">cp.trip</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_pilot_tms.report_cp_trip</field>
+        <field name="report_file">cargo_pilot_tms.report_cp_trip</field>
+        <field name="print_report_name">'Trip Sheet - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_cp_trip"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

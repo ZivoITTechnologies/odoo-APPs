@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_status_map_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.status.map.list</field>
+        <field name="model">zivo.logistics.status.map</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" decoration-warning="not verified">
+                <field name="provider"/>
+                <field name="raw_status"/>
+                <field name="normalized_status"/>
+                <field name="source" readonly="1"/>
+                <field name="confidence" widget="percentage" readonly="1"/>
+                <field name="hit_count"/>
+                <field name="verified" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_status_map_search" model="ir.ui.view">
+        <field name="name">zivo.logistics.status.map.search</field>
+        <field name="model">zivo.logistics.status.map</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="raw_status"/>
+                <field name="provider"/>
+                <filter name="to_review" string="AI suggestions to review" domain="[('verified', '=', False)]"/>
+                <group><filter name="group_provider" string="Carrier" context="{'group_by': 'provider'}"/></group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_status_map" model="ir.actions.act_window">
+        <field name="name">Status Mapping</field>
+        <field name="res_model">zivo.logistics.status.map</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p>Carrier statuses unknown to the connectors are classified by AI and appear here for review.</p>
+        </field>
+    </record>
+</odoo>

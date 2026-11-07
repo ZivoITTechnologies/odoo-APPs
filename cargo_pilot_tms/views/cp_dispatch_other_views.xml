@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Detention -->
+    <record id="view_cp_detention_record_list" model="ir.ui.view">
+        <field name="name">cp.detention.record.list</field>
+        <field name="model">cp.detention.record</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'rejected'" sample="1">
+                <field name="name"/>
+                <field name="plan_id"/>
+                <field name="vendor_id"/>
+                <field name="tat_hours"/>
+                <field name="free_hours"/>
+                <field name="gross_waiting_hours"/>
+                <field name="delay_reason"/>
+                <field name="calculated_amount" sum="Calculated"/>
+                <field name="approved_amount" sum="Approved"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="move_id" optional="hide"/>
+                <field name="state" widget="badge" decoration-warning="state in ('submitted', 'logistics_approved')"
+                       decoration-success="state == 'approved'" decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_detention_record_form" model="ir.ui.view">
+        <field name="name">cp.detention.record.form</field>
+        <field name="model">cp.detention.record</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_recalculate" string="Re-apply Vendor Terms" type="object" invisible="state != 'draft'"/>
+                    <button name="action_submit" string="Submit for Approval" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve_logistics" string="Approve (Logistics Manager)" type="object"
+                            class="btn-primary" invisible="state != 'submitted'" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_approve_ops" string="Approve (Plant Operations Head)" type="object"
+                            class="btn-primary" invisible="state != 'logistics_approved'"
+                            groups="cargo_pilot_tms.group_dispatch_ops_head"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            invisible="state not in ('submitted', 'logistics_approved')" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_reset" string="Back to Draft" type="object"
+                            invisible="state not in ('rejected', 'approved') or move_id" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,logistics_approved,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1>
+                        <field name="plan_id" readonly="1"/></div>
+                    <div class="cp-stat-row">
+                        <div class="cp-stat"><span>Turnaround (h)</span><field name="tat_hours"/></div>
+                        <div class="cp-stat"><span>Beyond free time (h)</span><field name="gross_waiting_hours"/></div>
+                        <div class="cp-stat cp-stat-alert"><span>Calculated</span><field name="calculated_amount"/></div>
+                    </div>
+                    <div class="text-muted small mb-2">Turnaround = Gate-Out (T3) - Gate-In (T0). Waiting = max(0, turnaround -
+                        free hours). Transporter-caused delays carry no detention.</div>
+                    <group>
+                        <group string="Gate">
+                            <field name="gate_entry_id" readonly="1"/>
+                            <field name="gate_in_time" readonly="state != 'draft'"/>
+                            <field name="gate_out_time" readonly="state != 'draft'"/>
+                            <field name="vendor_id"/>
+                            <field name="vehicle_type_id"/>
+                        </group>
+                        <group string="Vendor Terms">
+                            <field name="term_id" readonly="1"/>
+                            <field name="free_hours" readonly="state != 'draft'"/>
+                            <field name="method" readonly="state != 'draft'"/>
+                            <field name="hourly_rate" invisible="method != 'hourly'" readonly="state != 'draft'"/>
+                            <field name="daily_rate" invisible="method != 'daily'" readonly="state != 'draft'"/>
+                            <field name="partial_day" invisible="method != 'daily'" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Cause">
+                            <field name="delay_reason" required="state == 'draft'" readonly="state != 'draft'"/>
+                            <field name="delay_note"/>
+                            <field name="transporter_fault" invisible="1"/>
+                            <field name="chargeable_hours"/>
+                            <field name="chargeable_days" invisible="method != 'daily'"/>
+                        </group>
+                        <group string="Approval">
+                            <field name="approved_amount" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="adjust_reason" readonly="state not in ('draft', 'submitted')"/>
+                            <field name="logistics_approved_by"/>
+                            <field name="logistics_approved_at"/>
+                            <field name="ops_approved_by"/>
+                            <field name="ops_approved_at"/>
+                            <field name="move_id"/>
+                        </group>
+                    </group>
+                    <field name="evidence_ids" widget="many2many_binary" string="Evidence (photos, gate register, e-mails)"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_detention_record_search" model="ir.ui.view">
+        <field name="name">cp.detention.record.search</field>
+        <field name="model">cp.detention.record</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="plan_id"/>
+                <field name="vendor_id"/>
+                <filter name="to_approve" string="To Approve" domain="[('state', 'in', ('submitted', 'logistics_approved'))]"/>
+                <filter name="needs_reason" string="Needs Reason" domain="[('state', '=', 'draft')]"/>
+                <group>
+                    <filter name="by_reason" string="Delay Reason" context="{'group_by': 'delay_reason'}"/>
+                    <filter name="by_vendor" string="Vendor" context="{'group_by': 'vendor_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_cp_detention_record_pivot" model="ir.ui.view">
+        <field name="name">cp.detention.record.pivot</field>
+        <field name="model">cp.detention.record</field>
+        <field name="arch" type="xml">
+            <pivot string="Detention Spend">
+                <field name="delay_reason" type="row"/>
+                <field name="approved_amount" type="measure"/>
+                <field name="chargeable_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_cp_detention_record" model="ir.actions.act_window">
+        <field name="name">Detention Claims</field>
+        <field name="res_model">cp.detention.record</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="context">{'search_default_to_approve': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No detention claims</p>
+            <p>A claim opens automatically when a truck stays beyond the vendor's free hours between gate-in and gate-out.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_detention_term_list" model="ir.ui.view">
+        <field name="name">cp.detention.term.list</field>
+        <field name="model">cp.detention.term</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="partner_id"/>
+                <field name="vehicle_type_id"/>
+                <field name="free_hours"/>
+                <field name="method"/>
+                <field name="hourly_rate"/>
+                <field name="daily_rate"/>
+                <field name="partial_day"/>
+                <field name="note" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_cp_detention_term" model="ir.actions.act_window">
+        <field name="name">Detention Terms</field>
+        <field name="res_model">cp.detention.term</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- POD -->
+    <record id="view_cp_dispatch_pod_form" model="ir.ui.view">
+        <field name="name">cp.dispatch.pod.form</field>
+        <field name="model">cp.dispatch.pod</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_verify" string="Verify POD" type="object" class="btn-primary"
+                            invisible="status != 'pending' or not id" groups="cargo_pilot_tms.group_cp_user"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            invisible="status != 'pending' or not id" groups="cargo_pilot_tms.group_cp_user"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="plan_id" readonly="id"/>
+                            <field name="vendor_id"/>
+                            <field name="source"/>
+                            <field name="receiver_name"/>
+                            <field name="received_at"/>
+                            <field name="epod_id" invisible="not epod_id"/>
+                        </group>
+                        <group string="Audit Checklist">
+                            <field name="check_signature"/>
+                            <field name="check_date"/>
+                            <field name="check_stamp"/>
+                            <field name="check_quantity"/>
+                            <field name="damage_noted"/>
+                            <field name="damage_remarks" invisible="not damage_noted" required="damage_noted"/>
+                            <field name="reject_reason" invisible="status == 'verified'"/>
+                            <field name="verified_by" invisible="not verified_by"/>
+                            <field name="verified_at" invisible="not verified_at"/>
+                        </group>
+                    </group>
+                    <field name="attachment_ids" widget="many2many_binary" string="Signed POD / LR / delivery challan"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_cp_dispatch_pod_list" model="ir.ui.view">
+        <field name="name">cp.dispatch.pod.list</field>
+        <field name="model">cp.dispatch.pod</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="name"/>
+                <field name="create_date" string="Received"/>
+                <field name="plan_id"/>
+                <field name="vendor_id"/>
+                <field name="source"/>
+                <field name="document_count" string="Files"/>
+                <field name="status" widget="badge" decoration-success="status == 'verified'"
+                       decoration-warning="status == 'pending'" decoration-danger="status == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_cp_dispatch_pod" model="ir.actions.act_window">
+        <field name="name">POD Verification</field>
+        <field name="res_model">cp.dispatch.pod</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_pending': 1}</field>
+    </record>
+    <record id="view_cp_dispatch_pod_search" model="ir.ui.view">
+        <field name="name">cp.dispatch.pod.search</field>
+        <field name="model">cp.dispatch.pod</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="plan_id"/>
+                <field name="vendor_id"/>
+                <filter name="pending" string="To Verify" domain="[('status', '=', 'pending')]"/>
+                <filter name="rejected" string="Rejected" domain="[('status', '=', 'rejected')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Gate entry -->
+    <record id="view_cp_gate_entry_form_dispatch" model="ir.ui.view">
+        <field name="name">cp.gate.entry.form.dispatch</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_gate_entry_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_to_dock']" position="attributes">
+                <attribute name="string">Start Loading (T1)</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_weigh']" position="before">
+                <button name="action_loading_done" string="Loading Done (T2)" type="object"
+                        invisible="state != 'at_dock' or not dispatch_plan_id"/>
+            </xpath>
+            <xpath expr="//header/button[@name='action_gate_in']" position="attributes">
+                <attribute name="string">Gate In (T0)</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_gate_out']" position="attributes">
+                <attribute name="string">Gate Out (T3)</attribute>
+            </xpath>
+            <xpath expr="//field[@name='trip_id']" position="before">
+                <field name="dispatch_plan_id" readonly="1" invisible="not dispatch_plan_id"/>
+            </xpath>
+            <xpath expr="//field[@name='driver_name']" position="after">
+                <field name="driver_phone" widget="phone"/>
+                <field name="driver_license"/>
+                <field name="reporting_cutoff" invisible="not reporting_cutoff"/>
+                <field name="reported_late" invisible="not reported_late" decoration-danger="reported_late"/>
+            </xpath>
+            <xpath expr="//field[@name='tare_weight_kg']/.." position="after">
+                <group string="Inspection" invisible="not dispatch_plan_id">
+                    <field name="check_license"/>
+                    <field name="check_fitness"/>
+                    <field name="check_clean"/>
+                    <field name="check_seal"/>
+                    <field name="seal_number"/>
+                    <field name="inspection_note"/>
+                    <field name="inspection_ok" invisible="1"/>
+                </group>
+                <group string="Release" invisible="not dispatch_plan_id">
+                    <field name="eway_required" invisible="1"/>
+                    <field name="eway_bill_no" required="eway_required and state in ('at_dock', 'weighed')"/>
+                    <field name="detention_id" invisible="not detention_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Carriers and vendors on the contact -->
+    <record id="view_partner_form_dispatch" model="ir.ui.view">
+        <field name="name">res.partner.form.dispatch</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_partner_form_cp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='cp_transport']" position="inside">
+                <group>
+                    <group string="Dispatch Role">
+                        <field name="cp_regular_carrier"/>
+                        <field name="cp_carrier_sequence" invisible="not cp_regular_carrier"/>
+                        <field name="cp_is_3pl_vendor"/>
+                    </group>
+                    <group string="Regular Partner Limits" invisible="not cp_regular_carrier">
+                        <field name="cp_tracking_url_template" placeholder="https://carrier.example/track?awb={ref}"/>
+                        <field name="cp_max_weight_kg"/>
+                        <field name="cp_max_volume_cbm"/>
+                        <field name="cp_service_pincodes" placeholder="400, 411001, 5000"/>
+                    </group>
+                    <group string="3PL Eligibility" invisible="not cp_is_3pl_vendor">
+                        <field name="cp_service_state_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <separator string="Detention Terms" invisible="not cp_is_3pl_vendor and not cp_regular_carrier"/>
+                <field name="cp_detention_term_ids" invisible="not cp_is_3pl_vendor and not cp_regular_carrier">
+                    <list editable="bottom">
+                        <field name="vehicle_type_id"/>
+                        <field name="free_hours"/>
+                        <field name="method"/>
+                        <field name="hourly_rate"/>
+                        <field name="daily_rate"/>
+                        <field name="partial_day"/>
+                        <field name="currency_id" column_invisible="1"/>
+                    </list>
+                </field>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_cp_regular_carriers" model="ir.actions.act_window">
+        <field name="name">Regular Partners</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('cp_regular_carrier', '=', True)]</field>
+        <field name="context">{'default_cp_regular_carrier': True, 'default_is_company': True}</field>
+    </record>
+    <record id="action_cp_3pl_vendors" model="ir.actions.act_window">
+        <field name="name">3PL Vendors</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('cp_is_3pl_vendor', '=', True)]</field>
+        <field name="context">{'default_cp_is_3pl_vendor': True, 'default_is_company': True}</field>
+    </record>
+
+    <!-- Bid -->
+    <record id="view_cp_auction_form_dispatch" model="ir.ui.view">
+        <field name="name">cp.auction.form.dispatch</field>
+        <field name="model">cp.auction</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.view_cp_auction_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='winner_ids']" position="after">
+                <field name="dispatch_plan_id" invisible="not dispatch_plan_id"/>
+                <field name="bidding_mode" invisible="not dispatch_plan_id"/>
+                <field name="target_price" invisible="not dispatch_plan_id"/>
+                <field name="duration_minutes" invisible="not dispatch_plan_id"/>
+                <field name="participation_rate" invisible="not dispatch_plan_id"/>
+                <field name="proposed_bid_id" invisible="not proposed_bid_id"/>
+                <field name="override_reason" invisible="not override_reason"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vendor bill: POD gate and 3-way match -->
+    <record id="view_move_form_dispatch" model="ir.ui.view">
+        <field name="name">account.move.form.dispatch</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_cp_approve_mismatch" string="Approve Freight Mismatch" type="object"
+                        invisible="cp_match_state != 'exception' or state != 'draft'" groups="account.group_account_manager"/>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <field name="cp_match_state" invisible="1"/>
+                <field name="cp_pod_status" invisible="1"/>
+                <div class="alert alert-warning mb-0" role="alert"
+                     invisible="not cp_dispatch_id or cp_pod_status == 'verified' or move_type != 'in_invoice' or state != 'draft'">
+                    <strong>Awaiting POD:</strong> this freight bill cannot be posted or paid until the proof of delivery of
+                    <field name="cp_dispatch_id" class="d-inline" readonly="1"/> is verified.
+                </div>
+                <div class="alert alert-danger mb-0" role="alert" invisible="cp_match_state != 'exception'">
+                    <strong>3-way match exception:</strong> <field name="cp_match_note" class="d-inline"/>.
+                    An accounting manager must approve the difference.
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="cp_dispatch_id" invisible="move_type not in ('in_invoice', 'in_refund')"
+                       readonly="state != 'draft'"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Freight Match" name="cp_freight_match" invisible="not cp_dispatch_id">
+                    <group>
+                        <group string="Base Freight">
+                            <field name="cp_freight_expected"/>
+                            <field name="cp_freight_billed"/>
+                        </group>
+                        <group string="Detention">
+                            <field name="cp_detention_expected"/>
+                            <field name="cp_detention_billed"/>
+                        </group>
+                        <group string="Result">
+                            <field name="cp_match_state" widget="badge" decoration-success="cp_match_state == 'ok'"
+                                   decoration-danger="cp_match_state == 'exception'" decoration-info="cp_match_state == 'approved'"/>
+                            <field name="cp_pod_status" widget="badge"/>
+                            <field name="cp_exception_reason" readonly="state != 'draft'"/>
+                            <field name="cp_exception_approved_by" invisible="not cp_exception_approved_by"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Settings -->
+    <record id="res_config_settings_view_form_dispatch" model="ir.ui.view">
+        <field name="name">res.config.settings.dispatch</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="cargo_pilot_tms.res_config_settings_view_form_cp"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='cp_booking']" position="after">
+                <block title="Dispatch &amp; 3PL Bidding" name="cp_dispatch">
+                    <setting string="Bid duration" help="Default length of a 3PL bid, 10 to 20 minutes.">
+                        <field name="cp_dispatch_bid_minutes"/>
+                    </setting>
+                    <setting string="Vehicle reporting window" help="Hours the winner has to report the truck.">
+                        <field name="cp_dispatch_reporting_hours"/>
+                    </setting>
+                    <setting string="Default transit time" help="Days added to the delivery date for the target delivery date, when the delivery has no deadline and the lane has no distance.">
+                        <field name="cp_dispatch_transit_days"/>
+                    </setting>
+                    <setting string="E-way bill at gate-out" help="Interstate moves and goods above the value threshold need an e-way bill number before release.">
+                        <field name="cp_dispatch_require_eway"/>
+                        <div class="mt-2" invisible="not cp_dispatch_require_eway">
+                            <label for="cp_eway_threshold" string="Value threshold"/>
+                            <field name="cp_eway_threshold" class="o_light_label ms-2"/>
+                        </div>
+                    </setting>
+                    <setting string="Customer SMS" help="Send an SMS with the tracking link when goods leave (besides e-mail and WhatsApp).">
+                        <field name="cp_dispatch_sms"/>
+                    </setting>
+                    <setting string="Default detention terms" help="Used when a vendor has no detention terms of its own.">
+                        <div class="row"><label for="cp_detention_free_hours" class="col-6" string="Free hours"/><field name="cp_detention_free_hours" class="col-6"/></div>
+                        <div class="row"><label for="cp_detention_hourly_rate" class="col-6" string="Per hour"/><field name="cp_detention_hourly_rate" class="col-6"/></div>
+                        <div class="row"><label for="cp_detention_daily_rate" class="col-6" string="Per day"/><field name="cp_detention_daily_rate" class="col-6"/></div>
+                    </setting>
+                    <setting string="Regular partner target" help="Share of dispatches the regular partners should carry.">
+                        <field name="cp_regular_share_target"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Dashboard -->
+    <record id="action_cp_dispatch_dashboard" model="ir.actions.client">
+        <field name="name">Dispatch Dashboard</field>
+        <field name="tag">cp_dispatch_dashboard</field>
+    </record>
+
+    <!-- Menus: own app so Sales, Gate and Operations roles reach it -->
+    <menuitem id="menu_cp_dispatch_root" name="Dispatch" web_icon="cargo_pilot_tms,static/description/icon_dispatch.png"
+              sequence="46"
+              groups="cargo_pilot_tms.group_cp_user,group_dispatch_sales,group_dispatch_gate,group_dispatch_ops_head,account.group_account_invoice"/>
+    <menuitem id="menu_cp_dispatch_dashboard" name="Dashboard" parent="menu_cp_dispatch_root"
+              action="action_cp_dispatch_dashboard" sequence="1" groups="cargo_pilot_tms.group_cp_user,group_dispatch_ops_head,account.group_account_invoice"/>
+    <menuitem id="menu_cp_dispatch_plans" name="Dispatch Plans" parent="menu_cp_dispatch_root"
+              action="action_cp_dispatch_plan" sequence="2"/>
+    <menuitem id="menu_cp_dispatch_board" name="Transit Board" parent="menu_cp_dispatch_root"
+              action="action_cp_dispatch_board" sequence="3"/>
+    <menuitem id="menu_cp_dispatch_ops" name="Operations" parent="menu_cp_dispatch_root" sequence="4"/>
+    <menuitem id="menu_cp_dispatch_bids" name="3PL Bids" parent="menu_cp_dispatch_ops"
+              action="cargo_pilot_tms.action_cp_auction" sequence="1" groups="cargo_pilot_tms.group_cp_user"/>
+    <menuitem id="menu_cp_dispatch_gate" name="Gate &amp; Loading" parent="menu_cp_dispatch_ops"
+              action="cargo_pilot_tms.action_cp_gate_entry" sequence="2" groups="cargo_pilot_tms.group_cp_user,group_dispatch_gate"/>
+    <menuitem id="menu_cp_dispatch_detention" name="Detention Claims" parent="menu_cp_dispatch_ops"
+              action="action_cp_detention_record" sequence="3"
+              groups="cargo_pilot_tms.group_cp_user,group_dispatch_ops_head,account.group_account_invoice"/>
+    <menuitem id="menu_cp_dispatch_pod" name="POD Verification" parent="menu_cp_dispatch_ops"
+              action="action_cp_dispatch_pod" sequence="4" groups="cargo_pilot_tms.group_cp_user,account.group_account_invoice"/>
+    <menuitem id="menu_cp_dispatch_pod_pending" name="Outstanding PODs" parent="menu_cp_dispatch_ops"
+              action="action_cp_dispatch_pod_pending" sequence="5"/>
+    <menuitem id="menu_cp_dispatch_reports" name="Reports" parent="menu_cp_dispatch_root" sequence="8"
+              groups="cargo_pilot_tms.group_cp_user,group_dispatch_ops_head,account.group_account_invoice"/>
+    <menuitem id="menu_cp_dispatch_analysis" name="Dispatch Analysis" parent="menu_cp_dispatch_reports"
+              action="action_cp_dispatch_analysis" sequence="1"/>
+    <menuitem id="menu_cp_dispatch_config" name="Setup" parent="menu_cp_dispatch_root" sequence="9"
+              groups="cargo_pilot_tms.group_cp_manager"/>
+    <menuitem id="menu_cp_dispatch_regular" name="Regular Partners" parent="menu_cp_dispatch_config"
+              action="action_cp_regular_carriers" sequence="1"/>
+    <menuitem id="menu_cp_dispatch_vendors" name="3PL Vendors" parent="menu_cp_dispatch_config"
+              action="action_cp_3pl_vendors" sequence="2"/>
+    <menuitem id="menu_cp_dispatch_terms" name="Detention Terms" parent="menu_cp_dispatch_config"
+              action="action_cp_detention_term" sequence="3"/>
+    <menuitem id="menu_cp_dispatch_settings" name="Settings" parent="menu_cp_dispatch_config"
+              action="cargo_pilot_tms.action_cp_settings" sequence="9"/>
+</odoo>

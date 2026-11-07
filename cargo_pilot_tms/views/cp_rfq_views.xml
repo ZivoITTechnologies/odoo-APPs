@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_rfq_list" model="ir.ui.view">
+        <field name="name">cp.rfq.list</field>
+        <field name="model">cp.rfq</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="title"/>
+                <field name="date_deadline"/>
+                <field name="contract_start" optional="show"/>
+                <field name="contract_end" optional="show"/>
+                <field name="quote_count" string="Quotes"/>
+                <field name="state" widget="badge" decoration-warning="state == 'published'"
+                       decoration-info="state == 'evaluation'" decoration-success="state == 'awarded'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_rfq_form" model="ir.ui.view">
+        <field name="name">cp.rfq.form</field>
+        <field name="model">cp.rfq</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_publish" string="Publish to Transporters" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_close_quotes" string="Close Quotes" type="object"
+                            invisible="state != 'published'"/>
+                    <button name="action_select_best" string="Select Best per Lane" type="object"
+                            invisible="state != 'evaluation'"/>
+                    <button name="action_award" string="Award &amp; Create Contracts" type="object" class="btn-primary"
+                            invisible="state != 'evaluation'" groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('awarded', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,published,evaluation,awarded"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_quotes" type="object" class="oe_stat_button" icon="fa-list-ol">
+                            <field name="quote_count" widget="statinfo" string="Quotes"/>
+                        </button>
+                        <button name="action_view_contracts" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="state != 'awarded'">
+                            <span class="o_stat_text">Contracts</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="title" placeholder="e.g. West zone lanes FY27"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_deadline"/>
+                            <field name="price_weight"/>
+                        </group>
+                        <group>
+                            <field name="contract_start"/>
+                            <field name="contract_end"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Lanes" name="lanes">
+                            <field name="line_ids" readonly="state not in ('draft',)">
+                                <list editable="bottom">
+                                    <field name="lane_id"/>
+                                    <field name="vehicle_type_id"/>
+                                    <field name="charge_basis"/>
+                                    <field name="monthly_volume"/>
+                                    <field name="lowest_rate" readonly="1"/>
+                                    <field name="average_rate" readonly="1" optional="show"/>
+                                    <field name="benchmark_rate" readonly="1" optional="show"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Invited Transporters" name="transporters">
+                            <field name="transporter_ids" widget="many2many" readonly="state not in ('draft', 'published')">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="cp_score" string="Score"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Quotes &amp; Scoring" name="quotes">
+                            <field name="quote_ids" context="{'default_rfq_id': id}">
+                                <list editable="bottom" default_order="line_id, rank">
+                                    <field name="rfq_id" column_invisible="1"/>
+                                    <field name="line_id"/>
+                                    <field name="transporter_id"/>
+                                    <field name="rate"/>
+                                    <field name="score" widget="progressbar"/>
+                                    <field name="rank" decoration-success="rank == 1"/>
+                                    <field name="selected" widget="boolean_toggle"/>
+                                    <field name="remarks" optional="hide"/>
+                                    <field name="submitted_on" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_rfq_quote_list" model="ir.ui.view">
+        <field name="name">cp.rfq.quote.list</field>
+        <field name="model">cp.rfq.quote</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="rfq_id" column_invisible="1"/>
+                <field name="line_id"/>
+                <field name="transporter_id"/>
+                <field name="rate"/>
+                <field name="score" widget="progressbar"/>
+                <field name="rank"/>
+                <field name="selected" widget="boolean_toggle"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_rfq_quote_pivot" model="ir.ui.view">
+        <field name="name">cp.rfq.quote.pivot</field>
+        <field name="model">cp.rfq.quote</field>
+        <field name="arch" type="xml">
+            <pivot string="Quote Comparison">
+                <field name="line_id" type="row"/>
+                <field name="transporter_id" type="col"/>
+                <field name="rate" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_cp_rfq_quote_search" model="ir.ui.view">
+        <field name="name">cp.rfq.quote.search</field>
+        <field name="model">cp.rfq.quote</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="transporter_id"/>
+                <field name="line_id"/>
+                <filter name="selected" string="Selected" domain="[('selected', '=', True)]"/>
+                <group>
+                    <filter name="group_line" string="Lane" context="{'group_by': 'line_id'}"/>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_rfq" model="ir.actions.act_window">
+        <field name="name">Rate Requests</field>
+        <field name="res_model">cp.rfq</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Run a contract rate RFQ</p>
+            <p>Invite transporters to quote on many lanes at once. Quotes are scored on price and past performance, and awards become rate contracts.</p>
+        </field>
+    </record>
+</odoo>

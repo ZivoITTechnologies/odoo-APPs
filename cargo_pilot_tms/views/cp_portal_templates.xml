@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Home entries -->
+    <template id="portal_my_home_cp" name="Transporter Workspace" inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_vendor_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_vendor_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/img/portal_auction.svg'"/>
+                <t t-set="title">Load Auctions</t>
+                <t t-set="url" t-value="'/my/cp/auctions'"/>
+                <t t-set="text">Bid on open loads</t>
+                <t t-set="placeholder_count" t-value="'cp_auction_count'"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/img/portal_trip.svg'"/>
+                <t t-set="title">My Trips</t>
+                <t t-set="url" t-value="'/my/cp/trips'"/>
+                <t t-set="text">Assign vehicles, share driver links, upload ePODs</t>
+                <t t-set="placeholder_count" t-value="'cp_trip_count'"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/img/portal_rfq.svg'"/>
+                <t t-set="title">Rate Requests</t>
+                <t t-set="url" t-value="'/my/cp/rfqs'"/>
+                <t t-set="text">Quote contract rates per lane</t>
+                <t t-set="placeholder_count" t-value="'cp_rfq_count'"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/img/portal_bill.svg'"/>
+                <t t-set="title">Freight Bills</t>
+                <t t-set="url" t-value="'/my/cp/bills'"/>
+                <t t-set="text">See audit results and approved amounts</t>
+                <t t-set="placeholder_count" t-value="'cp_bill_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_my_home_cp_customer" name="Customer Shipments" inherit_id="portal.portal_my_home" priority="41">
+        <div id="portal_common_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/cargo_pilot_tms/static/src/img/portal_trip.svg'"/>
+                <t t-set="title">Your Shipments</t>
+                <t t-set="url" t-value="'/my/cp/shipments'"/>
+                <t t-set="text">Request a truck and follow your deliveries</t>
+                <t t-set="placeholder_count" t-value="'cp_shipment_count'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_breadcrumbs_cp" inherit_id="portal.portal_breadcrumbs" priority="40">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'cp_auctions'" class="breadcrumb-item active">Load Auctions</li>
+            <li t-if="page_name == 'cp_auction'" class="breadcrumb-item"><a href="/my/cp/auctions">Load Auctions</a></li>
+            <li t-if="page_name == 'cp_auction'" class="breadcrumb-item active" t-esc="auction.name"/>
+            <li t-if="page_name == 'cp_trips'" class="breadcrumb-item active">My Trips</li>
+            <li t-if="page_name == 'cp_trip'" class="breadcrumb-item"><a href="/my/cp/trips">My Trips</a></li>
+            <li t-if="page_name == 'cp_trip'" class="breadcrumb-item active" t-esc="trip.name"/>
+            <li t-if="page_name == 'cp_rfqs'" class="breadcrumb-item active">Rate Requests</li>
+            <li t-if="page_name == 'cp_rfq'" class="breadcrumb-item"><a href="/my/cp/rfqs">Rate Requests</a></li>
+            <li t-if="page_name == 'cp_rfq'" class="breadcrumb-item active" t-esc="rfq.name"/>
+            <li t-if="page_name == 'cp_bills'" class="breadcrumb-item active">Freight Bills</li>
+            <li t-if="page_name == 'cp_shipments'" class="breadcrumb-item active">Your Shipments</li>
+            <li t-if="page_name == 'cp_book'" class="breadcrumb-item"><a href="/my/cp/shipments">Your Shipments</a></li>
+            <li t-if="page_name == 'cp_book'" class="breadcrumb-item active">Request a Truck</li>
+            <li t-if="page_name == 'cp_bill'" class="breadcrumb-item"><a href="/my/cp/bills">Freight Bills</a></li>
+            <li t-if="page_name == 'cp_bill'" class="breadcrumb-item active" t-esc="bill.name"/>
+        </xpath>
+    </template>
+
+    <template id="cp_portal_flash">
+        <div t-if="message" class="alert alert-success" role="status" t-esc="message"/>
+        <div t-if="error" class="alert alert-danger" role="alert" t-esc="error"/>
+    </template>
+
+    <!-- Auctions list -->
+    <template id="portal_my_cp_auctions" name="Load Auctions">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Load Auctions</t>
+            </t>
+            <div class="cp-portal">
+                <p t-if="not auctions" class="text-muted mt-3">No auctions here right now. You will get an email when a load is posted.</p>
+                <div class="row g-3 mt-1">
+                    <div t-foreach="auctions" t-as="a" class="col-md-6 col-lg-4">
+                        <a t-attf-href="/my/cp/auctions/#{a.id}" class="cp-card d-block text-decoration-none h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="cp-card-id" t-esc="a.name"/>
+                                <span t-if="a.state == 'live'" class="cp-pill cp-pill-live">Live</span>
+                                <span t-elif="a.state == 'scheduled'" class="cp-pill">Opens soon</span>
+                                <span t-elif="transporter in a.winner_ids" class="cp-pill cp-pill-won">Won</span>
+                                <span t-else="" class="cp-pill cp-pill-muted" t-field="a.state"/>
+                            </div>
+                            <div class="cp-card-lane mt-2" t-esc="a.lane_id.name"/>
+                            <div class="small text-muted"><t t-esc="a.vehicle_count"/> x <t t-esc="a.vehicle_type_id.name"/> · <t t-esc="a.total_weight_ton"/> t</div>
+                            <div class="d-flex justify-content-between mt-3 small">
+                                <span>Placement <strong t-field="a.required_date" t-options="{'widget': 'date'}"/></span>
+                                <span t-if="a.time_left">Ends in <strong t-esc="a.time_left"/></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Auction detail -->
+    <template id="portal_my_cp_auction" name="Load Auction">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <t t-call="cargo_pilot_tms.cp_portal_flash"/>
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <h2 class="mb-0" t-esc="auction.lane_id.name"/>
+                        <div class="text-muted"><t t-esc="auction.name"/> · <t t-esc="auction.vehicle_count"/> x <t t-esc="auction.vehicle_type_id.name"/></div>
+                    </div>
+                    <span t-if="auction.state == 'live'" class="cp-pill cp-pill-live cp-pill-lg">Live · ends in <t t-esc="auction.time_left or '&lt;1m'"/></span>
+                    <span t-elif="auction.state == 'scheduled'" class="cp-pill cp-pill-lg">Opens in <t t-esc="auction.time_left"/></span>
+                    <span t-else="" class="cp-pill cp-pill-muted cp-pill-lg" t-field="auction.state"/>
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Placement</span><strong t-field="auction.required_date"/></div></div>
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Weight</span><strong><t t-esc="auction.total_weight_ton"/> t</strong></div></div>
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Ceiling / vehicle</span>
+                        <strong t-if="auction.ceiling_price" t-field="auction.ceiling_price" t-options="{'widget': 'monetary', 'display_currency': auction.currency_id}"/>
+                        <strong t-else="">None</strong></div></div>
+                    <div class="col-6 col-md-3"><div class="cp-stat"><span>Your rank</span>
+                        <strong t-if="my_rank and auction.bid_mode == 'open'">#<t t-esc="my_rank"/> of <t t-esc="auction.participant_count"/></strong>
+                        <strong t-elif="my_rank">Bid placed</strong>
+                        <strong t-else="">No bid yet</strong></div></div>
+                </div>
+
+                <div class="row g-4 mt-1">
+                    <div class="col-lg-6">
+                        <div class="cp-panel">
+                            <h5>Place a bid</h5>
+                            <t t-if="auction.state in ('live', 'scheduled')">
+                                <p class="small text-muted" t-if="auction.bid_mode == 'open' and auction.best_rate">
+                                    Current best rate: <strong t-field="auction.best_rate" t-options="{'widget': 'monetary', 'display_currency': auction.currency_id}"/> per vehicle.
+                                </p>
+                                <p class="small text-muted" t-if="auction.state == 'scheduled'">
+                                    The auction has not opened. You can place one pre-bid now.
+                                </p>
+                                <form t-attf-action="/my/cp/auctions/#{auction.id}/bid" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <div class="row g-2">
+                                        <div class="col-7">
+                                            <label class="form-label small" for="cp_rate">Rate per vehicle</label>
+                                            <input id="cp_rate" type="number" step="0.01" min="1" name="rate" class="form-control form-control-lg" required="1"
+                                                   t-att-max="auction.ceiling_price or None"/>
+                                        </div>
+                                        <div class="col-5">
+                                            <label class="form-label small" for="cp_vehicles">Vehicles</label>
+                                            <input id="cp_vehicles" type="number" min="1" t-att-max="auction.vehicle_count" name="vehicles"
+                                                   class="form-control form-control-lg" t-att-value="auction.vehicle_count"
+                                                   t-att-readonly="None if auction.allow_part_bid else '1'"/>
+                                        </div>
+                                    </div>
+                                    <input type="text" name="note" class="form-control mt-2" placeholder="Note (optional)"/>
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">Submit bid</button>
+                                </form>
+                                <p class="small text-muted mt-2 mb-0">
+                                    Each new bid must be at least <t t-esc="auction.min_decrement_pct"/>% below your last one.
+                                    <t t-if="auction.extension_minutes">Bids in the last <t t-esc="auction.extension_minutes"/> minutes extend the auction.</t>
+                                </p>
+                            </t>
+                            <p t-else="" class="text-muted mb-0">Bidding is closed.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="cp-panel">
+                            <h5>Your bids</h5>
+                            <p t-if="not my_bids" class="text-muted mb-0">You have not bid yet.</p>
+                            <table t-else="" class="table table-sm mb-0">
+                                <thead><tr><th>Time</th><th class="text-end">Rate</th><th class="text-end">Vehicles</th><th/></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="my_bids" t-as="b" t-att-class="'' if b.is_latest else 'text-muted'">
+                                        <td><span t-field="b.bid_time"/></td>
+                                        <td class="text-end"><span t-field="b.rate" t-options="{'widget': 'monetary', 'display_currency': auction.currency_id}"/></td>
+                                        <td class="text-end" t-esc="b.vehicle_count"/>
+                                        <td>
+                                            <span t-if="b.state == 'won'" class="cp-pill cp-pill-won">Won <t t-esc="b.awarded_vehicles"/></span>
+                                            <span t-elif="b.is_pre_bid" class="cp-pill">Pre-bid</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- RFQs -->
+    <template id="portal_my_cp_rfqs" name="Rate Requests">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Rate Requests</t>
+            </t>
+            <p t-if="not rfqs" class="text-muted mt-3">No rate requests yet.</p>
+            <t t-if="rfqs" t-call="portal.portal_table">
+                <thead><tr><th>Reference</th><th>Title</th><th>Lanes</th><th>Deadline</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="rfqs" t-as="r">
+                        <td><a t-attf-href="/my/cp/rfqs/#{r.id}" t-esc="r.name"/></td>
+                        <td t-esc="r.title"/>
+                        <td t-esc="len(r.line_ids)"/>
+                        <td><span t-field="r.date_deadline"/></td>
+                        <td><span class="cp-pill" t-field="r.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_cp_rfq" name="Rate Request">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <t t-call="cargo_pilot_tms.cp_portal_flash"/>
+                <h2 class="mb-0" t-esc="rfq.title"/>
+                <div class="text-muted mb-3"><t t-esc="rfq.name"/> · contract <t t-esc="rfq.contract_start"/> to <t t-esc="rfq.contract_end"/> · quotes due <span t-field="rfq.date_deadline"/></div>
+                <form t-attf-action="/my/cp/rfqs/#{rfq.id}/quote" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead><tr><th>Lane</th><th>Vehicle</th><th>Basis</th><th class="text-end">Trips / month</th><th style="width: 160px">Your rate</th><th>Remarks</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="rfq.line_ids" t-as="line">
+                                    <t t-set="q" t-value="quotes.get(line.id)"/>
+                                    <td t-esc="line.lane_id.name"/>
+                                    <td t-esc="line.vehicle_type_id.name"/>
+                                    <td><span t-field="line.charge_basis"/></td>
+                                    <td class="text-end" t-esc="line.monthly_volume"/>
+                                    <td><input type="number" step="0.01" min="0" class="form-control" t-attf-name="rate_#{line.id}"
+                                               t-att-value="q.rate if q else ''" t-att-disabled="None if rfq.state == 'published' else '1'"/></td>
+                                    <td><input type="text" class="form-control" t-attf-name="remarks_#{line.id}"
+                                               t-att-value="q.remarks if q else ''" t-att-disabled="None if rfq.state == 'published' else '1'"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button t-if="rfq.state == 'published'" type="submit" class="btn btn-primary">Save quotes</button>
+                    <p t-else="" class="text-muted">This request is closed for quotes.</p>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <!-- Trips -->
+    <template id="portal_my_cp_trips" name="My Trips">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">My Trips</t>
+            </t>
+            <p t-if="not trips" class="text-muted mt-3">No trips in this view.</p>
+            <t t-if="trips" t-call="portal.portal_table">
+                <thead><tr><th>Trip</th><th>Lane</th><th>Vehicle</th><th>Placement</th><th class="text-end">Freight</th><th>ePOD</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="trips" t-as="t">
+                        <td><a t-attf-href="/my/cp/trips/#{t.id}" t-esc="t.name"/></td>
+                        <td t-esc="t.lane_id.name"/>
+                        <td><span t-if="t.vehicle_number" class="cp-plate" t-esc="t.vehicle_number"/><span t-else="" class="text-danger small">Assign vehicle</span></td>
+                        <td><span t-field="t.planned_dispatch" t-options="{'widget': 'date'}"/></td>
+                        <td class="text-end"><span t-field="t.agreed_freight" t-options="{'widget': 'monetary', 'display_currency': t.currency_id}"/></td>
+                        <td><span class="cp-pill" t-field="t.epod_state"/></td>
+                        <td><span class="cp-pill" t-field="t.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_cp_trip" name="Trip">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <t t-call="cargo_pilot_tms.cp_portal_flash"/>
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <h2 class="mb-0" t-esc="trip.lane_id.name"/>
+                        <div class="text-muted"><t t-esc="trip.name"/> · placement <span t-field="trip.planned_dispatch"/></div>
+                    </div>
+                    <span class="cp-pill cp-pill-lg" t-field="trip.state"/>
+                </div>
+                <t t-set="my_offer" t-value="trip.offer_ids.filtered(lambda o: o.state == 'pending' and o.transporter_id == trip.transporter_id)[:1]"/>
+                <div t-if="my_offer" class="cp-offer-box mt-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <div class="fw-bold">New booking: please accept or decline</div>
+                            <div class="small"><t t-esc="'LTL docket' if trip.shipment_mode == 'ltl' else (trip.vehicle_type_id.name or 'Truck')"/> ·
+                                freight <b t-field="my_offer.price" t-options="{'widget': 'monetary', 'display_currency': trip.currency_id}"/> ·
+                                reply by <b t-field="my_offer.deadline"/></div>
+                        </div>
+                        <form t-attf-action="/my/cp/trips/#{trip.id}/offer" method="post" class="d-flex flex-wrap gap-2 align-items-center">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" name="decision" value="accept" class="btn btn-primary">Accept</button>
+                            <select name="reason" class="form-select form-select-sm w-auto">
+                                <t t-foreach="decline_reasons or []" t-as="r">
+                                    <option t-att-value="r[0]" t-esc="r[1]"/>
+                                </t>
+                            </select>
+                            <button type="submit" name="decision" value="decline" class="btn btn-outline-secondary">Decline</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row g-4 mt-1">
+                    <div class="col-lg-6">
+                        <div class="cp-panel">
+                            <h5>Vehicle &amp; driver</h5>
+                            <form t-attf-action="/my/cp/trips/#{trip.id}/update" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <t t-set="locked" t-value="trip.state not in ('draft', 'assigned', 'reported', 'loading')"/>
+                                <div class="row g-2">
+                                    <div class="col-md-6"><label class="form-label small">Vehicle number</label>
+                                        <input name="vehicle_number" class="form-control text-uppercase" t-att-value="trip.vehicle_number" t-att-disabled="'1' if locked else None"/></div>
+                                    <div class="col-md-6" t-if="trip.shipment_mode == 'ltl'"><label class="form-label small">Docket / LR no.</label>
+                                        <input name="docket_number" class="form-control" t-att-value="trip.docket_number" t-att-disabled="'1' if locked else None"/></div>
+                                    <div class="col-md-6" t-if="trip.appointment_required"><label class="form-label small">Delivery appointment no.</label>
+                                        <input name="appointment_ref" class="form-control" t-att-value="trip.appointment_ref" t-att-disabled="'1' if locked else None"/></div>
+                                    <div class="col-md-6"><label class="form-label small">E-way bill no.</label>
+                                        <input name="eway_bill_no" class="form-control" t-att-value="trip.eway_bill_no" t-att-disabled="'1' if locked else None"/></div>
+                                    <div class="col-md-6"><label class="form-label small">Driver name</label>
+                                        <input name="driver_name" class="form-control" t-att-value="trip.driver_name" t-att-disabled="'1' if locked else None"/></div>
+                                    <div class="col-md-6"><label class="form-label small">Driver phone</label>
+                                        <input name="driver_phone" type="tel" class="form-control" t-att-value="trip.driver_phone" t-att-disabled="'1' if locked else None"/></div>
+                                </div>
+                                <div class="d-flex gap-2 mt-3" t-if="not locked">
+                                    <button type="submit" class="btn btn-secondary">Save</button>
+                                    <button t-if="trip.state == 'draft' and not my_offer" type="submit" name="confirm" value="1" class="btn btn-primary">Save &amp; confirm vehicle</button>
+                                </div>
+                            </form>
+                            <hr/>
+                            <div class="small">
+                                <div class="mb-1">Driver link (send by SMS or WhatsApp):</div>
+                                <input class="form-control form-control-sm" readonly="1" t-att-value="trip.driver_url" onclick="this.select()"/>
+                                <div class="mt-2 mb-1">Customer tracking link:</div>
+                                <input class="form-control form-control-sm" readonly="1" t-att-value="trip.tracking_url" onclick="this.select()"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="cp-panel">
+                            <h5>Proof of delivery</h5>
+                            <t t-if="trip.epod_state == 'verified'">
+                                <p class="text-success mb-0">ePOD verified.</p>
+                            </t>
+                            <t t-elif="trip.state in ('in_transit', 'arrived', 'delivered')">
+                                <t t-set="last_epod" t-value="trip.epod_ids[:1]"/>
+                                <div t-if="last_epod and last_epod.state == 'exception'" class="alert alert-warning small">
+                                    Last ePOD has exceptions: <t t-esc="last_epod.exception_reason"/>
+                                </div>
+                                <t t-call="cargo_pilot_tms.cp_epod_form">
+                                    <t t-set="action_url" t-value="'/my/cp/trips/%s/epod' % trip.id"/>
+                                </t>
+                            </t>
+                            <p t-else="" class="text-muted mb-0">Available once the vehicle is in transit.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="cp-panel mt-4" t-if="appointment or slot_days">
+                    <h5><i class="fa fa-calendar me-2"/>Loading appointment</h5>
+                    <div t-if="appointment" class="cp-appt">
+                        <div class="cp-appt-when"><span t-field="appointment.slot_start" t-options="{'format': 'EEE dd MMM, HH:mm'}"/></div>
+                        <div class="small text-muted"><t t-esc="appointment.dock_id.name"/> at <t t-esc="appointment.location_id.name"/> · <span t-field="appointment.state"/></div>
+                    </div>
+                    <t t-if="slot_days">
+                        <p class="small text-muted mt-2 mb-2" t-if="appointment">Need a different time? Pick a new slot:</p>
+                        <p class="small text-muted mb-2" t-else="">Pick a free one-hour slot so the plant expects you and your truck skips the queue.</p>
+                        <form t-attf-action="/my/cp/trips/#{trip.id}/appointment" method="post">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div t-foreach="slot_days" t-as="day" class="mb-2">
+                                <div class="small fw-semibold mb-1" t-esc="day['day']"/>
+                                <div class="cp-slots">
+                                    <t t-foreach="day['slots']" t-as="slot">
+                                        <input type="radio" class="btn-check" name="slot" t-att-value="slot['value']"
+                                               t-attf-id="slot_#{day_index}_#{slot_index}" required="1"/>
+                                        <label class="btn btn-outline-secondary btn-sm" t-attf-for="slot_#{day_index}_#{slot_index}" t-esc="slot['label']"/>
+                                    </t>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2">Book slot</button>
+                        </form>
+                    </t>
+                </div>
+                <div class="cp-panel mt-4">
+                    <h5>Timeline</h5>
+                    <ul class="cp-timeline">
+                        <li t-foreach="trip.cp_public_timeline()" t-as="e">
+                            <span class="cp-timeline-time" t-field="e.event_time"/>
+                            <span t-esc="e.description"/>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Shared ePOD form (portal and driver page) -->
+    <template id="cp_epod_form">
+        <form t-att-action="action_url" method="post" enctype="multipart/form-data" class="cp-epod-form">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <input type="hidden" name="latitude" class="cp-geo-lat"/>
+            <input type="hidden" name="longitude" class="cp-geo-lon"/>
+            <input type="hidden" name="signature" class="cp-signature-data"/>
+            <div class="row g-2">
+                <div class="col-7"><label class="form-label small">Received by</label>
+                    <input name="receiver_name" class="form-control" required="1"/></div>
+                <div class="col-5"><label class="form-label small">Phone</label>
+                    <input name="receiver_phone" type="tel" class="form-control"/></div>
+                <div class="col-4"><label class="form-label small">Weight (t)</label>
+                    <input name="received_weight_ton" type="number" step="0.001" min="0" class="form-control"
+                           t-att-value="trip.loaded_weight_ton or ''"/></div>
+                <div class="col-4"><label class="form-label small">Short pkgs</label>
+                    <input name="shortage_packages" type="number" min="0" value="0" class="form-control"/></div>
+                <div class="col-4"><label class="form-label small">Damaged pkgs</label>
+                    <input name="damaged_packages" type="number" min="0" value="0" class="form-control"/></div>
+            </div>
+            <t t-set="expected_serials" t-value="sum(trip.order_ids.mapped('serial_count'))"/>
+            <div t-if="expected_serials or trip.serial_scan_required" class="mt-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label class="form-label small mb-1">Serial numbers delivered (<t t-esc="expected_serials"/> expected)</label>
+                    <button type="button" class="btn btn-sm btn-outline-secondary cp-scan-btn d-none"><i class="fa fa-barcode me-1"/>Scan</button>
+                </div>
+                <video class="cp-scan-video d-none" playsinline="1" muted="1"/>
+                <textarea name="scanned_serials" class="form-control cp-scan-target" rows="3"
+                          placeholder="Scan or type one serial number per line"/>
+                <div class="small text-muted cp-scan-count"/>
+            </div>
+            <div t-if="trip.grn_required" class="mt-2">
+                <label class="form-label small">Retailer GRN no.</label>
+                <input name="grn_number" class="form-control" required="1"/>
+            </div>
+            <label class="form-label small mt-2">Photo of signed delivery copy</label>
+            <input type="file" name="photos" accept="image/*" capture="environment" multiple="1" class="form-control"/>
+            <label class="form-label small mt-2">Receiver signature</label>
+            <canvas class="cp-signature-pad" width="600" height="180"/>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+                <button type="button" class="btn btn-link btn-sm p-0 cp-signature-clear">Clear</button>
+                <span class="small text-muted cp-geo-status">Locating…</span>
+            </div>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="refused_by_consignee" value="1" t-attf-id="cp_refused_#{trip.id}"/>
+                <label class="form-check-label small" t-attf-for="cp_refused_#{trip.id}">Consignee refused / site closed</label>
+            </div>
+            <textarea name="remarks" class="form-control mt-2" rows="2" placeholder="Remarks"/>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">Submit delivery proof</button>
+        </form>
+    </template>
+
+    <!-- Freight bills -->
+    <template id="portal_my_cp_bills" name="Freight Bills">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Freight Bills</t>
+            </t>
+            <p t-if="not bills" class="text-muted mt-3">No freight bills yet.</p>
+            <t t-if="bills" t-call="portal.portal_table">
+                <thead><tr><th>Audit Ref.</th><th>Your Invoice</th><th>Date</th><th class="text-end">Billed</th><th class="text-end">Approved</th><th>Status</th></tr></thead>
+                <tbody>
+                    <tr t-foreach="bills" t-as="b">
+                        <td><a t-attf-href="/my/cp/bills/#{b.id}" t-esc="b.name"/></td>
+                        <td t-esc="b.bill_number"/>
+                        <td><span t-field="b.bill_date"/></td>
+                        <td class="text-end"><span t-field="b.billed_total" t-options="{'widget': 'monetary', 'display_currency': b.currency_id}"/></td>
+                        <td class="text-end"><span t-field="b.approved_total" t-options="{'widget': 'monetary', 'display_currency': b.currency_id}"/></td>
+                        <td><span class="cp-pill" t-field="b.state"/></td>
+                    </tr>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_cp_bill" name="Freight Bill">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <h2 class="mb-0">Invoice <t t-esc="bill.bill_number"/></h2>
+                <div class="text-muted mb-3"><t t-esc="bill.name"/> · <span t-field="bill.bill_date"/> · <span t-field="bill.state"/></div>
+                <div class="row g-3 mb-3">
+                    <div class="col-4"><div class="cp-stat"><span>Billed</span><strong t-field="bill.billed_total" t-options="{'widget': 'monetary', 'display_currency': bill.currency_id}"/></div></div>
+                    <div class="col-4"><div class="cp-stat"><span>Approved</span><strong t-field="bill.approved_total" t-options="{'widget': 'monetary', 'display_currency': bill.currency_id}"/></div></div>
+                    <div class="col-4"><div class="cp-stat"><span>Deductions</span><strong t-field="bill.deduction_total" t-options="{'widget': 'monetary', 'display_currency': bill.currency_id}"/></div></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>Trip</th><th>Lane</th><th class="text-end">Billed</th><th class="text-end">Approved</th><th>Findings</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="bill.line_ids" t-as="l">
+                                <td t-esc="l.trip_id.name"/>
+                                <td t-esc="l.lane_id.name"/>
+                                <td class="text-end"><span t-field="l.billed_amount" t-options="{'widget': 'monetary', 'display_currency': bill.currency_id}"/></td>
+                                <td class="text-end"><span t-field="l.approved_amount" t-options="{'widget': 'monetary', 'display_currency': bill.currency_id}"/></td>
+                                <td class="small" style="white-space: pre-line" t-esc="l.findings or ''"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- Customer: shipments list -->
+    <template id="portal_my_cp_shipments" name="Your Shipments">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <t t-call="cargo_pilot_tms.cp_portal_flash"/>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h2 class="mb-0">Your shipments</h2>
+                    <a href="/my/cp/shipments/new" class="btn btn-primary"><i class="fa fa-plus me-1"/>Request a truck</a>
+                </div>
+                <div t-if="not indents" class="cp-panel text-center py-5">
+                    <i class="fa fa-truck fa-2x text-muted"/>
+                    <p class="mt-2 mb-3">No shipments yet.</p>
+                    <a href="/my/cp/shipments/new" class="btn btn-primary">Request your first truck</a>
+                </div>
+                <div class="row g-3">
+                    <div t-foreach="indents" t-as="ind" class="col-md-6">
+                        <div class="cp-card h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="cp-card-id" t-esc="ind.name"/>
+                                <span t-if="ind.state in ('draft', 'confirmed', 'sourcing')" class="cp-pill">Finding a truck</span>
+                                <span t-elif="ind.state == 'allocated'" class="cp-pill cp-pill-won">Truck booked</span>
+                                <span t-elif="ind.state == 'done'" class="cp-pill cp-pill-won">Delivered</span>
+                                <span t-else="" class="cp-pill cp-pill-muted" t-field="ind.state"/>
+                            </div>
+                            <div class="cp-card-lane mt-2" t-esc="ind.lane_id.name"/>
+                            <div class="small text-muted">Pickup <span t-field="ind.required_date" t-options="{'widget': 'datetime'}"/> · <t t-esc="ind.vehicle_count"/> x <t t-esc="ind.vehicle_type_id.name"/></div>
+                            <div class="small text-muted" t-if="ind.origin">Your ref: <t t-esc="ind.origin"/></div>
+                            <div class="mt-3 d-grid gap-2" t-if="ind.trip_ids.filtered(lambda t: t.state != 'cancel')">
+                                <t t-foreach="ind.trip_ids.filtered(lambda t: t.state != 'cancel')" t-as="t">
+                                    <a class="btn btn-sm btn-outline-primary text-start d-flex justify-content-between" t-att-href="t.tracking_url" target="_blank">
+                                        <span><i class="fa fa-map-marker me-1"/><t t-esc="t.vehicle_number or t.name"/></span>
+                                        <span class="small" t-field="t.state"/>
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Customer: request a truck -->
+    <template id="portal_my_cp_book" name="Request a Truck">
+        <t t-call="portal.portal_layout">
+            <div class="cp-portal mt-3">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <h2>Request a truck</h2>
+                        <p class="text-muted">Tell us what to move. We confirm the truck and send you a live tracking link.</p>
+                        <div t-if="error" class="alert alert-danger" t-esc="error"/>
+                        <form action="/my/cp/shipments/new" method="post" class="cp-panel">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="cp-book-route">
+                                <div>
+                                    <label class="form-label fw-semibold" for="cp_origin">Pick up from</label>
+                                    <select id="cp_origin" name="origin_id" class="form-select form-select-lg" required="1">
+                                        <option value="">Choose…</option>
+                                        <option t-foreach="locations" t-as="l" t-att-value="l.id" t-esc="l.name"
+                                                t-att-selected="'selected' if str(l.id) == post.get('origin_id') else None"/>
+                                    </select>
+                                </div>
+                                <i class="fa fa-long-arrow-right d-none d-md-block"/>
+                                <div>
+                                    <label class="form-label fw-semibold" for="cp_dest">Deliver to</label>
+                                    <select id="cp_dest" name="destination_id" class="form-select form-select-lg" required="1">
+                                        <option value="">Choose…</option>
+                                        <option t-foreach="locations" t-as="l" t-att-value="l.id" t-esc="l.name"
+                                                t-att-selected="'selected' if str(l.id) == post.get('destination_id') else None"/>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="cp_vt">Truck type</label>
+                                    <select id="cp_vt" name="vehicle_type_id" class="form-select" required="1">
+                                        <option t-foreach="vehicle_types" t-as="v" t-att-value="v.id" t-esc="v.name"/>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label" for="cp_n">Trucks</label>
+                                    <input id="cp_n" type="number" min="1" max="50" name="vehicle_count" value="1" class="form-control"/>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <label class="form-label" for="cp_w">Weight (t)</label>
+                                    <input id="cp_w" type="number" min="0" step="0.1" name="weight_ton" class="form-control"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="cp_pickup">Pickup date and time</label>
+                                    <input id="cp_pickup" type="datetime-local" name="pickup" class="form-control" required="1"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="cp_ref">Your reference (PO / order)</label>
+                                    <input id="cp_ref" name="reference" class="form-control" maxlength="64"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="cp_mat">What is moving</label>
+                                    <input id="cp_mat" name="material" class="form-control" placeholder="e.g. 400 bags of cement"/>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="cp_notes">Notes for the planner</label>
+                                    <textarea id="cp_notes" name="notes" rows="2" class="form-control"/>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">Send request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

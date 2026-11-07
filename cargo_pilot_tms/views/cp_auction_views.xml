@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_auction_list" model="ir.ui.view">
+        <field name="name">cp.auction.list</field>
+        <field name="model">cp.auction</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('cancel',)">
+                <field name="name"/>
+                <field name="indent_id"/>
+                <field name="lane_id"/>
+                <field name="vehicle_type_id" optional="show"/>
+                <field name="vehicle_count" string="Vehicles"/>
+                <field name="date_end"/>
+                <field name="participant_count" string="Bidders"/>
+                <field name="best_rate"/>
+                <field name="savings_amount" sum="Savings" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-warning="state == 'scheduled'"
+                       decoration-danger="state == 'live'" decoration-info="state == 'closed'"
+                       decoration-success="state == 'awarded'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_auction_kanban" model="ir.ui.view">
+        <field name="name">cp.auction.kanban</field>
+        <field name="model">cp.auction</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false" class="o_kanban_small_column">
+                <field name="state"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold"/>
+                            <span class="badge text-bg-danger" t-if="record.state.raw_value == 'live'">LIVE</span>
+                        </div>
+                        <field name="lane_id"/>
+                        <div class="small text-muted"><field name="vehicle_count"/> x <field name="vehicle_type_id"/></div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span class="small"><field name="participant_count"/> bidders</span>
+                            <span class="fw-bold"><field name="best_rate" widget="monetary"/></span>
+                        </div>
+                        <div class="small text-muted" t-if="record.time_left.raw_value">Ends in <field name="time_left"/></div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_auction_form" model="ir.ui.view">
+        <field name="name">cp.auction.form</field>
+        <field name="model">cp.auction</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_publish" string="Publish" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start" string="Open Now" type="object" invisible="state != 'scheduled'"/>
+                    <button name="action_close" string="Close Bidding" type="object" invisible="state != 'live'"
+                            confirm="Close bidding now? Transporters will no longer be able to bid."/>
+                    <button name="action_open_award_wizard" string="Award" type="object" class="btn-primary"
+                            invisible="state not in ('live', 'closed') or bid_count == 0"
+                            groups="cargo_pilot_tms.group_cp_manager"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('awarded', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,scheduled,live,closed,awarded"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_trips" type="object" class="oe_stat_button" icon="fa-truck"
+                                invisible="state != 'awarded'">
+                            <span class="o_stat_text">Trips</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Live" bg_color="text-bg-danger" invisible="state != 'live'"/>
+                    <widget name="web_ribbon" title="Awarded" bg_color="text-bg-success" invisible="state != 'awarded'"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="cp-auction-stats row g-2 mb-3" invisible="state == 'draft'">
+                        <div class="col-6 col-md-3"><div class="cp-stat"><span>Best rate</span><field name="best_rate"/></div></div>
+                        <div class="col-6 col-md-3"><div class="cp-stat"><span>Bidders</span><field name="participant_count"/></div></div>
+                        <div class="col-6 col-md-3"><div class="cp-stat"><span>Bids</span><field name="bid_count"/></div></div>
+                        <div class="col-6 col-md-3"><div class="cp-stat"><span>Time left</span><field name="time_left"/></div></div>
+                    </div>
+                    <group>
+                        <group string="Load">
+                            <field name="indent_id" readonly="state != 'draft'"/>
+                            <field name="lane_id"/>
+                            <field name="vehicle_type_id"/>
+                            <field name="vehicle_count" readonly="state != 'draft'"/>
+                            <field name="required_date"/>
+                            <field name="total_weight_ton"/>
+                        </group>
+                        <group string="Rules">
+                            <field name="date_start" readonly="state not in ('draft', 'scheduled')"/>
+                            <field name="date_end" readonly="state not in ('draft', 'scheduled', 'live')"/>
+                            <field name="bid_mode" readonly="state != 'draft'"/>
+                            <field name="ceiling_price" readonly="state not in ('draft', 'scheduled')"/>
+                            <field name="suggested_ceiling" invisible="state not in ('draft', 'scheduled')"/>
+                            <field name="benchmark_rate"/>
+                            <field name="allow_pre_bid" readonly="state != 'draft'"/>
+                            <field name="allow_part_bid" readonly="state != 'draft'"/>
+                            <field name="min_decrement_pct" readonly="state not in ('draft', 'scheduled')"/>
+                            <field name="extension_minutes" readonly="state not in ('draft', 'scheduled')"/>
+                            <field name="extension_count" invisible="extension_count == 0"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Result" invisible="state != 'awarded'">
+                        <group>
+                            <field name="winner_ids" widget="many2many_tags"/>
+                            <field name="awarded_amount"/>
+                        </group>
+                        <group>
+                            <field name="savings_amount"/>
+                            <field name="savings_pct" widget="percentage"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bids" name="bids">
+                            <field name="bid_ids" readonly="1">
+                                <list decoration-success="state == 'won'" decoration-muted="not is_latest"
+                                      default_order="is_latest desc, rate, bid_time">
+                                    <field name="rank"/>
+                                    <field name="transporter_id"/>
+                                    <field name="rate"/>
+                                    <field name="vehicle_count" string="Vehicles"/>
+                                    <field name="awarded_vehicles" optional="show"/>
+                                    <field name="bid_time"/>
+                                    <field name="is_pre_bid"/>
+                                    <field name="is_latest" string="Current"/>
+                                    <field name="channel" optional="show"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Invited Transporters" name="transporters">
+                            <group>
+                                <field name="open_to_all"/>
+                            </group>
+                            <field name="transporter_ids" readonly="state not in ('draft', 'scheduled', 'live')">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="cp_score" string="Score"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_auction_search" model="ir.ui.view">
+        <field name="name">cp.auction.search</field>
+        <field name="model">cp.auction</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="lane_id"/>
+                <field name="indent_id"/>
+                <filter name="running" string="Scheduled &amp; Live" domain="[('state', 'in', ('scheduled', 'live'))]"/>
+                <filter name="to_award" string="To Award" domain="[('state', '=', 'closed')]"/>
+                <filter name="awarded" string="Awarded" domain="[('state', '=', 'awarded')]"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_lane" string="Lane" context="{'group_by': 'lane_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_auction" model="ir.actions.act_window">
+        <field name="name">Load Bidding</field>
+        <field name="res_model">cp.auction</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No auctions yet</p>
+            <p>Start an auction from a confirmed indent. Transporters bid from their portal; late bids extend the clock so nobody can snipe.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_auction_bid_list" model="ir.ui.view">
+        <field name="name">cp.auction.bid.list</field>
+        <field name="model">cp.auction.bid</field>
+        <field name="arch" type="xml">
+            <list create="false">
+                <field name="auction_id"/>
+                <field name="transporter_id"/>
+                <field name="rate"/>
+                <field name="vehicle_count"/>
+                <field name="bid_time"/>
+                <field name="channel"/>
+                <field name="state" widget="badge"/>
+                <field name="currency_id" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+</odoo>

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Tally Connector AI — Two-way TallyPrime Sync',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.3.0',
     'category': 'Accounting/Accounting',
-    'summary': 'Real-time two-way Odoo ⇄ TallyPrime sync (Direct, Bridge Agent for '
-               'Odoo Online/Odoo.sh, or offline XML) with AI mapping, anomaly detection '
-               'and self-healing errors.',
+    'summary': 'Two-way TallyPrime ⇄ Odoo 19 sync with AI: all voucher types, GST guard, '
+               'godowns, batches, cost centres, stock moves. Works with Odoo Online via '
+               'Bridge Agent.',
     'description': """
 ZivoIT Tally Connector AI
 =========================
@@ -30,6 +30,7 @@ ZivoIT Tally Connector AI
     'author': 'Zivo IT Technologies',
     'maintainer': 'Zivo IT Technologies',
     'website': 'https://www.zivoit.com',
+    'support': 'info@zivoit.com',
     'license': 'OPL-1',
     'depends': ['account', 'product', 'uom', 'mail', 'stock'],
     'data': [
@@ -47,7 +48,7 @@ ZivoIT Tally Connector AI
         'views/tally_menus.xml',
     ],
     'external_dependencies': {'python': []},
-    'images': ['static/description/banner.png'],
+    'images': ['static/description/banner.png'],   # App Store thumbnail (2:1)
     'installable': True,
     'application': True,
     # Odoo Apps: one-shot price per Odoo version, EUR or USD only; Odoo keeps 30%.

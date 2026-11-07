@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cargo_pilot_tms.ControlTower">
+        <div class="o_action cp-ct h-100 overflow-auto">
+            <div t-if="state.loading" class="p-5 text-center text-muted">Loading…</div>
+            <t t-else="">
+                <t t-set="d" t-value="state.data"/>
+
+                <!-- Header -->
+                <div class="cp-ct-head">
+                    <div>
+                        <h2 class="mb-0">Today</h2>
+                        <div class="cp-ct-sub">Everything moving, and what needs you first</div>
+                    </div>
+                    <div class="cp-ct-actions">
+                        <button class="btn btn-light" t-on-click="() => this.load(true)" title="Refresh">
+                            <i class="fa fa-refresh"/>
+                        </button>
+                        <button class="btn btn-primary cp-ct-book" t-on-click="() => this.bookLoad()">
+                            <i class="fa fa-plus me-1"/>Book a load
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Setup checklist -->
+                <div t-if="!d.setup_done and state.showSetup" class="cp-ct-card cp-ct-setup">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="mb-0">Get started</h6>
+                            <div class="small text-muted"><t t-esc="setupProgress"/>% done</div>
+                        </div>
+                        <button class="btn btn-link btn-sm text-muted" t-on-click="() => this.state.showSetup = false">Hide</button>
+                    </div>
+                    <div class="cp-ct-meter"><div t-attf-style="width: {{ setupProgress }}%"/></div>
+                    <ol class="cp-ct-steps">
+                        <li t-foreach="d.setup" t-as="s" t-key="s.key" t-att-class="{'done': s.done}"
+                            t-on-click="() => this.openXml(s.action)">
+                            <i t-attf-class="fa {{ s.done ? 'fa-check-circle' : 'fa-circle-o' }}"/>
+                            <span t-esc="s.label"/>
+                            <i t-if="!s.done" class="fa fa-angle-right ms-auto"/>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Tiles -->
+                <div class="cp-ct-tiles">
+                    <button class="cp-ct-tile" t-att-class="{'cp-ct-alert': openIssueTotal}" t-on-click="() => this.onTile('issues')">
+                        <i class="fa fa-flag cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="openIssueTotal"/>
+                        <span class="cp-ct-label">Open issues</span>
+                    </button>
+                    <button class="cp-ct-tile" t-on-click="() => this.onTile('in_transit')">
+                        <i class="fa fa-truck cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="d.kpis.in_transit"/>
+                        <span class="cp-ct-label">On the road</span>
+                    </button>
+                    <button class="cp-ct-tile" t-att-class="{'cp-ct-alert': d.kpis.late}" t-on-click="() => this.onTile('late')">
+                        <i class="fa fa-clock-o cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="d.kpis.late"/>
+                        <span class="cp-ct-label">Running late</span>
+                    </button>
+                    <button class="cp-ct-tile" t-on-click="() => this.onTile('open_indents')">
+                        <i class="fa fa-inbox cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="d.kpis.open_indents"/>
+                        <span class="cp-ct-label">Loads to cover</span>
+                    </button>
+                    <button class="cp-ct-tile" t-on-click="() => this.onTile('live_auctions')">
+                        <i class="fa fa-gavel cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="d.kpis.live_auctions"/>
+                        <span class="cp-ct-label">Live bidding</span>
+                    </button>
+                    <button class="cp-ct-tile" t-att-class="{'cp-ct-warn': d.kpis.epod_pending}" t-on-click="() => this.onTile('epod_pending')">
+                        <i class="fa fa-pencil-square-o cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="d.kpis.epod_pending"/>
+                        <span class="cp-ct-label">Proof pending</span>
+                    </button>
+                    <button class="cp-ct-tile" t-on-click="() => this.onTile('bills_in_audit')">
+                        <i class="fa fa-search-plus cp-ct-icon"/>
+                        <span class="cp-ct-value" t-esc="d.kpis.bills_in_audit"/>
+                        <span class="cp-ct-label">Invoices to check</span>
+                    </button>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Issues inbox -->
+                    <div class="col-xl-5 col-lg-6">
+                        <div class="cp-ct-card h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Needs attention</h6>
+                                <button class="btn btn-link btn-sm p-0" t-on-click="() => this.onTile('issues')">See all</button>
+                            </div>
+                            <div class="cp-ct-sevbar">
+                                <span class="sev-critical" t-if="d.issue_counts.critical"><t t-esc="d.issue_counts.critical"/> critical</span>
+                                <span class="sev-high" t-if="d.issue_counts.high"><t t-esc="d.issue_counts.high"/> high</span>
+                                <span class="sev-medium" t-if="d.issue_counts.medium"><t t-esc="d.issue_counts.medium"/> medium</span>
+                                <span class="sev-low" t-if="d.issue_counts.low"><t t-esc="d.issue_counts.low"/> low</span>
+                            </div>
+                            <div t-if="!d.issues.length" class="cp-ct-empty">
+                                <i class="fa fa-check-circle"/>
+                                <div>All clear. Nothing needs you right now.</div>
+                            </div>
+                            <ul class="cp-ct-issues">
+                                <li t-foreach="d.issues" t-as="i" t-key="i.id" t-attf-class="sev-{{ i.severity }}">
+                                    <div class="cp-ct-issue-main" t-on-click="() => this.openRecord('cp.exception', i.id)">
+                                        <div class="d-flex justify-content-between gap-2">
+                                            <span class="fw-semibold" t-esc="i.name"/>
+                                            <span class="cp-ct-age" t-esc="i.age"/>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <span t-attf-class="cp-ct-sev sev-{{ i.severity }}" t-esc="severityLabel(i.severity)"/>
+                                            <t t-esc="i.type"/>
+                                        </div>
+                                        <div t-if="i.suggestion" class="small cp-ct-hint"><i class="fa fa-lightbulb-o me-1"/><t t-esc="i.suggestion"/></div>
+                                    </div>
+                                    <button class="btn btn-sm btn-light cp-ct-done" title="Mark resolved"
+                                            t-on-click="() => this.resolveIssue(i.id)"><i class="fa fa-check"/></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Live map -->
+                    <div class="col-xl-7 col-lg-6">
+                        <div class="cp-ct-card h-100 p-0 overflow-hidden d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+                                <h6 class="mb-0">Live map</h6>
+                                <div class="cp-ct-legend small">
+                                    <span><i class="dot ok"/>On time</span>
+                                    <span><i class="dot late"/>Late</span>
+                                    <span><i class="dot stopped"/>Stopped</span>
+                                </div>
+                            </div>
+                            <div t-ref="map" class="cp-ct-map flex-grow-1"/>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline -->
+                    <div class="col-lg-8">
+                        <div class="cp-ct-card h-100">
+                            <h6>Shipments by stage</h6>
+                            <div class="cp-ct-pipeline">
+                                <t t-foreach="d.pipeline" t-as="s" t-key="s.key">
+                                    <button class="cp-ct-stage" t-on-click="() => this.onStage(s.key, s.label)">
+                                        <span class="cp-ct-stage-count" t-esc="s.count"/>
+                                        <span class="cp-ct-stage-bar"><span t-attf-style="height: {{ Math.round(s.count / maxStage * 100) }}%"/></span>
+                                        <span class="cp-ct-stage-label" t-esc="s.label"/>
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Month & CO2 -->
+                    <div class="col-lg-4">
+                        <div class="cp-ct-card h-100">
+                            <h6>This month</h6>
+                            <div class="cp-ct-big"><t t-esc="d.kpis.on_time_pct"/>%<small>on time</small></div>
+                            <div class="cp-ct-meter"><div t-attf-style="width: {{ d.kpis.on_time_pct }}%"/></div>
+                            <dl class="cp-ct-facts">
+                                <dt>Delivered</dt><dd t-esc="d.kpis.delivered_month"/>
+                                <dt>Saved by bidding</dt><dd t-esc="money(d.kpis.auction_savings)"/>
+                                <dt>Saved by invoice checks</dt><dd t-esc="money(d.kpis.audit_savings)"/>
+                                <dt><i class="fa fa-leaf text-success me-1"/>CO2e emitted</dt><dd><t t-esc="number(d.co2.month_kg)"/> kg</dd>
+                                <dt>Carbon intensity</dt><dd><t t-esc="d.co2.intensity"/> g/t-km</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Daily deliveries -->
+                    <div class="col-lg-7">
+                        <div class="cp-ct-card h-100">
+                            <h6>Deliveries, last 14 days</h6>
+                            <div class="cp-ct-bars">
+                                <t t-foreach="d.daily" t-as="day" t-key="day_index">
+                                    <div class="cp-ct-bar" t-att-title="day.label + ': ' + day.value">
+                                        <span class="cp-ct-bar-val" t-if="day.value" t-esc="day.value"/>
+                                        <span class="cp-ct-bar-fill" t-attf-style="height: {{ Math.round(day.value / maxDaily * 100) }}%"/>
+                                        <span class="cp-ct-bar-label" t-esc="day.label"/>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transporters -->
+                    <div class="col-lg-5">
+                        <div class="cp-ct-card h-100">
+                            <h6>Transporter scorecard</h6>
+                            <p t-if="!d.top_transporters.length" class="text-muted small mb-0">No deliveries this month yet.</p>
+                            <div t-foreach="d.top_transporters" t-as="t" t-key="t_index" class="cp-ct-carrier">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-semibold text-truncate" t-esc="t.name"/>
+                                    <span class="small text-muted"><t t-esc="t.trips"/> trips</span>
+                                </div>
+                                <div class="cp-ct-meter my-1"><div t-attf-style="width: {{ t.on_time }}%"/></div>
+                                <div class="small text-muted"><t t-esc="t.on_time"/>% on time</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,6 +1,6 @@
 {
     "name": "ZivoIT EPC AI - EPC Project Controls with AI",
-    "version": "19.0.2.0.0",
+    "version": "19.0.2.0.2",
     "category": "Services/Project",
     "summary": "AI-enabled EPC (Engineering, Procurement & Construction) project controls: "
                "CPM on working calendars, EVM, delay prediction & Monte Carlo, schedule optimisation, "
@@ -44,6 +44,10 @@ and every call is logged.
     "author": "Zivo IT Technologies",
     "website": "https://www.zivoit.com",
     "license": "OPL-1",
+    "price": 599.0,
+    "currency": "USD",
+    "maintainer": "Zivo IT Technologies",
+    "images": ["static/description/banner.png"],
     "depends": ["project", "purchase_stock", "account", "mail"],
     "external_dependencies": {"python": ["requests"]},
     "data": [

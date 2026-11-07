@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rule_cp_courier_account_company" model="ir.rule">
+        <field name="name">Courier accounts: own companies</field>
+        <field name="model_id" ref="model_cp_courier_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_parcel_company" model="ir.rule">
+        <field name="name">Parcels: own companies</field>
+        <field name="model_id" ref="model_cp_parcel"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_cp_courier_log_company" model="ir.rule">
+        <field name="name">Courier logs: own companies</field>
+        <field name="model_id" ref="model_cp_courier_log"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

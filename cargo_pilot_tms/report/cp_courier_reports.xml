@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_cp_label_4x6" model="report.paperformat">
+        <field name="name">Shipping label 4 x 6 in</field>
+        <field name="format">custom</field>
+        <field name="page_height">152</field>
+        <field name="page_width">102</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">3</field>
+        <field name="margin_bottom">3</field>
+        <field name="margin_left">3</field>
+        <field name="margin_right">3</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_parcel_label" model="ir.actions.report">
+        <field name="name">Shipping Label (4x6)</field>
+        <field name="model">cp.parcel</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_pilot_tms.report_parcel_label</field>
+        <field name="report_file">cargo_pilot_tms.report_parcel_label</field>
+        <field name="print_report_name">'Label - %s' % (object.awb or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_cp_label_4x6"/>
+        <field name="binding_model_id" ref="model_cp_parcel"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_parcel_manifest" model="ir.actions.report">
+        <field name="name">Pickup Handover Sheet</field>
+        <field name="model">cp.parcel</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cargo_pilot_tms.report_parcel_manifest</field>
+        <field name="report_file">cargo_pilot_tms.report_parcel_manifest</field>
+        <field name="print_report_name">'Handover %s' % time.strftime('%Y-%m-%d')</field>
+        <field name="binding_model_id" ref="model_cp_parcel"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_parcel_label">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page cp-label" style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: #000; page-break-after: always;">
+                    <table style="width: 100%; border-collapse: collapse; border: 2px solid #000;">
+                        <tr>
+                            <td style="padding: 6px; border-bottom: 2px solid #000;" colspan="2">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <strong style="font-size: 16px;" t-out="o.courier_name or o.account_id.courier_display_name or o.account_id.name or ''"/>
+                                    <span t-if="o.service" t-out="o.service"/>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px; text-align: center; border-bottom: 2px solid #000;" colspan="2">
+                                <t t-if="o.awb">
+                                    <img t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=%s&amp;width=600&amp;height=110&amp;humanreadable=0' % o.awb"
+                                         style="width: 92%; height: 22mm;" alt="AWB barcode"/>
+                                    <div style="font-size: 18px; font-weight: bold; letter-spacing: 2px;" t-out="o.awb"/>
+                                </t>
+                                <div t-else="" style="font-size: 14px; padding: 12mm 0;">AWB will be written by the courier</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px; vertical-align: top; border-bottom: 2px solid #000;" colspan="2">
+                                <div style="font-size: 9px; text-transform: uppercase;">Deliver to</div>
+                                <div style="font-size: 15px; font-weight: bold;" t-out="o.recipient_partner_id.name"/>
+                                <div t-out="o.recipient_partner_id.street or ''"/>
+                                <div t-if="o.recipient_partner_id.street2" t-out="o.recipient_partner_id.street2"/>
+                                <div><t t-out="o.recipient_partner_id.city or ''"/> <t t-out="o.recipient_partner_id.state_id.name or ''"/></div>
+                                <div style="font-size: 22px; font-weight: bold; margin-top: 2px;">PIN <t t-out="o.dest_pin or ''"/></div>
+                                <div>Phone: <t t-out="o.recipient_partner_id.phone or ''"/></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px; width: 50%; border-right: 2px solid #000; border-bottom: 2px solid #000; vertical-align: top;">
+                                <t t-if="o.payment_mode == 'cod'">
+                                    <div style="font-size: 9px;">COLLECT CASH</div>
+                                    <div style="font-size: 18px; font-weight: bold;" t-out="o.cod_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                </t>
+                                <div t-else="" style="font-size: 18px; font-weight: bold;">PREPAID</div>
+                            </td>
+                            <td style="padding: 6px; border-bottom: 2px solid #000; vertical-align: top;">
+                                <div>Boxes: <b t-out="o.piece_count"/></div>
+                                <div>Weight: <b t-out="'%.2f' % o.chargeable_weight_kg"/> kg</div>
+                                <div>Value: <span t-out="o.declared_value" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px; vertical-align: top; border-bottom: 2px solid #000;" colspan="2">
+                                <div style="font-size: 9px; text-transform: uppercase;">From / return to</div>
+                                <div style="font-weight: bold;" t-out="o.sender_partner_id.commercial_partner_id.name"/>
+                                <div><t t-out="o.sender_partner_id.street or ''"/>, <t t-out="o.sender_partner_id.city or ''"/> - <t t-out="o.origin_pin or ''"/></div>
+                                <div>Phone: <t t-out="o.sender_partner_id.phone or ''"/></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px;" colspan="2">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div>Ref: <b t-out="o.reference or o.name"/></div>
+                                        <div t-if="o.invoice_number">Invoice: <t t-out="o.invoice_number"/></div>
+                                        <div t-if="o.eway_bill_no">E-way bill: <t t-out="o.eway_bill_no"/></div>
+                                        <div t-if="o.contents">Contents: <t t-out="o.contents"/></div>
+                                    </div>
+                                    <img t-att-src="'/report/barcode/?barcode_type=Code128&amp;value=%s&amp;width=300&amp;height=60&amp;humanreadable=1' % o.name"
+                                         style="width: 38mm; height: 12mm;" alt="Reference barcode"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_parcel_manifest">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="docs[:1]"/>
+                <div class="page">
+                    <h3>Pickup handover sheet</h3>
+                    <p>
+                        <span t-out="', '.join(docs.account_id.mapped('name'))"/> ·
+                        <span t-out="context_timestamp(datetime.datetime.now()).strftime('%d %b %Y %H:%M')"/> ·
+                        <b t-out="len(docs)"/> parcel(s), <b t-out="sum(docs.mapped('piece_count'))"/> box(es)
+                    </p>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr><th>#</th><th>AWB</th><th>Reference</th><th>Receiver</th><th>PIN</th><th class="text-end">Boxes</th><th class="text-end">kg</th><th class="text-end">COD</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="p">
+                                <td><span t-out="p_index + 1"/></td>
+                                <td><span t-out="p.awb or ''"/></td>
+                                <td><span t-out="p.reference or p.name"/></td>
+                                <td><span t-out="p.recipient_partner_id.name"/></td>
+                                <td><span t-out="p.dest_pin or ''"/></td>
+                                <td class="text-end"><span t-out="p.piece_count"/></td>
+                                <td class="text-end"><span t-out="'%.2f' % p.chargeable_weight_kg"/></td>
+                                <td class="text-end"><span t-if="p.payment_mode == 'cod'" t-out="p.cod_amount" t-options="{'widget': 'monetary', 'display_currency': p.currency_id}"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row mt-5">
+                        <div class="col-6">Handed over by: ______________________</div>
+                        <div class="col-6">Received by (courier): ______________________</div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

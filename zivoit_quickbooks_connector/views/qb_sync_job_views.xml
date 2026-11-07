@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_qb_sync_job_list" model="ir.ui.view">
+        <field name="name">qb.sync.job.list</field>
+        <field name="model">qb.sync.job</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="state == 'failed'" decoration-warning="state == 'conflict'"
+                  decoration-muted="state in ('done', 'skipped')" decoration-info="state == 'pending'">
+                <header>
+                    <button name="action_run_now" type="object" string="Run Now"/>
+                    <button name="action_retry" type="object" string="Retry"/>
+                    <button name="action_skip" type="object" string="Skip"/>
+                    <button name="action_force_odoo" type="object" string="Keep Odoo Version"/>
+                    <button name="action_force_qb" type="object" string="Keep QuickBooks Version"/>
+                </header>
+                <field name="create_date" string="Queued"/>
+                <field name="connection_id" optional="hide"/>
+                <field name="direction"/>
+                <field name="qb_entity"/>
+                <field name="qb_id"/>
+                <field name="name" optional="hide"/>
+                <field name="source" optional="show"/>
+                <field name="operation" optional="hide"/>
+                <field name="attempts"/>
+                <field name="next_attempt" optional="hide"/>
+                <field name="error" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-danger="state == 'failed'"
+                       decoration-warning="state == 'conflict'" decoration-info="state in ('pending', 'running')"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_qb_sync_job_form" model="ir.ui.view">
+        <field name="name">qb.sync.job.form</field>
+        <field name="model">qb.sync.job</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_run_now" type="object" string="Run Now" class="btn-primary"
+                            invisible="state in ('done', 'running')"/>
+                    <button name="action_retry" type="object" string="Retry" invisible="state not in ('failed', 'skipped')"/>
+                    <button name="action_force_odoo" type="object" string="Keep Odoo Version" invisible="state != 'conflict'"/>
+                    <button name="action_force_qb" type="object" string="Keep QuickBooks Version" invisible="state != 'conflict'"/>
+                    <button name="action_skip" type="object" string="Skip" invisible="state in ('done', 'skipped')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_record" type="object" class="oe_stat_button" icon="fa-file-o"
+                                invisible="not res_id">
+                            <span class="o_stat_text">Odoo Record</span>
+                        </button>
+                    </div>
+                    <h2><field name="name"/></h2>
+                    <group>
+                        <group>
+                            <field name="connection_id"/>
+                            <field name="direction"/>
+                            <field name="qb_entity"/>
+                            <field name="qb_id"/>
+                            <field name="operation"/>
+                            <field name="source"/>
+                        </group>
+                        <group>
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                            <field name="attempts"/>
+                            <field name="max_attempts"/>
+                            <field name="next_attempt"/>
+                            <field name="date_done"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="not error">
+                        <field name="error"/>
+                    </div>
+                    <notebook>
+                        <page string="Logs">
+                            <field name="log_ids">
+                                <list>
+                                    <field name="create_date"/>
+                                    <field name="level"/>
+                                    <field name="message"/>
+                                    <field name="response_status"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Technical" groups="base.group_no_one">
+                            <field name="error_detail"/>
+                            <field name="payload" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="view_qb_sync_job_search" model="ir.ui.view">
+        <field name="name">qb.sync.job.search</field>
+        <field name="model">qb.sync.job</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="qb_id"/>
+                <field name="qb_entity"/>
+                <field name="error"/>
+                <filter name="pending" string="Pending" domain="[('state', 'in', ('pending', 'running'))]"/>
+                <filter name="failed" string="Failed" domain="[('state', '=', 'failed')]"/>
+                <filter name="conflict" string="Conflicts" domain="[('state', '=', 'conflict')]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <separator/>
+                <filter name="import" string="Imports" domain="[('direction', '=', 'import')]"/>
+                <filter name="export" string="Exports" domain="[('direction', '!=', 'import')]"/>
+                <group>
+                    <filter name="by_entity" string="Entity" context="{'group_by': 'qb_entity'}"/>
+                    <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="by_source" string="Source" context="{'group_by': 'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_qb_sync_job_graph" model="ir.ui.view">
+        <field name="name">qb.sync.job.graph</field>
+        <field name="model">qb.sync.job</field>
+        <field name="arch" type="xml">
+            <graph type="bar" stacked="1">
+                <field name="qb_entity"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+    <record id="view_qb_sync_job_pivot" model="ir.ui.view">
+        <field name="name">qb.sync.job.pivot</field>
+        <field name="model">qb.sync.job</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="qb_entity" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_qb_sync_job" model="ir.actions.act_window">
+        <field name="name">Sync Queue</field>
+        <field name="res_model">qb.sync.job</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="context">{'search_default_pending': 1, 'search_default_failed': 1, 'search_default_conflict': 1}</field>
+    </record>
+    <record id="action_qb_sync_report" model="ir.actions.act_window">
+        <field name="name">Sync Analysis</field>
+        <field name="res_model">qb.sync.job</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+</odoo>

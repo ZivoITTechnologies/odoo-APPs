@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Booking offer page (link sent to the transporter) -->
+    <template id="cp_offer_page" name="Booking Offer">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="title">Booking <t t-esc="trip.name"/></t>
+            <div class="cp-track cp-offer-page">
+                <div class="cp-track-head">
+                    <div class="container">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <img t-if="trip.company_id.logo" t-att-src="'/web/image/res.company/%s/logo/160x60' % trip.company_id.id"
+                                 alt="Logo" class="cp-track-logo"/>
+                            <span t-else="" class="fw-bold" t-esc="trip.company_id.name"/>
+                            <span class="small opacity-75">Booking <t t-esc="trip.name"/></span>
+                        </div>
+                        <h1 class="mt-3 mb-1"><t t-esc="trip.origin_id.city or trip.origin_id.name"/> → <t t-esc="trip.destination_id.city or trip.destination_id.name"/></h1>
+                        <div class="cp-track-state">For <t t-esc="offer.transporter_id.name"/></div>
+                    </div>
+                </div>
+                <div class="container cp-track-body">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="cp-panel">
+                                <div t-if="message" class="alert alert-success" t-esc="message"/>
+                                <div t-if="error" class="alert alert-danger" t-esc="error"/>
+                                <dl class="cp-track-facts">
+                                    <dt>Load</dt><dd><t t-esc="'Part load (LTL)' if trip.shipment_mode == 'ltl' else (trip.vehicle_type_id.name or 'Full truck')"/></dd>
+                                    <dt>Placement</dt><dd><span t-field="trip.planned_dispatch"/></dd>
+                                    <dt t-if="trip.promised_delivery">Deliver by</dt><dd t-if="trip.promised_delivery"><span t-field="trip.promised_delivery"/></dd>
+                                    <dt t-if="trip.box_count">Boxes</dt><dd t-if="trip.box_count" t-esc="trip.box_count"/>
+                                    <dt t-if="trip.order_weight_kg or trip.loaded_weight_ton">Weight</dt>
+                                    <dd t-if="trip.order_weight_kg or trip.loaded_weight_ton"><t t-esc="'%.0f kg' % (trip.order_weight_kg or trip.loaded_weight_ton * 1000)"/></dd>
+                                    <dt>Freight</dt><dd><b t-field="offer.price" t-options="{'widget': 'monetary', 'display_currency': trip.currency_id}"/></dd>
+                                    <dt>Reply by</dt><dd><span t-field="offer.deadline"/></dd>
+                                </dl>
+                                <t t-if="offer.state == 'pending'">
+                                    <form method="post" class="mt-3">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <button type="submit" name="decision" value="accept" class="btn btn-primary btn-lg w-100">Accept booking</button>
+                                        <div class="mt-3 small text-muted">Can't take it?</div>
+                                        <div class="d-flex gap-2 mt-1">
+                                            <select name="reason" class="form-select">
+                                                <t t-foreach="reasons" t-as="r"><option t-att-value="r[0]" t-esc="r[1]"/></t>
+                                            </select>
+                                            <button type="submit" name="decision" value="decline" class="btn btn-outline-secondary">Decline</button>
+                                        </div>
+                                    </form>
+                                </t>
+                                <p t-else="" class="mt-3 mb-0 fw-semibold">This offer is: <span t-field="offer.state"/>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Customer tracking page -->
+    <template id="cp_public_tracking" name="Shipment Tracking">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="title">Track shipment <t t-esc="trip.name"/></t>
+            <div class="cp-track">
+                <div class="cp-track-head">
+                    <div class="container">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <img t-if="trip.company_id.logo" t-att-src="'/web/image/res.company/%s/logo/160x60' % trip.company_id.id"
+                                 alt="Logo" class="cp-track-logo"/>
+                            <span t-else="" class="fw-bold" t-esc="trip.company_id.name"/>
+                            <span class="small opacity-75">Shipment <t t-esc="trip.name"/></span>
+                        </div>
+                        <h1 class="mt-3 mb-1"><t t-esc="trip.origin_id.city or trip.origin_id.name"/> → <t t-esc="trip.destination_id.city or trip.destination_id.name"/></h1>
+                        <div class="cp-track-state">
+                            <t t-if="trip.state in ('draft', 'assigned')">Vehicle being arranged</t>
+                            <t t-elif="trip.state in ('reported', 'loading')">Loading at origin</t>
+                            <t t-elif="trip.state == 'in_transit'">On the way</t>
+                            <t t-elif="trip.state == 'arrived'">Arrived at destination</t>
+                            <t t-else="">Delivered</t>
+                        </div>
+                    </div>
+                </div>
+                <div class="container cp-track-body">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="cp-panel">
+                                <div class="cp-track-progress">
+                                    <div class="cp-track-bar" t-attf-style="width: #{int(trip.progress_pct)}%"/>
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted mt-1">
+                                    <span t-esc="trip.origin_id.name"/>
+                                    <span t-esc="trip.destination_id.name"/>
+                                </div>
+                                <dl class="cp-track-facts mt-3">
+                                    <dt t-if="trip.eta and trip.state == 'in_transit'">Estimated arrival</dt>
+                                    <dd t-if="trip.eta and trip.state == 'in_transit'"><span t-field="trip.eta"/></dd>
+                                    <dt t-if="trip.actual_delivery">Delivered</dt>
+                                    <dd t-if="trip.actual_delivery"><span t-field="trip.actual_delivery"/></dd>
+                                    <dt t-if="trip.vehicle_number">Vehicle</dt>
+                                    <dd t-if="trip.vehicle_number"><span class="cp-plate" t-esc="trip.vehicle_number"/></dd>
+                                    <dt t-if="trip.state == 'in_transit' and trip.remaining_km">Distance left</dt>
+                                    <dd t-if="trip.state == 'in_transit' and trip.remaining_km"><t t-esc="int(trip.remaining_km)"/> km</dd>
+                                    <dt t-if="trip.co2_kg">Carbon footprint</dt>
+                                    <dd t-if="trip.co2_kg"><i class="fa fa-leaf text-success me-1"/><t t-esc="int(trip.co2_kg)"/> kg CO2e</dd>
+                                    <dt t-if="trip.last_ping_time">Last update</dt>
+                                    <dd t-if="trip.last_ping_time"><span t-field="trip.last_ping_time"/></dd>
+                                </dl>
+                            </div>
+                            <div class="cp-panel mt-3">
+                                <h6 class="text-uppercase small text-muted">Journey</h6>
+                                <ul class="cp-timeline">
+                                    <li t-foreach="events" t-as="e">
+                                        <span class="cp-timeline-time" t-field="e.event_time"/>
+                                        <span t-esc="e.description"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="cp-panel p-0 overflow-hidden">
+                                <div class="cp-track-map cp-leaflet" t-att-data-map="map_json"/>
+                            </div>
+                            <p class="small text-muted mt-2">Map data © OpenStreetMap contributors.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Driver mobile page -->
+    <template id="cp_driver_page" name="Driver Page">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="title">Trip <t t-esc="trip.name"/></t>
+            <t t-set="head">
+                <link rel="manifest" t-attf-href="/cp/driver/#{token}/manifest.webmanifest"/>
+                <meta name="theme-color" content="#1f5a4d"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-title" content="Driver"/>
+                <link rel="apple-touch-icon" href="/cargo_pilot_tms/static/description/icon.png"/>
+            </t>
+            <div class="cp-driver" t-att-data-token="token" t-att-data-state="trip.state">
+                <div class="cp-driver-head">
+                    <div class="small opacity-75"><t t-esc="trip.name"/> · <span class="cp-plate cp-plate-light" t-esc="trip.vehicle_number or '-'"/></div>
+                    <h1 class="h3 mt-1 mb-0"><t t-esc="trip.origin_id.name"/> → <t t-esc="trip.destination_id.name"/></h1>
+                    <div class="small mt-1">Status: <strong t-field="trip.state"/></div>
+                </div>
+                <div class="container py-3">
+                    <t t-call="cargo_pilot_tms.cp_portal_flash"/>
+
+                    <div class="cp-install d-none mb-3">
+                        <i class="fa fa-mobile fa-2x"/>
+                        <div class="flex-grow-1 small"><strong>Keep this on your phone.</strong> Add it to your home screen to open the trip in one tap.</div>
+                        <button type="button" class="btn btn-sm btn-light cp-install-btn">Add</button>
+                    </div>
+
+                    <div class="cp-panel mb-3" t-if="trip.state in ('assigned', 'reported', 'loading', 'in_transit', 'arrived')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">Location sharing</div>
+                                <div class="small text-muted cp-share-status">Keep this page open while driving.</div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary cp-share-toggle">Start</button>
+                        </div>
+                    </div>
+
+                    <form t-attf-action="/cp/driver/#{token}/status" method="post" class="d-grid gap-2 mb-3">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <button t-if="trip.state == 'assigned'" name="step" value="reported" class="btn btn-lg btn-secondary">I have reached the loading point</button>
+                        <button t-if="trip.state in ('assigned', 'reported', 'loading')" name="step" value="dispatch" class="btn btn-lg btn-primary">Loaded, start trip</button>
+                        <button t-if="trip.state == 'in_transit'" name="step" value="arrived" class="btn btn-lg btn-primary">I have reached the destination</button>
+                    </form>
+
+                    <div class="cp-panel" t-if="trip.state in ('in_transit', 'arrived', 'delivered') and trip.epod_state != 'verified'">
+                        <h5>Delivery proof</h5>
+                        <t t-call="cargo_pilot_tms.cp_epod_form">
+                            <t t-set="action_url" t-value="'/cp/driver/%s/epod' % token"/>
+                        </t>
+                    </div>
+                    <div class="alert alert-success" t-if="trip.epod_state == 'verified'">Delivery proof accepted. Thank you, have a safe trip back.</div>
+
+                    <div class="cp-panel mt-3 small">
+                        <div><span class="text-muted">Consignee:</span> <t t-esc="trip.consignee_id.name or '-'"/></div>
+                        <div t-if="trip.consignee_id.phone"><span class="text-muted">Phone:</span>
+                            <a t-att-href="'tel:%s' % trip.consignee_id.phone" t-esc="trip.consignee_id.phone"/></div>
+                        <div t-if="trip.eway_bill_no"><span class="text-muted">E-way bill:</span> <t t-esc="trip.eway_bill_no"/></div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

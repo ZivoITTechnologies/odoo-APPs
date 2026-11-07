@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cp_courier_account_user,cp.courier.account user,model_cp_courier_account,cargo_pilot_tms.group_cp_user,1,0,0,0
+access_cp_courier_account_manager,cp.courier.account manager,model_cp_courier_account,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_courier_log_manager,cp.courier.log manager,model_cp_courier_log,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_parcel_user,cp.parcel user,model_cp_parcel,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_parcel_manager,cp.parcel manager,model_cp_parcel,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_parcel_package_user,cp.parcel.package user,model_cp_parcel_package,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_parcel_event_user,cp.parcel.event user,model_cp_parcel_event,cargo_pilot_tms.group_cp_user,1,1,1,0
+access_cp_parcel_event_manager,cp.parcel.event manager,model_cp_parcel_event,cargo_pilot_tms.group_cp_manager,1,1,1,1
+access_cp_courier_rate_wizard_user,cp.courier.rate.wizard user,model_cp_courier_rate_wizard,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_courier_rate_line_user,cp.courier.rate.line user,model_cp_courier_rate_line,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_courier_pickup_wizard_user,cp.courier.pickup.wizard user,model_cp_courier_pickup_wizard,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_parcel_ndr_wizard_user,cp.parcel.ndr.wizard user,model_cp_parcel_ndr_wizard,cargo_pilot_tms.group_cp_user,1,1,1,1
+access_cp_parcel_update_wizard_user,cp.parcel.update.wizard user,model_cp_parcel_update_wizard,cargo_pilot_tms.group_cp_user,1,1,1,1

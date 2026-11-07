@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_qb_integrity_wizard" model="ir.ui.view">
+        <field name="name">qb.integrity.wizard.form</field>
+        <field name="model">qb.integrity.wizard</field>
+        <field name="arch" type="xml">
+            <form string="QuickBooks Integrity Check">
+                <p class="text-muted">Compares invoices, credit notes, bills, vendor credits and payments between Odoo and
+                    QuickBooks: missing documents on either side, differing totals and differing open balances.</p>
+                <group>
+                    <group>
+                        <field name="connection_id" options="{'no_create': True}"/>
+                        <field name="check_balance"/>
+                    </group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                </group>
+                <div invisible="state != 'done'">
+                    <div class="alert alert-success" role="status" invisible="issue_count != 0">
+                        All <field name="checked_count" class="d-inline"/> documents match. 🎉
+                    </div>
+                    <div class="alert alert-warning" role="status" invisible="issue_count == 0">
+                        <field name="issue_count" class="d-inline"/> issue(s) found.
+                    </div>
+                    <field name="state" invisible="1"/>
+                    <field name="line_ids" invisible="issue_count == 0">
+                        <list create="0" delete="0">
+                            <field name="entity"/>
+                            <field name="qb_id"/>
+                            <field name="qb_ref"/>
+                            <field name="issue" widget="badge"/>
+                            <field name="qb_amount"/>
+                            <field name="odoo_amount"/>
+                            <field name="difference"/>
+                            <field name="res_model" column_invisible="1"/>
+                            <button name="action_open" type="object" icon="fa-external-link" title="Open" invisible="not res_model"/>
+                            <button name="action_fix" type="object" icon="fa-wrench" title="Fix (re-sync)"/>
+                        </list>
+                    </field>
+                </div>
+                <footer>
+                    <button name="action_check" type="object" string="Run Check" class="btn-primary"/>
+                    <button name="action_fix_all" type="object" string="Fix All" invisible="issue_count == 0"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_qb_integrity_wizard" model="ir.actions.act_window">
+        <field name="name">Integrity Check</field>
+        <field name="res_model">qb.integrity.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

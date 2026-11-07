@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_delivery_carrier_form_zivo" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.zivo.hub</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Logistics Hub" name="zivo_hub" invisible="delivery_type != 'zivo_hub'">
+                    <group>
+                        <group string="Carrier selection">
+                            <field name="zivo_strategy" required="delivery_type == 'zivo_hub'"/>
+                            <field name="zivo_account_id" invisible="zivo_strategy != 'fixed'" required="delivery_type == 'zivo_hub' and zivo_strategy == 'fixed'"/>
+                            <field name="zivo_account_ids" widget="many2many_tags" invisible="zivo_strategy == 'fixed'"/>
+                            <field name="zivo_service_code"/>
+                            <field name="zivo_default_package_type_id"/>
+                            <field name="zivo_failover" invisible="zivo_strategy == 'fixed'"/>
+                        </group>
+                        <group string="AI safeguards">
+                            <field name="zivo_hold_high_risk"/>
+                            <field name="zivo_risk_threshold" invisible="not zivo_hold_high_risk"/>
+                            <field name="zivo_min_address_score"/>
+                        </group>
+                    </group>
+                    <div class="text-muted">
+                        <b>AI Best</b> ranks every serviceable courier by price, promised transit time and the delivered / RTO
+                        rate each courier achieved on the same destination in the last 180 days. COD orders weigh reliability higher.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_zivo_delivery_methods" model="ir.actions.act_window">
+        <field name="name">Delivery Methods</field>
+        <field name="res_model">delivery.carrier</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('delivery_type', '=', 'zivo_hub')]</field>
+        <field name="context">{'default_delivery_type': 'zivo_hub', 'default_integration_level': 'rate_and_ship'}</field>
+    </record>
+</odoo>

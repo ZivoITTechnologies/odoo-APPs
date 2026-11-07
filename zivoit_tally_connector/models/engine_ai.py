@@ -91,6 +91,11 @@ class TallyConnectionAI(models.Model):
         if rate is not None:
             dom.append(('amount', '=', rate))
         taxes = Tax.search(dom)
+        # Indian charts also hold RC / EXP / SEZ variants at the same rate: prefer the tax
+        # whose markers (and those of its parent group) match the Tally ledger name.
+        taxes = taxes.sorted(lambda t: (matching.tax_rank(
+            t.name + ' ' + ' '.join(Tax.search([('children_tax_ids', 'in', t.id)]).mapped('name')),
+            m.tally_name), t.sequence, t.id))
         for use in uses:
             # child taxes of groups carry type_tax_use 'none'; check their parents' usage
             for t in taxes:

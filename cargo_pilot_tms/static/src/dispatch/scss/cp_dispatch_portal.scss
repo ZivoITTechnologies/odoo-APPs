@@ -1,0 +1,4 @@
+.cp-countdown { font-variant-numeric: tabular-nums; }
+.cp-countdown-clock { font-weight: 800; font-size: 1.15em; }
+.cp-countdown-urgent { background: #d64545 !important; color: #fff !important; animation: cp-pulse 1s ease-in-out infinite; }
+@keyframes cp-pulse { 50% { opacity: 0.75; } }

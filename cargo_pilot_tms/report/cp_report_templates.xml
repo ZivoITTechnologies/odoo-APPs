@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Consignment Note -->
+    <template id="report_cp_consignment_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.consignor_id.lang)"/>
+            <div class="page">
+                <div class="row mb-3">
+                    <div class="col-7">
+                        <h2 class="mb-0">Consignment Note</h2>
+                        <div class="text-muted">LR No. <strong t-field="o.name"/></div>
+                    </div>
+                    <div class="col-5 text-end">
+                        <div>Date: <span t-field="o.booking_date"/></div>
+                        <div t-if="o.booking_hub_id">Branch: <span t-field="o.booking_hub_id.name"/></div>
+                        <div>Load: <span t-field="o.load_type"/></div>
+                        <div>Payment: <strong t-field="o.payment_type"/></div>
+                    </div>
+                </div>
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr><th>Consignor</th><th>Consignee</th><th>Billing Party</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><div t-field="o.consignor_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone', 'vat'], 'no_marker': True}"/></td>
+                            <td><div t-field="o.consignee_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'phone', 'vat'], 'no_marker': True}"/></td>
+                            <td><div t-field="o.billing_partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'vat'], 'no_marker': True}"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row mb-2">
+                    <div class="col-4">From: <strong t-field="o.from_location_id.name"/></div>
+                    <div class="col-4">To: <strong t-field="o.to_location_id.name"/></div>
+                    <div class="col-4">Vehicle: <strong t-esc="o.vehicle_number or '-'"/></div>
+                </div>
+                <div class="row mb-3 small">
+                    <div class="col-4">E-way bill: <span t-esc="o.eway_bill_no or '-'"/></div>
+                    <div class="col-4">Invoice: <span t-esc="o.invoice_ref or '-'"/></div>
+                    <div class="col-4">Goods value: <span t-field="o.goods_value" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></div>
+                </div>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Description</th><th>Packing</th>
+                            <th class="text-end">Packages</th><th class="text-end">Actual (kg)</th><th class="text-end">Charged (kg)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.line_ids" t-as="line">
+                            <td t-esc="line.description"/>
+                            <td><span t-field="line.packing_type"/></td>
+                            <td class="text-end" t-esc="line.packages"/>
+                            <td class="text-end" t-esc="line.actual_weight_kg"/>
+                            <td class="text-end" t-esc="line.charged_weight_kg"/>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="2">Total</td>
+                            <td class="text-end" t-esc="o.total_packages"/>
+                            <td class="text-end" t-esc="o.actual_weight_kg"/>
+                            <td class="text-end" t-esc="o.charged_weight_kg"/>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-6">
+                        <p class="small text-muted mt-4">Goods received in apparent good condition. Subject to the carrier's standard terms of carriage.</p>
+                        <div class="mt-5 row">
+                            <div class="col-6 border-top pt-1 small">Consignor signature</div>
+                            <div class="col-6 border-top pt-1 small">For the carrier</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <table class="table table-sm">
+                            <tr><td>Freight</td><td class="text-end"><span t-field="o.freight_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr t-if="o.loading_charge or o.unloading_charge"><td>Loading / unloading</td>
+                                <td class="text-end"><span t-esc="o.loading_charge + o.unloading_charge" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr t-if="o.door_collection_charge or o.door_delivery_charge"><td>Door collection / delivery</td>
+                                <td class="text-end"><span t-esc="o.door_collection_charge + o.door_delivery_charge" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr t-if="o.other_charge"><td>Other</td><td class="text-end"><span t-field="o.other_charge" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr t-if="o.tax_amount"><td>Taxes</td><td class="text-end"><span t-field="o.tax_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr class="fw-bold border-top"><td>Total</td><td class="text-end"><span t-field="o.total_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr t-if="o.advance_received"><td>Advance</td><td class="text-end"><span t-field="o.advance_received" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr t-if="o.advance_received" class="fw-bold"><td>Balance</td><td class="text-end"><span t-field="o.balance_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_cp_consignment">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="cargo_pilot_tms.report_cp_consignment_document"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- Challan -->
+    <template id="report_cp_challan">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Loading Challan <span t-field="o.name"/></h2>
+                        <div class="row mb-3">
+                            <div class="col-3">Date: <span t-field="o.date"/></div>
+                            <div class="col-3">From: <strong t-field="o.from_hub_id.name"/></div>
+                            <div class="col-3">To: <strong t-field="o.to_hub_id.name"/></div>
+                            <div class="col-3">Vehicle: <strong t-esc="o.vehicle_number or '-'"/></div>
+                        </div>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>LR</th><th>Consignor</th><th>Consignee</th><th>Destination</th>
+                                    <th class="text-end">Pkgs</th><th class="text-end">Weight (kg)</th><th>Payment</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.consignment_ids" t-as="c">
+                                    <td t-esc="c.name"/>
+                                    <td t-esc="c.consignor_id.name"/>
+                                    <td t-esc="c.consignee_id.name"/>
+                                    <td t-esc="c.to_location_id.name"/>
+                                    <td class="text-end" t-esc="c.total_packages"/>
+                                    <td class="text-end" t-esc="c.actual_weight_kg"/>
+                                    <td><span t-field="c.payment_type"/></td>
+                                </tr>
+                                <tr class="fw-bold">
+                                    <td colspan="4">Total</td>
+                                    <td class="text-end" t-esc="o.total_packages"/>
+                                    <td class="text-end" t-esc="o.total_weight_kg"/>
+                                    <td/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row mt-5">
+                            <div class="col-4 border-top pt-1 small">Loaded by</div>
+                            <div class="col-4 border-top pt-1 small">Driver</div>
+                            <div class="col-4 border-top pt-1 small">Received by</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Hire Slip -->
+    <template id="report_cp_hire_slip">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Vehicle Hire Slip <span t-field="o.name"/></h2>
+                        <table class="table table-sm table-borderless mb-3">
+                            <tr><td class="text-muted">Date</td><td><span t-field="o.date"/></td><td class="text-muted">Trip</td><td><span t-field="o.trip_id.name"/></td></tr>
+                            <tr><td class="text-muted">Owner / Broker</td><td><span t-field="o.owner_id.name"/></td><td class="text-muted">Vehicle</td><td><span t-field="o.vehicle_number"/></td></tr>
+                            <tr><td class="text-muted">Lane</td><td><span t-field="o.lane_id.name"/></td><td class="text-muted">PAN / Tax ID</td><td t-esc="o.owner_pan or '-'"/></tr>
+                        </table>
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <tr><td>Hire</td><td class="text-end"><span t-field="o.hire_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                    <tr><td>Detention</td><td class="text-end"><span t-field="o.detention_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                    <tr><td>Extra</td><td class="text-end"><span t-field="o.extra_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                    <tr><td>Deductions <span class="small text-muted" t-esc="o.deduction_note or ''"/></td><td class="text-end"><span t-field="o.deduction_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                    <tr class="fw-bold border-top"><td>Net hire</td><td class="text-end"><span t-field="o.total_hire" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                    <tr><td>Paid</td><td class="text-end"><span t-field="o.paid_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                    <tr class="fw-bold"><td>Balance due</td><td class="text-end"><span t-field="o.balance_due" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <thead><tr><th>Date</th><th>Type</th><th class="text-end">Amount</th></tr></thead>
+                                    <tr t-foreach="o.payment_ids" t-as="p">
+                                        <td><span t-field="p.date"/></td><td><span t-field="p.payment_type"/></td>
+                                        <td class="text-end"><span t-field="p.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row mt-5">
+                            <div class="col-6 border-top pt-1 small">Owner / broker signature</div>
+                            <div class="col-6 border-top pt-1 small">Authorised signatory</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Trip Sheet -->
+    <template id="report_cp_trip">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Trip Sheet <span t-field="o.name"/></h2>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div>Lane: <strong t-field="o.lane_id.name"/></div>
+                                <div>Transporter: <span t-esc="o.transporter_id.name or '-'"/></div>
+                                <div>Vehicle: <strong t-esc="o.vehicle_number or '-'"/></div>
+                                <div>Driver: <span t-esc="o.driver_name or o.driver_id.name or '-'"/> <span t-esc="o.driver_phone or ''"/></div>
+                            </div>
+                            <div class="col-6">
+                                <div>Planned dispatch: <span t-field="o.planned_dispatch"/></div>
+                                <div t-if="o.actual_dispatch">Dispatched: <span t-field="o.actual_dispatch"/></div>
+                                <div t-if="o.actual_delivery">Delivered: <span t-field="o.actual_delivery"/></div>
+                                <div>E-way bill: <span t-esc="o.eway_bill_no or '-'"/></div>
+                                <div>Loaded: <span t-esc="o.loaded_weight_ton"/> t</div>
+                            </div>
+                        </div>
+                        <h5>Timeline</h5>
+                        <table class="table table-sm">
+                            <tr t-foreach="o.event_ids.sorted('event_time')" t-as="e">
+                                <td><span t-field="e.event_time"/></td><td><span t-field="e.event_type"/></td><td t-esc="e.description"/>
+                            </tr>
+                        </table>
+                        <h5 t-if="o.expense_ids">Expenses</h5>
+                        <table class="table table-sm" t-if="o.expense_ids">
+                            <tr t-foreach="o.expense_ids" t-as="x">
+                                <td><span t-field="x.date"/></td><td><span t-field="x.expense_type"/></td><td t-esc="x.paid_to or ''"/>
+                                <td class="text-end"><span t-field="x.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr>
+                        </table>
+                        <table class="table table-sm w-50 ms-auto">
+                            <tr><td>Revenue</td><td class="text-end"><span t-field="o.revenue_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr><td>Hire</td><td class="text-end"><span t-field="o.hire_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr><td>Expenses</td><td class="text-end"><span t-field="o.expense_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr class="fw-bold border-top"><td>Profit</td><td class="text-end"><span t-field="o.profit_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -69,9 +69,27 @@ class EpcScheduleOptimizer(models.TransientModel):
             ]
             if not candidates:
                 break
-            best = min(candidates, key=lambda a: (a.crash_cost_per_day, -duration[a.id], a.id))
-            duration[best.id] -= 1
-            cpm = Activity._cpm_compute(order, links, duration, calendar, constraints)
+            # Only pay for a day that actually brings the finish forward: an activity can be "critical"
+            # by its start (e.g. it only drives successors through start-to-start links) while its
+            # duration does not drive the project finish.
+            accepted = None
+            for activity in sorted(candidates, key=lambda a: (a.crash_cost_per_day, -duration[a.id], a.id)):
+                trial = dict(duration)
+                trial[activity.id] -= 1
+                trial_cpm = Activity._cpm_compute(order, links, trial, calendar, constraints)
+                if trial_cpm["finish"] < cpm["finish"]:
+                    accepted = (trial, trial_cpm)
+                    break
+            if not accepted:
+                # Parallel critical paths: shorten every candidate together, keep it only if it helps.
+                trial = dict(duration)
+                for activity in candidates:
+                    trial[activity.id] -= 1
+                trial_cpm = Activity._cpm_compute(order, links, trial, calendar, constraints)
+                if trial_cpm["finish"] >= cpm["finish"]:
+                    break
+                accepted = (trial, trial_cpm)
+            duration, cpm = accepted
             steps += 1
 
         commands = [(5, 0, 0)]

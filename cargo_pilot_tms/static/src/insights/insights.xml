@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cargo_pilot_tms.Insights">
+        <div class="o_action cp-ct cp-in h-100 overflow-auto">
+            <div t-if="state.loading" class="p-5 text-center text-muted">Loading…</div>
+            <t t-else="">
+                <t t-set="d" t-value="state.data"/>
+                <div class="cp-ct-head">
+                    <div>
+                        <h2 class="mb-0">Freight Insights</h2>
+                        <div class="cp-ct-sub">What freight costs, where it goes and who delivers</div>
+                    </div>
+                    <div class="cp-in-periods" role="group">
+                        <button t-foreach="periods" t-as="p" t-key="p.key" class="btn btn-sm"
+                                t-att-class="state.period === p.key ? 'btn-primary' : 'btn-light'"
+                                t-on-click="() => this.load(p.key)" t-esc="p.label"/>
+                    </div>
+                </div>
+
+                <div class="cp-in-kpis">
+                    <button class="cp-in-kpi cp-in-kpi-main" t-on-click="() => this.openShipments()">
+                        <span class="cp-in-label">Freight spend</span>
+                        <span class="cp-in-value" t-esc="money(d.kpis.spend)"/>
+                        <span class="cp-in-foot"><t t-esc="d.kpis.shipments"/> shipments</span>
+                    </button>
+                    <button class="cp-in-kpi" t-on-click="() => this.openShipments()">
+                        <span class="cp-in-label">Cost per kg</span>
+                        <span class="cp-in-value"><t t-esc="d.currency.symbol"/> <t t-esc="d.kpis.cost_per_kg"/></span>
+                        <span class="cp-in-foot">trucks and LTL</span>
+                    </button>
+                    <button class="cp-in-kpi" t-on-click="() => this.openOrders()">
+                        <span class="cp-in-label">Freight of goods value</span>
+                        <span class="cp-in-value"><t t-esc="d.kpis.freight_pct"/>%</span>
+                        <span class="cp-in-foot">per order, see split</span>
+                    </button>
+                    <button class="cp-in-kpi" t-att-class="{'cp-in-warn': d.kpis.on_time &lt; 85 and d.kpis.delivered}"
+                            t-on-click="() => this.openShipments([['state', 'in', ['delivered', 'closed']]], 'Delivered')">
+                        <span class="cp-in-label">Delivered on time</span>
+                        <span class="cp-in-value"><t t-esc="d.kpis.on_time"/>%</span>
+                        <span class="cp-in-foot"><t t-esc="d.kpis.delivered"/> delivered</span>
+                    </button>
+                    <button class="cp-in-kpi" t-att-class="{'cp-in-alert': d.kpis.pod_pending}" t-on-click="() => this.openPod()">
+                        <span class="cp-in-label">POD pending</span>
+                        <span class="cp-in-value" t-esc="d.kpis.pod_pending"/>
+                        <span class="cp-in-foot">avg turnaround <t t-esc="d.kpis.pod_tat"/> h</span>
+                    </button>
+                    <button class="cp-in-kpi" t-on-click="() => this.openOffers()">
+                        <span class="cp-in-label">Bookings accepted</span>
+                        <span class="cp-in-value"><t t-esc="d.kpis.acceptance"/>%</span>
+                        <span class="cp-in-foot">reply in <t t-esc="d.kpis.reply_minutes"/> min, <t t-esc="d.kpis.declines"/> declined</span>
+                    </button>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-xl-8">
+                        <div class="cp-ct-card h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6>Freight spend by month</h6>
+                                <div class="cp-in-legend"><span class="cp-in-sw cp-in-ftl"/>FTL <span class="cp-in-sw cp-in-ltl ms-2"/>LTL</div>
+                            </div>
+                            <div class="cp-in-bars">
+                                <div t-foreach="d.months" t-as="m" t-key="m_index" class="cp-in-bar"
+                                     t-att-title="m.label + ' ' + m.year + ': ' + money(m.ftl + m.ltl)">
+                                    <div class="cp-in-stack">
+                                        <div class="cp-in-seg cp-in-ltl" t-attf-style="height: {{ barHeight(m.ltl) }}px"/>
+                                        <div class="cp-in-seg cp-in-ftl" t-attf-style="height: {{ barHeight(m.ftl) }}px"/>
+                                    </div>
+                                    <span class="cp-in-bar-label" t-esc="m.label"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4">
+                        <div class="cp-ct-card h-100">
+                            <h6>How goods move</h6>
+                            <div t-foreach="d.modes" t-as="m" t-key="m.key" class="cp-in-mode">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-semibold" t-esc="m.label"/>
+                                    <span><t t-esc="money(m.spend)"/> · <t t-esc="m.count"/></span>
+                                </div>
+                                <div class="cp-ct-meter"><div t-attf-class="cp-in-mode-{{ m.key }}" t-attf-style="width: {{ modeShare(m) }}%"/></div>
+                            </div>
+                            <div class="cp-in-note">CO2e this period: <b><t t-esc="d.kpis.co2_t"/> t</b></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="cp-ct-card h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6>Freight by channel</h6>
+                                <button class="btn btn-link btn-sm p-0" t-on-click="() => this.openOrders()">Per order</button>
+                            </div>
+                            <div t-if="!d.channels.length" class="cp-ct-empty"><div>No shipments in this period.</div></div>
+                            <div t-foreach="d.channels" t-as="c" t-key="c.key" class="cp-in-row">
+                                <span class="cp-in-row-name" t-esc="c.label"/>
+                                <div class="cp-in-row-bar"><div t-attf-style="width: {{ Math.round(c.spend / maxChannel * 100) }}%"/></div>
+                                <span class="cp-in-row-val" t-esc="money(c.spend)"/>
+                                <span class="cp-in-pill" t-att-class="{'cp-in-pill-warn': c.freight_pct &gt; 5}"><t t-esc="c.freight_pct"/>%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="cp-ct-card h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6>Proof of delivery still missing</h6>
+                                <button class="btn btn-link btn-sm p-0" t-on-click="() => this.openPod()">Chase</button>
+                            </div>
+                            <div class="cp-in-pod">
+                                <div t-foreach="d.pod" t-as="p" t-key="p.key" t-attf-class="cp-in-pod-col cp-in-pod-{{ p.key }}">
+                                    <div class="cp-in-pod-bar"><div t-attf-style="height: {{ Math.round(p.count / maxPod * 100) }}%"/></div>
+                                    <b t-esc="p.count"/>
+                                    <span t-esc="p.label"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="cp-ct-card h-100">
+                            <h6>Top lanes by spend</h6>
+                            <table class="table table-sm cp-in-table mb-0">
+                                <thead><tr><th>Lane</th><th class="text-end">Trips</th><th class="text-end">Spend</th><th class="text-end">Per kg</th><th class="text-end">On time</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="d.lanes" t-as="l" t-key="l_index">
+                                        <td><span t-esc="l.name"/> <span t-if="l.movement == 'interstate'" class="cp-in-tag">Interstate</span></td>
+                                        <td class="text-end" t-esc="l.trips"/>
+                                        <td class="text-end" t-esc="money(l.spend)"/>
+                                        <td class="text-end"><t t-esc="l.cost_per_kg"/></td>
+                                        <td class="text-end"><t t-if="l.on_time !== null"><t t-esc="l.on_time"/>%</t><t t-else="">-</t></td>
+                                    </tr>
+                                    <tr t-if="!d.lanes.length"><td colspan="5" class="text-muted">No shipments in this period.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="cp-ct-card h-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6>Transporter scorecard</h6>
+                                <button class="btn btn-link btn-sm p-0" t-on-click="() => this.openScorecard()">All transporters</button>
+                            </div>
+                            <table class="table table-sm cp-in-table mb-0">
+                                <thead><tr><th>Transporter</th><th class="text-center">Grade</th><th class="text-end">Accepts</th><th class="text-end">Placed</th><th class="text-end">On time</th><th class="text-end">POD h</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="d.scorecard" t-as="s" t-key="s.id" class="cp-in-click" t-on-click="() => this.openTransporter(s.id)">
+                                        <td t-esc="s.name"/>
+                                        <td class="text-center"><span t-attf-class="cp-grade-chip cp-grade-{{ s.grade }}" t-esc="gradeLabel(s.grade)"/></td>
+                                        <td class="text-end"><t t-esc="s.acceptance"/>%</td>
+                                        <td class="text-end"><t t-esc="s.placement"/>%</td>
+                                        <td class="text-end"><t t-esc="s.on_time"/>%</td>
+                                        <td class="text-end" t-esc="s.pod_tat"/>
+                                    </tr>
+                                    <tr t-if="!d.scorecard.length"><td colspan="6" class="text-muted">No transporter activity in this period.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="cp-ct-card cp-in-billing" t-on-click="() => this.openBills()">
+                            <div>
+                                <h6 class="mb-1">Invoice check</h6>
+                                <div class="cp-in-note mt-0">Billed shipments this period: agreed <b t-esc="money(d.billing.agreed)"/>, approved <b t-esc="money(d.billing.billed)"/>
+                                    (<t t-esc="d.billing.variance_pct"/>%). Overcharges stopped: <b class="text-success" t-esc="money(d.billing.deductions)"/>.</div>
+                            </div>
+                            <i class="fa fa-angle-right fa-lg text-muted"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

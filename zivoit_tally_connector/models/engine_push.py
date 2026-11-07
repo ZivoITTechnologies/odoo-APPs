@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Odoo → Tally: masters and vouchers."""
 import logging
+import re
 from collections import OrderedDict
 
 from odoo import _, fields, models
@@ -86,6 +87,8 @@ class TallyConnectionPush(models.Model):
             return False
         if not mapping.synced_to_tally:
             return mapping.origin == 'odoo' or not mapping.tally_guid
+        if mapping.odoo_hash:
+            return mapping._odoo_changed_since_sync()
         return bool(record.write_date and mapping.odoo_write_date
                     and record.write_date > mapping.odoo_write_date)
 
@@ -485,6 +488,34 @@ class TallyConnectionPush(models.Model):
         self._flush_masters(col)
         return voucher_reqs
 
+    def _refresh_master_request(self, req):
+        """Drop masters that are in conflict (the accountant decides first).
+
+        Each object sits in its own TALLYMESSAGE, in the same order as res_ids.
+        Returns False when nothing is left to send.
+        """
+        ids = req._get_res_ids()
+        maps = self.env['tally.mapping'].browse(ids)
+        held = [m.id for m in maps.exists() if m.state == 'conflict']
+        if not held:
+            return True
+        body = req.request_xml or ''
+        start, end = body.find('<REQUESTDATA>'), body.rfind('</REQUESTDATA>')
+        msgs = re.findall(r'<TALLYMESSAGE\b.*?</TALLYMESSAGE>', body[start:end], re.S)
+        if len(msgs) != len(ids):
+            req.write({'state': 'cancelled', 'error': _('Held: a master in this batch is in '
+                                                        'conflict.')})
+            return False
+        keep = [(i, msg) for i, msg in zip(ids, msgs) if i not in held]
+        if not keep:
+            req.write({'state': 'cancelled', 'error': _('Held: master in conflict — resolve it '
+                                                        'in Mappings.')})
+            return False
+        req.write({'res_ids': ','.join(str(i) for i, _m in keep),
+                   'request_xml': TX.build_import_envelope(
+                       self.tally_company, 'All Masters', [m for _i, m in keep])})
+        return True
+
     def _auto_heal_extra(self, code, arg, col):
         return False
 
@@ -529,7 +560,8 @@ class TallyConnectionPush(models.Model):
         for m in maps:
             target = m._target()
             vals = {'synced_to_tally': True, 'last_sync': now,
-                    'odoo_write_date': target.write_date if target else now}
+                    'odoo_write_date': target.write_date if target else now,
+                    'odoo_hash': m._odoo_fingerprint()}
             if m.pending_name:
                 vals.update(tally_name=m.pending_name, pending_name=False)
             m.write(vals)
@@ -557,6 +589,7 @@ class TallyConnectionPush(models.Model):
         if res['ok']:
             for mv in moves:
                 mv.write({'tally_state': 'synced', 'tally_guid': self._remote_id(mv),
+                          'tally_number': mv.name,
                           'tally_last_sync': fields.Datetime.now(), 'tally_error': False,
                           'tally_master_id': res.get('last_vch_id') or mv.tally_master_id})
 

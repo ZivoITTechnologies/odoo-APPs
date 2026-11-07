@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_account_kanban" model="ir.ui.view">
+        <field name="name">zivo.logistics.account.kanban</field>
+        <field name="model">zivo.logistics.account</field>
+        <field name="arch" type="xml">
+            <kanban highlight_color="color" class="o_kanban_mobile">
+                <field name="state"/>
+                <field name="environment"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <field name="state" widget="badge" decoration-success="state == 'connected'"
+                                   decoration-danger="state == 'error'" decoration-muted="state == 'draft'"/>
+                        </div>
+                        <div class="text-muted">
+                            <field name="provider"/> · <field name="environment"/>
+                        </div>
+                        <div class="row mt-2 text-center">
+                            <div class="col-3"><div class="fs-5"><field name="shipment_count"/></div><small class="text-muted">Shipments</small></div>
+                            <div class="col-3"><div class="fs-5"><field name="delivered_rate" widget="float" digits="[3,0]"/>%</div><small class="text-muted">Delivered</small></div>
+                            <div class="col-3"><div class="fs-5"><field name="rto_rate" widget="float" digits="[3,0]"/>%</div><small class="text-muted">RTO</small></div>
+                            <div class="col-3"><div class="fs-5"><field name="avg_tat" widget="float" digits="[3,1]"/></div><small class="text-muted">Avg days</small></div>
+                        </div>
+                        <footer class="pt-1">
+                            <button name="action_view_shipments" type="object" class="btn btn-link p-0">Shipments</button>
+                            <button name="action_test_connection" type="object" class="btn btn-link p-0 ms-auto"
+                                    groups="zivoit_logistics_hub.group_logistics_manager">Test</button>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_zivo_account_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.account.list</field>
+        <field name="model">zivo.logistics.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="environment"/>
+                <field name="rate_source" optional="show"/>
+                <field name="shipment_count"/>
+                <field name="delivered_rate" widget="float" digits="[3,1]" optional="show"/>
+                <field name="rto_rate" widget="float" digits="[3,1]" optional="show"/>
+                <field name="avg_tat" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'" decoration-danger="state == 'error'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivo_account_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.account.form</field>
+        <field name="model">zivo.logistics.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object" string="Test Connection" class="btn-primary"
+                            groups="zivoit_logistics_hub.group_logistics_manager"/>
+                    <button name="action_refresh_token" type="object" string="Refresh Token"
+                            groups="zivoit_logistics_hub.group_logistics_manager"
+                            invisible="provider in ('delhivery', 'dtdc', 'demo')"/>
+                    <button name="action_apply_preset" type="object" string="Load Endpoint Template"
+                            groups="zivoit_logistics_hub.group_logistics_manager" invisible="provider != 'shree_maruti'"
+                            confirm="This replaces the configured endpoints with the template. Continue?"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_shipments" type="object" class="oe_stat_button" icon="fa-truck">
+                            <field name="shipment_count" widget="statinfo" string="Shipments"/>
+                        </button>
+                        <button name="action_view_api_logs" type="object" class="oe_stat_button" icon="fa-exchange"
+                                groups="zivoit_logistics_hub.group_logistics_manager" string="API Logs"/>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Shiprocket - Hyderabad WH"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="active" invisible="1"/>
+                            <field name="provider"/>
+                            <field name="environment" widget="radio" options="{'horizontal': true}"/>
+                            <field name="capability_text"/>
+                            <field name="is_aggregator" invisible="1"/>
+                            <field name="credential_fields" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="pickup_partner_id"/>
+                            <field name="pickup_location_code"/>
+                            <field name="default_service_code"/>
+                            <field name="rate_source"/>
+                            <field name="last_test_message" invisible="not last_test_message"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="provider != 'demo'">
+                        The <b>ZivoIT Sandbox Courier</b> works offline: rates follow the Indian zone model, labels are
+                        generated locally and tracking moves one milestone every <code>step_minutes</code> (Extra Settings).
+                        Destination PIN codes ending with <b>13</b> simulate a failed delivery followed by RTO.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="provider != 'shree_maruti'">
+                        Shree Maruti shares its API document and credentials during onboarding. Click
+                        <b>Load Endpoint Template</b>, then fill in each endpoint path and confirm the field names
+                        from that document. No code change is needed.
+                    </div>
+                    <notebook>
+                        <page string="Credentials" name="credentials" groups="zivoit_logistics_hub.group_logistics_manager">
+                            <group>
+                                <group string="Login">
+                                    <field name="username" invisible="'username' not in credential_fields and provider != 'generic'"/>
+                                    <field name="password" password="True" invisible="'password' not in credential_fields and provider != 'generic'"/>
+                                    <field name="api_key" password="True" invisible="'api_key' not in credential_fields and provider != 'generic'"/>
+                                    <field name="client_id" invisible="'client_id' not in credential_fields and provider != 'generic'"/>
+                                    <field name="client_secret" password="True" invisible="'client_secret' not in credential_fields and provider != 'generic'"/>
+                                    <field name="license_key" password="True" invisible="'license_key' not in credential_fields"/>
+                                </group>
+                                <group string="Account">
+                                    <field name="customer_code" invisible="'customer_code' not in credential_fields and provider != 'generic'"/>
+                                    <field name="account_number" invisible="'account_number' not in credential_fields and provider != 'generic'"/>
+                                    <field name="base_url" placeholder="Official endpoint is used when empty"/>
+                                    <field name="token_expiry" invisible="not token_expiry"/>
+                                </group>
+                            </group>
+                            <group string="Advanced">
+                                <field name="extra_config" widget="code" options="{'mode': 'javascript'}" nolabel="1" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="API Endpoints" name="endpoints" invisible="provider not in ('generic', 'shree_maruti')"
+                              groups="zivoit_logistics_hub.group_logistics_manager">
+                            <group>
+                                <field name="auth_style"/>
+                                <field name="auth_header_name" invisible="auth_style in ('none',)"/>
+                            </group>
+                            <field name="endpoint_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="operation"/>
+                                    <field name="method"/>
+                                    <field name="path"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group>
+                                            <field name="operation"/>
+                                            <field name="method"/>
+                                            <field name="path"/>
+                                            <field name="content_type"/>
+                                            <field name="active"/>
+                                        </group>
+                                        <group>
+                                            <field name="success_path"/>
+                                            <field name="error_path"/>
+                                            <field name="token_path" invisible="operation != 'auth'"/>
+                                            <field name="token_lifetime_hours" invisible="operation != 'auth'"/>
+                                        </group>
+                                    </group>
+                                    <group string="Request">
+                                        <field name="body_template" widget="code" options="{'mode': 'javascript'}"/>
+                                        <field name="headers_template" widget="code" options="{'mode': 'javascript'}"/>
+                                    </group>
+                                    <group string="Response mapping">
+                                        <group>
+                                            <field name="awb_path" invisible="operation != 'create'"/>
+                                            <field name="reference_path" invisible="operation not in ('create', 'pickup')"/>
+                                            <field name="label_path" invisible="operation not in ('create', 'label')"/>
+                                            <field name="label_type" invisible="operation not in ('create', 'label')"/>
+                                            <field name="price_path" invisible="operation not in ('create', 'rate')"/>
+                                            <field name="list_path" invisible="operation != 'rate'"/>
+                                            <field name="service_path" invisible="operation != 'rate'"/>
+                                            <field name="service_name_path" invisible="operation != 'rate'"/>
+                                            <field name="tat_path" invisible="operation not in ('rate', 'serviceability')"/>
+                                            <field name="serviceable_path" invisible="operation != 'serviceability'"/>
+                                            <field name="cod_path" invisible="operation != 'serviceability'"/>
+                                        </group>
+                                        <group invisible="operation != 'track'">
+                                            <field name="status_path"/>
+                                            <field name="status_desc_path"/>
+                                            <field name="edd_path"/>
+                                            <field name="events_path"/>
+                                            <field name="event_time_path"/>
+                                            <field name="event_status_path"/>
+                                            <field name="event_desc_path"/>
+                                            <field name="event_location_path"/>
+                                        </group>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Rate Card" name="rate_card">
+                            <group>
+                                <group>
+                                    <field name="fuel_surcharge_pct"/>
+                                    <field name="gst_pct"/>
+                                </group>
+                                <group>
+                                    <field name="rate_currency_id"/>
+                                    <field name="volumetric_divisor"/>
+                                </group>
+                            </group>
+                            <field name="rate_card_ids">
+                                <list editable="bottom">
+                                    <field name="service_code"/>
+                                    <field name="service_name"/>
+                                    <field name="zone"/>
+                                    <field name="base_weight"/>
+                                    <field name="base_price"/>
+                                    <field name="additional_weight"/>
+                                    <field name="additional_price"/>
+                                    <field name="cod_fixed"/>
+                                    <field name="cod_percent"/>
+                                    <field name="tat_days"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Shipping Rules" name="rules">
+                            <group>
+                                <group>
+                                    <field name="cod_enabled"/>
+                                    <field name="max_cod_amount" invisible="not cod_enabled"/>
+                                    <field name="max_weight_kg"/>
+                                </group>
+                                <group>
+                                    <field name="auto_pickup"/>
+                                    <field name="auto_track"/>
+                                    <field name="tracking_url_template"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Webhook" name="webhook" groups="zivoit_logistics_hub.group_logistics_manager">
+                            <group>
+                                <field name="webhook_url" widget="CopyClipboardChar"/>
+                            </group>
+                            <p class="text-muted">Register this URL in the carrier panel (e.g. Shiprocket &gt; Settings &gt; API &gt; Webhooks)
+                                to receive real-time status updates instead of waiting for the tracking cron.</p>
+                            <button name="action_regenerate_webhook_token" type="object" string="Regenerate secret URL" class="btn-secondary"
+                                    confirm="The current webhook URL will stop working. Continue?"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_zivo_account_search" model="ir.ui.view">
+        <field name="name">zivo.logistics.account.search</field>
+        <field name="model">zivo.logistics.account</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="provider"/>
+                <filter name="production" string="Production" domain="[('environment', '=', 'production')]"/>
+                <filter name="errors" string="Connection errors" domain="[('state', '=', 'error')]"/>
+                <separator/>
+                <filter name="inactive" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_provider" string="Carrier" context="{'group_by': 'provider'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_account" model="ir.actions.act_window">
+        <field name="name">Carrier Accounts</field>
+        <field name="res_model">zivo.logistics.account</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect your first courier</p>
+            <p>Add Shiprocket, Delhivery, DTDC, Blue Dart, FedEx, Xpressbees, Shree Maruti or any courier with a REST API.
+               Start with the offline <b>ZivoIT Sandbox Courier</b> to try the full flow in minutes.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_trip_list" model="ir.ui.view">
+        <field name="name">cp.trip.list</field>
+        <field name="model">cp.trip</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="is_late and state in ('in_transit', 'arrived')"
+                  decoration-warning="is_stopped" decoration-muted="state in ('closed', 'cancel')">
+                <field name="name"/>
+                <field name="planned_dispatch" optional="show"/>
+                <field name="lane_id"/>
+                <field name="transporter_id"/>
+                <field name="vehicle_number"/>
+                <field name="driver_name" optional="hide"/>
+                <field name="eta" optional="show"/>
+                <field name="progress_pct" widget="progressbar" optional="show"/>
+                <field name="agreed_freight" sum="Freight" optional="show"/>
+                <field name="co2_kg" sum="CO2e" optional="hide"/>
+                <field name="customer_ref" optional="hide"/>
+                <field name="epod_state" widget="badge" optional="show" decoration-success="epod_state == 'verified'"
+                       decoration-danger="epod_state == 'exception'" decoration-warning="epod_state == 'pending'"/>
+                <field name="is_late" column_invisible="1"/>
+                <field name="is_stopped" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-info="state in ('assigned', 'reported', 'loading')"
+                       decoration-warning="state == 'in_transit'" decoration-success="state in ('arrived', 'delivered', 'closed')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_kanban" model="ir.ui.view">
+        <field name="name">cp.trip.kanban</field>
+        <field name="model">cp.trip</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false" class="cp-trip-kanban" sample="1">
+                <field name="state"/>
+                <field name="is_late"/>
+                <field name="is_stopped"/>
+                <field name="epod_state"/>
+                <field name="open_issue_count"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="cp-kcard-top">
+                            <span class="cp-plate-box cp-plate" t-if="record.vehicle_number.raw_value"><field name="vehicle_number"/></span>
+                            <span class="text-danger small fw-semibold" t-else="">No truck yet</span>
+                            <div>
+                                <span t-if="record.is_stopped.raw_value" class="cp-chip cp-chip-amber">Stopped</span>
+                                <span t-elif="record.is_late.raw_value" class="cp-chip cp-chip-red">Late</span>
+                                <span t-if="record.open_issue_count.raw_value" class="cp-chip cp-chip-dark ms-1"><i class="fa fa-flag"/> <t t-esc="record.open_issue_count.raw_value"/></span>
+                            </div>
+                        </div>
+                        <field name="lane_id" class="cp-kcard-route"/>
+                        <field name="transporter_id" class="cp-kcard-meta"/>
+                        <field name="progress_pct" widget="progressbar" class="mt-1"
+                               invisible="state not in ('in_transit', 'arrived')"/>
+                        <footer class="cp-kcard-meta">
+                            <field name="name"/>
+                            <span class="ms-auto" t-if="record.eta.raw_value and ['in_transit', 'arrived'].includes(record.state.raw_value)">ETA <field name="eta" widget="datetime"/></span>
+                            <span class="ms-auto" t-elif="record.epod_state.raw_value == 'verified'"><i class="fa fa-check-circle text-success"/> Proof OK</span>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_form" model="ir.ui.view">
+        <field name="name">cp.trip.form</field>
+        <field name="model">cp.trip</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_assign" string="Assign Vehicle" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_report" string="Reported at Origin" type="object"
+                            invisible="state != 'assigned'"/>
+                    <button name="action_start_loading" string="Start Loading" type="object"
+                            invisible="state not in ('assigned', 'reported')"/>
+                    <button name="action_dispatch" string="Dispatch" type="object" class="btn-primary"
+                            invisible="state not in ('assigned', 'reported', 'loading')"/>
+                    <button name="action_mark_arrived" string="Arrived" type="object"
+                            invisible="state != 'in_transit'"/>
+                    <button name="action_new_epod" string="Record ePOD" type="object" class="btn-primary"
+                            invisible="state not in ('in_transit', 'arrived', 'delivered') or epod_state == 'verified'"/>
+                    <button name="action_mark_delivered" string="Delivered" type="object"
+                            invisible="state not in ('in_transit', 'arrived')"/>
+                    <button name="action_close" string="Close Trip" type="object" class="btn-primary"
+                            invisible="state != 'delivered'"/>
+                    <button name="action_share_tracking" string="Tracking Link" type="object" icon="fa-share-alt"
+                            invisible="state in ('draft', 'cancel')"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('delivered', 'closed', 'cancel')"/>
+                    <button name="action_reset_draft" string="Reset to Planned" type="object" invisible="state != 'cancel'"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_issues" type="object" class="oe_stat_button" icon="fa-flag"
+                                invisible="open_issue_count == 0">
+                            <field name="open_issue_count" widget="statinfo" string="Open Issues"/>
+                        </button>
+                        <button name="action_open_driver_page" type="object" class="oe_stat_button" icon="fa-mobile"
+                                invisible="state in ('draft', 'closed', 'cancel')">
+                            <span class="o_stat_text">Driver Page</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Late" bg_color="text-bg-danger"
+                            invisible="not is_late or state not in ('in_transit', 'arrived')"/>
+                    <widget name="web_ribbon" title="Stopped" bg_color="text-bg-warning" invisible="not is_stopped"/>
+                    <div class="oe_title mb-1">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <div class="cp-hero">
+                        <div class="cp-hero-route">
+                            <i class="fa fa-map-signs text-muted me-2" title="Route"/>
+                            <field name="lane_id" readonly="state not in ('draft',)" nolabel="1" options="{'no_create': True}"/>
+                        </div>
+                        <div class="cp-hero-kpi">
+                            <span>Truck</span>
+                            <field name="vehicle_number" class="cp-plate" readonly="1" invisible="not vehicle_number"/>
+                            <span class="text-danger" invisible="vehicle_number">Not assigned</span>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="state not in ('in_transit', 'arrived')">
+                            <span>ETA</span><field name="eta" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi" invisible="state not in ('in_transit',)">
+                            <span>Km left</span><field name="remaining_km" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi">
+                            <span>Freight</span><field name="agreed_freight" readonly="1"/>
+                        </div>
+                        <div class="cp-hero-kpi">
+                            <span>CO2e (kg)</span><field name="co2_kg" readonly="1"/>
+                        </div>
+                    </div>
+                    <field name="state" widget="cp_trip_stepper" nolabel="1" readonly="1"/>
+                    <group>
+                        <group string="Vehicle &amp; Driver">
+                            <field name="transporter_id"/>
+                            <field name="vehicle_id"/>
+                            <field name="vehicle_number" required="state not in ('draft', 'cancel')"/>
+                            <field name="vehicle_type_id"/>
+                            <field name="is_market_vehicle"/>
+                            <field name="driver_id"/>
+                            <field name="driver_name"/>
+                            <field name="driver_phone" widget="phone"/>
+                        </group>
+                        <group string="Schedule">
+                            <field name="planned_dispatch"/>
+                            <field name="actual_dispatch" invisible="not actual_dispatch"/>
+                            <field name="promised_delivery"/>
+                            <field name="eta" invisible="not eta"/>
+                            <field name="actual_arrival" invisible="not actual_arrival"/>
+                            <field name="actual_delivery" invisible="not actual_delivery"/>
+                            <field name="is_late" invisible="1"/>
+                            <field name="is_stopped" invisible="1"/>
+                        </group>
+                        <group string="Load &amp; Freight">
+                            <field name="customer_ref"/>
+                            <field name="consignee_id"/>
+                            <field name="loaded_weight_ton"/>
+                            <field name="delivered_weight_ton" invisible="not delivered_weight_ton"/>
+                            <field name="agreed_freight"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="eway_bill_no"/>
+                            <field name="eway_bill_expiry"/>
+                        </group>
+                        <group string="Source">
+                            <field name="indent_id"/>
+                            <field name="auction_id" invisible="not auction_id"/>
+                            <field name="contract_line_id" invisible="not contract_line_id"/>
+                            <field name="epod_state" widget="badge"/>
+                            <field name="is_billed"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Timeline" name="timeline">
+                            <field name="event_ids" readonly="1">
+                                <list>
+                                    <field name="event_time"/>
+                                    <field name="event_type" widget="badge"/>
+                                    <field name="description"/>
+                                    <field name="latitude" optional="hide"/>
+                                    <field name="longitude" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Tracking" name="tracking">
+                            <group>
+                                <group>
+                                    <field name="last_ping_time"/>
+                                    <field name="last_latitude"/>
+                                    <field name="last_longitude"/>
+                                    <field name="last_speed"/>
+                                </group>
+                                <group>
+                                    <field name="tracking_url" widget="url" string="Customer Tracking Link"/>
+                                    <field name="driver_url" widget="url" string="Driver Page"/>
+                                </group>
+                            </group>
+                            <field name="ping_ids">
+                                <list editable="top" default_order="ping_time desc">
+                                    <field name="ping_time"/>
+                                    <field name="latitude"/>
+                                    <field name="longitude"/>
+                                    <field name="speed"/>
+                                    <field name="source"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="ePOD" name="epod">
+                            <field name="epod_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="received_time"/>
+                                    <field name="receiver_name"/>
+                                    <field name="received_weight_ton"/>
+                                    <field name="fault_party" optional="show"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Expenses &amp; P&amp;L" name="pnl">
+                            <field name="expense_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="expense_type"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="payment_mode"/>
+                                    <field name="paid_to"/>
+                                    <field name="settled"/>
+                                    <field name="note" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="revenue_amount"/>
+                                <field name="hire_amount"/>
+                                <field name="expense_amount"/>
+                                <field name="profit_amount" class="oe_subtotal_footer_separator"/>
+                                <field name="margin_pct" widget="percentage" invisible="1"/>
+                            </group>
+                        </page>
+                        <page string="Consignments" name="consignments">
+                            <field name="consignment_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="consignor_id"/>
+                                    <field name="consignee_id"/>
+                                    <field name="total_packages"/>
+                                    <field name="actual_weight_kg"/>
+                                    <field name="total_amount"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Hire &amp; Gate" name="hire">
+                            <field name="hire_slip_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="owner_id"/>
+                                    <field name="total_hire"/>
+                                    <field name="balance_due"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                            <field name="gate_entry_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="location_id"/>
+                                    <field name="gate_in_time"/>
+                                    <field name="gate_out_time"/>
+                                    <field name="net_weight_kg"/>
+                                    <field name="turnaround_min"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_search" model="ir.ui.view">
+        <field name="name">cp.trip.search</field>
+        <field name="model">cp.trip</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Any Reference"
+                       filter_domain="['|', '|', '|', '|', ('name', 'ilike', self), ('vehicle_number', 'ilike', self), ('customer_ref', 'ilike', self), ('eway_bill_no', 'ilike', self), ('consignment_ids.name', 'ilike', self)]"/>
+                <field name="vehicle_number"/>
+                <field name="transporter_id"/>
+                <field name="lane_id"/>
+                <field name="driver_name"/>
+                <field name="indent_id"/>
+                <filter name="active_trips" string="Active"
+                        domain="[('state', 'in', ('assigned', 'reported', 'loading', 'in_transit', 'arrived'))]"/>
+                <filter name="in_transit" string="In Transit" domain="[('state', '=', 'in_transit')]"/>
+                <filter name="late" string="Late" domain="[('is_late', '=', True)]"/>
+                <filter name="stopped" string="Stopped" domain="[('is_stopped', '=', True)]"/>
+                <separator/>
+                <filter name="epod_missing" string="ePOD Pending"
+                        domain="[('state', 'in', ('arrived', 'delivered')), ('epod_state', '!=', 'verified')]"/>
+                <filter name="unbilled" string="Not Billed"
+                        domain="[('state', 'in', ('delivered', 'closed')), ('is_billed', '=', False)]"/>
+                <filter name="market" string="Market Vehicles" domain="[('is_market_vehicle', '=', True)]"/>
+                <separator/>
+                <filter name="dispatch_date" string="Dispatch Date" date="planned_dispatch"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_transporter" string="Transporter" context="{'group_by': 'transporter_id'}"/>
+                    <filter name="group_lane" string="Lane" context="{'group_by': 'lane_id'}"/>
+                    <filter name="group_day" string="Dispatch Day" context="{'group_by': 'planned_dispatch:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_pivot" model="ir.ui.view">
+        <field name="name">cp.trip.pivot</field>
+        <field name="model">cp.trip</field>
+        <field name="arch" type="xml">
+            <pivot string="Trip Analysis">
+                <field name="transporter_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="agreed_freight" type="measure"/>
+                <field name="loaded_weight_ton" type="measure"/>
+                <field name="co2_kg" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_cp_trip_graph" model="ir.ui.view">
+        <field name="name">cp.trip.graph</field>
+        <field name="model">cp.trip</field>
+        <field name="arch" type="xml">
+            <graph string="Trips" type="bar">
+                <field name="planned_dispatch" interval="week"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_cp_trip" model="ir.actions.act_window">
+        <field name="name">Shipments</field>
+        <field name="res_model">cp.trip</field>
+        <field name="view_mode">kanban,list,form,pivot,graph</field>
+        <field name="context">{'search_default_active_trips': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No trips yet</p>
+            <p>Trips come from allocated indents, awarded auctions or consignments. Each one is tracked from vehicle assignment to ePOD.</p>
+        </field>
+    </record>
+
+    <record id="action_cp_trip_all" model="ir.actions.act_window">
+        <field name="name">Shipment Analysis</field>
+        <field name="res_model">cp.trip</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_courier_account_kanban" model="ir.ui.view">
+        <field name="name">cp.courier.account.kanban</field>
+        <field name="model">cp.courier.account</field>
+        <field name="arch" type="xml">
+            <kanban class="cp-courier-kanban" create="true" quick_create="false">
+                <field name="state"/>
+                <field name="environment"/>
+                <field name="provider"/>
+                <field name="initials"/>
+                <field name="active_parcel_count"/>
+                <templates>
+                    <t t-name="card" class="cp-kcard">
+                        <div class="d-flex align-items-center gap-2">
+                            <span t-attf-class="cp-courier-badge cp-courier-{{ record.provider.raw_value }}" t-esc="record.initials.raw_value"/>
+                            <div class="flex-grow-1 min-w-0">
+                                <field name="name" class="fw-bold d-block text-truncate"/>
+                                <field name="provider" class="cp-kcard-meta"/>
+                            </div>
+                            <span t-if="record.state.raw_value == 'ok'" class="cp-chip cp-chip-green">Connected</span>
+                            <span t-elif="record.state.raw_value == 'error'" class="cp-chip cp-chip-red">Problem</span>
+                            <span t-else="" class="cp-chip">Not checked</span>
+                        </div>
+                        <field name="capability_summary" class="cp-kcard-meta mt-2"/>
+                        <footer class="cp-kcard-meta mt-2">
+                            <t t-if="!['manual', 'demo'].includes(record.provider.raw_value)">
+                                <span t-if="record.environment.raw_value == 'production'" class="cp-chip cp-chip-dark">Live</span>
+                                <span t-else="" class="cp-chip cp-chip-amber">Test</span>
+                            </t>
+                            <span class="ms-auto"><t t-esc="record.active_parcel_count.raw_value"/> moving</span>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_courier_account_list" model="ir.ui.view">
+        <field name="name">cp.courier.account.list</field>
+        <field name="model">cp.courier.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="provider"/>
+                <field name="environment" widget="badge" decoration-success="environment == 'production'" decoration-warning="environment == 'test'"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+                <field name="active_parcel_count" string="Moving"/>
+                <field name="delivered_pct"/>
+                <field name="rto_pct"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_courier_account_form" model="ir.ui.view">
+        <field name="name">cp.courier.account.form</field>
+        <field name="model">cp.courier.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object" string="Test connection" class="btn-primary"/>
+                    <button name="action_toggle_environment" type="object" string="Switch to live"
+                            invisible="environment == 'production' or provider in ('manual', 'demo')"
+                            confirm="Real parcels will be booked and charged from now on. Continue?"/>
+                    <button name="action_toggle_environment" type="object" string="Switch to test"
+                            invisible="environment == 'test' or provider in ('manual', 'demo')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="new,ok"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_parcels" type="object" class="oe_stat_button" icon="fa-cube">
+                            <field name="parcel_count" widget="statinfo" string="Parcels"/>
+                        </button>
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-list-alt">
+                            <span class="o_stat_text">API Log</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="visible_fields" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Delhivery Mumbai"/></h1>
+                    </div>
+                    <div class="cp-help" invisible="state != 'error'">
+                        <i class="fa fa-exclamation-triangle text-danger" title="Problem"/><field name="last_check_message" nolabel="1"/>
+                    </div>
+                    <div class="cp-help" invisible="state != 'ok'">
+                        <i class="fa fa-check-circle text-success" title="Connected"/><field name="last_check_message" nolabel="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="provider"/>
+                            <field name="environment" widget="radio" options="{'horizontal': true}"
+                                   invisible="provider in ('manual', 'demo')"/>
+                            <field name="pickup_partner_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="capability_summary" string="Works with"/>
+                            <field name="supports_cod"/>
+                            <field name="auto_pickup" invisible="not can_pickup"/>
+                            <field name="auto_book_label" invisible="not can_label"/>
+                            <field name="notify_customer"/>
+                            <field name="can_pickup" invisible="1"/>
+                            <field name="can_label" invisible="1"/>
+                            <field name="can_webhook" invisible="1"/>
+                            <field name="can_rate" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Connection" name="connection" invisible="provider == 'demo'">
+                            <div class="cp-help" invisible="provider != 'delhivery'">
+                                <i class="fa fa-key" title="Where to find it"/>In Delhivery One open <b>Settings &gt; API Setup</b> and copy the API token. The pickup location must match a client warehouse name exactly.
+                            </div>
+                            <div class="cp-help" invisible="provider != 'bluedart'">
+                                <i class="fa fa-key" title="Where to find it"/>Create an app on the DHL / Blue Dart developer portal for the Client ID and Secret. Your Blue Dart account manager gives you the Login ID, Licence Key and customer code.
+                            </div>
+                            <div class="cp-help" invisible="provider != 'dtdc'">
+                                <i class="fa fa-key" title="Where to find it"/>DTDC sends the API key and customer code when they open API access. The tracking user and password are separate; ask for "tracking API access".
+                            </div>
+                            <div class="cp-help" invisible="provider != 'shiprocket'">
+                                <i class="fa fa-key" title="Where to find it"/>In Shiprocket open <b>Settings &gt; API &gt; Configure</b> and create an API user. Use that e-mail and password here, not your own login.
+                            </div>
+                            <div class="cp-help" invisible="provider != 'xpressbees'">
+                                <i class="fa fa-key" title="Where to find it"/>Use the e-mail and password of your Xpressbees shipping account. The pickup location is the warehouse name in that account.
+                            </div>
+                            <div class="cp-help" invisible="provider != 'clickpost'">
+                                <i class="fa fa-key" title="Where to find it"/>Use ClickPost for couriers without an open API, such as Shree Maruti (partner id 69). Add the courier in ClickPost first, then copy the username, API key and account code.
+                            </div>
+                            <div class="cp-help" invisible="provider != 'manual'">
+                                <i class="fa fa-info-circle" title="How it works"/>Book at the courier counter or by phone, type the docket number (or use a number series), and print the label here. Add status updates yourself, or let the receiver use your tracking page.
+                            </div>
+                            <group groups="cargo_pilot_tms.group_cp_manager">
+                                <group>
+                                    <field name="api_key" password="True"
+                                           invisible="provider not in ('delhivery', 'dtdc', 'clickpost')"
+                                           required="provider in ('delhivery', 'dtdc', 'clickpost')"/>
+                                    <field name="client_id" invisible="provider != 'bluedart'" required="provider == 'bluedart'"/>
+                                    <field name="client_secret" password="True" invisible="provider != 'bluedart'" required="provider == 'bluedart'"/>
+                                    <field name="login_id" invisible="provider != 'bluedart'" required="provider == 'bluedart'"/>
+                                    <field name="licence_key" password="True" invisible="provider != 'bluedart'" required="provider == 'bluedart'"/>
+                                    <field name="username" invisible="provider not in ('dtdc', 'shiprocket', 'xpressbees', 'clickpost')"
+                                           required="provider in ('shiprocket', 'xpressbees', 'clickpost')"
+                                           string="API User / E-mail"/>
+                                    <field name="password" password="True" invisible="provider not in ('dtdc', 'shiprocket', 'xpressbees')"
+                                           required="provider in ('shiprocket', 'xpressbees')"/>
+                                </group>
+                                <group>
+                                    <field name="customer_code" invisible="provider not in ('bluedart', 'dtdc')"
+                                           required="provider in ('bluedart', 'dtdc')"/>
+                                    <field name="pickup_location_name" invisible="provider not in ('delhivery', 'shiprocket', 'xpressbees')"
+                                           required="provider in ('delhivery', 'shiprocket')"/>
+                                    <field name="service_code" invisible="provider not in ('delhivery', 'bluedart', 'dtdc')"/>
+                                    <field name="origin_area" invisible="provider != 'bluedart'"/>
+                                    <field name="commodity_code" invisible="provider != 'dtdc'"/>
+                                    <field name="channel_id" invisible="provider != 'shiprocket'"/>
+                                    <field name="courier_partner_id" invisible="provider != 'clickpost'" required="provider == 'clickpost'"/>
+                                    <field name="account_code" invisible="provider != 'clickpost'"/>
+                                    <field name="courier_display_name" invisible="provider not in ('clickpost', 'manual')"/>
+                                    <field name="awb_sequence_id" invisible="provider != 'manual'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Rate card" name="rate_card">
+                            <div class="cp-help">
+                                <i class="fa fa-calculator" title="Rate card"/>Used to price couriers that have no price API (Blue Dart, DTDC, ClickPost, counter bookings) and as a fallback. Fill in your contract slab rates.
+                            </div>
+                            <group>
+                                <group string="Weight">
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="rate_slab_kg"/>
+                                    <field name="rate_first_slab"/>
+                                    <field name="rate_additional_slab"/>
+                                    <field name="volumetric_divisor"/>
+                                    <field name="max_weight_kg"/>
+                                </group>
+                                <group string="Extras">
+                                    <field name="rate_fuel_percent"/>
+                                    <field name="rate_cod_fixed"/>
+                                    <field name="rate_cod_percent"/>
+                                    <field name="rate_card_days"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Tracking" name="tracking">
+                            <group>
+                                <field name="tracking_url_template" placeholder="https://courier.example/track/{awb}"/>
+                                <field name="default_tracking_url" string="Standard page" invisible="not default_tracking_url"/>
+                            </group>
+                            <group string="Push updates (webhook)" invisible="not can_webhook" groups="cargo_pilot_tms.group_cp_manager">
+                                <div colspan="2" class="text-muted small">Give this address to the courier (or paste it in its webhook settings) to get status changes the moment they happen. Tracking also updates every two hours without it.</div>
+                                <field name="webhook_url" widget="CopyClipboardChar"/>
+                                <button name="action_regenerate_webhook" type="object" string="New address" class="btn-link"
+                                        confirm="The old address will stop working. Continue?"/>
+                            </group>
+                        </page>
+                        <page string="Advanced" name="advanced" groups="cargo_pilot_tms.group_cp_manager">
+                            <group>
+                                <field name="default_base_url" string="Standard API address" invisible="provider in ('manual', 'demo')"/>
+                                <field name="base_url_override" invisible="provider in ('manual', 'demo')"/>
+                                <field name="debug_logging"/>
+                                <field name="sequence"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cp_courier_account" model="ir.actions.act_window">
+        <field name="name">Courier Accounts</field>
+        <field name="res_model">cp.courier.account</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect your first courier</p>
+            <p>Add Delhivery, Blue Dart, DTDC, Shiprocket, Xpressbees, ClickPost (Shree Maruti and others) or any courier you book at the counter. Try the demo courier to see the full flow without API keys.</p>
+        </field>
+    </record>
+
+    <record id="view_cp_courier_log_list" model="ir.ui.view">
+        <field name="name">cp.courier.log.list</field>
+        <field name="model">cp.courier.log</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-danger="not success">
+                <field name="create_date" string="When"/>
+                <field name="account_id"/>
+                <field name="operation"/>
+                <field name="method"/>
+                <field name="status_code"/>
+                <field name="duration_ms"/>
+                <field name="success" widget="boolean"/>
+                <field name="url" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_cp_courier_log_form" model="ir.ui.view">
+        <field name="name">cp.courier.log.form</field>
+        <field name="model">cp.courier.log</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group><field name="account_id"/><field name="operation"/><field name="method"/><field name="url"/></group>
+                        <group><field name="create_date" string="When"/><field name="status_code"/><field name="duration_ms"/><field name="success"/></group>
+                    </group>
+                    <label for="request_body"/>
+                    <field name="request_body" widget="ace" options="{'mode': 'text'}"/>
+                    <label for="response_body"/>
+                    <field name="response_body" widget="ace" options="{'mode': 'text'}"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_cp_courier_log" model="ir.actions.act_window">
+        <field name="name">Courier API Log</field>
+        <field name="res_model">cp.courier.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No requests logged</p>
+            <p>Failed courier requests appear here, with secrets hidden. Turn on "Log every request" on an account to keep all of them.</p>
+        </field>
+    </record>
+</odoo>

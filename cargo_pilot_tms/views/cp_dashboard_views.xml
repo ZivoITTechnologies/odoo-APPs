@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_cp_control_tower" model="ir.actions.client">
+        <field name="name">Today</field>
+        <field name="tag">cp_control_tower</field>
+    </record>
+    <record id="action_cp_insights" model="ir.actions.client">
+        <field name="name">Freight Insights</field>
+        <field name="tag">cp_insights</field>
+    </record>
+</odoo>

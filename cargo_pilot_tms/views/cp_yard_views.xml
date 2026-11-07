@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_gate_entry_list" model="ir.ui.view">
+        <field name="name">cp.gate.entry.list</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="location_id"/>
+                <field name="vehicle_number"/>
+                <field name="direction"/>
+                <field name="dock_id"/>
+                <field name="gate_in_time"/>
+                <field name="gate_out_time" optional="show"/>
+                <field name="net_weight_kg" optional="show"/>
+                <field name="turnaround_min" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'expected'"
+                       decoration-warning="state in ('gate_in', 'at_dock')" decoration-success="state == 'gate_out'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_gate_entry_kanban" model="ir.ui.view">
+        <field name="name">cp.gate.entry.kanban</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false" class="o_kanban_small_column">
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <field name="vehicle_number" class="fw-bold cp-plate"/>
+                        <field name="location_id" class="small"/>
+                        <div class="small text-muted">
+                            <field name="direction"/> <span t-if="record.dock_id.raw_value">· <field name="dock_id"/></span>
+                        </div>
+                        <footer class="small text-muted">
+                            <field name="name"/>
+                            <field name="gate_in_time" widget="datetime" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_gate_entry_form" model="ir.ui.view">
+        <field name="name">cp.gate.entry.form</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_gate_in" string="Gate In" type="object" class="btn-primary"
+                            invisible="state != 'expected'"/>
+                    <button name="action_to_dock" string="Send to Dock" type="object" class="btn-primary"
+                            invisible="state != 'gate_in'"/>
+                    <button name="action_weigh" string="Record Weighment" type="object"
+                            invisible="state not in ('gate_in', 'at_dock')"/>
+                    <button name="action_gate_out" string="Gate Out" type="object" class="btn-primary"
+                            invisible="state not in ('at_dock', 'weighed')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('gate_out', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="expected,gate_in,at_dock,weighed,gate_out"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Vehicle">
+                            <field name="location_id"/>
+                            <field name="direction"/>
+                            <field name="trip_id"/>
+                            <field name="vehicle_number"/>
+                            <field name="driver_name"/>
+                            <field name="rfid_tag"/>
+                            <field name="checklist_ok"/>
+                        </group>
+                        <group string="Dock">
+                            <field name="dock_id"/>
+                            <field name="slot_start"/>
+                            <field name="slot_end"/>
+                        </group>
+                        <group string="Weighbridge">
+                            <field name="tare_weight_kg"/>
+                            <field name="gross_weight_kg"/>
+                            <field name="net_weight_kg"/>
+                        </group>
+                        <group string="Times">
+                            <field name="gate_in_time"/>
+                            <field name="dock_in_time"/>
+                            <field name="dock_out_time"/>
+                            <field name="gate_out_time"/>
+                            <field name="dock_min"/>
+                            <field name="turnaround_min"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_gate_entry_calendar" model="ir.ui.view">
+        <field name="name">cp.gate.entry.calendar</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="arch" type="xml">
+            <calendar date_start="slot_start" date_stop="slot_end" color="dock_id" mode="day" quick_create="0">
+                <field name="vehicle_number"/>
+                <field name="dock_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_cp_gate_entry_search" model="ir.ui.view">
+        <field name="name">cp.gate.entry.search</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_number"/>
+                <field name="rfid_tag"/>
+                <field name="location_id"/>
+                <filter name="inside" string="Inside Plant" domain="[('state', 'in', ('gate_in', 'at_dock', 'weighed'))]"/>
+                <filter name="expected" string="Expected" domain="[('state', '=', 'expected')]"/>
+                <group>
+                    <filter name="group_location" string="Plant" context="{'group_by': 'location_id'}"/>
+                    <filter name="group_dock" string="Dock" context="{'group_by': 'dock_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_cp_gate_entry_pivot" model="ir.ui.view">
+        <field name="name">cp.gate.entry.pivot</field>
+        <field name="model">cp.gate.entry</field>
+        <field name="arch" type="xml">
+            <pivot string="Yard Turnaround">
+                <field name="location_id" type="row"/>
+                <field name="turnaround_min" type="measure"/>
+                <field name="dock_min" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_cp_gate_entry" model="ir.actions.act_window">
+        <field name="name">Gate &amp; Docks</field>
+        <field name="res_model">cp.gate.entry</field>
+        <field name="view_mode">kanban,list,calendar,pivot,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Log vehicles at the plant gate</p>
+            <p>Gate in, send to a dock, record tare and gross weight, gate out. Turnaround time is measured automatically.</p>
+        </field>
+    </record>
+
+    <record id="action_cp_dock" model="ir.actions.act_window">
+        <field name="name">Docks</field>
+        <field name="res_model">cp.dock</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="view_cp_dock_list" model="ir.ui.view">
+        <field name="name">cp.dock.list</field>
+        <field name="model">cp.dock</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="location_id"/>
+                <field name="name"/>
+                <field name="dock_type"/>
+                <field name="occupied"/>
+            </list>
+        </field>
+    </record>
+</odoo>

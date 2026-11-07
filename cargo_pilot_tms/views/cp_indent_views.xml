@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cp_indent_list" model="ir.ui.view">
+        <field name="name">cp.indent.list</field>
+        <field name="model">cp.indent</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="priority == '1' and state in ('confirmed', 'sourcing')"
+                  decoration-muted="state in ('done', 'cancel')">
+                <field name="priority" widget="priority" optional="show"/>
+                <field name="name"/>
+                <field name="required_date"/>
+                <field name="lane_id"/>
+                <field name="vehicle_type_id"/>
+                <field name="vehicle_count" string="Vehicles"/>
+                <field name="allocated_count" string="Allocated" optional="show"/>
+                <field name="total_weight_ton" sum="Total" optional="show"/>
+                <field name="origin" optional="hide"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state in ('draft', 'confirmed')"
+                       decoration-warning="state == 'sourcing'" decoration-success="state in ('allocated', 'done')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_cp_indent_kanban" model="ir.ui.view">
+        <field name="name">cp.indent.kanban</field>
+        <field name="model">cp.indent</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" quick_create="false">
+                <field name="state"/>
+                <field name="priority"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold"/>
+                            <field name="priority" widget="priority"/>
+                        </div>
+                        <field name="lane_id" class="text-truncate"/>
+                        <div class="d-flex justify-content-between text-muted small mt-1">
+                            <span><field name="vehicle_count"/> x <field name="vehicle_type_id"/></span>
+                            <field name="required_date" widget="date"/>
+                        </div>
+                        <footer class="mt-2">
+                            <span class="small text-muted"><field name="allocated_count"/> allocated</span>
+                            <field name="user_id" widget="many2one_avatar_user" class="ms-auto"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_cp_indent_calendar" model="ir.ui.view">
+        <field name="name">cp.indent.calendar</field>
+        <field name="model">cp.indent</field>
+        <field name="arch" type="xml">
+            <calendar date_start="required_date" color="vehicle_type_id" mode="week" quick_create="0">
+                <field name="lane_id"/>
+                <field name="vehicle_count"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_cp_indent_form" model="ir.ui.view">
+        <field name="name">cp.indent.form</field>
+        <field name="model">cp.indent</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_auto_allocate" string="Allocate to Contract" type="object" class="btn-primary"
+                            invisible="state not in ('confirmed', 'sourcing') or pending_count == 0"
+                            help="Create trips for the contracted transporter with the best priority on this lane."/>
+                    <button name="action_create_auction" string="Start Spot Auction" type="object"
+                            invisible="state not in ('confirmed', 'sourcing') or pending_count == 0"/>
+                    <button name="action_reset" string="Reset to Draft" type="object" invisible="state != 'cancel'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,sourcing,allocated,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_trips" type="object" class="oe_stat_button" icon="fa-truck"
+                                invisible="trip_count == 0">
+                            <field name="trip_count" widget="statinfo" string="Trips"/>
+                        </button>
+                        <button name="action_view_auctions" type="object" class="oe_stat_button" icon="fa-gavel"
+                                invisible="auction_count == 0">
+                            <field name="auction_count" widget="statinfo" string="Auctions"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <field name="priority" widget="priority" class="me-2"/>
+                        <h1 class="d-inline"><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Requirement">
+                            <field name="shipment_mode" widget="radio" options="{'horizontal': true}"
+                                   readonly="state not in ('draft', 'confirmed')"/>
+                            <field name="channel"/>
+                            <field name="lane_id" readonly="state not in ('draft', 'confirmed')"/>
+                            <field name="movement" invisible="not movement"/>
+                            <field name="vehicle_type_id" readonly="state not in ('draft', 'confirmed')"
+                                   invisible="shipment_mode == 'ltl'" required="shipment_mode == 'ftl'"/>
+                            <field name="vehicle_count" readonly="state not in ('draft', 'confirmed')"
+                                   invisible="shipment_mode == 'ltl'"/>
+                            <field name="consignee_id"/>
+                            <field name="origin"/>
+                        </group>
+                        <group string="Schedule">
+                            <field name="required_date"/>
+                            <field name="delivery_deadline"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="source_channel"/>
+                            <field name="channel_rule_id" invisible="not channel_rule_id"/>
+                            <field name="allocated_count"/>
+                            <field name="pending_count" decoration-danger="pending_count &gt; 0"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Orders &amp; Goods" name="materials">
+                            <field name="line_ids" readonly="state not in ('draft', 'confirmed')">
+                                <list editable="bottom">
+                                    <field name="order_ref"/>
+                                    <field name="invoice_ref" optional="show"/>
+                                    <field name="customer_id" optional="show"/>
+                                    <field name="product_id" optional="show"/>
+                                    <field name="description"/>
+                                    <field name="quantity" sum="Boxes"/>
+                                    <field name="uom_label" optional="hide"/>
+                                    <field name="weight_kg" sum="kg"/>
+                                    <field name="weight_ton" optional="hide" sum="t"/>
+                                    <field name="volume_cbm" sum="Volume" optional="hide"/>
+                                    <field name="order_value" sum="Value" optional="show"/>
+                                    <field name="serial_numbers" optional="hide"/>
+                                    <field name="eway_bill_no" optional="hide"/>
+                                    <field name="drop_point" optional="hide"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="total_boxes"/>
+                                <field name="total_weight_ton"/>
+                                <field name="total_volume_cbm"/>
+                                <field name="goods_value"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                        </page>
+                        <page string="Trips" name="trips" invisible="trip_count == 0">
+                            <field name="trip_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="transporter_id"/>
+                                    <field name="vehicle_number"/>
+                                    <field name="agreed_freight"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Loading instructions, gate pass details..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cp_indent_search" model="ir.ui.view">
+        <field name="name">cp.indent.search</field>
+        <field name="model">cp.indent</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="lane_id"/>
+                <field name="vehicle_type_id"/>
+                <filter name="my" string="My Indents" domain="[('user_id', '=', uid)]"/>
+                <filter name="open" string="Open" domain="[('state', 'in', ('confirmed', 'sourcing'))]"/>
+                <filter name="urgent" string="Urgent" domain="[('priority', '=', '1')]"/>
+                <separator/>
+                <filter name="today" string="Placement Today"
+                        domain="[('required_date', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')), ('required_date', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_lane" string="Lane" context="{'group_by': 'lane_id'}"/>
+                    <filter name="group_origin" string="Origin" context="{'group_by': 'origin_location_id'}"/>
+                    <filter name="group_date" string="Placement Date" context="{'group_by': 'required_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_cp_indent" model="ir.actions.act_window">
+        <field name="name">Load Requests</field>
+        <field name="res_model">cp.indent</field>
+        <field name="view_mode">kanban,list,calendar,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Raise your first vehicle indent</p>
+            <p>An indent says which lane, how many trucks and when. Allocate it to a contracted transporter or put it on a spot auction.</p>
+        </field>
+    </record>
+</odoo>

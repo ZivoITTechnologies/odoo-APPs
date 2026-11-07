@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_bulk_ship_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.bulk.ship.form</field>
+        <field name="model">zivo.logistics.bulk.ship</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="state" invisible="1"/>
+                <p invisible="state == 'done'">Book the selected (validated) transfers with the AI selected courier and print all labels in one PDF.</p>
+                <field name="picking_ids" readonly="state == 'done'">
+                    <list>
+                        <field name="name"/>
+                        <field name="partner_id"/>
+                        <field name="carrier_id"/>
+                        <field name="carrier_tracking_ref"/>
+                        <field name="state"/>
+                    </list>
+                </field>
+                <field name="result" invisible="not result"/>
+                <footer>
+                    <button name="action_ship" type="object" string="Ship" class="btn-primary" invisible="state == 'done'"/>
+                    <button name="action_print_labels" type="object" string="Print Labels" class="btn-primary" invisible="state != 'done'"/>
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

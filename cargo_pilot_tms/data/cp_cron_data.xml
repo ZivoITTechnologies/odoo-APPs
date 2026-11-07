@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="cron_cp_auction_lifecycle" model="ir.cron">
+            <field name="name">Cargo Pilot: open and close auctions</field>
+            <field name="model_id" ref="model_cp_auction"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_auction_lifecycle()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+        </record>
+        <record id="cron_cp_trip_monitor" model="ir.cron">
+            <field name="name">Cargo Pilot: stoppage and e-way bill alerts</field>
+            <field name="model_id" ref="model_cp_trip"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_trip_monitor()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+        </record>
+        <record id="cron_cp_epod_followup" model="ir.cron">
+            <field name="name">Cargo Pilot: ePOD follow-up</field>
+            <field name="model_id" ref="model_cp_epod"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_epod_followup()</field>
+            <field name="interval_number">2</field>
+            <field name="interval_type">hours</field>
+        </record>
+        <record id="cron_cp_rfq_close" model="ir.cron">
+            <field name="name">Cargo Pilot: close RFQs at deadline</field>
+            <field name="model_id" ref="model_cp_rfq"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_close_rfqs()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+        </record>
+        <record id="cron_cp_contract_expiry" model="ir.cron">
+            <field name="name">Cargo Pilot: expire rate contracts</field>
+            <field name="model_id" ref="model_cp_rate_contract"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_expire_contracts()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+        <record id="cron_cp_document_expiry" model="ir.cron">
+            <field name="name">Cargo Pilot: document expiry alerts</field>
+            <field name="model_id" ref="model_cp_document"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_document_expiry()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+        <record id="cron_cp_maintenance_due" model="ir.cron">
+            <field name="name">Cargo Pilot: maintenance due alerts</field>
+            <field name="model_id" ref="model_cp_maintenance_plan"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_maintenance_due()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+        <record id="cron_cp_offer_expiry" model="ir.cron">
+            <field name="name">Cargo Pilot: booking offers past their deadline</field>
+            <field name="model_id" ref="model_cp_trip_offer"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_offer_expiry()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+        </record>
+        <record id="cron_cp_trip_followups" model="ir.cron">
+            <field name="name">Cargo Pilot: POD ageing, containers and appointments</field>
+            <field name="model_id" ref="model_cp_trip"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_trip_followups()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+        </record>
+        <record id="cron_cp_webhook_send" model="ir.cron">
+            <field name="name">Cargo Pilot: send webhooks</field>
+            <field name="model_id" ref="model_cp_webhook_delivery"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send()</field>
+            <field name="interval_number">2</field>
+            <field name="interval_type">minutes</field>
+        </record>
+    </data>
+</odoo>

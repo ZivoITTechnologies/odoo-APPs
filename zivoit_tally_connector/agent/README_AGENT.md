@@ -33,3 +33,6 @@ Linux/macOS: `python3 zivoit_tally_agent.py` (systemd/launchd unit optional).
   methods; the connection token identifies which Tally connection it serves.
 * All traffic to Odoo is HTTPS. Tally traffic stays on the local machine/LAN.
 * Logs: `zivoit_tally_agent.log` (rotated, 3 × 2 MB).
+
+## Support
+Email info@zivoit.com · www.zivoit.com

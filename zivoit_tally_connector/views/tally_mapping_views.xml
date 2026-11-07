@@ -4,7 +4,7 @@
         <field name="name">tally.mapping.list</field>
         <field name="model">tally.mapping</field>
         <field name="arch" type="xml">
-            <list editable="bottom" decoration-warning="state == 'suggested'"
+            <list decoration-warning="state == 'suggested'"
                   decoration-danger="state in ('conflict', 'deleted')" decoration-muted="state == 'ignored'">
                 <header>
                     <button name="action_confirm" type="object" string="Confirm"/>
@@ -13,25 +13,22 @@
                     <button name="action_ignore" type="object" string="Ignore"/>
                 </header>
                 <field name="connection_id" optional="hide"/>
-                <field name="kind"/>
+                <field name="kind" string="Type"/>
                 <field name="tally_name"/>
-                <field name="tally_parent" optional="show"/>
-                <field name="tally_gstin" optional="hide"/>
-                <field name="partner_id" invisible="kind != 'party'"/>
-                <field name="account_id" invisible="kind != 'ledger'"/>
-                <field name="tax_id" invisible="kind != 'tax'"/>
-                <field name="journal_id" invisible="kind != 'bank'"/>
-                <field name="product_id" invisible="kind != 'item'"/>
-                <field name="uom_id" invisible="kind != 'unit'"/>
-                <field name="analytic_account_id" invisible="kind != 'costcentre'"/>
-                <field name="analytic_plan_id" invisible="kind != 'costcategory'"/>
-                <field name="confidence" widget="percentage" optional="show"/>
-                <field name="match_reason" optional="show"/>
+                <field name="tally_parent" string="Tally group / category" optional="show"/>
+                <field name="odoo_record" string="Odoo record"/>
+                <field name="origin" column_invisible="1"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="account_id" optional="hide"/>
+                <field name="tax_id" optional="hide"/>
+                <field name="product_id" optional="hide"/>
+                <field name="confidence" widget="percentage" optional="show" invisible="origin != 'ai'"/>
+                <field name="match_reason" string="Why" optional="show"/>
                 <field name="synced_to_tally" optional="hide"/>
                 <field name="state" widget="badge" decoration-success="state == 'confirmed'"
-                       decoration-warning="state == 'suggested'" decoration-danger="state == 'conflict'"/>
+                       decoration-warning="state == 'suggested'" decoration-danger="state in ('conflict', 'deleted')"/>
                 <button name="action_confirm" type="object" icon="fa-check" title="Confirm"
-                        invisible="state == 'confirmed'"/>
+                        invisible="state not in ('suggested', 'unmapped')"/>
                 <button name="action_resolve_keep_tally" type="object" string="Keep Tally"
                         invisible="state != 'conflict'"/>
                 <button name="action_resolve_keep_odoo" type="object" string="Keep Odoo"
@@ -106,6 +103,8 @@
                 <field name="partner_id"/>
                 <field name="product_id"/>
                 <field name="account_id"/>
+                <filter name="business" string="Business masters"
+                        domain="[('kind', 'not in', ('group', 'vchtype'))]"/>
                 <filter name="review" string="To review" domain="[('state', 'in', ('suggested', 'unmapped', 'conflict', 'deleted'))]"/>
                 <filter name="suggested" string="AI suggestions" domain="[('state', '=', 'suggested')]"/>
                 <filter name="conflict" string="Conflicts" domain="[('state', '=', 'conflict')]"/>
@@ -127,6 +126,6 @@
         <field name="name">Mappings</field>
         <field name="res_model">tally.mapping</field>
         <field name="view_mode">list,form</field>
-        <field name="context">{'search_default_review': 1}</field>
+        <field name="context">{'search_default_business': 1}</field>
     </record>
 </odoo>
