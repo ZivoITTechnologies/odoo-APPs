@@ -30,6 +30,9 @@ class ZivoJobWorkLoss(models.Model):
         ('tolerance', 'Within Tolerance'),
         ('other', 'Other'),
     ], required=True, default='process')
+    reason_id = fields.Many2one('zivo.job.work.reason', 'Reason Code',
+                                domain="[('reason_type', 'in', ('shortage', 'loss', 'scrap', 'other'))]")
+    exception_id = fields.Many2one('zivo.job.work.exception', 'Exception', readonly=True, ondelete='set null')
     note = fields.Text('Explanation')
     recover_from_vendor = fields.Boolean('Recover From Job Worker',
                                          help="The value will be debited to the job worker.")
@@ -73,6 +76,9 @@ class ZivoJobWorkLoss(models.Model):
             loss.write({'state': 'approved', 'move_id': move.id, 'approved_by_id': self.env.user.id})
             job.message_post(body=_("Approved loss %(ref)s: %(qty)s %(uom)s of %(p)s.", ref=loss.name,
                                     qty=loss.qty, uom=mat.product_uom_id.name, p=mat.product_id.display_name))
+            exc = loss.exception_id
+            if exc and exc.state in ('open', 'to_approve'):
+                exc.sudo()._jw_mark_done('resolved', loss.reason_id, loss.note or exc.resolution)
 
     def action_approve(self):
         if not self.env.user.has_group('zivo_job_work_360.group_job_work_manager'):
@@ -83,5 +89,11 @@ class ZivoJobWorkLoss(models.Model):
     def action_reject(self):
         if not self.env.user.has_group('zivo_job_work_360.group_job_work_manager'):
             raise AccessError(_("Only Job Work Administrators can reject material losses."))
-        self.filtered(lambda l: l.state == 'to_approve').write({'state': 'rejected'})
+        for loss in self.filtered(lambda l: l.state == 'to_approve'):
+            loss.state = 'rejected'
+            exc = loss.exception_id
+            if exc and exc.state == 'to_approve':
+                exc.sudo().write({'state': 'open', 'pending_action': False, 'loss_id': False})
+                exc.job_id.message_post(body=_("Write-off %(loss)s rejected; exception %(exc)s is open again.",
+                                               loss=loss.name, exc=exc.name))
         return True

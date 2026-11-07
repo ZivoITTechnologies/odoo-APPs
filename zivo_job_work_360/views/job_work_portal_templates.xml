@@ -37,7 +37,7 @@
                 <div class="card-body d-flex flex-wrap gap-3 align-items-center">
                     <div>
                         <div class="text-muted small">Your performance (last <t t-esc="(score.date_to - score.date_from).days"/> days)</div>
-                        <div class="fs-3 fw-bold">Grade <t t-esc="score.grade"/> · <t t-esc="'%.0f' % score.score"/>/100</div>
+                        <div class="fs-3 fw-bold">Grade <t t-esc="score.grade"/> - <t t-esc="'%.0f' % score.score"/>/100</div>
                     </div>
                     <div class="ms-md-auto d-flex flex-wrap gap-3 small">
                         <span>On-time <strong t-esc="'%.1f%%' % score.on_time_rate"/></span>
@@ -104,10 +104,10 @@
                                 <div>
                                     <h3 class="mb-0"><t t-esc="job.name"/> <small class="text-muted">| <t t-esc="job.product_id.display_name"/></small></h3>
                                     <div class="text-muted">
-                                        <t t-esc="job.job_type_id.name"/> · Due
+                                        <t t-esc="job.job_type_id.name"/> - Due
                                         <span t-field="job.date_expected" t-options='{"widget": "date"}'
                                               t-att-class="'text-danger fw-bold' if job.is_overdue else ''"/>
-                                        <t t-if="job.client_ref"> · Ref <t t-esc="job.client_ref"/></t>
+                                        <t t-if="job.client_ref"> - Ref <t t-esc="job.client_ref"/></t>
                                     </div>
                                 </div>
                                 <div class="ms-auto text-end">
@@ -176,6 +176,10 @@
                                 <button t-if="job.state in ('ready', 'issued', 'at_vendor', 'processing', 'qc_pending')" type="button"
                                         class="btn btn-secondary btn-lg" data-bs-toggle="collapse" data-bs-target="#jw_request">
                                     <i class="fa fa-cubes"/> Request Material
+                                </button>
+                                <button t-if="job.company_id.jw_labour_enabled and job.state in ('issued', 'at_vendor', 'processing', 'qc_pending', 'completed')"
+                                        type="button" class="btn btn-secondary btn-lg" data-bs-toggle="collapse" data-bs-target="#jw_labour">
+                                    <i class="fa fa-clock-o"/> Log Hours
                                 </button>
                                 <button type="button" class="btn btn-secondary btn-lg" data-bs-toggle="collapse" data-bs-target="#jw_upload">
                                     <i class="fa fa-upload"/> Upload
@@ -249,6 +253,38 @@
                                     <label class="form-label mt-2" for="jw_req_reason">Reason</label>
                                     <textarea id="jw_req_reason" name="reason" class="form-control" rows="2" required="required"/>
                                     <button type="submit" class="btn btn-primary mt-2 align-self-start">Send Request</button>
+                                </form>
+                            </div>
+                            <div class="collapse mt-3" id="jw_labour" t-if="job.company_id.jw_labour_enabled">
+                                <form method="post" t-attf-action="/my/job-works/#{job.id}/labour" class="card card-body">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="access_token" t-att-value="access_token"/>
+                                    <h5>Log labour hours</h5>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label" for="jw_lab_date">Date</label>
+                                            <input id="jw_lab_date" type="date" name="date" class="form-control"
+                                                   t-att-value="datetime.date.today().isoformat()"/>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <label class="form-label" for="jw_lab_hours">Hours</label>
+                                            <input id="jw_lab_hours" type="number" step="0.25" min="0" name="hours" class="form-control" required="required"/>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label" for="jw_lab_operation">Operation</label>
+                                            <input id="jw_lab_operation" type="text" name="operation" class="form-control"
+                                                   placeholder="e.g. Loading, Plating, Polishing" required="required"/>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label" for="jw_lab_worker">Worker / team</label>
+                                            <input id="jw_lab_worker" type="text" name="worker_name" class="form-control"/>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label" for="jw_lab_note">Comment</label>
+                                            <input id="jw_lab_note" type="text" name="note" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary mt-2 align-self-start">Submit Hours</button>
                                 </form>
                             </div>
                             <div class="collapse mt-3" id="jw_upload">
@@ -335,6 +371,26 @@
                                         <td class="text-end" t-esc="job._jw_fmt_qty(p.qty_rejected)"/>
                                         <td class="text-end" t-esc="job._jw_fmt_qty(p.qty_rework)"/>
                                         <td class="d-none d-md-table-cell" t-esc="p.note"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3" t-if="job.company_id.jw_labour_enabled and job.labour_ids">
+                        <div class="card-header"><strong>Your labour hours</strong></div>
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                                <thead><tr><th>Date</th><th>Operation</th><th class="d-none d-md-table-cell">Worker</th>
+                                    <th class="text-end">Hours</th><th class="text-end">Status</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="job.labour_ids" t-as="lab">
+                                        <td><span t-field="lab.date"/></td>
+                                        <td t-esc="lab.operation"/>
+                                        <td class="d-none d-md-table-cell" t-esc="lab.worker_name"/>
+                                        <td class="text-end" t-esc="'%g' % lab.hours"/>
+                                        <td class="text-end"><span t-field="lab.state"
+                                            t-attf-class="badge #{'text-bg-success' if lab.state == 'approved' else 'text-bg-danger' if lab.state == 'rejected' else 'text-bg-warning'}"/></td>
                                     </tr>
                                 </tbody>
                             </table>

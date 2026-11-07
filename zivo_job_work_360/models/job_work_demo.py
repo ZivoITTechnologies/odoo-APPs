@@ -4,6 +4,8 @@ from datetime import timedelta
 
 from odoo import Command, api, fields, models
 
+from .job_work_reason import EXCEPTION_REASON_TYPES
+
 _logger = logging.getLogger(__name__)
 
 
@@ -120,6 +122,65 @@ class ZivoJobWorkDemo(models.Model):
                 'date_planned_start': now + timedelta(days=2), 'date_expected': now + timedelta(days=9),
                 'material_ids': [Command.create({'product_id': machined.id, 'planned_qty': 5000.0})],
             })
+            self._jw_load_demo_v11(locals())
             self.env['zivo.job.work.vendor.score'].generate_scorecards(company)
         except Exception:  # demo data must never block the installation
             _logger.exception("Job Work 360: the demo scenario could not be generated")
+
+    @api.model
+    def _jw_load_demo_v11(self, ctx):
+        """Version 1.1 stories: labour hours, customer-owned material held too long, approval queue."""
+        company, stock, now = ctx['company'], ctx['stock'], ctx['now']
+        issue, receive = ctx['issue'], ctx['receive']
+        job_ht, job_pl = ctx['job_ht'], ctx['job_pl']
+        brass, bush = ctx['brass'], ctx['bush']
+        vendor_b, vendor_c, machining = ctx['vendor_b'], ctx['vendor_c'], ctx['machining']
+        ref = self.env.ref
+
+        # vendor labour hours on the plating job
+        company.jw_labour_enabled = True
+        vendor_b.jw_labour_rate = 250.0
+        Labour = self.env['zivo.job.work.labour']
+        for days, operation, worker, hours, state in (
+                (10, 'Loading on racks', 'Line team A', 6.0, 'approved'),
+                (9, 'Plating', 'Line team A', 14.0, 'approved'),
+                (8, 'Plating', 'Line team B', 12.5, 'approved'),
+                (1, 'Unloading and packing', 'Line team B', 5.0, 'submitted')):
+            line = Labour.create({
+                'job_id': job_pl.id, 'date': (now - timedelta(days=days)).date(), 'operation': operation,
+                'worker_name': worker, 'hours': hours, 'source': 'portal', 'state': 'draft'})
+            line.action_submit()
+            if state == 'approved':
+                line.action_approve()
+
+        # customer-owned brass machined for a principal, partly returned and held for more than 90 days
+        customer = self.env['res.partner'].create({
+            'name': 'Orion Auto Components', 'is_company': True, 'city': 'Pune',
+            'country_id': ref('base.in').id})
+        self.env['stock.quant']._update_available_quantity(brass, stock, 300.0, owner_id=customer)
+        job_co = self.create({
+            'partner_id': vendor_c.id, 'principal_id': customer.id, 'job_type_id': machining.id,
+            'product_id': bush.id, 'product_qty': 110.0, 'rate': 40.0, 'client_ref': 'ORION-PO-7781',
+            'date_planned_start': now - timedelta(days=96), 'date_expected': now - timedelta(days=80),
+            'material_ids': [Command.create({'product_id': brass.id, 'planned_qty': 120.0, 'scrap_pct': 8.0})],
+        })
+        issue(job_co, 95)
+        job_co.write({'date_sent': now - timedelta(days=95)})
+        job_co.action_vendor_accept()
+        job_co.action_vendor_start()
+        receive(job_co, 40.0, 43.0, 3.0)
+        materials = (job_co | ctx['job_br'] | job_pl).material_ids
+        self.env.add_to_compute(materials._fields['date_oldest_balance'], materials)
+        materials.flush_recordset()
+        self.env['zivo.job.work.material']._cron_refresh_aging()
+        job_co._jw_run_checks()
+
+        # a resolution waiting for the manager
+        exception = (job_ht | job_pl).exception_ids.filtered(lambda e: e.state == 'open')[:1]
+        reason = self.env['zivo.job.work.reason'].search([
+            ('reason_type', 'in', EXCEPTION_REASON_TYPES.get(exception.exception_type, ['other']))], limit=1)
+        if exception and reason:
+            exception.write({
+                'state': 'to_approve', 'reason_id': reason.id,
+                'resolution': 'Explained by the job worker, evidence attached on the portal.',
+                'requested_by_id': self.env.user.id, 'pending_action': 'resolve'})

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_job_work_compliance" name="Compliance" parent="zivo_job_work_360.menu_job_work_root" sequence="35"
+              groups="zivo_job_work_360.group_jw_india"/>
+    <menuitem id="menu_job_work_challans" name="Job Work Challans" parent="menu_job_work_compliance" sequence="1"
+              action="action_zivo_job_work_challan"/>
+    <menuitem id="menu_job_work_itc04" name="ITC-04 Preparation" parent="menu_job_work_compliance" sequence="5"
+              action="action_zivo_job_work_itc04_wizard" groups="zivo_job_work_360.group_job_work_user"/>
+</odoo>

@@ -29,4 +29,10 @@
         <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         <field name="comment">Configuration, approvals (loss, extra material, bill variance), reconciliation and scorecards.</field>
     </record>
+
+    <!-- technical group switched on from Settings > Job Work > India Compliance -->
+    <record id="group_jw_india" model="res.groups">
+        <field name="name">Job Work: India Compliance</field>
+        <field name="comment">Shows job work challans, E-Way Bill data, ITC-04 preparation and GST fields.</field>
+    </record>
 </odoo>

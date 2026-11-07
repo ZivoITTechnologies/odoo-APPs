@@ -2,24 +2,33 @@
 # Copyright 2026 ZivoIT Technologies
 # License OPL-1 (https://www.odoo.com/documentation/19.0/legal/licenses.html#odoo-apps).
 {
-    'name': 'Job Work 360 - Subcontracting Control Tower',
-    'version': '19.0.1.0.0',
-    'summary': 'Job work orders, subcontractor stock, scrap, yield, quality, costing, '
-               'reconciliation, vendor portal and vendor scorecards for outsourced manufacturing',
+    'name': 'Job Work 360 - Outsourced Manufacturing & Job Work Control Tower',
+    'version': '19.0.1.2.0',
+    'summary': 'Material custody, vendor execution, production reporting, scrap/yield, quality, costing, '
+               'reconciliation and compliance for outsourced manufacturing (subcontracting / job work)',
     'description': """
 Job Work 360 for Odoo 19
 ========================
-Complete Job Work & Subcontracting management for manufacturing companies.
+Complete Outsourced Manufacturing & Job Work Control Tower.
 
-* Job Work Orders with configurable job types and multi-stage chains
-* Material issue to job workers and subcontractor stock (custody) views
-* Consumption, scrap, unprocessed returns and approved loss postings
-* Material reconciliation engine with automatic exceptions
+Manufacturing control
+* Job Work Orders with configurable job types and multi-stage chains with end-to-end traceability
+* Material issue, subcontractor stock, FIFO aging and value held at each job worker
+* Customer-owned material tracked with stock owners and kept out of your valuation
+* Consumption, scrap, by-products, unprocessed returns and approved losses
+* Material reconciliation engine: exceptions with reason codes and approval workflow
 * Job-level quality inspection, NCR, acceptance / rejection / rework
-* Expected vs actual costing (material, processing, scrap, freight, inspection)
-* Purchase order for processing charges and vendor bill variance control
-* Vendor portal: accept jobs, confirm receipt, report progress, request material, upload documents
-* Vendor scorecards with configurable weights and an executive dashboard
+
+Vendor collaboration
+* Vendor portal: accept jobs, confirm receipt, report production, request material, upload documents
+* Optional labour hours per operation with manager approval and labour cost per unit
+
+Financial & compliance control
+* Expected vs actual costing, purchase order for processing charges and vendor bill variance control
+* Vendor scorecards and an executive dashboard
+* India compliance (switch on in Settings): job work challan with QR code, E-Way Bill JSON data,
+  ITC-04 preparation and XLSX export, statutory return-period alerts, Compliance Control Center.
+  Prepared data only: it does not file returns or call government APIs.
 """,
     'category': 'Manufacturing/Manufacturing',
     'author': 'ZivoIT Technologies',
@@ -42,9 +51,11 @@ Complete Job Work & Subcontracting management for manufacturing companies.
         'report/job_work_report_templates.xml',
         'data/job_work_data.xml',
         'data/ir_cron_data.xml',
+        'data/job_work_reason_data.xml',
         'wizard/job_work_receive_wizard_views.xml',
         'wizard/job_work_return_wizard_views.xml',
         'wizard/job_work_loss_wizard_views.xml',
+        'wizard/job_work_exception_resolve_wizard_views.xml',
         'views/job_work_type_views.xml',
         'views/job_work_views.xml',
         'views/job_work_material_views.xml',
@@ -53,15 +64,29 @@ Complete Job Work & Subcontracting management for manufacturing companies.
         'views/job_work_exception_views.xml',
         'views/job_work_request_views.xml',
         'views/job_work_vendor_score_views.xml',
+        'views/job_work_reason_views.xml',
+        'views/job_work_labour_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
         'views/stock_views.xml',
         'views/purchase_views.xml',
         'views/job_work_portal_templates.xml',
         'views/job_work_menus.xml',
+        # India compliance
+        'security/india_rules.xml',
+        'data/india_sequence_data.xml',
+        'data/india_cron_data.xml',
+        'report/india_challan_report.xml',
+        'wizard/itc04_wizard_views.xml',
+        'views/india_challan_views.xml',
+        'views/india_product_views.xml',
+        'views/india_res_config_settings_views.xml',
+        'views/india_job_work_views.xml',
+        'views/india_menus.xml',
     ],
     'demo': [
         'demo/job_work_demo.xml',
+        'demo/india_demo.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -74,4 +99,5 @@ Complete Job Work & Subcontracting management for manufacturing companies.
     'images': ['static/description/banner.png'],
     'installable': True,
     'application': True,
+    'post_init_hook': 'post_init_hook',
 }

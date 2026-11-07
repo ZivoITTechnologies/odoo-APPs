@@ -20,4 +20,14 @@
         <field name="binding_model_id" ref="model_zivo_job_work"/>
         <field name="binding_type">report</field>
     </record>
+    <record id="action_report_job_work_chain" model="ir.actions.report">
+        <field name="name">Job Chain Traceability</field>
+        <field name="model">zivo.job.work</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivo_job_work_360.report_job_work_chain</field>
+        <field name="report_file">zivo_job_work_360.report_job_work_chain</field>
+        <field name="print_report_name">'Job Chain - %s' % ((object.root_id or object).name)</field>
+        <field name="binding_model_id" ref="model_zivo_job_work"/>
+        <field name="binding_type">report</field>
+    </record>
 </odoo>

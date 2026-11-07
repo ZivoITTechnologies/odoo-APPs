@@ -23,6 +23,8 @@
               action="action_zivo_job_work_loss"/>
     <menuitem id="menu_job_work_exceptions" name="Exceptions" parent="menu_job_work_operations" sequence="15"
               action="action_zivo_job_work_exception"/>
+    <menuitem id="menu_job_work_labour" name="Labour Hours" parent="menu_job_work_operations" sequence="20"
+              action="action_zivo_job_work_labour"/>
 
     <menuitem id="menu_job_work_quality" name="Quality" parent="menu_job_work_root" sequence="20"/>
     <menuitem id="menu_job_work_qc" name="Inspections" parent="menu_job_work_quality" sequence="1"
@@ -41,6 +43,8 @@
               action="action_zivo_job_work_analysis"/>
     <menuitem id="menu_job_work_reconciliation" name="Material Reconciliation" parent="menu_job_work_reporting"
               sequence="5" action="action_zivo_job_work_reconciliation"/>
+    <menuitem id="menu_job_work_aging" name="Material Aging" parent="menu_job_work_reporting"
+              sequence="7" action="action_zivo_job_work_material_aging"/>
     <menuitem id="menu_job_work_scorecards" name="Job Worker Scorecards" parent="menu_job_work_reporting"
               sequence="10" action="action_zivo_job_work_vendor_score"/>
 
@@ -52,4 +56,6 @@
               action="action_zivo_job_work_type"/>
     <menuitem id="menu_job_work_workers" name="Job Workers" parent="menu_job_work_config" sequence="10"
               action="action_zivo_job_workers"/>
+    <menuitem id="menu_job_work_reasons" name="Reason Codes" parent="menu_job_work_config" sequence="7"
+              action="action_zivo_job_work_reason"/>
 </odoo>

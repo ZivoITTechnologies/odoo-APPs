@@ -3,6 +3,8 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare, float_is_zero
 
+from ..models.job_work_material import jw_allowed_uoms
+
 
 class ZivoJobWorkReceiveWizard(models.TransientModel):
     _name = 'zivo.job.work.receive.wizard'
@@ -21,6 +23,7 @@ class ZivoJobWorkReceiveWizard(models.TransientModel):
     vendor_challan_date = fields.Date('Job Worker Delivery Date')
     note = fields.Text('Notes')
     line_ids = fields.One2many('zivo.job.work.receive.wizard.line', 'wizard_id', 'Material Consumption')
+    byproduct_line_ids = fields.One2many('zivo.job.work.receive.wizard.byproduct', 'wizard_id', 'By-products')
     done = fields.Boolean(readonly=True)
 
     @api.model
@@ -40,6 +43,8 @@ class ZivoJobWorkReceiveWizard(models.TransientModel):
                     'qty_scrap': 0.0,
                 }))
             res['line_ids'] = lines
+            res['byproduct_line_ids'] = [(0, 0, {'product_id': p.id, 'qty': 0.0})
+                                         for p in job.job_type_id.byproduct_product_ids]
         return res
 
     @api.onchange('qty_received')
@@ -57,9 +62,16 @@ class ZivoJobWorkReceiveWizard(models.TransientModel):
         rounding = job.product_uom_id.rounding
         if float_compare(self.qty_received, 0.0, precision_rounding=rounding) < 0:
             raise UserError(_("The received quantity cannot be negative."))
-        has_material = any(l.qty_consumed > 0 or l.qty_scrap > 0 for l in self.line_ids)
+        has_material = any(l.qty_consumed > 0 or l.qty_scrap > 0 for l in self.line_ids) or any(
+            b.qty > 0 for b in self.byproduct_line_ids)
         if float_is_zero(self.qty_received, precision_rounding=rounding) and not has_material and not self.is_final:
             raise UserError(_("Enter a received quantity, a consumption or scrap quantity."))
+        for bp in self.byproduct_line_ids:
+            if bp.qty < 0:
+                raise UserError(_("By-product quantities cannot be negative."))
+            if bp.qty > 0 and bp.product_id.tracking != 'none':
+                raise UserError(_("By-product %s is tracked by lots/serial numbers; receive it with a standard "
+                                  "receipt instead.", bp.product_id.display_name))
         for line in self.line_ids:
             mat_round = line.material_id.product_uom_id.rounding
             if line.qty_consumed < 0 or line.qty_scrap < 0:
@@ -108,6 +120,14 @@ class ZivoJobWorkReceiveWizard(models.TransientModel):
                     job._jw_post_move(mat.product_id, line.qty_scrap, mat.product_uom_id, vendor_loc, scrap_loc,
                                       'scrap', material=mat, production=production,
                                       description=_('%s - process scrap', job.name))
+        for bp in self.byproduct_line_ids.filtered(lambda b: b.qty > 0):
+            job._jw_post_move(bp.product_id, bp.qty, bp.product_uom_id, processing_loc, job.location_dest_id,
+                              'byproduct', production=production,
+                              description=_('%(job)s - by-product %(p)s', job=job.name, p=bp.product_id.display_name))
+        if self.byproduct_line_ids.filtered(lambda b: b.qty > 0):
+            job.message_post(body=_("By-products received: %s", ', '.join(
+                '%s %s %s' % (b.qty, b.product_uom_id.name, b.product_id.display_name)
+                for b in self.byproduct_line_ids if b.qty > 0)))
         if not production:
             job.message_post(body=_("Material consumption/scrap recorded without output."))
             if self.is_final and job.state in ('issued', 'at_vendor', 'processing'):
@@ -149,3 +169,26 @@ class ZivoJobWorkReceiveWizardLine(models.TransientModel):
     def _compute_expected(self):
         for line in self:
             line.qty_expected = line.material_id.std_qty_per_unit * line.wizard_id.qty_received
+
+
+class ZivoJobWorkReceiveWizardByproduct(models.TransientModel):
+    _name = 'zivo.job.work.receive.wizard.byproduct'
+    _description = 'Receive Job Work Output - By-product'
+
+    wizard_id = fields.Many2one('zivo.job.work.receive.wizard', required=True, ondelete='cascade')
+    product_id = fields.Many2one('product.product', 'By-product', required=True,
+                                 domain="[('type', '=', 'consu'), ('tracking', '=', 'none')]")
+    allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
+    product_uom_id = fields.Many2one('uom.uom', 'Unit', required=True, compute='_compute_uom', store=True,
+                                     readonly=False, precompute=True, domain="[('id', 'in', allowed_uom_ids)]")
+    qty = fields.Float('Quantity', digits='Product Unit')
+
+    @api.depends('product_id')
+    def _compute_uom(self):
+        for line in self:
+            line.product_uom_id = line.product_id.uom_id
+
+    @api.depends('product_id')
+    def _compute_allowed_uom_ids(self):
+        for line in self:
+            line.allowed_uom_ids = jw_allowed_uoms(line.product_id)

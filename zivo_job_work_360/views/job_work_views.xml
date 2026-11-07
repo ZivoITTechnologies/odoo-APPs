@@ -104,6 +104,8 @@
                     </div>
                     <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger" invisible="not is_overdue"/>
                     <widget name="web_ribbon" title="Disputed" bg_color="text-bg-warning" invisible="not is_disputed or is_overdue"/>
+                    <widget name="web_ribbon" title="Customer-Owned" bg_color="text-bg-info"
+                            invisible="not is_customer_owned or is_overdue or is_disputed"/>
                     <div class="oe_title">
                         <h1 class="d-flex">
                             <field name="priority" widget="priority" class="me-3"/>
@@ -115,7 +117,9 @@
                             <field name="partner_id" readonly="state not in ('draft', 'planned')"
                                    context="{'default_jw_is_job_worker': True, 'default_is_company': True}"/>
                             <field name="job_type_id" readonly="state not in ('draft', 'planned')"/>
-                            <field name="principal_id"/>
+                            <field name="principal_id" readonly="state not in ('draft', 'planned')"/>
+                            <field name="is_customer_owned" invisible="1"/>
+                            <field name="labour_enabled" invisible="1"/>
                             <field name="client_ref"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
@@ -163,10 +167,10 @@
                         </div>
                         <div class="col-6 col-md-3 col-lg">
                             <div class="border rounded p-2 text-center h-100">
-                                <div class="text-muted small">Rejected · Rework · Scrap</div>
+                                <div class="text-muted small">Rejected / Rework / Scrap</div>
                                 <div class="fs-5 fw-bold text-danger text-nowrap">
-                                    <field name="qty_rejected" nolabel="1" class="oe_inline"/> ·
-                                    <field name="qty_rework" nolabel="1" class="oe_inline"/> ·
+                                    <field name="qty_rejected" nolabel="1" class="oe_inline"/> /
+                                    <field name="qty_rework" nolabel="1" class="oe_inline"/> /
                                     <field name="qty_qc_scrap" nolabel="1" class="oe_inline"/>
                                 </div>
                                 <div class="small text-muted">Pending QC: <field name="qty_pending_qc" nolabel="1" class="oe_inline"/></div>
@@ -253,6 +257,20 @@
                                             invisible="state != 'qc_pending'"/>
                                 </list>
                             </field>
+                            <field name="byproduct_count" invisible="1"/>
+                            <group string="By-products &amp; Returned Scrap" invisible="not byproduct_count"
+                                   groups="stock.group_stock_user">
+                                <field name="byproduct_move_ids" nolabel="1" colspan="2" readonly="1">
+                                    <list>
+                                        <field name="date"/>
+                                        <field name="product_id"/>
+                                        <field name="quantity" string="Quantity"/>
+                                        <field name="product_uom" string="Unit"/>
+                                        <field name="jw_move_type"/>
+                                        <field name="jw_production_id"/>
+                                    </list>
+                                </field>
+                            </group>
                             <group string="Inspections" invisible="not qc_ids">
                                 <field name="qc_ids" nolabel="1" colspan="2" readonly="1">
                                     <list decoration-danger="result == 'fail'">
@@ -353,16 +371,23 @@
                             <field name="exception_ids" readonly="1">
                                 <list decoration-danger="state == 'open' and severity == 'high'"
                                       decoration-warning="state == 'open' and severity == 'medium'"
-                                      decoration-muted="state != 'open'">
+                                      decoration-info="state == 'to_approve'"
+                                      decoration-muted="state in ('resolved', 'waived')">
                                     <field name="create_date" string="Raised"/>
                                     <field name="exception_type"/>
                                     <field name="severity" widget="badge"/>
                                     <field name="description"/>
+                                    <field name="reason_id" optional="show"/>
+                                    <field name="resolution" optional="hide"/>
                                     <field name="state" widget="badge"/>
                                     <button name="action_resolve" type="object" string="Resolve" icon="fa-check"
                                             invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_user"/>
                                     <button name="action_waive" type="object" string="Waive" icon="fa-ban"
                                             invisible="state != 'open'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                    <button name="action_approve_resolution" type="object" string="Approve" icon="fa-thumbs-up"
+                                            invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                    <button name="action_reject_resolution" type="object" string="Reject" icon="fa-thumbs-down"
+                                            invisible="state != 'to_approve'" groups="zivo_job_work_360.group_job_work_manager"/>
                                 </list>
                             </field>
                             <group string="Loss Requests" invisible="not loss_ids">
@@ -434,6 +459,105 @@
                                 <field name="shared_attachment_ids" widget="many2many_binary" nolabel="1" colspan="2"/>
                             </group>
                         </page>
+                        <page string="Labour" name="labour" invisible="not labour_enabled or state == 'draft'">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6 col-md-3">
+                                    <div class="border rounded p-2 text-center h-100">
+                                        <div class="text-muted small">Approved Hours</div>
+                                        <div class="fs-4 fw-bold"><field name="labour_hours" nolabel="1"/></div>
+                                        <div class="small text-muted">pending <field name="labour_hours_pending" nolabel="1" class="oe_inline"/> h</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="border rounded p-2 text-center h-100">
+                                        <div class="text-muted small">Hours / Unit</div>
+                                        <div class="fs-4 fw-bold"><field name="labour_hours_per_unit" nolabel="1"/></div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="border rounded p-2 text-center h-100">
+                                        <div class="text-muted small">Labour Cost / Unit</div>
+                                        <div class="fs-4 fw-bold"><field name="labour_cost_per_unit" nolabel="1"/></div>
+                                        <div class="small text-muted">vs charge <field name="contract_cost_per_unit" nolabel="1" class="oe_inline"/></div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="border rounded p-2 text-center h-100">
+                                        <div class="text-muted small">Job Worker Margin</div>
+                                        <div class="fs-4 fw-bold"><field name="labour_margin_pct" nolabel="1" widget="float" digits="[16,1]"
+                                             decoration-danger="labour_margin_pct &lt; 0" class="oe_inline"/> %</div>
+                                        <div class="small text-muted">labour cost <field name="labour_cost" nolabel="1" class="oe_inline"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <field name="labour_ids" context="{'default_job_id': id, 'default_source': 'backend'}">
+                                <list editable="bottom" decoration-muted="state == 'rejected'" decoration-info="state == 'submitted'">
+                                    <field name="date" readonly="state == 'approved'"/>
+                                    <field name="operation" readonly="state == 'approved'"/>
+                                    <field name="worker_name" optional="show" readonly="state == 'approved'"/>
+                                    <field name="hours" sum="Total" readonly="state == 'approved'"/>
+                                    <field name="hourly_rate" optional="show" readonly="state == 'approved'"/>
+                                    <field name="cost" sum="Total"/>
+                                    <field name="company_currency_id" column_invisible="1"/>
+                                    <field name="source" optional="show" readonly="1"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'approved'"
+                                           decoration-warning="state == 'submitted'" decoration-danger="state == 'rejected'"/>
+                                    <button name="action_submit" type="object" icon="fa-paper-plane" title="Submit"
+                                            invisible="state not in ('draft', 'rejected')"/>
+                                    <button name="action_approve" type="object" icon="fa-check" title="Approve"
+                                            invisible="state != 'submitted'" groups="zivo_job_work_360.group_job_work_manager"/>
+                                    <button name="action_reject" type="object" icon="fa-times" title="Reject"
+                                            invisible="state not in ('submitted', 'draft')" groups="zivo_job_work_360.group_job_work_manager"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Job Chain" name="chain" invisible="chain_count &lt; 2">
+                            <field name="chain_count" invisible="1"/>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6 col-md">
+                                    <div class="border rounded p-2 text-center h-100"><div class="text-muted small">Stages</div>
+                                        <div class="fs-4 fw-bold"><field name="chain_count" nolabel="1"/></div></div>
+                                </div>
+                                <div class="col-6 col-md">
+                                    <div class="border rounded p-2 text-center h-100"><div class="text-muted small">Final Accepted</div>
+                                        <div class="fs-4 fw-bold"><field name="chain_final_qty" nolabel="1"/></div></div>
+                                </div>
+                                <div class="col-6 col-md">
+                                    <div class="border rounded p-2 text-center h-100"><div class="text-muted small">Rejected (all stages)</div>
+                                        <div class="fs-4 fw-bold text-danger"><field name="chain_rejected_qty" nolabel="1"/></div></div>
+                                </div>
+                                <div class="col-6 col-md">
+                                    <div class="border rounded p-2 text-center h-100"><div class="text-muted small">Chain Cost</div>
+                                        <div class="fs-4 fw-bold"><field name="chain_cost" nolabel="1"/></div>
+                                        <div class="small text-muted"><field name="chain_cost_per_unit" nolabel="1" class="oe_inline"/> / unit</div></div>
+                                </div>
+                                <div class="col-6 col-md">
+                                    <div class="border rounded p-2 text-center h-100"><div class="text-muted small">Lead Time</div>
+                                        <div class="fs-4 fw-bold"><field name="chain_lead_days" nolabel="1" widget="float" digits="[16,1]" class="oe_inline"/> d</div>
+                                        <div class="small text-muted">scrap <field name="chain_scrap_value" nolabel="1" class="oe_inline"/></div></div>
+                                </div>
+                            </div>
+                            <field name="chain_job_ids" readonly="1">
+                                <list>
+                                    <field name="stage_sequence" string="Stage"/>
+                                    <field name="name"/>
+                                    <field name="job_type_id"/>
+                                    <field name="partner_id"/>
+                                    <field name="product_id"/>
+                                    <field name="product_qty" string="Planned"/>
+                                    <field name="qty_received"/>
+                                    <field name="qty_accepted"/>
+                                    <field name="qty_rejected"/>
+                                    <field name="actual_yield" optional="show"/>
+                                    <field name="scrap_rate" optional="show"/>
+                                    <field name="cost_act_total" string="Actual Cost" optional="show"/>
+                                    <field name="date_issued" optional="hide"/>
+                                    <field name="date_completed" optional="hide"/>
+                                    <field name="is_rework" optional="show"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
                         <page string="Instructions" name="instructions">
                             <field name="notes" placeholder="Process instructions, drawings references, packing requirements..."/>
                         </page>
@@ -445,6 +569,13 @@
                                            readonly="state not in ('draft', 'planned')"/>
                                     <field name="location_dest_id" groups="stock.group_stock_multi_locations"
                                            readonly="state in ('reconciled', 'closed', 'cancel')"/>
+                                </group>
+                                <group string="Ownership">
+                                    <field name="jw_owner_id" invisible="not is_customer_owned"/>
+                                    <div colspan="2" class="text-muted small" invisible="not is_customer_owned">
+                                        Customer-owned material: stock moves carry this owner and the material is
+                                        excluded from your valuation and job costing.
+                                    </div>
                                 </group>
                                 <group string="Traceability">
                                     <field name="parent_id" readonly="state != 'draft'"/>
@@ -518,7 +649,7 @@
                         </div>
                         <field name="partner_id" class="fw-bolder"/>
                         <div class="text-muted">
-                            <field name="job_type_id"/> · <field name="product_id"/>
+                            <field name="job_type_id"/> - <field name="product_id"/>
                         </div>
                         <div class="d-flex mt-1">
                             <span><field name="qty_received"/> / <field name="product_qty"/> <field name="product_uom_id"/></span>
@@ -605,6 +736,7 @@
                 <filter string="With Exceptions" name="exceptions" domain="[('open_exception_count', '&gt;', 0)]"/>
                 <filter string="Disputed" name="disputed" domain="[('is_disputed', '=', True)]"/>
                 <filter string="Rework Jobs" name="rework" domain="[('is_rework', '=', True)]"/>
+                <filter string="Customer-Owned Material" name="customer_owned" domain="[('is_customer_owned', '=', True)]"/>
                 <filter string="Urgent" name="urgent" domain="[('priority', '=', '2')]"/>
                 <separator/>
                 <filter string="Expected Completion" name="date_expected" date="date_expected"/>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_exception_resolve_wizard_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.exception.resolve.wizard.form</field>
+        <field name="model">zivo.job.work.exception.resolve.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Resolve Exception">
+                <field name="exception_id" invisible="1"/>
+                <field name="mode" invisible="1"/>
+                <field name="allowed_reason_ids" invisible="1"/>
+                <field name="can_write_off" invisible="1"/>
+                <field name="needs_approval" invisible="1"/>
+                <div class="alert alert-secondary mb-2" role="alert">
+                    <field name="exception_type" readonly="1" class="fw-bold"/> -
+                    <field name="severity" readonly="1"/>
+                    <div><field name="description" readonly="1"/></div>
+                </div>
+                <group>
+                    <field name="reason_id" options="{'no_create': True}"/>
+                    <field name="resolution" placeholder="Explain what happened and what was done"/>
+                </group>
+                <group invisible="not can_write_off or mode != 'resolve'">
+                    <field name="write_off"/>
+                    <label for="write_off_qty" invisible="not write_off"/>
+                    <div class="o_row" invisible="not write_off">
+                        <field name="write_off_qty"/>
+                        <field name="product_uom_id" readonly="1"/>
+                        <span class="text-muted">of</span>
+                        <field name="qty_balance" readonly="1"/>
+                    </div>
+                    <field name="recover_from_vendor" invisible="not write_off"/>
+                </group>
+                <div class="alert alert-info mb-0" role="alert" invisible="not needs_approval">
+                    This resolution will be submitted to a Job Work Administrator for approval.
+                </div>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

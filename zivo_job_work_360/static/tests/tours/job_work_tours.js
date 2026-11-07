@@ -173,3 +173,28 @@ registry.category("web_tour.tours").add("zivo_e2e_portal", {
         { content: "progress listed", trigger: "td:contains(30)" },
     ],
 });
+
+registry.category("web_tour.tours").add("zivo_v11_resolve_exception", {
+    steps: () => [
+        { trigger: ".o_notebook .nav-link:contains(Reconciliation)", run: "click" },
+        { trigger: "div[name=exception_ids] .o_data_row:contains(Material Shortage) button[name=action_resolve]", run: "click" },
+        { trigger: ".modal .o_field_widget[name=reason_id] input", run: "edit Weighing" },
+        { trigger: ".o-autocomplete--dropdown-item:contains(Weighing)", run: "click" },
+        { trigger: ".modal .o_field_widget[name=resolution] textarea", run: "edit Scale calibration error at vendor" },
+        { trigger: ".modal .o_field_widget[name=write_off] input", run: "click" },
+        { trigger: ".modal .o_field_widget[name=write_off_qty] input" },
+        { trigger: ".modal button[name=action_confirm]", run: "click" },
+        { content: "exception resolved", trigger: "div[name=exception_ids] .o_data_row:contains(Material Shortage):contains(Resolved)" },
+        { trigger: "button[name=action_reconcile]", run: "click" },
+        { content: "reconciled", trigger: "button[name=action_close]" },
+    ],
+});
+
+registry.category("web_tour.tours").add("zivo_v11_dashboard", {
+    steps: () => [
+        { trigger: ".o_jw_dashboard .card-header:contains(Material Aging)" },
+        { trigger: ".o_jw_dashboard .card-header:contains(Waiting for Approval)" },
+        { trigger: ".o_jw_dashboard a:contains(Aging report)", run: "click" },
+        { content: "aging pivot", trigger: ".o_pivot" },
+    ],
+});

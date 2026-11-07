@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import _, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResCompany(models.Model):
@@ -38,6 +39,25 @@ class ResCompany(models.Model):
              "custody can be tracked per vendor.")
     jw_auto_ncr = fields.Boolean(
         'Create NCR on Failed Inspection', default=True)
+    jw_resolution_approval = fields.Boolean(
+        'Approve High-Severity Resolutions', default=True,
+        help="Resolving a high-severity exception (shortage, excess scrap, quality...) requires the approval of a "
+             "Job Work Administrator, whatever the reason code.")
+
+    # Aging of material at job workers
+    jw_aging_days_1 = fields.Integer('Aging Bucket 1 (days)', default=30)
+    jw_aging_days_2 = fields.Integer('Aging Bucket 2 (days)', default=60)
+    jw_aging_days_3 = fields.Integer('Aging Bucket 3 (days)', default=90)
+    jw_aging_alert = fields.Boolean(
+        'Alert on Old Material', default=True,
+        help="Raise an exception when material has been at a job worker longer than the last aging bucket.")
+
+    # Vendor labour reporting
+    jw_labour_enabled = fields.Boolean(
+        'Vendor Labour Hours', default=False,
+        help="Let job workers report labour hours per operation on the portal; managers approve them and the job "
+             "shows labour cost per unit compared with the contracted processing charge.")
+    jw_default_labour_rate = fields.Float('Default Hourly Labour Rate', digits='Product Price', default=0.0)
 
     # Vendor scorecard weights
     jw_score_period_days = fields.Integer('Scorecard Period (days)', default=90)
@@ -76,3 +96,21 @@ class ResCompany(models.Model):
             location = self.env['stock.location'].sudo().search(
                 [('company_id', '=', False), ('usage', '=', 'inventory')], order='id', limit=1)
         return location
+
+    @api.constrains('jw_aging_days_1', 'jw_aging_days_2', 'jw_aging_days_3')
+    def _check_jw_aging_days(self):
+        for company in self:
+            if not 0 < company.jw_aging_days_1 < company.jw_aging_days_2 < company.jw_aging_days_3:
+                raise ValidationError(_("Aging buckets must be positive and increasing (e.g. 30, 60, 90 days)."))
+
+    def _jw_aging_bucket(self, days):
+        """Label of the aging bucket for an age in days (prefixed for natural sorting)."""
+        self.ensure_one()
+        b1, b2, b3 = self.jw_aging_days_1 or 30, self.jw_aging_days_2 or 60, self.jw_aging_days_3 or 90
+        if days <= b1:
+            return '1. 0-%s days' % b1
+        if days <= b2:
+            return '2. %s-%s days' % (b1 + 1, b2)
+        if days <= b3:
+            return '3. %s-%s days' % (b2 + 1, b3)
+        return '4. > %s days' % b3

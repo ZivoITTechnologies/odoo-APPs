@@ -38,7 +38,7 @@
                 <sheet>
                     <div class="oe_title">
                         <h1><field name="partner_id"/></h1>
-                        <h3>Grade <field name="grade"/> · <field name="score" widget="float" digits="[16,1]"/> / 100</h3>
+                        <h3>Grade <field name="grade"/> - <field name="score" widget="float" digits="[16,1]"/> / 100</h3>
                     </div>
                     <group>
                         <group>

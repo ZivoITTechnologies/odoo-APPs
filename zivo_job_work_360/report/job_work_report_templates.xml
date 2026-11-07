@@ -166,4 +166,63 @@
             </t>
         </t>
     </template>
+
+    <template id="report_job_work_chain_document">
+        <t t-call="web.external_layout">
+            <t t-set="root" t-value="o.root_id or o"/>
+            <div class="page">
+                <h2>Job Chain Traceability <span t-field="root.name"/></h2>
+                <div class="row mt-3 mb-3">
+                    <div class="col-3"><strong>Product</strong><div t-field="root.product_id"/></div>
+                    <div class="col-3"><strong>Principal</strong><div t-field="root.principal_id"/></div>
+                    <div class="col-3"><strong>Reference</strong><div t-field="root.client_ref"/></div>
+                    <div class="col-3"><strong>Stages</strong><div t-esc="o.chain_count"/></div>
+                </div>
+                <table class="table table-sm">
+                    <thead><tr>
+                        <th>Stage</th><th>Job Work</th><th>Process</th><th>Job Worker</th><th>Product</th>
+                        <th class="text-end">Planned</th><th class="text-end">Received</th><th class="text-end">Accepted</th>
+                        <th class="text-end">Rejected</th><th class="text-end">Yield %</th><th class="text-end">Actual Cost</th>
+                        <th>Issued</th><th>Completed</th><th>Status</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr t-foreach="o.chain_job_ids" t-as="j">
+                            <td><span t-esc="j.stage_sequence"/><span t-if="j.is_rework"> (rework)</span></td>
+                            <td><span t-field="j.name"/></td>
+                            <td><span t-field="j.job_type_id"/></td>
+                            <td><span t-field="j.partner_id"/></td>
+                            <td><span t-field="j.product_id"/></td>
+                            <td class="text-end"><span t-field="j.product_qty"/></td>
+                            <td class="text-end"><span t-field="j.qty_received"/></td>
+                            <td class="text-end"><span t-field="j.qty_accepted"/></td>
+                            <td class="text-end"><span t-field="j.qty_rejected"/></td>
+                            <td class="text-end"><span t-esc="'%.1f' % j.actual_yield"/></td>
+                            <td class="text-end"><span t-field="j.cost_act_total"/></td>
+                            <td><span t-field="j.date_issued" t-options='{"widget": "date"}'/></td>
+                            <td><span t-field="j.date_completed" t-options='{"widget": "date"}'/></td>
+                            <td><span t-field="j.state"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table table-sm w-50">
+                    <tbody>
+                        <tr><td>Final accepted quantity</td><td class="text-end"><span t-field="o.chain_final_qty"/></td></tr>
+                        <tr><td>Rejected across stages</td><td class="text-end"><span t-field="o.chain_rejected_qty"/></td></tr>
+                        <tr><td>Scrap &amp; loss value</td><td class="text-end"><span t-field="o.chain_scrap_value"/></td></tr>
+                        <tr><td>Total actual cost</td><td class="text-end"><span t-field="o.chain_cost"/></td></tr>
+                        <tr class="fw-bold"><td>Cost per final unit</td><td class="text-end"><span t-field="o.chain_cost_per_unit"/></td></tr>
+                        <tr><td>Lead time (days)</td><td class="text-end"><span t-esc="'%.1f' % o.chain_lead_days"/></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_job_work_chain">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="zivo_job_work_360.report_job_work_chain_document"/>
+            </t>
+        </t>
+    </template>
 </odoo>

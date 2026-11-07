@@ -55,6 +55,18 @@
         border-radius: 0.375rem;
     }
 
+    .o_jw_bar_warning {
+        background-color: $warning;
+    }
+
+    .o_jw_bar_danger {
+        background-color: $danger;
+    }
+
+    .o_jw_aging_value {
+        width: 9rem;
+    }
+
     .cursor-pointer {
         cursor: pointer;
     }

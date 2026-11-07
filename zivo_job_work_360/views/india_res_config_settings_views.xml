@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_jw_india" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.jw.india</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="zivo_job_work_360.res_config_settings_view_form_job_work"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='jw_scorecard']" position="before">
+                <block title="India Compliance" name="jw_india">
+                    <setting id="jw_in_enable" help="Job work challans with QR code, E-Way Bill data, ITC-04 preparation and return-period alerts">
+                        <field name="group_jw_india"/>
+                    </setting>
+                    <setting id="jw_in_auto_challan" company_dependent="1" invisible="not group_jw_india"
+                             help="Create the job work challan when material is dispatched">
+                        <field name="jw_in_auto_challan"/>
+                    </setting>
+                    <setting id="jw_in_default_gst_rate" company_dependent="1" invisible="not group_jw_india" string="Default GST Rate"
+                             help="Used on challans and E-Way Bill data when a product has no purchase tax">
+                        <field name="jw_in_default_gst_rate"/> %
+                    </setting>
+                    <setting id="jw_in_return_periods" company_dependent="1" invisible="not group_jw_india" string="Return Period Alerts"
+                             help="Configurable periods for goods to come back from job workers. Validate against current GST rules.">
+                        <div class="content-group">
+                            <div class="row"><label for="jw_in_return_days_inputs" class="col-7 o_light_label"/><field name="jw_in_return_days_inputs" class="col-3"/></div>
+                            <div class="row"><label for="jw_in_return_days_capital" class="col-7 o_light_label"/><field name="jw_in_return_days_capital" class="col-3"/></div>
+                            <div class="row"><label for="jw_in_alert_days" class="col-7 o_light_label"/><field name="jw_in_alert_days" class="col-3"/></div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

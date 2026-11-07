@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_jw_india" model="ir.ui.view">
+        <field name="name">product.template.form.jw.india</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="jw_hsn_code" groups="zivo_job_work_360.group_jw_india"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="uom_form_view_jw_india" model="ir.ui.view">
+        <field name="name">uom.uom.form.jw.india</field>
+        <field name="model">uom.uom</field>
+        <field name="inherit_id" ref="uom.product_uom_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="jw_uqc" groups="zivo_job_work_360.group_jw_india"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

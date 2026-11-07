@@ -42,6 +42,7 @@
                             <field name="expected_yield"/>
                             <field name="expected_scrap_pct"/>
                             <field name="scrap_product_id"/>
+                            <field name="byproduct_product_ids" widget="many2many_tags"/>
                             <field name="is_rework"/>
                         </group>
                     </group>

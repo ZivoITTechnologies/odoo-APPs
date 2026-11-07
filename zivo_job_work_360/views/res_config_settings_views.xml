@@ -22,6 +22,19 @@
                                  help="Allowed scrap above the material's standard process scrap before an excess scrap exception">
                             <field name="jw_scrap_tolerance"/> %
                         </setting>
+                        <setting id="jw_resolution_approval" company_dependent="1"
+                                 help="Resolutions and write-offs of high-severity exceptions need a Job Work Administrator's approval (reason codes can also require approval)">
+                            <field name="jw_resolution_approval"/>
+                        </setting>
+                        <setting id="jw_aging" company_dependent="1" string="Aging Buckets"
+                                 help="Age of material at job workers (first in, first out), in days">
+                            <div class="content-group">
+                                <div class="row"><label for="jw_aging_days_1" class="col-6 o_light_label"/><field name="jw_aging_days_1" class="col-3"/></div>
+                                <div class="row"><label for="jw_aging_days_2" class="col-6 o_light_label"/><field name="jw_aging_days_2" class="col-3"/></div>
+                                <div class="row"><label for="jw_aging_days_3" class="col-6 o_light_label"/><field name="jw_aging_days_3" class="col-3"/></div>
+                                <div class="row mt-2"><label for="jw_aging_alert" class="col-6 o_light_label"/><field name="jw_aging_alert" class="col-3"/></div>
+                            </div>
+                        </setting>
                         <setting id="jw_yield_tolerance" company_dependent="1" string="Yield Tolerance"
                                  help="Points below the expected yield before a low yield exception">
                             <field name="jw_yield_tolerance"/> pts
@@ -39,6 +52,15 @@
                         <setting id="jw_cost_variance_tolerance" company_dependent="1" string="Cost Variance Tolerance"
                                  help="Actual cost above expected by more than this % raises a cost variance exception">
                             <field name="jw_cost_variance_tolerance"/> %
+                        </setting>
+                    </block>
+                    <block title="Vendor Collaboration" name="jw_collaboration">
+                        <setting id="jw_labour_enabled" company_dependent="1"
+                                 help="Job workers report labour hours per operation on the portal; managers approve them and jobs compare labour cost with the contracted charge">
+                            <field name="jw_labour_enabled"/>
+                            <div class="content-group mt-2" invisible="not jw_labour_enabled">
+                                <div class="row"><label for="jw_default_labour_rate" class="col-6 o_light_label"/><field name="jw_default_labour_rate" class="col-4"/></div>
+                            </div>
                         </setting>
                     </block>
                     <block title="Vendor Bill Control" name="jw_bills">

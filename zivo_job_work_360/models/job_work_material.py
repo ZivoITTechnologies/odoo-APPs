@@ -71,7 +71,14 @@ class ZivoJobWorkMaterial(models.Model):
     consumption_variance = fields.Float('Consumption Variance', compute='_compute_expected',
                                         digits='Product Unit')
     date_first_issue = fields.Datetime('First Issued', compute='_compute_quantities', store=True)
-    age_days = fields.Integer('Age (days)', compute='_compute_age')
+    date_oldest_balance = fields.Datetime(
+        'Oldest Material Since', compute='_compute_quantities', store=True,
+        help="Dispatch date of the oldest quantity still at the job worker (first in, first out).")
+    age_days = fields.Integer('Age (days)', compute='_compute_age', store=True, aggregator='max',
+                              help="Days since the oldest quantity still at the job worker was sent (FIFO).")
+    aging_bucket = fields.Char('Aging', compute='_compute_age', store=True, index=True)
+    is_customer_owned = fields.Boolean(related='job_id.is_customer_owned', store=True, string='Customer-Owned')
+    owner_id = fields.Many2one(related='job_id.jw_owner_id', store=True, string='Material Owner')
 
     _planned_positive = models.Constraint('CHECK(planned_qty >= 0)', 'Required quantity cannot be negative.')
 
@@ -118,14 +125,17 @@ class ZivoJobWorkMaterial(models.Model):
         for mat in self:
             totals = {'issue': 0.0, 'consume': 0.0, 'return': 0.0, 'scrap': 0.0, 'loss': 0.0}
             first_issue = False
+            issues = []
             for move in mat.move_ids:
                 if move.state != 'done' or move.jw_move_type not in totals:
                     continue
                 qty = move.product_uom._compute_quantity(move.quantity, mat.product_uom_id, round=False) \
                     if mat.product_uom_id else move.quantity
                 totals[move.jw_move_type] += qty
-                if move.jw_move_type == 'issue' and (not first_issue or move.date < first_issue):
-                    first_issue = move.date
+                if move.jw_move_type == 'issue':
+                    issues.append((move.date, qty))
+                    if not first_issue or move.date < first_issue:
+                        first_issue = move.date
             mat.qty_issued = totals['issue']
             mat.qty_consumed = totals['consume']
             mat.qty_returned = totals['return']
@@ -137,6 +147,17 @@ class ZivoJobWorkMaterial(models.Model):
             mat.balance_qty = balance
             mat.balance_value = balance * mat.unit_cost
             mat.date_first_issue = first_issue
+            # FIFO: the oldest dispatch that is not fully consumed/returned/scrapped yet
+            outflow = totals['consume'] + totals['return'] + totals['scrap'] + totals['loss']
+            oldest = False
+            if balance > 0:
+                for date, qty in sorted(issues, key=lambda i: i[0]):
+                    if outflow >= qty - (mat.product_uom_id.rounding or 0.0) / 2.0:
+                        outflow -= qty
+                        continue
+                    oldest = date
+                    break
+            mat.date_oldest_balance = oldest
 
     def _compute_in_transit(self):
         for mat in self:
@@ -148,10 +169,39 @@ class ZivoJobWorkMaterial(models.Model):
             mat.expected_consumption = mat.std_qty_per_unit * mat.job_id.qty_received
             mat.consumption_variance = mat.qty_consumed - mat.expected_consumption
 
+    @api.depends('date_oldest_balance', 'balance_qty', 'company_id.jw_aging_days_1',
+                 'company_id.jw_aging_days_2', 'company_id.jw_aging_days_3')
     def _compute_age(self):
         now = fields.Datetime.now()
         for mat in self:
-            mat.age_days = (now - mat.date_first_issue).days if mat.date_first_issue and mat.balance_qty > 0 else 0
+            if mat.date_oldest_balance and mat.balance_qty > 0:
+                mat.age_days = max((now - mat.date_oldest_balance).days, 0)
+                mat.aging_bucket = mat.company_id._jw_aging_bucket(mat.age_days) if mat.company_id else False
+            else:
+                mat.age_days = 0
+                mat.aging_bucket = False
+
+    @api.model
+    def _cron_refresh_aging(self):
+        """Ages move with the calendar: refresh them daily and alert on material held too long."""
+        materials = self.search([('balance_qty', '>', 0), ('job_id.state', 'not in', ('draft', 'cancel', 'closed'))])
+        self.env.add_to_compute(self._fields['age_days'], materials)
+        self.env.add_to_compute(self._fields['aging_bucket'], materials)
+        materials.flush_recordset(['age_days', 'aging_bucket'])
+        stale = self.env['zivo.job.work.exception'].sudo().search(
+            [('exception_type', '=', 'aging'), ('state', 'in', ('open', 'to_approve')),
+             ('material_id.balance_qty', '<=', 0)])
+        for exc in stale:
+            exc.job_id._jw_set_exception('aging', False, material=exc.material_id)
+        for mat in materials:
+            company = mat.company_id
+            limit = company.jw_aging_days_3 or 90
+            mat.job_id._jw_set_exception(
+                'aging', company.jw_aging_alert and mat.age_days > limit,
+                _("%(qty)s %(uom)s of %(product)s has been at %(vendor)s for %(days)s days (limit %(limit)s).",
+                  qty=mat.balance_qty, uom=mat.product_uom_id.name, product=mat.product_id.display_name,
+                  vendor=mat.partner_id.display_name, days=mat.age_days, limit=limit),
+                severity='medium', material=mat)
 
     @api.onchange('product_id')
     def _onchange_product_cost(self):

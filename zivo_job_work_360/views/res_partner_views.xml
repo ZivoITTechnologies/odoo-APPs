@@ -21,6 +21,7 @@
             </div>
             <xpath expr="//page[@name='sales_purchases']//group[@name='purchase']" position="inside">
                 <field name="jw_is_job_worker" groups="zivo_job_work_360.group_job_work_user"/>
+                <field name="jw_labour_rate" groups="zivo_job_work_360.group_job_work_user" invisible="not jw_is_job_worker"/>
             </xpath>
         </field>
     </record>

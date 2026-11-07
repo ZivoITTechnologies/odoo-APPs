@@ -6,7 +6,7 @@ from collections import OrderedDict
 from werkzeug.exceptions import NotFound
 from werkzeug.urls import url_encode
 
-from odoo import _, http
+from odoo import _, fields, http
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.http import request
 from odoo.addons.portal.controllers import portal
@@ -204,6 +204,39 @@ class JobWorkPortal(portal.CustomerPortal):
                    rew=vals['qty_rework'], note=vals['note']),
             author_id=author.id, message_type='comment', subtype_xmlid='mail.mt_note')
         return self._jw_redirect(job_sudo, access_token, success=_("Progress reported. Thank you!"))
+
+    @http.route(['/my/job-works/<int:job_id>/labour'], type='http', auth='public', methods=['POST'],
+                website=True)
+    def portal_job_work_labour(self, job_id, access_token=None, **kw):
+        job_sudo = self._jw_get_job(job_id, access_token)
+        try:
+            if not job_sudo.company_id.jw_labour_enabled:
+                raise UserError(_("Labour reporting is not enabled."))
+            if job_sudo.state not in ('issued', 'at_vendor', 'processing', 'qc_pending', 'completed'):
+                raise UserError(_("Labour can be reported once material has been issued to you."))
+            hours = self._jw_float(kw.get('hours'), _("Hours"))
+            operation = (kw.get('operation') or '').strip()[:120]
+            if not operation:
+                raise UserError(_("Enter the operation performed."))
+            try:
+                date = fields.Date.to_date(kw.get('date')) if kw.get('date') else fields.Date.context_today(
+                    job_sudo)
+            except ValueError:
+                raise UserError(_("Enter a valid date."))
+            request.env['zivo.job.work.labour'].sudo().create({
+                'job_id': job_sudo.id,
+                'date': date,
+                'operation': operation,
+                'worker_name': (kw.get('worker_name') or '').strip()[:120],
+                'hours': hours,
+                'note': (kw.get('note') or '').strip()[:2000],
+                'source': 'portal',
+                'state': 'submitted',
+                'submitted_by_id': request.env.user.id,
+            })
+        except (UserError, ValidationError) as e:
+            return self._jw_redirect(job_sudo, access_token, error=str(e.args[0] if e.args else e))
+        return self._jw_redirect(job_sudo, access_token, success=_("Hours submitted for approval."))
 
     @http.route(['/my/job-works/<int:job_id>/request'], type='http', auth='public', methods=['POST'],
                 website=True)

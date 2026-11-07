@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_reason_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.reason.list</field>
+        <field name="model">zivo.job.work.reason</field>
+        <field name="arch" type="xml">
+            <list string="Reason Codes" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="reason_type"/>
+                <field name="requires_approval"/>
+                <field name="recover_from_vendor"/>
+                <field name="description" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_reason_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.reason.search</field>
+        <field name="model">zivo.job.work.reason</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter string="Applies To" name="group_type" context="{'group_by': 'reason_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_reason" model="ir.actions.act_window">
+        <field name="name">Reason Codes</field>
+        <field name="res_model">zivo.job.work.reason</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a reason code</p>
+            <p>Reason codes explain unaccounted material, scrap, losses and quality issues. Codes that require
+               approval send resolutions to a Job Work Administrator.</p>
+        </field>
+    </record>
+</odoo>

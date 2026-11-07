@@ -19,6 +19,7 @@
                     </group>
                     <group>
                         <field name="reason"/>
+                        <field name="reason_id" options="{'no_create': True}"/>
                         <field name="recover_from_vendor"/>
                         <field name="approve_now" invisible="not is_manager"/>
                     </group>

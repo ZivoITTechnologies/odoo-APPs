@@ -34,6 +34,10 @@ class ZivoJobWorkType(models.Model):
         domain="[('type', '=', 'consu')]",
         help="Optional by-product received back when the job worker returns process scrap "
              "(for example brass turnings).")
+    byproduct_product_ids = fields.Many2many(
+        'product.product', 'zivo_job_work_type_byproduct_rel', 'type_id', 'product_id', 'Expected By-products',
+        domain="[('type', '=', 'consu'), ('tracking', '=', 'none')]",
+        help="By-products proposed when receiving output (offcuts, turnings, returnable packaging...).")
     is_rework = fields.Boolean('Rework Type', help="Used for rework job work orders created from inspections.")
     instructions = fields.Html('Standard Instructions', translate=True)
     job_count = fields.Integer(compute='_compute_job_count')

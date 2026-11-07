@@ -139,7 +139,7 @@ class TestJobWorkFlow(JobWorkCommon):
         self.assertEqual(mat.qty_loss, 2.0, "within shortage tolerance (0.5%) -> written off")
         self.assertEqual(mat.balance_qty, 0.0)
         self.assertEqual(job.state, 'completed', "excess scrap is high severity and blocks")
-        excess.with_user(self.manager).action_waive()
+        self._resolve(excess, 'zivo_job_work_360.reason_setup_scrap', user=self.manager, mode='waive')
         job.action_reconcile()
         self.assertEqual(job.state, 'reconciled')
 

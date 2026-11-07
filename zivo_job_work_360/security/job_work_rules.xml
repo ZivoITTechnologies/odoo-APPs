@@ -63,6 +63,17 @@
             <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
 
+        <record id="rule_zivo_job_work_labour_company" model="ir.rule">
+            <field name="name">Job Work Labour: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_labour"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_zivo_job_work_reason_company" model="ir.rule">
+            <field name="name">Job Work Reason: multi-company</field>
+            <field name="model_id" ref="model_zivo_job_work_reason"/>
+            <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+        </record>
+
         <!-- Vendor portal isolation: a job worker only sees its own jobs -->
         <record id="rule_zivo_job_work_portal" model="ir.rule">
             <field name="name">Job Work: portal job worker sees own jobs</field>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_form_india" model="ir.ui.view">
+        <field name="name">zivo.job.work.form.india</field>
+        <field name="model">zivo.job.work</field>
+        <field name="inherit_id" ref="zivo_job_work_360.view_zivo_job_work_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_challans" type="object" class="oe_stat_button" icon="fa-file-text"
+                        invisible="not challan_count" groups="zivo_job_work_360.group_jw_india">
+                    <field name="challan_count" widget="statinfo" string="Challans"/>
+                </button>
+            </div>
+            <xpath expr="//field[@name='material_ids']/list/field[@name='is_capital_goods']" position="after">
+                <field name="jw_in_due_date" optional="show" column_invisible="parent.state in ('draft', 'planned')"
+                       groups="zivo_job_work_360.group_jw_india"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_material_list_india" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.list.india</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="inherit_id" ref="zivo_job_work_360.view_zivo_job_work_material_list"/>
+        <field name="arch" type="xml">
+            <field name="age_days" position="after">
+                <field name="is_capital_goods" optional="hide"/>
+                <field name="jw_in_due_date" optional="show" groups="zivo_job_work_360.group_jw_india"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_picking_form_jw_india" model="ir.ui.view">
+        <field name="name">stock.picking.form.jw.india</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_jw_challans" type="object" class="oe_stat_button" icon="fa-file-text"
+                        invisible="not jw_challan_count" groups="zivo_job_work_360.group_jw_india">
+                    <field name="jw_challan_count" widget="statinfo" string="Challan"/>
+                </button>
+            </div>
+            <xpath expr="//header" position="inside">
+                <field name="jw_is_issue" invisible="1"/>
+                <button name="action_create_jw_challan" type="object" string="Job Work Challan"
+                        invisible="not jw_is_issue or jw_challan_count or state in ('draft', 'cancel')"
+                        groups="zivo_job_work_360.group_job_work_user,zivo_job_work_360.group_jw_india"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

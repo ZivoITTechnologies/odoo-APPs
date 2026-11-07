@@ -20,6 +20,8 @@ class ZivoJobWorkLossWizard(models.TransientModel):
         ('lost', 'Lost / Missing'),
         ('other', 'Other'),
     ], required=True, default='process')
+    reason_id = fields.Many2one('zivo.job.work.reason', 'Reason Code',
+                                domain="[('reason_type', 'in', ('shortage', 'loss', 'scrap', 'other'))]")
     note = fields.Text('Explanation', required=True)
     recover_from_vendor = fields.Boolean('Recover From Job Worker')
     is_manager = fields.Boolean(compute='_compute_is_manager')
@@ -40,6 +42,11 @@ class ZivoJobWorkLossWizard(models.TransientModel):
         is_manager = self.env.user.has_group('zivo_job_work_360.group_job_work_manager')
         for wiz in self:
             wiz.is_manager = is_manager
+
+    @api.onchange('reason_id')
+    def _onchange_reason_id(self):
+        if self.reason_id:
+            self.recover_from_vendor = self.reason_id.recover_from_vendor
 
     @api.onchange('material_id')
     def _onchange_material_id(self):
@@ -62,6 +69,7 @@ class ZivoJobWorkLossWizard(models.TransientModel):
             'qty': self.qty,
             'reason': self.reason,
             'note': self.note,
+            'reason_id': self.reason_id.id,
             'recover_from_vendor': self.recover_from_vendor,
         })
         if self.approve_now and self.is_manager:

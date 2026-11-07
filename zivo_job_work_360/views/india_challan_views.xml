@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_challan_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.challan.form</field>
+        <field name="model">zivo.job.work.challan</field>
+        <field name="arch" type="xml">
+            <form string="Job Work Challan">
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="oe_highlight"
+                            invisible="state != 'draft'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_print" type="object" string="Print Challan" class="oe_highlight"
+                            invisible="state == 'cancel'"/>
+                    <button name="action_export_ewaybill_json" type="object" string="E-Way Bill JSON"
+                            invisible="state == 'cancel'" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state == 'cancel'"
+                            confirm="Cancel this challan?" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_draft" type="object" string="Reset to Draft" invisible="state != 'cancel'"
+                            groups="zivo_job_work_360.group_job_work_user"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="d-flex">
+                        <div class="oe_title flex-grow-1">
+                            <h1><field name="name"/></h1>
+                            <div class="text-muted">Delivery challan for job work</div>
+                        </div>
+                        <field name="qr_image" widget="image" readonly="1" class="ms-3" options="{'size': [110, 110]}"/>
+                    </div>
+                    <group>
+                        <group string="Parties">
+                            <field name="job_id" readonly="state != 'draft'"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="principal_gstin" readonly="state != 'draft'"/>
+                            <field name="job_worker_gstin" readonly="state != 'draft'" placeholder="Unregistered"/>
+                            <field name="from_state_code" readonly="state != 'draft'"/>
+                            <field name="to_state_code" readonly="state != 'draft'"/>
+                            <field name="is_interstate"/>
+                        </group>
+                        <group string="Document">
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="picking_id" readonly="1"/>
+                            <field name="nature_of_processing" readonly="state != 'draft'"/>
+                            <field name="amount_total"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Goods" name="lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="name"/>
+                                    <field name="hsn_code"/>
+                                    <field name="qty"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="uqc"/>
+                                    <field name="unit_value"/>
+                                    <field name="value" sum="Total"/>
+                                    <field name="gst_rate"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Transport &amp; E-Way Bill" name="transport">
+                            <group>
+                                <group string="Transport">
+                                    <field name="transport_mode"/>
+                                    <field name="vehicle_no"/>
+                                    <field name="vehicle_type"/>
+                                    <field name="transporter_name"/>
+                                    <field name="transporter_id"/>
+                                    <field name="transport_doc_no"/>
+                                    <field name="transport_doc_date"/>
+                                    <field name="distance_km"/>
+                                </group>
+                                <group string="E-Way Bill">
+                                    <field name="ewaybill_no"/>
+                                    <field name="ewaybill_date"/>
+                                    <field name="ewaybill_valid_until"/>
+                                    <div colspan="2" class="text-muted small">
+                                        Generate the JSON, upload it on the E-Way Bill portal, then record the
+                                        E-Way Bill number here. Validate the schema version against current NIC
+                                        documentation.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Addresses" name="addresses">
+                            <group>
+                                <field name="source_address"/>
+                                <field name="destination_address"/>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_challan_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.challan.list</field>
+        <field name="model">zivo.job.work.challan</field>
+        <field name="arch" type="xml">
+            <list string="Job Work Challans" sample="1" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="job_worker_gstin" optional="show"/>
+                <field name="job_id"/>
+                <field name="nature_of_processing" optional="show"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="ewaybill_no" optional="show"/>
+                <field name="vehicle_no" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_challan_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.challan.search</field>
+        <field name="model">zivo.job.work.challan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="job_id"/>
+                <field name="ewaybill_no"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Without E-Way Bill" name="no_ewb" domain="[('state', '=', 'confirmed'), ('ewaybill_no', '=', False)]"/>
+                <filter string="Date" name="date" date="date"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_challan" model="ir.actions.act_window">
+        <field name="name">Job Work Challans</field>
+        <field name="res_model">zivo.job.work.challan</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No challan yet</p>
+            <p>Challans are created automatically when material is dispatched to a job worker.</p>
+        </field>
+    </record>
+</odoo>

@@ -26,7 +26,8 @@
                     <div class="col-6 col-md-4 col-xl-3">
                         <div class="o_jw_kpi card h-100" t-on-click="() => this.openCustody(false)">
                             <div class="card-body"><div class="o_jw_kpi_label">Material Value at Job Workers</div>
-                                <div class="o_jw_kpi_value" t-esc="k.value_at_vendors"/></div>
+                                <div class="o_jw_kpi_value" t-esc="k.value_at_vendors"/>
+                                <div class="small text-muted" t-if="k.customer_owned_value_raw">incl. customer-owned <t t-esc="k.customer_owned_value"/></div></div>
                         </div>
                     </div>
                     <div class="col-6 col-md-4 col-xl-3">
@@ -82,6 +83,39 @@
                             </div>
                         </div>
                         <div class="small text-muted mt-2" t-if="c.note" t-esc="c.note"/>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-7">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold d-flex">Material Aging at Job Workers
+                                <a href="#" class="ms-auto small" t-on-click.prevent="openAging">Aging report</a></div>
+                            <div class="card-body">
+                                <div t-foreach="state.data.aging" t-as="a" t-key="a.bucket"
+                                     class="o_jw_pipeline_row d-flex align-items-center mb-2" t-on-click="() => this.openAging(a.bucket)">
+                                    <div class="o_jw_pipeline_label" t-esc="a.label"/>
+                                    <div class="flex-grow-1 mx-2 o_jw_bar_track">
+                                        <div t-attf-class="o_jw_bar #{a_index == 3 ? 'o_jw_bar_danger' : (a_index == 2 ? 'o_jw_bar_warning' : '')}"
+                                             t-attf-style="width: #{Math.round(a.value / state.data.aging_max * 100)}%"/>
+                                    </div>
+                                    <div class="fw-bold text-end o_jw_aging_value" t-esc="a.value_fmt"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card h-100">
+                            <div class="card-header fw-bold">Waiting for Approval</div>
+                            <div class="list-group list-group-flush">
+                                <a href="#" t-foreach="state.data.approvals" t-as="ap" t-key="ap.model"
+                                   class="list-group-item list-group-item-action d-flex align-items-center"
+                                   t-on-click.prevent="() => this.openApprovals(ap)">
+                                    <span t-esc="ap.label"/>
+                                    <span t-attf-class="ms-auto badge #{ap.count ? 'text-bg-warning' : 'text-bg-light'}" t-esc="ap.count"/>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -160,7 +194,7 @@
                                             <td class="text-end"><t t-esc="s.quality"/>%</td>
                                             <td class="text-end"><t t-esc="s.yield"/>%</td>
                                             <td class="text-end"><t t-esc="s.scrap"/>%</td>
-                                            <td class="text-end"><span t-attf-class="badge #{gradeClass(s.grade)}"><t t-esc="s.grade"/> · <t t-esc="s.score"/></span></td>
+                                            <td class="text-end"><span t-attf-class="badge #{gradeClass(s.grade)}"><t t-esc="s.grade"/> - <t t-esc="s.score"/></span></td>
                                         </tr>
                                     </tbody>
                                 </table>

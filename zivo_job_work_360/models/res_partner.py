@@ -7,6 +7,9 @@ class ResPartner(models.Model):
 
     jw_is_job_worker = fields.Boolean(
         'Job Worker', help="Mark this contact as a job worker / subcontractor for Job Work 360.")
+    jw_labour_rate = fields.Float(
+        'Job Work Labour Rate', digits='Product Price',
+        help="Hourly labour rate of this job worker, used to value reported labour hours (company currency).")
     jw_job_ids = fields.One2many('zivo.job.work', 'partner_id', string='Job Work Orders',
                                  groups='zivo_job_work_360.group_job_work_viewer')
     jw_job_count = fields.Integer('Job Work Count', compute='_compute_jw_stats', compute_sudo=True)

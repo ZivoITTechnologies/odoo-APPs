@@ -77,6 +77,24 @@ export class JobWorkDashboard extends Component {
         }
         this.action.doAction("zivo_job_work_360.action_zivo_job_work_exception");
     }
+    openAging(bucket) {
+        const domain = [["balance_qty", ">", 0], ["job_id.state", "not in", ["draft", "cancel", "closed"]]];
+        if (bucket && typeof bucket === "string") {
+            domain.push(["aging_bucket", "=", bucket]);
+            this.action.doAction({
+                type: "ir.actions.act_window",
+                name: _t("Material Aging"),
+                res_model: "zivo.job.work.material",
+                views: [[false, "list"], [false, "pivot"]],
+                domain,
+            });
+            return;
+        }
+        this.action.doAction("zivo_job_work_360.action_zivo_job_work_material_aging");
+    }
+    openApprovals(item) {
+        this.action.doAction(item.action);
+    }
     openScorecards() {
         this.action.doAction("zivo_job_work_360.action_zivo_job_work_vendor_score");
     }

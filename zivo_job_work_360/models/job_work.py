@@ -57,6 +57,11 @@ class ZivoJobWork(models.Model):
         'res.partner', 'Principal / Customer', required=True, tracking=True,
         default=lambda self: self.env.company.partner_id,
         help="Owner of the material. Defaults to your company; set the customer for customer-owned material.")
+    jw_owner_id = fields.Many2one(
+        'res.partner', 'Material Owner', compute='_compute_ownership', store=True,
+        help="Set when the material belongs to a customer: stock is then tracked with this owner and kept out "
+             "of your valuation and job costing.")
+    is_customer_owned = fields.Boolean('Customer-Owned Material', compute='_compute_ownership', store=True)
     partner_id = fields.Many2one(
         'res.partner', 'Job Worker', required=True, tracking=True, index=True,
         domain="[('is_company', '=', True)]", check_company=True)
@@ -147,6 +152,24 @@ class ZivoJobWork(models.Model):
     open_exception_count = fields.Integer(compute='_compute_exception_flags', store=True)
     has_blocking_exception = fields.Boolean(compute='_compute_exception_flags', store=True)
 
+    # Labour reported by the job worker
+    labour_enabled = fields.Boolean(related='company_id.jw_labour_enabled')
+    labour_ids = fields.One2many('zivo.job.work.labour', 'job_id', 'Labour Hours')
+    labour_hours = fields.Float('Approved Hours', compute='_compute_labour', store=True)
+    labour_hours_pending = fields.Float('Hours To Approve', compute='_compute_labour', store=True)
+    labour_cost = fields.Monetary('Labour Cost', compute='_compute_labour', store=True,
+                                  currency_field='company_currency_id')
+    labour_hours_per_unit = fields.Float('Hours / Output Unit', compute='_compute_labour', store=True,
+                                         digits=(16, 4))
+    labour_cost_per_unit = fields.Monetary('Labour Cost / Output Unit', compute='_compute_labour', store=True,
+                                           currency_field='company_currency_id')
+    contract_cost_per_unit = fields.Monetary('Contracted Charge / Unit', compute='_compute_labour', store=True,
+                                             currency_field='company_currency_id')
+    labour_margin_pct = fields.Float(
+        'Job Worker Margin (%)', compute='_compute_labour', store=True,
+        help="(Contracted processing charge - reported labour cost) / contracted charge. A negative value means "
+             "the contracted rate does not cover the labour reported by the job worker.")
+
     # Multi-stage
     parent_id = fields.Many2one('zivo.job.work', 'Previous Stage', index=True, copy=False, check_company=True)
     child_ids = fields.One2many('zivo.job.work', 'parent_id', 'Next Stages / Rework')
@@ -154,6 +177,20 @@ class ZivoJobWork(models.Model):
                               recursive=True)
     stage_sequence = fields.Integer('Stage No.', compute='_compute_root', store=True, recursive=True)
     mrp_production_id = fields.Many2one('mrp.production', 'Manufacturing Order', copy=False, check_company=True)
+    chain_job_ids = fields.Many2many('zivo.job.work', compute='_compute_chain', string='Chain Stages')
+    chain_count = fields.Integer('Stages in Chain', compute='_compute_chain')
+    chain_cost = fields.Monetary('Chain Actual Cost', compute='_compute_chain', currency_field='company_currency_id')
+    chain_scrap_value = fields.Monetary('Chain Scrap & Loss', compute='_compute_chain',
+                                        currency_field='company_currency_id')
+    chain_lead_days = fields.Float('Chain Lead Time (days)', compute='_compute_chain')
+    chain_final_qty = fields.Float('Chain Final Accepted', compute='_compute_chain', digits='Product Unit')
+    chain_rejected_qty = fields.Float('Chain Rejected', compute='_compute_chain', digits='Product Unit')
+    chain_cost_per_unit = fields.Monetary('Chain Cost / Final Unit', compute='_compute_chain',
+                                          currency_field='company_currency_id')
+    byproduct_move_ids = fields.Many2many('stock.move', compute='_compute_byproduct_moves',
+                                          string='By-products Received', groups='stock.group_stock_user',
+                                          compute_sudo=True)
+    byproduct_count = fields.Integer(compute='_compute_byproduct_moves', compute_sudo=True)
 
     # Vendor collaboration
     vendor_state = fields.Selection(VENDOR_STATES, 'Job Worker Status', default='new', copy=False, tracking=True)
@@ -330,7 +367,7 @@ class ZivoJobWork(models.Model):
     @api.depends('exception_ids.state', 'exception_ids.severity')
     def _compute_exception_flags(self):
         for job in self:
-            open_exc = job.exception_ids.filtered(lambda e: e.state == 'open')
+            open_exc = job.exception_ids.filtered(lambda e: e.state in ('open', 'to_approve'))
             job.open_exception_count = len(open_exc)
             job.has_blocking_exception = any(e.severity == 'high' for e in open_exc)
 
@@ -397,6 +434,64 @@ class ZivoJobWork(models.Model):
                 job.actual_yield = 0.0
                 job.yield_variance = 0.0
 
+    @api.depends('principal_id', 'company_id')
+    def _compute_ownership(self):
+        for job in self:
+            principal = job.principal_id.commercial_partner_id
+            own = (job.company_id or self.env.company).partner_id.commercial_partner_id
+            owner = principal if principal and principal != own else self.env['res.partner']
+            job.jw_owner_id = owner
+            job.is_customer_owned = bool(owner)
+
+    @api.depends('labour_ids.state', 'labour_ids.hours', 'labour_ids.cost', 'qty_received', 'product_qty', 'rate',
+                 'currency_id')
+    def _compute_labour(self):
+        for job in self:
+            approved = job.labour_ids.filtered(lambda l: l.state == 'approved')
+            job.labour_hours = sum(approved.mapped('hours'))
+            job.labour_hours_pending = sum(job.labour_ids.filtered(lambda l: l.state == 'submitted').mapped('hours'))
+            job.labour_cost = sum(approved.mapped('cost'))
+            basis = job.qty_received or job.product_qty
+            job.labour_hours_per_unit = basis and job.labour_hours / basis or 0.0
+            job.labour_cost_per_unit = basis and job.labour_cost / basis or 0.0
+            contract = job._jw_to_company_currency(job.rate, job.currency_id) if job.company_id else job.rate
+            job.contract_cost_per_unit = contract
+            job.labour_margin_pct = contract and (contract - job.labour_cost_per_unit) / contract * 100.0 \
+                if job.labour_cost else 0.0
+
+    def _compute_chain(self):
+        for job in self:
+            root = job.root_id or job
+            if not isinstance(root.id, int):
+                job.update({'chain_job_ids': False, 'chain_count': 0, 'chain_cost': 0.0, 'chain_scrap_value': 0.0,
+                            'chain_lead_days': 0.0, 'chain_final_qty': 0.0, 'chain_rejected_qty': 0.0,
+                            'chain_cost_per_unit': 0.0})
+                continue
+            chain = self.search([('root_id', '=', root.id), ('state', '!=', 'cancel')], order='stage_sequence, id')
+            main = chain.filtered(lambda j: not j.is_rework)
+            last_seq = max(main.mapped('stage_sequence') or [0])
+            final = main.filtered(lambda j: j.stage_sequence == last_seq)
+            starts = [d for d in chain.mapped('date_issued') if d]
+            ends = [d for d in chain.mapped('date_completed') if d]
+            all_done = all(j.state in ('completed', 'reconciled', 'closed') for j in chain)
+            end = max(ends) if (all_done and ends) else fields.Datetime.now()
+            job.chain_job_ids = chain
+            job.chain_count = len(chain)
+            job.chain_cost = sum(chain.mapped('cost_act_total'))
+            job.chain_scrap_value = sum(chain.mapped('material_scrap_value'))
+            job.chain_lead_days = max((end - min(starts)).total_seconds() / 86400.0, 0.0) if starts else 0.0
+            job.chain_final_qty = sum(final.mapped('qty_accepted'))
+            job.chain_rejected_qty = sum(chain.mapped('qty_rejected'))
+            job.chain_cost_per_unit = job.chain_final_qty and job.chain_cost / job.chain_final_qty or 0.0
+
+    def _compute_byproduct_moves(self):
+        Move = self.env['stock.move'].sudo()
+        for job in self:
+            moves = Move.search([('jw_order_id', '=', job.id), ('jw_move_type', 'in', ('byproduct', 'scrap_return')),
+                                 ('state', '=', 'done')]) if isinstance(job.id, int) else Move
+            job.byproduct_move_ids = moves
+            job.byproduct_count = len(moves)
+
     @api.depends('date_issued', 'date_completed')
     def _compute_cycle_time(self):
         for job in self:
@@ -434,14 +529,15 @@ class ZivoJobWork(models.Model):
                  'material_ids.qty_consumed', 'material_ids.qty_scrap', 'material_ids.qty_loss',
                  'material_ids.scrap_pct', 'rate', 'product_qty', 'qty_accepted', 'qty_received',
                  'cost_line_ids.expected_amount', 'cost_line_ids.actual_amount', 'cost_line_ids.cost_type',
-                 'purchase_line_ids.invoice_lines.parent_state', 'currency_id')
+                 'purchase_line_ids.invoice_lines.parent_state', 'currency_id', 'is_customer_owned')
     def _compute_costs(self):
         for job in self:
             # Scale the standard to the received output once output is known
             basis = job.qty_received if job.qty_received > 0 else job.product_qty
             factor = job.product_qty and basis / job.product_qty or 1.0
             exp_mat = exp_scrap = act_mat = act_scrap = 0.0
-            for mat in job.material_ids:
+            # customer-owned material is not ours: it does not enter our job cost
+            for mat in job.material_ids if not job.is_customer_owned else []:
                 exp_mat += mat.planned_qty * (1 - mat.scrap_pct / 100.0) * factor * mat.unit_cost
                 exp_scrap += mat.planned_qty * (mat.scrap_pct / 100.0) * factor * mat.unit_cost
                 act_mat += mat.qty_consumed * mat.unit_cost
@@ -552,14 +648,14 @@ class ZivoJobWork(models.Model):
         return jobs
 
     def write(self, vals):
-        locked_fields = {'partner_id', 'product_id', 'company_id', 'warehouse_id'}
+        locked_fields = {'partner_id', 'product_id', 'company_id', 'warehouse_id', 'principal_id'}
         if locked_fields & set(vals):
             for job in self:
                 if job.state not in ('draft', 'planned') and any(
                         job[f].id != vals[f] for f in locked_fields & set(vals) if f in vals):
                     raise UserError(_(
-                        "You cannot change the job worker, output product, warehouse or company of %s once "
-                        "material movements have started.", job.name))
+                        "You cannot change the job worker, principal, output product, warehouse or company of %s "
+                        "once material movements have started.", job.name))
         return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
@@ -624,6 +720,7 @@ class ZivoJobWork(models.Model):
             'jw_material_id': material and material.id or False,
             'jw_production_id': production and production.id or False,
             'jw_move_type': move_type,
+            'restrict_partner_id': self.jw_owner_id.id,
         })
         move._action_confirm()
         if location.usage == 'internal':
@@ -636,6 +733,8 @@ class ZivoJobWork(models.Model):
                     product=product.display_name, location=location.display_name, qty=qty, job=self.name))
         else:
             move.quantity = qty
+            if self.jw_owner_id:
+                move.move_line_ids.owner_id = self.jw_owner_id
         move.picked = True
         move._action_done()
         if move.state != 'done':
@@ -653,6 +752,7 @@ class ZivoJobWork(models.Model):
             'origin': self.name,
             'company_id': self.company_id.id,
             'jw_order_id': self.id,
+            'owner_id': self.jw_owner_id.id,
             'scheduled_date': fields.Datetime.now(),
             'move_ids': [(0, 0, {
                 'product_id': product.id,
@@ -665,6 +765,7 @@ class ZivoJobWork(models.Model):
                 'jw_material_id': material and material.id or False,
                 'jw_move_type': move_type,
                 'origin': self.name,
+                'restrict_partner_id': self.jw_owner_id.id,
             }) for material, product, qty, uom in lines],
         })
         picking.action_confirm()
@@ -991,7 +1092,8 @@ class ZivoJobWork(models.Model):
             messages = []
             for job in blocked:
                 reasons = job._jw_reconciliation_blockers() + [
-                    e.name for e in job.exception_ids if e.state == 'open' and e.severity == 'high']
+                    e.name + (_(' (awaiting approval)') if e.state == 'to_approve' else '')
+                    for e in job.exception_ids if e.state in ('open', 'to_approve') and e.severity == 'high']
                 messages.append('%s: %s' % (job.name, '; '.join(reasons)))
             return {
                 'type': 'ir.actions.client',
@@ -1110,7 +1212,7 @@ class ZivoJobWork(models.Model):
         """Open an exception when ``active`` and none is open; auto-resolve it when no longer active."""
         self.ensure_one()
         Exception_ = self.env['zivo.job.work.exception'].sudo()
-        domain = [('job_id', '=', self.id), ('exception_type', '=', exc_type), ('state', '=', 'open')]
+        domain = [('job_id', '=', self.id), ('exception_type', '=', exc_type), ('state', 'in', ('open', 'to_approve'))]
         if material:
             domain.append(('material_id', '=', material.id))
         existing = Exception_.search(domain)
@@ -1126,7 +1228,7 @@ class ZivoJobWork(models.Model):
                 'material_id': material and material.id or False,
             })
         elif active and existing:
-            existing.description = description
+            existing.filtered(lambda e: e.state == 'open').description = description
         elif not active and existing and auto:
             existing.write({'state': 'resolved', 'resolution': _('Resolved automatically: condition cleared.'),
                             'resolved_by_id': self.env.user.id, 'date_resolved': fields.Datetime.now()})
@@ -1143,6 +1245,8 @@ class ZivoJobWork(models.Model):
                   state=dict(job._fields['state']._description_selection(job.env)).get(job.state)),
                 severity='high')
             for mat in job.material_ids:
+                if mat.balance_qty <= 0:
+                    job._jw_set_exception('aging', False, material=mat)
                 rounding = mat.product_uom_id.rounding
                 issued = mat.qty_issued
                 if final:
@@ -1323,6 +1427,35 @@ class ZivoJobWork(models.Model):
             ('company_id', 'in', companies.ids), ('balance_qty', '>', 0),
             ('job_id.state', 'not in', ('cancel', 'closed'))])
         value_at_vendors = sum(materials.mapped('balance_value'))
+        owned_value = sum(materials.filtered('is_customer_owned').mapped('balance_value'))
+        aging = defaultdict(lambda: {'value': 0.0, 'lines': 0})
+        for mat in materials:
+            bucket = mat.aging_bucket or company._jw_aging_bucket(mat.age_days)
+            aging[bucket]['value'] += mat.balance_value
+            aging[bucket]['lines'] += 1
+        buckets = [company._jw_aging_bucket(d) for d in (0, (company.jw_aging_days_1 or 30) + 1,
+                                                           (company.jw_aging_days_2 or 60) + 1,
+                                                           (company.jw_aging_days_3 or 90) + 1)]
+        aging_rows = [{'bucket': b, 'label': b.split('. ', 1)[-1], 'value': aging[b]['value'],
+                       'value_fmt': currency.format(aging[b]['value']), 'lines': aging[b]['lines']}
+                      for b in buckets]
+        approvals = []
+        for label, model, domain, xmlid in (
+                (_('Exception resolutions'), 'zivo.job.work.exception', [('state', '=', 'to_approve')],
+                 'zivo_job_work_360.action_zivo_job_work_exception'),
+                (_('Material losses'), 'zivo.job.work.loss', [('state', '=', 'to_approve')],
+                 'zivo_job_work_360.action_zivo_job_work_loss'),
+                (_('Material requests'), 'zivo.job.work.request', [('state', '=', 'to_approve')],
+                 'zivo_job_work_360.action_zivo_job_work_request'),
+                (_('Labour hours'), 'zivo.job.work.labour', [('state', '=', 'submitted')],
+                 'zivo_job_work_360.action_zivo_job_work_labour')):
+            if model == 'zivo.job.work.labour' and not company.jw_labour_enabled:
+                continue
+            Model = self.env[model]
+            if not Model.has_access('read'):
+                continue
+            approvals.append({'label': label, 'model': model, 'action': xmlid,
+                              'count': Model.search_count(domain + [('company_id', 'in', companies.ids)])})
         by_vendor = defaultdict(lambda: {'value': 0.0, 'lines': 0, 'age': 0})
         for mat in materials:
             entry = by_vendor[mat.partner_id]
@@ -1355,6 +1488,8 @@ class ZivoJobWork(models.Model):
                 'overdue_jobs': len(overdue),
                 'value_at_vendors': currency.format(value_at_vendors),
                 'value_at_vendors_raw': value_at_vendors,
+                'customer_owned_value': currency.format(owned_value),
+                'customer_owned_value_raw': owned_value,
                 'avg_cycle_time': round(sum(cycle) / len(cycle), 1) if cycle else 0.0,
                 'avg_yield': round(sum(yields) / len(yields), 1) if yields else 0.0,
                 'scrap_rate': round(issued_value and scrap_value / issued_value * 100.0 or 0.0, 2),
@@ -1366,6 +1501,9 @@ class ZivoJobWork(models.Model):
                 'period_days': company.jw_score_period_days or 90,
             },
             'pipeline': pipeline,
+            'aging': aging_rows,
+            'aging_max': max([r['value'] for r in aging_rows] + [1.0]),
+            'approvals': approvals,
             'vendors_custody': vendor_rows,
             'exceptions': [{
                 'id': e.id, 'job': e.job_id.name, 'job_id': e.job_id.id,

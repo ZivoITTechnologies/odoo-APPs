@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="reason_weighing_difference" model="zivo.job.work.reason">
+            <field name="name">Weighing / counting difference</field>
+            <field name="code">WGT</field>
+            <field name="sequence">10</field>
+            <field name="reason_type">shortage</field>
+            <field name="requires_approval" eval="True"/>
+        </record>
+        <record id="reason_lost_at_vendor" model="zivo.job.work.reason">
+            <field name="name">Lost / missing at job worker</field>
+            <field name="code">LOST</field>
+            <field name="sequence">20</field>
+            <field name="reason_type">shortage</field>
+            <field name="requires_approval" eval="True"/>
+            <field name="recover_from_vendor" eval="True"/>
+        </record>
+        <record id="reason_process_loss" model="zivo.job.work.reason">
+            <field name="name">Process loss (burning, evaporation, chips)</field>
+            <field name="code">PROC</field>
+            <field name="sequence">30</field>
+            <field name="reason_type">loss</field>
+            <field name="requires_approval" eval="False"/>
+        </record>
+        <record id="reason_transit_damage" model="zivo.job.work.reason">
+            <field name="name">Damaged in transit</field>
+            <field name="code">TRNS</field>
+            <field name="sequence">40</field>
+            <field name="reason_type">loss</field>
+            <field name="requires_approval" eval="True"/>
+            <field name="recover_from_vendor" eval="True"/>
+        </record>
+        <record id="reason_setup_scrap" model="zivo.job.work.reason">
+            <field name="name">Setup / trial scrap</field>
+            <field name="code">SETUP</field>
+            <field name="sequence">50</field>
+            <field name="reason_type">scrap</field>
+            <field name="requires_approval" eval="False"/>
+        </record>
+        <record id="reason_machine_breakdown" model="zivo.job.work.reason">
+            <field name="name">Machine breakdown at job worker</field>
+            <field name="code">MACH</field>
+            <field name="sequence">60</field>
+            <field name="reason_type">scrap</field>
+            <field name="requires_approval" eval="True"/>
+            <field name="recover_from_vendor" eval="True"/>
+        </record>
+        <record id="reason_material_defect" model="zivo.job.work.reason">
+            <field name="name">Raw material defect</field>
+            <field name="code">RMDEF</field>
+            <field name="sequence">70</field>
+            <field name="reason_type">quality</field>
+            <field name="requires_approval" eval="True"/>
+        </record>
+        <record id="reason_process_defect" model="zivo.job.work.reason">
+            <field name="name">Process defect at job worker</field>
+            <field name="code">PRDEF</field>
+            <field name="sequence">80</field>
+            <field name="reason_type">quality</field>
+            <field name="requires_approval" eval="True"/>
+            <field name="recover_from_vendor" eval="True"/>
+        </record>
+        <record id="reason_other" model="zivo.job.work.reason">
+            <field name="name">Other (explain)</field>
+            <field name="code">OTH</field>
+            <field name="sequence">90</field>
+            <field name="reason_type">other</field>
+            <field name="requires_approval" eval="True"/>
+        </record>
+
+        <record id="ir_cron_job_work_aging" model="ir.cron">
+            <field name="name">Job Work: refresh material aging</field>
+            <field name="model_id" ref="model_zivo_job_work_material"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_refresh_aging()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -16,7 +16,10 @@
                 <field name="balance_qty" decoration-bf="1"/>
                 <field name="product_uom_id" string="Unit"/>
                 <field name="balance_value" sum="Total"/>
-                <field name="age_days" decoration-danger="age_days &gt; 30" decoration-warning="age_days &gt; 15"/>
+                <field name="age_days" decoration-danger="age_days &gt; 90" decoration-warning="age_days &gt; 30"/>
+                <field name="aging_bucket" optional="show"/>
+                <field name="is_customer_owned" optional="hide"/>
+                <field name="owner_id" optional="hide"/>
                 <field name="consumption_variance" optional="hide"/>
                 <field name="job_state" widget="badge" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
@@ -63,11 +66,15 @@
                 <filter string="Unaccounted on Completed Jobs" name="unaccounted"
                         domain="[('balance_qty', '&gt;', 0), ('job_id.state', 'in', ('completed', 'reconciled'))]"/>
                 <filter string="Capital Goods" name="capital" domain="[('is_capital_goods', '=', True)]"/>
+                <filter string="Customer-Owned" name="customer_owned" domain="[('is_customer_owned', '=', True)]"/>
+                <filter string="Company-Owned" name="company_owned" domain="[('is_customer_owned', '=', False)]"/>
                 <filter string="First Issued" name="date_first_issue" date="date_first_issue"/>
                 <group>
                     <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
                     <filter string="Material" name="group_product" context="{'group_by': 'product_id'}"/>
                     <filter string="Job Work" name="group_job" context="{'group_by': 'job_id'}"/>
+                    <filter string="Aging" name="group_aging" context="{'group_by': 'aging_bucket'}"/>
+                    <filter string="Owner" name="group_owner" context="{'group_by': 'owner_id'}"/>
                 </group>
             </search>
         </field>
@@ -88,6 +95,44 @@
         <field name="res_model">zivo.job.work.material</field>
         <field name="view_mode">pivot,list,graph</field>
         <field name="domain">[('job_id.state', 'not in', ('draft', 'cancel'))]</field>
+    </record>
+    <record id="view_zivo_job_work_material_aging_pivot" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.aging.pivot</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <pivot string="Material Aging" sample="1">
+                <field name="partner_id" type="row"/>
+                <field name="aging_bucket" type="col"/>
+                <field name="balance_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_material_aging_graph" model="ir.ui.view">
+        <field name="name">zivo.job.work.material.aging.graph</field>
+        <field name="model">zivo.job.work.material</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <graph string="Material Aging" type="bar" stacked="1" sample="1">
+                <field name="aging_bucket"/>
+                <field name="partner_id"/>
+                <field name="balance_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_material_aging" model="ir.actions.act_window">
+        <field name="name">Material Aging</field>
+        <field name="res_model">zivo.job.work.material</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="domain">[('job_id.state', 'not in', ('draft', 'cancel')), ('balance_qty', '&gt;', 0)]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_zivo_job_work_material_aging_pivot')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_zivo_job_work_material_aging_graph')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('view_zivo_job_work_material_list')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No material at job workers</p>
+            <p>Value of material still at each job worker by age (first in, first out). Buckets are set in Settings.</p>
+        </field>
     </record>
     <record id="action_server_jw_subcontractor_stock" model="ir.actions.server">
         <field name="name">Stock at Job Workers</field>

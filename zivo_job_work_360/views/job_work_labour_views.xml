@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivo_job_work_labour_list" model="ir.ui.view">
+        <field name="name">zivo.job.work.labour.list</field>
+        <field name="model">zivo.job.work.labour</field>
+        <field name="arch" type="xml">
+            <list string="Labour Hours" sample="1" decoration-muted="state == 'rejected'"
+                  decoration-info="state == 'submitted'">
+                <field name="date"/>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="operation"/>
+                <field name="worker_name" optional="show"/>
+                <field name="hours" sum="Total"/>
+                <field name="hourly_rate" optional="show"/>
+                <field name="cost" sum="Total"/>
+                <field name="source" optional="show"/>
+                <field name="company_currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'"
+                       decoration-warning="state == 'submitted'" decoration-danger="state == 'rejected'"/>
+                <button name="action_approve" type="object" string="Approve" icon="fa-check"
+                        invisible="state != 'submitted'" groups="zivo_job_work_360.group_job_work_manager"/>
+                <button name="action_reject" type="object" string="Reject" icon="fa-times"
+                        invisible="state not in ('submitted', 'draft')" groups="zivo_job_work_360.group_job_work_manager"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_labour_form" model="ir.ui.view">
+        <field name="name">zivo.job.work.labour.form</field>
+        <field name="model">zivo.job.work.labour</field>
+        <field name="arch" type="xml">
+            <form string="Labour Hours">
+                <header>
+                    <button name="action_submit" type="object" string="Submit" class="oe_highlight"
+                            invisible="state not in ('draft', 'rejected')" groups="zivo_job_work_360.group_job_work_user"/>
+                    <button name="action_approve" type="object" string="Approve" class="oe_highlight"
+                            invisible="state != 'submitted'" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <button name="action_reject" type="object" string="Reject"
+                            invisible="state not in ('submitted', 'draft')" groups="zivo_job_work_360.group_job_work_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="job_id" readonly="state == 'approved'"/>
+                            <field name="partner_id"/>
+                            <field name="date" readonly="state == 'approved'"/>
+                            <field name="operation" readonly="state == 'approved'"/>
+                            <field name="worker_name" readonly="state == 'approved'"/>
+                        </group>
+                        <group>
+                            <field name="hours" readonly="state == 'approved'"/>
+                            <field name="hourly_rate" readonly="state == 'approved'"/>
+                            <field name="cost"/>
+                            <field name="company_currency_id" invisible="1"/>
+                            <field name="source" readonly="1"/>
+                            <field name="submitted_by_id"/>
+                            <field name="approved_by_id" invisible="not approved_by_id"/>
+                            <field name="reject_reason" invisible="not reject_reason"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Comment"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_labour_search" model="ir.ui.view">
+        <field name="name">zivo.job.work.labour.search</field>
+        <field name="model">zivo.job.work.labour</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="job_id"/>
+                <field name="partner_id"/>
+                <field name="operation"/>
+                <filter string="To Approve" name="to_approve" domain="[('state', '=', 'submitted')]"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Date" name="date" date="date"/>
+                <group>
+                    <filter string="Job Worker" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Job Work" name="group_job" context="{'group_by': 'job_id'}"/>
+                    <filter string="Operation" name="group_operation" context="{'group_by': 'operation'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_zivo_job_work_labour_pivot" model="ir.ui.view">
+        <field name="name">zivo.job.work.labour.pivot</field>
+        <field name="model">zivo.job.work.labour</field>
+        <field name="arch" type="xml">
+            <pivot string="Labour Analysis">
+                <field name="partner_id" type="row"/>
+                <field name="operation" type="row"/>
+                <field name="hours" type="measure"/>
+                <field name="cost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_zivo_job_work_labour" model="ir.actions.act_window">
+        <field name="name">Labour Hours</field>
+        <field name="res_model">zivo.job.work.labour</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="context">{'search_default_to_approve': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No labour hours to review</p>
+            <p>Job workers report the hours spent per operation on the vendor portal (enable it in Settings).</p>
+        </field>
+    </record>
+</odoo>

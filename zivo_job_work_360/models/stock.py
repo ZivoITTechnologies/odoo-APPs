@@ -10,6 +10,7 @@ MOVE_TYPES = [
     ('loss', 'Approved Loss'),
     ('output', 'Output Receipt'),
     ('scrap_return', 'Returned Scrap'),
+    ('byproduct', 'By-product Receipt'),
     ('reject', 'Rejected Output'),
     ('qc_scrap', 'Scrapped Output'),
 ]
@@ -51,6 +52,14 @@ class StockMove(models.Model):
                     vals['jw_move_type'] = False
                     vals['jw_production_id'] = False
         return super().create(vals_list)
+
+    def _update_reserved_quantity_vals(self, need, location_id, lot_id=None, package_id=None, owner_id=None,
+                                       strict=True):
+        # Customer-owned job work material: only reserve the quants of that owner
+        if not owner_id and self.restrict_partner_id and (self.jw_material_id or self.jw_production_id):
+            owner_id = self.restrict_partner_id
+        return super()._update_reserved_quantity_vals(need, location_id, lot_id=lot_id, package_id=package_id,
+                                                      owner_id=owner_id, strict=strict)
 
     def _action_done(self, cancel_backorder=False):
         moves = super()._action_done(cancel_backorder=cancel_backorder)

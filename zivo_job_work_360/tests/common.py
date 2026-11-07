@@ -88,5 +88,22 @@ class JobWorkCommon(TransactionCase):
         qc.action_done()
         return qc
 
-    def _qty_at(self, product, location):
+    def _resolve(self, exception, reason_xmlid, user=None, mode='resolve', write_off=False, qty=None,
+                 note='Explained'):
+        env = self.env(user=user) if user else self.env
+        action = exception.with_env(env).action_waive() if mode == 'waive' else \
+            exception.with_env(env).action_resolve()
+        wiz_form = Form(env['zivo.job.work.exception.resolve.wizard'].with_context(action['context']))
+        wiz_form.reason_id = self.env.ref(reason_xmlid)
+        wiz_form.resolution = note
+        if write_off:
+            wiz_form.write_off = True
+            if qty is not None:
+                wiz_form.write_off_qty = qty
+        return wiz_form.save().action_confirm()
+
+    def _qty_at(self, product, location, owner=None):
+        if owner is not None:
+            return self.env['stock.quant']._get_available_quantity(product, location, owner_id=owner, strict=True,
+                                                                   allow_negative=True)
         return self.env['stock.quant']._get_available_quantity(product, location, allow_negative=True)

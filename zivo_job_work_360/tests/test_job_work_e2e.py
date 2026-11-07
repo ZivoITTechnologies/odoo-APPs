@@ -6,7 +6,6 @@
 * edge cases: units of measure, serial numbers, multi-step warehouses, double submission, chains, volume
 """
 import time
-from datetime import timedelta
 
 from lxml import etree
 
@@ -18,7 +17,7 @@ from odoo.tools.safe_eval import safe_eval
 
 from .common import JobWorkCommon
 
-JW_MODULES = ('zivo_job_work_360', 'zivo_job_work_360_india')
+JW_MODULES = ('zivo_job_work_360', 'zivo_job_work_360')
 
 
 def _spec_from_arch(model, arch):
@@ -170,7 +169,7 @@ class TestJobWorkSmoke(JobWorkCommon):
             records[:3].web_read(spec)
         for vt in ('pivot', 'graph'):
             if vt in views['views']:
-                Model.read_group([], ['__count'], [])
+                Model.formatted_read_group([], [], ['__count'])
 
     def _menu_actions(self, user):
         menus = self.env['ir.ui.menu'].with_user(user).load_web_menus(False)
@@ -250,10 +249,12 @@ class TestJobWorkSmoke(JobWorkCommon):
 
     def test_06_scheduled_actions_run(self):
         crons = self.env['ir.cron'].search([('model_id.model', 'in', (
-            'zivo.job.work', 'zivo.job.work.vendor.score'))])
-        self.assertGreaterEqual(len(crons), 2)
+            'zivo.job.work', 'zivo.job.work.vendor.score', 'zivo.job.work.material'))])
+        self.assertGreaterEqual(len(crons), 3)
         for cron in crons:
-            cron.method_direct_trigger()
+            # run the scheduled action in the test transaction (method_direct_trigger uses its own cursor and
+            # would wait on rows locked by this test on a database that already contains data)
+            cron.ir_actions_server_id.run()
 
     def test_07_settings_save(self):
         settings = Form(self.env['res.config.settings'])
@@ -501,3 +502,45 @@ class TestJobWorkEdgeCases(JobWorkCommon):
         with self.assertRaises(UserError):
             wizard.action_create_returns()
         self.assertEqual(job.qty_accepted, 5.0)
+
+
+@tagged('post_install', '-at_install', 'job_work', 'job_work_e2e')
+class TestJobWorkV11Browser(HttpCase, JobWorkCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.e2e_vendor = cls.env['res.partner'].create({'name': 'E2E Forge', 'is_company': True,
+                                                        'jw_is_job_worker': True})
+        cls.e2e_type = cls.env['zivo.job.work.type'].create({
+            'name': 'E2E Coating', 'code': 'E2E', 'quality_required': False, 'expected_yield': 98.0,
+            'expected_scrap_pct': 0.0, 'lead_days': 4})
+        cls.e2e_raw = cls.env['product.product'].create({'name': 'E2E Raw', 'type': 'consu', 'is_storable': True,
+                                                         'standard_price': 3.0})
+        cls.e2e_out = cls.env['product.product'].create({'name': 'E2E Output', 'type': 'consu',
+                                                         'is_storable': True, 'standard_price': 9.0})
+        cls.env['stock.quant']._update_available_quantity(cls.e2e_raw, cls.stock_location, 500.0)
+        cls.manager.write({'password': 'jw_manager_pwd'})
+
+    def test_03_resolve_exception_in_browser(self):
+        self.e2e_type.quality_required = False
+        job = self._create_job(qty=10.0, material_qty=100.0, partner=self.e2e_vendor, product=self.e2e_out,
+                               raw=self.e2e_raw, job_type=self.e2e_type)
+        job.user_id = self.manager
+        self._issue_all(job)
+        self._receive(job, 10.0, consumed=96.0)
+        job.action_reconcile()
+        self.assertEqual(job.state, 'completed')
+        self.start_tour('/odoo/action-zivo_job_work_360.action_zivo_job_work/%s' % job.id,
+                        'zivo_v11_resolve_exception', login='jw_manager', password='jw_manager_pwd')
+        shortage = job.exception_ids.filtered(lambda e: e.exception_type == 'shortage')
+        self.assertEqual(shortage.state, 'resolved')
+        self.assertEqual(shortage.reason_id.code, 'WGT')
+        self.assertEqual(shortage.loss_id.qty, 4.0)
+        self.assertEqual(job.state, 'reconciled')
+
+    def test_04_dashboard_v11_in_browser(self):
+        job = self._create_job(qty=10.0, material_qty=10.0)
+        self._issue_all(job)
+        self.start_tour('/odoo/action-zivo_job_work_360.action_job_work_dashboard', 'zivo_v11_dashboard',
+                        login='jw_manager', password='jw_manager_pwd')

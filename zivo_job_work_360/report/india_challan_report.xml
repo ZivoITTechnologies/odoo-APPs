@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_job_work_challan" model="ir.actions.report">
+        <field name="name">Job Work Challan</field>
+        <field name="model">zivo.job.work.challan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivo_job_work_360.report_job_work_challan</field>
+        <field name="report_file">zivo_job_work_360.report_job_work_challan</field>
+        <field name="print_report_name">'Job Work Challan - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_zivo_job_work_challan"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_job_work_challan_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <div class="row">
+                    <div class="col-8">
+                        <h3 class="mb-0">DELIVERY CHALLAN FOR JOB WORK</h3>
+                        <div class="text-muted small">Goods sent for job work - not a supply</div>
+                        <h4 class="mt-2">No. <span t-field="o.name"/></h4>
+                        <div>Date: <span t-field="o.date"/></div>
+                        <div t-if="o.state == 'cancel'" class="text-danger fw-bold">CANCELLED</div>
+                    </div>
+                    <div class="col-4 text-end">
+                        <img t-if="o.qr_image" t-att-src="image_data_uri(o.qr_image)" style="width: 110px; height: 110px;" alt="QR"/>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <strong>Principal (Consignor)</strong>
+                        <div t-field="o.company_id.partner_id" t-options='{"widget": "contact", "fields": ["name", "address"], "no_marker": True}'/>
+                        <div>GSTIN: <span t-field="o.principal_gstin"/></div>
+                        <div>State Code: <span t-esc="o.from_state_code or ''"/></div>
+                    </div>
+                    <div class="col-6">
+                        <strong>Job Worker (Consignee)</strong>
+                        <div t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["name", "address"], "no_marker": True}'/>
+                        <div>GSTIN: <span t-esc="o.job_worker_gstin or 'Unregistered'"/></div>
+                        <div>State Code: <span t-esc="o.to_state_code or ''"/></div>
+                    </div>
+                </div>
+                <div class="row mt-3 small">
+                    <div class="col-3"><strong>Job Work Ref.</strong><div t-field="o.job_id.name"/></div>
+                    <div class="col-3"><strong>Nature of Processing</strong><div t-field="o.nature_of_processing"/></div>
+                    <div class="col-3"><strong>Dispatch Transfer</strong><div t-esc="o.sudo().picking_id.name"/></div>
+                    <div class="col-3"><strong>E-Way Bill</strong><div t-field="o.ewaybill_no"/></div>
+                </div>
+                <table class="table table-sm mt-3">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Description of Goods</th><th>HSN</th><th class="text-end">Qty</th><th>UQC</th>
+                            <th class="text-end">Rate</th><th class="text-end">Value</th><th class="text-end">GST %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.line_ids" t-as="line">
+                            <td t-esc="line_index + 1"/>
+                            <td><span t-field="line.name"/></td>
+                            <td><span t-field="line.hsn_code"/></td>
+                            <td class="text-end"><span t-field="line.qty"/></td>
+                            <td><span t-field="line.uqc"/></td>
+                            <td class="text-end"><span t-field="line.unit_value"/></td>
+                            <td class="text-end"><span t-field="line.value"/></td>
+                            <td class="text-end"><span t-esc="'%.2f' % line.gst_rate"/></td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="6" class="text-end">Total value of goods</td>
+                            <td class="text-end"><span t-field="o.amount_total"/></td>
+                            <td/>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row small">
+                    <div class="col-6">
+                        <strong>Transport</strong>
+                        <div>Mode: <span t-field="o.transport_mode"/></div>
+                        <div t-if="o.vehicle_no">Vehicle: <span t-field="o.vehicle_no"/></div>
+                        <div t-if="o.transporter_name">Transporter: <span t-field="o.transporter_name"/> <span t-field="o.transporter_id"/></div>
+                        <div t-if="o.transport_doc_no">Doc: <span t-field="o.transport_doc_no"/> <span t-field="o.transport_doc_date"/></div>
+                        <div t-if="o.distance_km">Distance: <span t-field="o.distance_km"/> km</div>
+                    </div>
+                    <div class="col-6">
+                        <strong>Ship To</strong>
+                        <div style="white-space: pre-line" t-field="o.destination_address"/>
+                    </div>
+                </div>
+                <p t-if="o.note" class="mt-3" t-field="o.note"/>
+                <p class="small text-muted mt-3">Goods are sent for job work and are to be returned after processing.
+                    Values are for identification only.</p>
+                <div class="row mt-5">
+                    <div class="col-6">Received by (Job Worker)<br/><br/><br/>Signature &amp; Seal</div>
+                    <div class="col-6 text-end">For <span t-field="o.company_id.name"/><br/><br/><br/>Authorised Signatory</div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_job_work_challan">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="zivo_job_work_360.report_job_work_challan_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

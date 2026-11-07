@@ -4,3 +4,5 @@ from . import test_job_work_billing
 from . import test_job_work_portal
 from . import test_job_work_ui
 from . import test_job_work_e2e
+from . import test_job_work_v11
+from . import test_india
