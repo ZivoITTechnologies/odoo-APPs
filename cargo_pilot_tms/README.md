@@ -81,7 +81,7 @@ Leaflet 1.9.4 (BSD-2-Clause) is bundled in `static/lib/leaflet`.
 
 ## Licence and price
 OPL-1, USD 599 on the Odoo App Store (`price` / `currency` in `__manifest__.py`). One purchase covers every feature
-in this file. Author: Zivo IT Technologies, https://www.zivoit.com, support: info@zivoit.com.
+in this file. Author: ZivoIT Technologies, https://www.zivoit.com, support: info@zivoit.com.
 
 ## Cargo Pilot Courier
 Courier (parcel) shipping for Cargo Pilot TMS: compare prices, book AWBs, print labels, request pickups,

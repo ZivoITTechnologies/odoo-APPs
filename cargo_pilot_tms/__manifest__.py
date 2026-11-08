@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Cargo Pilot TMS - Transport, Dispatch & Courier Management',
-    'version': '19.0.3.0.0',
+    'version': '19.0.3.1.0',
     'summary': 'One app for shippers, 3PLs and transporters: dispatch planning, regular partners first, '
                'live 3PL bidding, gate and detention, tracking, ePOD, POD-gated freight bills, courier networks, '
                'e-way bill / ULIP / WhatsApp, Zoho and EasyEcom. For Odoo 19.',
@@ -24,8 +24,8 @@ Transport, dispatch and courier management in one Odoo 19 app.
 * Transporter side: consignment notes, challans, hire slips, trip P&L, fleet operations, scorecards
 """,
     'category': 'Inventory/Delivery',
-    'author': 'Zivo IT Technologies',
-    'maintainer': 'Zivo IT Technologies',
+    'author': 'ZivoIT Technologies',
+    'maintainer': 'ZivoIT Technologies',
     'website': 'https://www.zivoit.com',
     'support': 'info@zivoit.com',
     'license': 'OPL-1',
