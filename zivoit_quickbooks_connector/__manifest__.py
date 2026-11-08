@@ -2,7 +2,7 @@
 # Copyright 2026 ZivoIT Technologies (https://www.zivoit.com)
 # License OPL-1 (https://www.odoo.com/documentation/master/legal/licenses.html)
 {
-    "name": "QuickBooks Online Connector Pro | Two-Way Odoo ⇄ QuickBooks Sync",
+    "name": "QuickBooks Online Connector Pro | Two-Way Odoo and QuickBooks Sync",
     "summary": "Real-time two-way QuickBooks Online sync: customers, vendors, items, "
                "invoices, bills, credit notes, payments, estimates, POs, journal entries, "
                "taxes, classes & locations. Webhooks (CloudEvents) + CDC, conflict "

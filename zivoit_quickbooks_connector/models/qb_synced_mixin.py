@@ -3,8 +3,10 @@
 # License OPL-1
 from odoo import _, fields, models
 from odoo.exceptions import UserError
+from .qb_ui import friendly_errors
 
 
+@friendly_errors
 class QbSyncedMixin(models.AbstractModel):
     """Adds QuickBooks status fields, change tracking and buttons to a model."""
     _name = "qb.synced.mixin"

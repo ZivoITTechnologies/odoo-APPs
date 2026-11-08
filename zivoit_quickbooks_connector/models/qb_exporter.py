@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2026 ZivoIT Technologies (https://www.zivoit.com)
 # License OPL-1
-"""Odoo → QuickBooks export engine."""
+"""Odoo -> QuickBooks export engine."""
 import hashlib
 import json
 import logging
@@ -226,7 +226,7 @@ class QbExporter(models.AbstractModel):
                 return {"value": existing["Id"]}
         if not ctx.conn._allows(entity, "export"):
             if required:
-                raise UserError(_("%(model)s '%(name)s' is not linked to QuickBooks. Map it in QuickBooks → "
+                raise UserError(_("%(model)s '%(name)s' is not linked to QuickBooks. Map it in QuickBooks > "
                                   "Mappings or enable export for %(entity)s.", model=record._description,
                                   name=record.display_name, entity=entity))
             return None
@@ -264,7 +264,7 @@ class QbExporter(models.AbstractModel):
         mapping = self.env["qb.mapping"]._for_record(ctx.conn, taxes[:1], entity)
         if not mapping or not mapping.qb_id:
             raise UserError(_("Tax '%(tax)s' is not mapped to a QuickBooks tax code. Import QuickBooks taxes or run "
-                              "Smart Match, then map it in QuickBooks → Mappings.", tax=taxes[:1].display_name))
+                              "Smart Match, then map it in QuickBooks > Mappings.", tax=taxes[:1].display_name))
         return {"value": mapping.qb_id}
 
     def _analytic_refs(self, ctx, distribution):

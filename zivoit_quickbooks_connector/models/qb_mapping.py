@@ -4,8 +4,10 @@
 from odoo import api, fields, models
 
 from .qb_entity_config import ENTITY_SELECTION
+from .qb_ui import friendly_errors
 
 
+@friendly_errors
 class QbMapping(models.Model):
     """Link table between one Odoo record and one QuickBooks object.
 
@@ -109,7 +111,7 @@ class QbMapping(models.Model):
     @api.model
     def _link(self, connection, qb_entity, qb_obj_or_id, record, direction="import", name=None,
               payload_hash=None):
-        """Create or update the mapping for ``record`` ⇄ QBO object."""
+        """Create or update the mapping for ``record`` and the QBO object."""
         if isinstance(qb_obj_or_id, dict):
             qb_id = str(qb_obj_or_id.get("Id"))
             token = qb_obj_or_id.get("SyncToken")
@@ -177,7 +179,7 @@ class QbMapping(models.Model):
 
 
 def _parse_qb_datetime(value):
-    """QBO returns '2026-11-05T10:12:13-08:00' → naive UTC datetime."""
+    """QBO returns '2026-11-05T10:12:13-08:00' -> naive UTC datetime."""
     from datetime import datetime, timezone
     if not value:
         return False

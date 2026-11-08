@@ -212,3 +212,51 @@ class TestConnection(QbCommon):
         self.assertGreaterEqual(self.conn.pending_count, 1)
         self.assertIn(self.conn.health, ("ok", "warn", "ko"))
         self.assertEqual(self.conn.action_view_pending()["res_model"], "qb.sync.job")
+
+    # ------------------------------------------------------ error handling
+    def _break_network(self):
+        import requests
+        from .common import FakeQBO
+        original = FakeQBO.handle
+
+        def boom(fake, method, url, params, data, headers):
+            raise requests.exceptions.ConnectionError("Tunnel connection failed: 403 Forbidden")
+        self.fake.handle = boom.__get__(self.fake)
+        self.addCleanup(lambda: delattr(self.fake, "handle"))
+        tok = self.env["qb.connection.token"].sudo().search([("connection_id", "=", self.conn.id)])
+        tok.access_expiry = fields.Datetime.now() - timedelta(minutes=1)  # force a token refresh
+        return original
+
+    def test_network_error_is_a_clean_user_message(self):
+        self._break_network()
+        wiz = self.env["qb.integrity.wizard"].create({"connection_id": self.conn.id})
+        with self.assertRaises(UserError) as cm:
+            wiz.action_check()
+        self.assertIn("Could not reach QuickBooks", str(cm.exception))
+        self.assertIs(type(cm.exception), UserError, "the web client only shows a clean dialog for UserError itself")
+        with self.assertRaises(UserError):
+            self.conn.action_test_connection()
+        with self.assertRaises(UserError):
+            self.conn.action_smart_match()
+        with self.assertRaises(UserError):
+            self.conn.action_sync_now()
+
+    def test_network_error_does_not_expire_connection(self):
+        self._break_network()
+        self.env["qb.connection"]._cron_keep_tokens_alive()
+        self.assertEqual(self.conn.state, "connected", "a network outage must not force re-authorization")
+        self.assertIn("Could not reach QuickBooks", self.conn.last_error)
+
+    def test_network_error_in_job_is_retried(self):
+        self._break_network()
+        job = self.conn._enqueue("import", "Customer", qb_id="5150")
+        job._run_one()
+        self.assertEqual(job.state, "pending", "network errors are transient and retried later")
+        self.assertEqual(self.conn.state, "connected")
+
+    def test_disconnect_works_offline(self):
+        self._break_network()
+        conn = self.conn
+        conn.action_disconnect()
+        self.assertEqual(conn.state, "draft")
+

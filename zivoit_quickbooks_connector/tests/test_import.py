@@ -346,7 +346,7 @@ class TestImport(QbCommon):
         cust = self.fake.add("Customer", {"DisplayName": "Conflicted Co", "Notes": "qb"})
         self.import_obj("Customer", cust)
         partner = self.mapped("Customer", cust["Id"])
-        partner.phone = "+1 555 0000"  # local change → dirty
+        partner.phone = "+1 555 0000"  # local change -> dirty
         self.assertEqual(self.Mapping._for_record(self.conn, partner).state, "dirty")
         cust.update(SyncToken="1", PrimaryPhone={"FreeFormNumber": "999"})
         return cust, partner

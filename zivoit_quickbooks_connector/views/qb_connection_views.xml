@@ -15,7 +15,7 @@
                             <div>
                                 <field name="name" class="fw-bold fs-5"/>
                                 <div class="text-muted small">
-                                    <field name="qb_company_name"/> · <field name="environment"/>
+                                    <field name="qb_company_name"/> | <field name="environment"/>
                                 </div>
                             </div>
                             <field name="state" widget="badge"
@@ -51,7 +51,7 @@
                             </div>
                         </div>
                         <div class="small text-muted mt-2">
-                            Last sync: <field name="last_cdc_sync" widget="datetime"/> ·
+                            Last sync: <field name="last_cdc_sync" widget="datetime"/> |
                             <field name="done_today_count"/> done in 24h
                         </div>
                         <footer class="mt-2 d-flex gap-1 flex-wrap">

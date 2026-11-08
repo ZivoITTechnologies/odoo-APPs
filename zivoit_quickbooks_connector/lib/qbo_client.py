@@ -24,6 +24,11 @@ from urllib.parse import urlencode, quote
 
 import requests
 
+try:  # inside Odoo: QuickBooks errors are shown as clean user messages, never as tracebacks
+    from odoo.exceptions import UserError as _ErrorBase
+except ImportError:  # pragma: no cover - library used outside Odoo
+    _ErrorBase = Exception
+
 _logger = logging.getLogger(__name__)
 
 AUTH_URL = "https://appcenter.intuit.com/connect/oauth2"
@@ -48,7 +53,7 @@ def _sleep(seconds):
     time.sleep(seconds)
 
 
-class QBOError(Exception):
+class QBOError(_ErrorBase):
     """Generic QuickBooks API error carrying the parsed Fault payload."""
 
     def __init__(self, message, status=None, code=None, detail=None, payload=None):
@@ -198,11 +203,16 @@ class QBOClient:
         return "Basic " + base64.b64encode(raw).decode()
 
     def _token_request(self, data):
-        resp = self.session.post(
-            TOKEN_URL, data=data, timeout=DEFAULT_TIMEOUT,
-            headers={"Authorization": self._basic_auth(), "Accept": "application/json",
-                     "Content-Type": "application/x-www-form-urlencoded"},
-        )
+        try:
+            resp = self.session.post(
+                TOKEN_URL, data=data, timeout=DEFAULT_TIMEOUT,
+                headers={"Authorization": self._basic_auth(), "Accept": "application/json",
+                         "Content-Type": "application/x-www-form-urlencoded"},
+            )
+        except requests.RequestException as exc:
+            # network problem, not an authorization problem: keep the tokens, retry later
+            raise QBOError("Could not reach QuickBooks (Intuit) to refresh the connection. Check the server's "
+                           "internet access and try again. Details: %s" % exc) from exc
         try:
             body = resp.json()
         except ValueError:
@@ -232,9 +242,12 @@ class QBOClient:
         token = self.refresh_token or self.access_token
         if not token:
             return True
-        resp = self.session.post(
-            REVOKE_URL, json={"token": token}, timeout=DEFAULT_TIMEOUT,
-            headers={"Authorization": self._basic_auth(), "Accept": "application/json"})
+        try:
+            resp = self.session.post(
+                REVOKE_URL, json={"token": token}, timeout=DEFAULT_TIMEOUT,
+                headers={"Authorization": self._basic_auth(), "Accept": "application/json"})
+        except requests.RequestException as exc:
+            raise QBOError("Could not reach QuickBooks (Intuit) to revoke the connection: %s" % exc) from exc
         return resp.status_code in (200, 204)
 
     # --------------------------------------------------------------- Requests
@@ -278,7 +291,8 @@ class QBOClient:
                 if attempt <= self.max_retries:
                     self.sleep(min(2 ** attempt, 30))
                     continue
-                raise QBOError("Network error contacting QuickBooks: %s" % exc) from exc
+                raise QBOError("Could not reach QuickBooks. Check the server's internet access and try "
+                               "again. Details: %s" % exc) from exc
             duration = time.monotonic() - started
             status = resp.status_code
             if self.logger_cb:

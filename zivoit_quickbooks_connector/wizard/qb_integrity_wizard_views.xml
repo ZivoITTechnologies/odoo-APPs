@@ -19,7 +19,7 @@
                 </group>
                 <div invisible="state != 'done'">
                     <div class="alert alert-success" role="status" invisible="issue_count != 0">
-                        All <field name="checked_count" class="d-inline"/> documents match. 🎉
+                        All <field name="checked_count" class="d-inline"/> documents match.
                     </div>
                     <div class="alert alert-warning" role="status" invisible="issue_count == 0">
                         <field name="issue_count" class="d-inline"/> issue(s) found.

@@ -15,6 +15,7 @@ from odoo.modules import module as odoo_module
 from ..lib import crypto
 from ..lib.qbo_client import QBOClient, QBOError, QBOAuthError, parse_webhook
 from .qb_entity_config import ENTITIES, ENTITY_INFO, ENTITY_CANONICAL
+from .qb_ui import friendly_errors
 
 _logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class QbConnectionToken(models.Model):
     _conn_uniq = models.Constraint("UNIQUE(connection_id)", "One token record per connection.")
 
 
+@friendly_errors
 class QbConnection(models.Model):
     _name = "qb.connection"
     _description = "QuickBooks Online Connection"
@@ -64,11 +66,11 @@ class QbConnection(models.Model):
     client_secret = fields.Char("Client Secret", groups="zivoit_quickbooks_connector.group_qb_manager",
                                 copy=False)
     redirect_uri = fields.Char(compute="_compute_urls",
-                               help="Copy this URL into Intuit Developer → Keys & credentials → Redirect URIs")
+                               help="Copy this URL into Intuit Developer > Keys & credentials > Redirect URIs")
     webhook_url = fields.Char(compute="_compute_urls",
-                              help="Copy this URL into Intuit Developer → Webhooks → Endpoint URL")
+                              help="Copy this URL into Intuit Developer > Webhooks > Endpoint URL")
     webhook_verifier_token = fields.Char(groups="zivoit_quickbooks_connector.group_qb_manager", copy=False,
-                                         help="Verifier token shown in Intuit Developer → Webhooks")
+                                         help="Verifier token shown in Intuit Developer > Webhooks")
     realm_id = fields.Char("Company ID (Realm)", copy=False, tracking=True, index=True)
     oauth_nonce = fields.Char(copy=False, groups="base.group_system")
     token_ids = fields.One2many("qb.connection.token", "connection_id", groups="base.group_system")
@@ -331,7 +333,7 @@ class QbConnection(models.Model):
 
     def _api_logger(self, method, url, params, payload, status, body, duration, tid):
         self.env["qb.sync.log"]._log(
-            self, "%s %s → %s" % (method, url.split("/v3/company/")[-1], status), level="api",
+            self, "%s %s -> %s" % (method, url.split("/v3/company/")[-1], status), level="api",
             request_method=method, request_url=url, request_body=payload, response_status=status,
             response_body=body, duration_ms=int(duration * 1000), intuit_tid=tid)
 
@@ -527,7 +529,7 @@ class QbConnection(models.Model):
 
     def _incremental_sync(self, source="cdc"):
         """Use QuickBooks Change Data Capture to fetch everything that changed
-        since the last run – including deletions – in one call per 30 days."""
+        since the last run - including deletions - in one call per 30 days."""
         self.ensure_one()
         client = self._get_client()
         since = self.last_cdc_sync or (fields.Datetime.now() - timedelta(days=1))
@@ -671,9 +673,13 @@ class QbConnection(models.Model):
                 conn._get_client().refresh()
                 if conn.state == "expired":
                     conn.state = "connected"
-            except (QBOError, UserError) as exc:
+            except QBOAuthError as exc:
                 conn.write({"state": "expired", "last_error": str(exc)})
                 conn.message_post(body=_("QuickBooks authorization expired: %s. Please reconnect.", exc))
+            except (QBOError, UserError) as exc:
+                # temporary problem (network, Intuit outage): keep the connection, try again next run
+                conn.last_error = str(exc)
+                self.env["qb.sync.log"]._log(conn, str(exc), level="warning")
 
     def action_sync_now(self):
         total = 0
@@ -720,7 +726,7 @@ class QbConnection(models.Model):
         made += self._smart_match_taxes(client)
         made += self._smart_match_payment_methods(client)
         return self._notify(_("Smart Match"), _("%s mapping(s) proposed or confirmed. Review them in "
-                                                "Configuration → Mappings.", made), "success")
+                                                "Configuration > Mappings.", made), "success")
 
     @staticmethod
     def _similar(a, b):

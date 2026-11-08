@@ -19,7 +19,7 @@ class QbSyncLog(models.Model):
     job_id = fields.Many2one("qb.sync.job", ondelete="set null", index=True)
     level = fields.Selection([("info", "Info"), ("success", "Success"), ("warning", "Warning"),
                               ("error", "Error"), ("api", "API Call")], default="info", index=True)
-    direction = fields.Selection([("import", "QuickBooks → Odoo"), ("export", "Odoo → QuickBooks"),
+    direction = fields.Selection([("import", "QuickBooks to Odoo"), ("export", "Odoo to QuickBooks"),
                                   ("system", "System")], default="system")
     qb_entity = fields.Selection(ENTITY_SELECTION, string="Entity")
     qb_id = fields.Char("QuickBooks ID")
@@ -32,7 +32,7 @@ class QbSyncLog(models.Model):
     response_status = fields.Integer()
     response_body = fields.Text()
     duration_ms = fields.Integer("Duration (ms)")
-    intuit_tid = fields.Char("intuit_tid", help="Intuit transaction id – quote it to Intuit support.")
+    intuit_tid = fields.Char("intuit_tid", help="Intuit transaction id - quote it to Intuit support.")
 
     @api.model
     def _log(self, connection, message, level="info", direction="system", job=None, qb_entity=None,

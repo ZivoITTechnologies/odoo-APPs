@@ -5,8 +5,8 @@
         <field name="model">qb.import.wizard</field>
         <field name="arch" type="xml">
             <form string="Import from QuickBooks">
-                <p class="text-muted">Records are imported in dependency order (accounts → taxes → contacts →
-                    products → documents → payments). Existing Odoo records are matched to avoid duplicates.</p>
+                <p class="text-muted">Records are imported in dependency order (accounts, taxes, contacts,
+                    products, documents, then payments). Existing Odoo records are matched to avoid duplicates.</p>
                 <group>
                     <field name="connection_id" readonly="1"/>
                     <field name="mode" widget="radio"/>

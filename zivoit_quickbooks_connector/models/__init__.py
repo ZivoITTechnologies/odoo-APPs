@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from . import qb_ui
 from . import qb_entity_config
 from . import qb_mapping
 from . import qb_sync_log

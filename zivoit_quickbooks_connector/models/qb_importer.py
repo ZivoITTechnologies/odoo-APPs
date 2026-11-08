@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2026 ZivoIT Technologies (https://www.zivoit.com)
 # License OPL-1
-"""QuickBooks → Odoo import engine."""
+"""QuickBooks -> Odoo import engine."""
 import base64
 import logging
 
@@ -1032,7 +1032,7 @@ class QbImporter(models.AbstractModel):
             self._cancel_record(record)
         mapping.state = "deleted_qb"
         self.env["qb.sync.log"]._log(ctx.conn, _("%(entity)s %(id)s deleted in QuickBooks%(what)s.", entity=entity,
-                                                 id=qb_id, what=_(" → archived/cancelled in Odoo")
+                                                 id=qb_id, what=_(" and was archived/cancelled in Odoo")
                                                  if record and ctx.conn.deletion_policy == "mirror" else ""),
                                      level="warning", direction="import", job=ctx.job, record=record)
         return record

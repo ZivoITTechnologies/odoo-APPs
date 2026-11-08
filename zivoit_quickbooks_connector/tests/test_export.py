@@ -96,7 +96,7 @@ class TestExport(QbCommon):
         job = self.export("Customer", partner)
         self.conn.match_existing = True
         self.assertJobDone(job)
-        self.assertEqual(job.qb_id, existing["Id"], "6240 duplicate → linked instead of failing")
+        self.assertEqual(job.qb_id, existing["Id"], "6240 duplicate -> linked instead of failing")
         self.assertEqual(len([c for c in self.fake.all("Customer") if c["DisplayName"] == "Already There"]), 1)
 
     def test_export_item(self):
@@ -186,7 +186,7 @@ class TestExport(QbCommon):
         move.button_draft()
         move.invoice_line_ids.filtered("product_id").quantity = 6
         move.action_post()
-        # manual → conflict
+        # manual -> conflict
         self.conn.conflict_policy = "manual"
         j = self.conn._enqueue("export", "Invoice", record=move)
         j._run_one()
@@ -195,7 +195,7 @@ class TestExport(QbCommon):
         j.action_force_odoo()
         self.assertJobDone(j)
         self.assertEqual(self.fake.get("Invoice", job.qb_id)["SyncToken"], "6")
-        # qb wins → import queued instead of overwrite
+        # qb wins -> import queued instead of overwrite
         self.conn.conflict_policy = "qb"
         self.fake.get("Invoice", job.qb_id)["SyncToken"] = "9"
         move.button_draft()

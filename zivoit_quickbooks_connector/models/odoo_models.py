@@ -5,8 +5,10 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 from ..lib.qbo_client import QBOError
+from .qb_ui import friendly_errors
 
 
+@friendly_errors
 class ResPartner(models.Model):
     _name = "res.partner"
     _inherit = ["res.partner", "qb.synced.mixin"]
@@ -42,6 +44,7 @@ class ProductProduct(models.Model):
         return "Item"
 
 
+@friendly_errors
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
@@ -106,6 +109,7 @@ class AccountAnalyticAccount(models.Model):
         return "Class"
 
 
+@friendly_errors
 class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ["account.move", "qb.synced.mixin"]

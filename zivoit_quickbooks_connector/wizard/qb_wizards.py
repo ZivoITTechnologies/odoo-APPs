@@ -7,6 +7,7 @@ from odoo.tools import float_compare
 
 from ..lib.qbo_client import QBOClient
 from ..models.qb_entity_config import ENTITIES
+from ..models.qb_ui import friendly_errors
 
 
 def _entity_selection(direction):
@@ -14,6 +15,7 @@ def _entity_selection(direction):
     return [(e[0], e[1]) for e in ENTITIES if e[idx]]
 
 
+@friendly_errors
 class QbImportWizard(models.TransientModel):
     _name = "qb.import.wizard"
     _description = "QuickBooks Import Wizard"
@@ -48,6 +50,7 @@ class QbImportWizard(models.TransientModel):
         return conn._notify(_("Import queued"), _("%s QuickBooks record(s) queued for import.", queued), "success")
 
 
+@friendly_errors
 class QbExportWizard(models.TransientModel):
     _name = "qb.export.wizard"
     _description = "QuickBooks Export Wizard"
@@ -70,6 +73,7 @@ class QbExportWizard(models.TransientModel):
         return conn._notify(_("Export queued"), _("%s Odoo record(s) queued for export.", queued), "success")
 
 
+@friendly_errors
 class QbIntegrityWizard(models.TransientModel):
     _name = "qb.integrity.wizard"
     _description = "QuickBooks Integrity Check"
@@ -138,6 +142,7 @@ class QbIntegrityWizard(models.TransientModel):
         return self.action_check()
 
 
+@friendly_errors
 class QbIntegrityLine(models.TransientModel):
     _name = "qb.integrity.line"
     _description = "QuickBooks Integrity Issue"
@@ -178,6 +183,7 @@ class QbIntegrityLine(models.TransientModel):
                 "view_mode": "form", "target": "current"}
 
 
+@friendly_errors
 class QbTokenWizard(models.TransientModel):
     _name = "qb.token.wizard"
     _description = "QuickBooks Manual Token Entry"

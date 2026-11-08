@@ -2,6 +2,7 @@
 # Copyright 2026 ZivoIT Technologies (https://www.zivoit.com)
 # License OPL-1
 from odoo import api, fields, models
+from .qb_ui import friendly_errors
 
 # (QBO entity, label, odoo model, sequence, can_import, can_export, cdc_name)
 ENTITIES = [
@@ -30,17 +31,18 @@ ENTITY_SELECTION = [(e[0], e[1]) for e in ENTITIES] + [("TaxCodePurchase", "Taxe
 ENTITY_INFO = {e[0]: e for e in ENTITIES}
 ENTITY_SEQUENCE = {e[0]: e[3] for e in ENTITIES}
 ENTITY_SEQUENCE["TaxCodePurchase"] = 12
-# Lower-case → canonical name (webhook CloudEvents types are lower-case)
+# Lower-case -> canonical name (webhook CloudEvents types are lower-case)
 ENTITY_CANONICAL = {e[0].lower(): e[0] for e in ENTITIES}
 
 DIRECTIONS = [
     ("both", "Two-way"),
-    ("import", "QuickBooks → Odoo"),
-    ("export", "Odoo → QuickBooks"),
+    ("import", "QuickBooks to Odoo"),
+    ("export", "Odoo to QuickBooks"),
     ("none", "Disabled"),
 ]
 
 
+@friendly_errors
 class QbEntityConfig(models.Model):
     _name = "qb.entity.config"
     _description = "QuickBooks Entity Sync Settings"

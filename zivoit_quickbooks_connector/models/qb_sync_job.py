@@ -10,6 +10,7 @@ from odoo.exceptions import UserError, ValidationError
 
 from ..lib.qbo_client import QBOAuthError, QBOError
 from .qb_entity_config import ENTITY_SELECTION, ENTITY_SEQUENCE
+from .qb_ui import friendly_errors
 
 _logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class QbSkip(_QbFlow):
     """Raised by handlers to finish a job without error (nothing to do)."""
 
 
+@friendly_errors
 class QbSyncJob(models.Model):
     _name = "qb.sync.job"
     _description = "QuickBooks Sync Queue Job"
@@ -44,7 +46,7 @@ class QbSyncJob(models.Model):
     name = fields.Char(compute="_compute_name", store=True)
     connection_id = fields.Many2one("qb.connection", required=True, ondelete="cascade", index=True)
     company_id = fields.Many2one(related="connection_id.company_id", store=True)
-    direction = fields.Selection([("import", "QuickBooks → Odoo"), ("export", "Odoo → QuickBooks"),
+    direction = fields.Selection([("import", "QuickBooks to Odoo"), ("export", "Odoo to QuickBooks"),
                                   ("delete", "Delete in QuickBooks"), ("void", "Void in QuickBooks")],
                                  required=True, index=True)
     qb_entity = fields.Selection(ENTITY_SELECTION, string="Entity", required=True, index=True)
@@ -120,7 +122,7 @@ class QbSyncJob(models.Model):
         job = self
         message = str(exc.args[0]) if getattr(exc, "args", None) else str(exc)
         if transient and job.attempts < job.max_attempts:
-            delay = min(5 * (2 ** (job.attempts - 1)), 360)  # 5, 10, 20, 40… minutes
+            delay = min(5 * (2 ** (job.attempts - 1)), 360)  # 5, 10, 20, 40... minutes
             job.write({"state": "pending", "error": message,
                        "next_attempt": fields.Datetime.now() + timedelta(minutes=delay)})
             level = "warning"
