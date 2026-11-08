@@ -114,9 +114,9 @@ class TestTallyProtocol(BaseCase):
             TX.parse_collection('Could not connect', 'LEDGER')
 
     def test_amount_qty_parsing(self):
-        self.assertEqual(TX.parse_amount('₹ 1,23,456.50 Dr'), -123456.5)
+        self.assertEqual(TX.parse_amount('\u20b9 1,23,456.50 Dr'), -123456.5)
         self.assertEqual(TX.parse_amount('1180.00 Cr'), 1180.0)
-        self.assertEqual(TX.parse_amount('$ 10.00 @ ₹ 83.00/$ = ₹ 830.00'), 830.0)
+        self.assertEqual(TX.parse_amount('$ 10.00 @ \u20b9 83.00/$ = \u20b9 830.00'), 830.0)
         self.assertEqual(TX.parse_qty('2.5 kg = 2500 g'), (2.5, 'kg'))
         self.assertEqual(TX.fmt_date_human(date(2026, 3, 5)), '5-Mar-2026')
 

@@ -57,7 +57,7 @@ class TallyRequest(models.Model):
                                     index=True)
     company_id = fields.Many2one(related='connection_id.company_id', store=True)
     purpose = fields.Selection(PURPOSES, required=True, index=True)
-    direction = fields.Selection([('in', 'Tally → Odoo'), ('out', 'Odoo → Tally')],
+    direction = fields.Selection([('in', 'Tally to Odoo'), ('out', 'Odoo to Tally')],
                                  compute='_compute_direction', store=True)
     display_label = fields.Char(compute='_compute_display_label')
     priority = fields.Integer(default=50, index=True)

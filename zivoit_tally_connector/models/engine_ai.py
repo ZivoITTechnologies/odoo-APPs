@@ -337,7 +337,7 @@ class TallyConnectionAI(models.Model):
             return False
         snippet = (req.request_xml or '')[:1500]
         if not self.ai_send_amounts:
-            snippet = re.sub(r'<AMOUNT>[^<]*</AMOUNT>', '<AMOUNT>…</AMOUNT>', snippet)
+            snippet = re.sub(r'<AMOUNT>[^<]*</AMOUNT>', '<AMOUNT>...</AMOUNT>', snippet)
         prompt = ('TallyPrime rejected an XML import from Odoo.\nError: %s\nRequest excerpt:\n%s\n'
                   'Explain the root cause in one sentence and give up to 3 concrete fix steps '
                   '(Tally menu paths or connector settings).' % (message, snippet))
@@ -351,13 +351,13 @@ class TallyConnectionAI(models.Model):
         if not self._ai_enabled():
             if not findings:
                 return _('No anomalies detected by the built-in guard.')
-            return '\n'.join('• %s' % f['message'] for f in findings)
+            return '\n'.join('- %s' % f['message'] for f in findings)
         data = stage._data()
         if not self.ai_send_amounts:
             for le in data.get('ledger_entries', []):
-                le['amount'] = '…'
+                le['amount'] = '...'
             for ie in data.get('inventory_entries', []):
-                ie['amount'] = ie['rate'] = '…'
+                ie['amount'] = ie['rate'] = '...'
         prompt = ('Review this voucher imported from Tally for GST and accounting issues. '
                   'Built-in findings: %s\nVoucher: %s\nAnswer in at most 5 bullet points.'
                   % (json.dumps(findings), json.dumps(data, default=str)[:4000]))
@@ -392,7 +392,7 @@ class TallyConnectionAI(models.Model):
                 'd': done, 'f': len(failed)}]
             if codes:
                 items.append(_('Top failure causes: %s.') % ', '.join(
-                    '%s ×%s' % (k, v) for k, v in sorted(codes.items(), key=lambda kv: -kv[1])))
+                    '%s x%s' % (k, v) for k, v in sorted(codes.items(), key=lambda kv: -kv[1])))
             if review:
                 items.append(_('%s Tally vouchers need review.') % review)
             if maps:
@@ -404,7 +404,7 @@ class TallyConnectionAI(models.Model):
                 try:
                     narrative = conn._ai_complete(
                         'Write a 3-sentence health summary and the single most important next '
-                        'action for this Odoo–Tally integration: %s' % json.dumps(facts, default=str),
+                        'action for this Odoo-Tally integration: %s' % json.dumps(facts, default=str),
                         max_tokens=300).strip()
                 except llm.LLMError as e:
                     narrative = _('AI unavailable: %s') % e

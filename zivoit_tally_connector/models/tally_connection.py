@@ -11,7 +11,7 @@ from ..lib.transport import TallyConnectionError, post_xml
 
 _logger = logging.getLogger(__name__)
 
-SYNC_DIR = [('none', 'Off'), ('pull', 'Tally → Odoo'), ('push', 'Odoo → Tally'),
+SYNC_DIR = [('none', 'Off'), ('pull', 'Tally to Odoo'), ('push', 'Odoo to Tally'),
             ('both', 'Two-way')]
 AGENT_ONLINE_SECONDS = 180
 
@@ -68,7 +68,7 @@ class TallyConnection(models.Model):
                                      required=True)
     sync_journals = fields.Selection(SYNC_DIR, 'Journals & Contra', default='pull', required=True)
     sync_cost_centres = fields.Selection(SYNC_DIR, 'Cost centres', default='both', required=True,
-                                         help='Tally cost centres ↔ Odoo analytic accounts, '
+                                         help='Tally cost centres synced with Odoo analytic accounts, '
                                               'including allocations on vouchers.')
     primary_plan_id = fields.Many2one(
         'account.analytic.plan', 'Plan for "Primary Cost Category"',
@@ -148,7 +148,7 @@ class TallyConnection(models.Model):
                                     ('openai', 'OpenAI'),
                                     ('gemini', 'Google Gemini'),
                                     ('openai_compatible', 'OpenAI-compatible (Azure, Ollama, '
-                                                          'Groq, OpenRouter…)')],
+                                                          'Groq, OpenRouter...)')],
                                    default='none', required=True)
     ai_api_key = fields.Char(groups='zivoit_tally_connector.group_tally_manager', copy=False)
     ai_model = fields.Char()
@@ -156,8 +156,8 @@ class TallyConnection(models.Model):
     ai_send_amounts = fields.Boolean(
         'Share amounts with AI', help='Off: only names and error texts are sent to the AI '
                                       'provider. On: amounts are included for richer insights.')
-    ai_match_threshold = fields.Float('Auto-confirm matches ≥', default=0.92)
-    ai_suggest_threshold = fields.Float('Suggest matches ≥', default=0.6)
+    ai_match_threshold = fields.Float('Auto-confirm matches at or above', default=0.92)
+    ai_suggest_threshold = fields.Float('Suggest matches at or above', default=0.6)
     anomaly_check = fields.Boolean('AI anomaly guard', default=True)
     anomaly_block = fields.Boolean('Hold blocking anomalies', default=True,
                                    help='Vouchers with blocking findings are not posted/pushed.')
@@ -248,7 +248,7 @@ class TallyConnection(models.Model):
         if self.transport == 'file':
             self.write({'state': 'connected',
                         'last_test_message': _('Offline file mode: nothing to test.')})
-            return self._notify(_('Offline mode — use the XML import/export wizards.'))
+            return self._notify(_('Offline mode - use the XML import/export wizards.'))
         if self.transport == 'agent':
             if not self.agent_online:
                 self.write({'state': 'error', 'last_test_message': _(

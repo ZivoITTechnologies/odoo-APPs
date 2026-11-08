@@ -44,7 +44,7 @@ RULES = [
      "Tally rejected a duplicate voucher number. Set the voucher type numbering to "
      "'Manual' or 'Automatic (Manual Override)' in Tally."),
     (re.compile(r"(?:could not|cannot) set .*gst", re.I), 'gst_config',
-     "GST details could not be applied — enable GST in F11 Company Features and set the "
+     "GST details could not be applied - enable GST in F11 Company Features and set the "
      "ledger/stock item GST rates."),
     (re.compile(r"unknown request|cannot be processed", re.I), 'bad_request',
      "Tally did not understand the request. Check Tally version compatibility (Tally.ERP 9 6.x "

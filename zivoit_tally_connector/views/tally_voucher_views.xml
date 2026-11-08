@@ -120,7 +120,7 @@
                 <filter name="deleted" string="Deleted in Tally" domain="[('state', '=', 'deleted')]"/>
                 <filter name="anomaly" string="AI held" domain="[('state', '=', 'anomaly')]"/>
                 <filter name="done" string="Imported" domain="[('state', '=', 'done')]"/>
-                <filter name="risky" string="Risk ≥ 30" domain="[('risk_score', '>=', 30)]"/>
+                <filter name="risky" string="Risk 30 or more" domain="[('risk_score', '>=', 30)]"/>
                 <group>
                     <filter name="by_kind" string="Type" context="{'group_by': 'kind'}"/>
                     <filter name="by_state" string="Status" context="{'group_by': 'state'}"/>

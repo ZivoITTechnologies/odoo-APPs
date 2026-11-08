@@ -69,7 +69,7 @@ def sanitize_response(raw):
                 raw = raw.decode('utf-8')
             except UnicodeDecodeError:
                 raw = raw.decode('latin-1')
-    raw = raw.lstrip('﻿')
+    raw = raw.lstrip('\ufeff')
 
     def _charref(m):
         txt = m.group(1)
@@ -134,11 +134,11 @@ _NUM = re.compile(r'-?[\d,]*\.?\d+')
 
 
 def parse_amount(value):
-    """Parse '1,180.00', '-1180', '1180.00 Dr', '₹ 1,180.00 Cr', '$ 10 = ₹ 830'."""
+    """Parse '1,180.00', '-1180', '1180.00 Dr', 'Rs 1,180.00 Cr', '$ 10 = Rs 830'."""
     value = clean_text(value)
     if not value:
         return 0.0
-    if '=' in value:  # forex: "$ 10 @ ₹ 83/$ = ₹ 830" -> base currency part
+    if '=' in value:  # forex: "$ 10 @ Rs 83/$ = Rs 830" -> base currency part
         value = value.split('=')[-1]
     m = _NUM.search(value.replace(' ', ''))
     if not m:

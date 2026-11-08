@@ -20,7 +20,7 @@ INVOICE_KINDS = ('sale', 'purchase', 'credit_note', 'debit_note')
 class TallyMapping(models.Model):
     _inherit = 'tally.mapping'
 
-    kind = fields.Selection(selection_add=[('godown', 'Godown ↔ Location')],
+    kind = fields.Selection(selection_add=[('godown', 'Godown / Location')],
                             ondelete={'godown': 'cascade'})
     location_id = fields.Many2one('stock.location', index=True, ondelete='set null',
                                   domain=[('usage', '=', 'internal')])
@@ -46,7 +46,7 @@ class TallyConnection(models.Model):
         help="Its stock location is Tally's 'Main Location'; new godowns become locations "
              "inside it.")
     sync_godowns = fields.Selection(SYNC_DIR, 'Godowns', default='both', required=True)
-    sync_batches = fields.Boolean('Batches ↔ lots/serials', default=True)
+    sync_batches = fields.Boolean('Sync batches as lots/serials', default=True)
     create_stock_moves = fields.Boolean(
         'Create stock moves for Tally invoices', default=True,
         help='Item invoices imported from Tally create and validate the matching '

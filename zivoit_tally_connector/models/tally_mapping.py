@@ -5,14 +5,14 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 KINDS = [
-    ('party', 'Party ledger ↔ Contact'),
-    ('ledger', 'Ledger ↔ Account'),
-    ('tax', 'Duty ledger ↔ Tax'),
-    ('bank', 'Bank/Cash ledger ↔ Journal'),
-    ('item', 'Stock item ↔ Product'),
-    ('unit', 'Unit ↔ UoM'),
-    ('costcentre', 'Cost centre ↔ Analytic account'),
-    ('costcategory', 'Cost category ↔ Analytic plan'),
+    ('party', 'Party ledger / Contact'),
+    ('ledger', 'Ledger / Account'),
+    ('tax', 'Duty ledger / Tax'),
+    ('bank', 'Bank or cash ledger / Journal'),
+    ('item', 'Stock item / Product'),
+    ('unit', 'Unit / Unit of measure'),
+    ('costcentre', 'Cost centre / Analytic account'),
+    ('costcategory', 'Cost category / Analytic plan'),
     ('vchtype', 'Voucher type'),
     ('group', 'Group'),
 ]
@@ -20,7 +20,7 @@ KINDS = [
 
 class TallyMapping(models.Model):
     _name = 'tally.mapping'
-    _description = 'Tally ↔ Odoo mapping'
+    _description = 'Tally and Odoo mapping'
     _order = 'kind, tally_name'
     _rec_name = 'tally_name'
 
@@ -115,7 +115,7 @@ class TallyMapping(models.Model):
         return self.create(vals)
 
     # Odoo fields that are actually exchanged with Tally, per master kind.  A change to
-    # any other field (customer rank, followers, computed totals…) is not a conflict.
+    # any other field (customer rank, followers, computed totals...) is not a conflict.
     SYNC_FIELDS = {
         'party': ('name', 'vat', 'street', 'street2', 'city', 'zip', 'state_id', 'country_id',
                   'email', 'phone'),

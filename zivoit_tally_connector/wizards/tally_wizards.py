@@ -55,7 +55,7 @@ class TallyFileImport(models.TransientModel):
 
 
 class TallyFileExport(models.TransientModel):
-    """Offline mode: bundle queued Odoo→Tally requests into Tally-importable XML files."""
+    """Offline mode: bundle queued Odoo to Tally requests into Tally-importable XML files."""
     _name = 'tally.file.export'
     _description = 'Export XML for Tally import'
 
@@ -74,7 +74,7 @@ class TallyFileExport(models.TransientModel):
                                                  ('direction', '=', 'out'),
                                                  ('state', 'in', states)])
         if not reqs:
-            raise UserError(_('Nothing to export: no queued Odoo → Tally documents.'))
+            raise UserError(_('Nothing to export: no queued Odoo to Tally documents.'))
         masters = reqs.filtered(lambda r: r.purpose not in ('push_move', 'cancel_move'))
         vouchers = reqs - masters
 
@@ -118,7 +118,7 @@ class TallyMigration(models.TransientModel):
     _description = 'Tally historical migration'
 
     connection_id = fields.Many2one('tally.connection', required=True)
-    direction = fields.Selection([('pull', 'Tally → Odoo'), ('push', 'Odoo → Tally')],
+    direction = fields.Selection([('pull', 'Tally to Odoo'), ('push', 'Odoo to Tally')],
                                  required=True, default='pull')
     date_from = fields.Date(required=True)
     date_to = fields.Date(required=True, default=fields.Date.today)

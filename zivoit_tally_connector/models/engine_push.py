@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Odoo → Tally: masters and vouchers."""
+"""Odoo to Tally: masters and vouchers."""
 import logging
 import re
 from collections import OrderedDict
@@ -508,7 +508,7 @@ class TallyConnectionPush(models.Model):
             return False
         keep = [(i, msg) for i, msg in zip(ids, msgs) if i not in held]
         if not keep:
-            req.write({'state': 'cancelled', 'error': _('Held: master in conflict — resolve it '
+            req.write({'state': 'cancelled', 'error': _('Held: master in conflict - resolve it '
                                                         'in Mappings.')})
             return False
         req.write({'res_ids': ','.join(str(i) for i, _m in keep),

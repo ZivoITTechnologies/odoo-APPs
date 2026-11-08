@@ -221,7 +221,7 @@ class TallyVoucher(models.Model):
             dist[key] = round(dist.get(key, 0.0) + pct, 4)
         if missing:
             raise UserError(_('Unmapped Tally cost centres: %s. Map them to analytic accounts '
-                              'in Tally → Mappings.') % ', '.join(sorted(set(missing))))
+                              'in Tally > Mappings.') % ', '.join(sorted(set(missing))))
         return dist or False
 
     # ------------------------------------------------------------------
@@ -318,7 +318,7 @@ class TallyVoucher(models.Model):
         if party and party.partner_id:
             self.partner_id = party.partner_id
         if missing and not conn.suspense_account_id:
-            raise UserError(_('Unmapped Tally ledgers: %s. Map them in Tally → Mappings (AI '
+            raise UserError(_('Unmapped Tally ledgers: %s. Map them in Tally > Mappings (AI '
                               'suggestions are pre-filled) and click Process again.')
                             % ', '.join(sorted(set(missing))))
         move = self.env['account.move']

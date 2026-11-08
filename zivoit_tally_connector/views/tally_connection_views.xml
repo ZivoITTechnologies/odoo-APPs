@@ -41,8 +41,8 @@
                                 Mappings (<field name="count_mapping_review"/>)</button>
                         </div>
                         <div class="small mt-2" t-if="record.transport.raw_value == 'agent'">
-                            <span t-if="record.agent_online.raw_value" class="text-success">● Agent online</span>
-                            <span t-else="" class="text-danger">● Agent offline</span>
+                            <span t-if="record.agent_online.raw_value" class="text-success">Agent online</span>
+                            <span t-else="" class="text-danger">Agent offline</span>
                         </div>
                     </t>
                 </templates>

@@ -93,8 +93,8 @@
                 <filter name="queued" string="Queued" domain="[('state', 'in', ('pending', 'sent'))]"/>
                 <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
                 <separator/>
-                <filter name="in" string="Tally → Odoo" domain="[('direction', '=', 'in')]"/>
-                <filter name="out" string="Odoo → Tally" domain="[('direction', '=', 'out')]"/>
+                <filter name="in" string="Tally to Odoo" domain="[('direction', '=', 'in')]"/>
+                <filter name="out" string="Odoo to Tally" domain="[('direction', '=', 'out')]"/>
                 <group>
                     <filter name="by_purpose" string="Purpose" context="{'group_by': 'purpose'}"/>
                     <filter name="by_code" string="Error type" context="{'group_by': 'error_code'}"/>

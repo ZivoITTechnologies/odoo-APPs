@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Cost centres ↔ analytic accounts, and deletion detection (census)."""
+"""Cost centres to analytic accounts, and deletion detection (census)."""
 from datetime import date
 
 from odoo.tests import tagged

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tally → Odoo against the TallyPrime simulator."""
+"""Tally to Odoo against the TallyPrime simulator."""
 from datetime import date
 
 from odoo.tests import tagged

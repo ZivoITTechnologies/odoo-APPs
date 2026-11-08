@@ -11,7 +11,7 @@ XML server (default http://localhost:9000) and returns the responses.
 Works with Odoo Online, Odoo.sh and on-premise Odoo 19 using the standard
 JSON-2 API (Authorization: bearer <API key>).
 
-Requirements: Python 3.8+ — standard library only.
+Requirements: Python 3.8+ - standard library only.
 
 Usage:
     python zivoit_tally_agent.py                 # run forever
@@ -122,7 +122,7 @@ class Agent:
         return res.get('poll_seconds') or self.poll, len(jobs)
 
     def run_forever(self):
-        log.info('ZivoIT Tally Agent %s → %s (db %s), Tally %s:%s', VERSION, self.url,
+        log.info('ZivoIT Tally Agent %s to %s (db %s), Tally %s:%s', VERSION, self.url,
                  self.db or 'default', self.tally_host, self.tally_port)
         while _running:
             try:
@@ -147,13 +147,13 @@ class Agent:
             print('listening')
         else:
             ok = False
-            print('NOT reachable — open TallyPrime, F1 > Settings > Connectivity, set '
+            print('NOT reachable - open TallyPrime, F1 > Settings > Connectivity, set '
                   '"TallyPrime acts as" = Server/Both and port %s' % self.tally_port)
         print('Odoo %s ... ' % self.url, end='')
         try:
             res = self.call('agent_poll', token=self.token, hostname=socket.gethostname(),
                             version=VERSION, tally_ok=self.tally_alive(), limit=0)
-            print('OK — connection "%s", Tally company "%s"' % (res.get('connection'),
+            print('OK - connection "%s", Tally company "%s"' % (res.get('connection'),
                                                                res.get('company')))
         except Exception as e:  # noqa: BLE001
             ok = False

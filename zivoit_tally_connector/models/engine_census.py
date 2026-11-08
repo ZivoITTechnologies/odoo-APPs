@@ -12,7 +12,7 @@ REMOTEID, name) for the sync window and compares them with what Odoo knows:
   records are never deleted.  Odoo wins = master re-created in Tally.
 
 A mass-deletion guard refuses to apply anything when an implausible share of
-objects disappears at once (wrong company open, backup restored, …).
+objects disappears at once (wrong company open, backup restored, ...).
 """
 import logging
 from datetime import timedelta

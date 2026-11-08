@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tally → Odoo: incremental pulls by AlterID, master upserts, voucher staging."""
+"""Tally to Odoo: incremental pulls by AlterID, master upserts, voucher staging."""
 import json
 import logging
 from datetime import timedelta
@@ -135,7 +135,7 @@ class TallyConnectionPull(models.Model):
         self.last_alter_group = top
 
     def _group_chain(self, group):
-        """[group, parent, grand-parent, …] using pulled Tally groups."""
+        """[group, parent, grand-parent, ...] using pulled Tally groups."""
         Map = self.env['tally.mapping']
         chain, seen = [], set()
         while group and group.lower() not in seen and len(chain) < 25:

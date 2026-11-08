@@ -5,7 +5,7 @@
         <field name="model">tally.file.import</field>
         <field name="arch" type="xml">
             <form string="Import Tally XML">
-                <p class="text-muted">In TallyPrime: Alt+E Export › Masters / Day Book, Format = XML
+                <p class="text-muted">In TallyPrime: Alt+E Export &gt; Masters / Day Book, Format = XML
                     (Data Interchange). Upload the .xml (or a .zip of several).</p>
                 <group>
                     <field name="connection_id"/>

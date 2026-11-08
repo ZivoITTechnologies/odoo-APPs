@@ -60,7 +60,7 @@ def analyse(v, ctx):
     large = ctx.get('large_amount') or 100000.0
     if total >= large and total % 1000 == 0 and v.get('kind') in ('journal', 'payment', 'contra'):
         out.append(_finding(SEV_INFO, 'round_amount',
-                            'Large round-figure %s of %.0f — please confirm supporting documents.'
+                            'Large round-figure %s of %.0f - please confirm supporting documents.'
                             % (v.get('kind'), total)))
 
     # 5. GST place-of-supply sanity (intra-state => CGST+SGST, inter-state => IGST)
@@ -73,16 +73,16 @@ def analyse(v, ctx):
         intra = comp_state == party_state
         if intra and 'IGST' in heads:
             out.append(_finding(SEV_BLOCK, 'gst_pos',
-                                'IGST charged on an intra-state supply (%s → %s). CGST+SGST expected.'
+                                'IGST charged on an intra-state supply (%s to %s). CGST+SGST expected.'
                                 % (ctx.get('company_state'), party_state.title())))
         if not intra and heads & {'CGST', 'SGST', 'UTGST'}:
             out.append(_finding(SEV_BLOCK, 'gst_pos',
-                                'CGST/SGST charged on an inter-state supply (%s → %s). IGST expected.'
+                                'CGST/SGST charged on an inter-state supply (%s to %s). IGST expected.'
                                 % (ctx.get('company_state'), party_state.title())))
     if 'CGST' in heads and not heads & {'SGST', 'UTGST'}:
         out.append(_finding(SEV_WARN, 'gst_pair', 'CGST present without matching SGST/UTGST.'))
 
-    # 6. GST arithmetic: tax ≈ taxable × rate
+    # 6. GST arithmetic: tax approx. taxable x rate
     taxable = abs(v.get('taxable') or 0.0)
     for t in v.get('tax_lines') or []:
         if t.get('rate') and taxable:
