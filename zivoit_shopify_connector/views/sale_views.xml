@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form" model="ir.ui.view">
+        <field name="name">sale.order.form.zivo.shopify</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="zivo_shopify_gid" invisible="1"/>
+                <button name="action_zivo_release_hold" string="Release Risk Hold" type="object" class="btn-warning" invisible="not zivo_risk_hold" groups="zivoit_shopify_connector.group_user"/>
+                <button name="action_zivo_refresh" string="Refresh from Shopify" type="object" invisible="not zivo_shopify_gid" groups="zivoit_shopify_connector.group_user"/>
+                <button name="action_zivo_push_edits" string="Push Edits to Shopify" type="object" invisible="not zivo_shopify_gid or state != 'sale'" groups="zivoit_shopify_connector.group_user"/>
+                <button name="action_zivo_open_cancel" string="Cancel on Shopify" type="object" invisible="not zivo_shopify_gid or zivo_cancelled_on_shopify" groups="zivoit_shopify_connector.group_user"/>
+                <button name="action_zivo_open_export" string="Create on Shopify" type="object" invisible="zivo_shopify_gid or state != 'sale'" groups="zivoit_shopify_connector.group_user"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Shopify" name="zivo_shopify" invisible="not zivo_shopify_gid" groups="zivoit_shopify_connector.group_user">
+                    <div class="alert alert-danger" role="alert" invisible="not zivo_risk_hold">
+                        <strong>On risk hold.</strong> This order was stopped before confirmation. Review the explanation, then release it.
+                    </div>
+                    <group>
+                        <group string="Order">
+                            <field name="zivo_instance_id"/>
+                            <field name="zivo_shopify_name"/>
+                            <field name="zivo_financial_status"/>
+                            <field name="zivo_fulfillment_status"/>
+                            <field name="zivo_sales_channel"/>
+                            <field name="zivo_gateways"/>
+                            <field name="zivo_tags"/>
+                            <field name="zivo_market_id"/>
+                            <field name="zivo_routing_note"/>
+                            <field name="zivo_amount_mismatch" invisible="zivo_amount_mismatch == 0"/>
+                            <field name="zivo_cancelled_on_shopify" invisible="1"/>
+                        </group>
+                        <group string="AI Risk">
+                            <field name="zivo_risk_score" widget="progressbar"/>
+                            <field name="zivo_risk_level" widget="badge" decoration-success="zivo_risk_level == 'low'" decoration-warning="zivo_risk_level == 'medium'" decoration-danger="zivo_risk_level == 'high'"/>
+                            <field name="zivo_risk_hold" invisible="1"/>
+                            <field name="zivo_risk_reasons"/>
+                            <field name="zivo_fees"/>
+                        </group>
+                    </group>
+                    <separator string="Transactions"/>
+                    <field name="zivo_transaction_ids" readonly="1">
+                        <list>
+                            <field name="kind"/><field name="status"/><field name="gateway"/><field name="amount"/><field name="fee"/><field name="payment_id"/>
+                        </list>
+                    </field>
+                    <separator string="Fulfilments"/>
+                    <field name="zivo_fulfillment_ids" readonly="1">
+                        <list>
+                            <field name="shopify_gid"/><field name="origin"/><field name="status"/><field name="tracking_company"/><field name="tracking_number"/><field name="picking_id"/>
+                        </list>
+                    </field>
+                    <separator string="Refunds"/>
+                    <field name="zivo_refund_ids" readonly="1">
+                        <list>
+                            <field name="shopify_gid"/><field name="amount"/><field name="move_id"/><field name="return_picking_id"/><field name="state"/><field name="note"/>
+                        </list>
+                    </field>
+                    <separator string="Returns"/>
+                    <field name="zivo_return_ids">
+                        <list create="0" editable="bottom">
+                            <field name="name" readonly="1"/><field name="status" readonly="1"/><field name="summary" readonly="1"/><field name="picking_id" readonly="1"/>
+                            <button name="action_create_picking" string="Create Return" type="object" invisible="picking_id"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_shopify_order_list" model="ir.ui.view">
+        <field name="name">sale.order.list.zivo.shopify</field>
+        <field name="model">sale.order</field>
+        <field name="priority">40</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="zivo_risk_hold">
+                <field name="name"/>
+                <field name="date_order"/>
+                <field name="partner_id"/>
+                <field name="zivo_instance_id"/>
+                <field name="zivo_sales_channel"/>
+                <field name="zivo_financial_status" widget="badge" decoration-success="zivo_financial_status == 'PAID'" decoration-warning="zivo_financial_status == 'PENDING'"/>
+                <field name="zivo_fulfillment_status" widget="badge" decoration-success="zivo_fulfillment_status == 'FULFILLED'"/>
+                <field name="zivo_risk_score" string="Risk" widget="progressbar"/>
+                <field name="zivo_risk_hold" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_shopify_order_search" model="ir.ui.view">
+        <field name="name">sale.order.search.zivo.shopify</field>
+        <field name="model">sale.order</field>
+        <field name="priority">40</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="zivo_shopify_name"/>
+                <field name="partner_id"/>
+                <filter name="hold" string="On Risk Hold" domain="[('zivo_risk_hold', '=', True)]"/>
+                <filter name="unpaid" string="Pending Payment" domain="[('zivo_financial_status', '=', 'PENDING')]"/>
+                <filter name="unfulfilled" string="Unfulfilled" domain="[('zivo_fulfillment_status', '=', 'UNFULFILLED')]"/>
+                <filter name="mismatch" string="Amount Mismatch" domain="[('zivo_amount_mismatch', '!=', 0)]"/>
+                <filter name="group_store" string="Store" context="{'group_by': 'zivo_instance_id'}"/>
+                <filter name="group_channel" string="Sales Channel" context="{'group_by': 'zivo_sales_channel'}"/>
+                <filter name="group_month" string="Month" context="{'group_by': 'date_order:month'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_shopify_order_pivot" model="ir.ui.view">
+        <field name="name">sale.order.pivot.zivo.shopify</field>
+        <field name="model">sale.order</field>
+        <field name="priority">40</field>
+        <field name="arch" type="xml">
+            <pivot string="Profit by Channel">
+                <field name="zivo_sales_channel" type="row"/>
+                <field name="date_order" interval="month" type="col"/>
+                <field name="amount_untaxed" type="measure"/>
+                <field name="margin" type="measure"/>
+                <field name="zivo_fees" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_orders" model="ir.actions.act_window">
+        <field name="name">Shopify Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form,pivot</field>
+        <field name="domain">[('zivo_shopify_gid', '!=', False)]</field>
+        <field name="search_view_id" ref="view_shopify_order_search"/>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_shopify_order_list')}), (0, 0, {'view_mode': 'form', 'view_id': ref('sale.view_order_form')}), (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_shopify_order_pivot')})]"/>
+    </record>
+
+    <record id="view_customer_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.customer.list</field>
+        <field name="model">zivo.shopify.customer</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <header><button name="action_export" string="Export" type="object"/></header>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="instance_id"/>
+                <field name="partner_id"/>
+                <field name="orders_count"/>
+                <field name="amount_spent"/>
+                <field name="match_method" widget="badge"/>
+                <field name="match_confidence" widget="percentage"/>
+                <field name="last_sync_at"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_customers" model="ir.actions.act_window">
+        <field name="name">Shopify Customers</field>
+        <field name="res_model">zivo.shopify.customer</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="action_checkouts" model="ir.actions.act_window">
+        <field name="name">Abandoned Checkouts</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('zivo_checkout_gid', '!=', False)]</field>
+    </record>
+    <record id="view_lead_form" model="ir.ui.view">
+        <field name="name">crm.lead.form.zivo.shopify</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Abandoned Cart" name="zivo_cart" invisible="not zivo_checkout_gid" groups="zivoit_shopify_connector.group_user">
+                    <field name="zivo_checkout_gid" invisible="1"/>
+                    <group>
+                        <field name="zivo_instance_id"/>
+                        <field name="zivo_recovery_url" widget="url"/>
+                        <field name="zivo_cart_summary"/>
+                    </group>
+                    <button name="action_zivo_generate_email" string="Draft Recovery Email with AI" type="object" class="btn-primary mb-3"/>
+                    <field name="zivo_recovery_email"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="action_returns" model="ir.actions.act_window">
+        <field name="name">Returns</field>
+        <field name="res_model">zivo.shopify.return</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="view_return_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.return.list</field>
+        <field name="model">zivo.shopify.return</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="name"/><field name="order_id"/><field name="status" widget="badge"/><field name="summary"/><field name="picking_id"/>
+                <button name="action_create_picking" string="Create Return" type="object" invisible="picking_id"/>
+            </list>
+        </field>
+    </record>
+</odoo>

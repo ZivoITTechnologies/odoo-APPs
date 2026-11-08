@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_instance_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.instance.list</field>
+        <field name="model">zivo.shopify.instance</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="shop_domain"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="shop_plan"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'" decoration-danger="state in ('error', 'uninstalled')"/>
+                <field name="last_connected_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_instance_form" model="ir.ui.view">
+        <field name="name">zivo.shopify.instance.form</field>
+        <field name="model">zivo.shopify.instance</field>
+        <field name="arch" type="xml">
+            <form string="Shopify Store">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="btn-primary"/>
+                    <button name="action_register_webhooks" string="Sync Webhooks" type="object" invisible="state != 'connected'"/>
+                    <button name="action_import_products" string="Import Products" type="object" invisible="state != 'connected'"/>
+                    <button name="action_import_orders" string="Import Orders" type="object" invisible="state != 'connected'"/>
+                    <button name="action_import_customers" string="Import Customers" type="object" invisible="state != 'connected'"/>
+                    <button name="action_export_all_stock" string="Export All Stock" type="object" invisible="state != 'connected'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_products" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="product_count" widget="statinfo" string="Products"/>
+                        </button>
+                        <button name="action_open_orders" type="object" class="oe_stat_button" icon="fa-list-alt">
+                            <field name="order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <button name="action_open_jobs" type="object" class="oe_stat_button" icon="fa-tasks">
+                            <field name="pending_job_count" widget="statinfo" string="In Queue"/>
+                        </button>
+                        <button name="action_open_failed_jobs" type="object" class="oe_stat_button" icon="fa-exclamation-circle">
+                            <field name="failed_job_count" widget="statinfo" string="Failed"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="My Online Store"/></h1>
+                        <field name="shop_url" widget="url" readonly="1" invisible="not shop_url"/>
+                    </div>
+                    <notebook>
+                        <page string="Connection" name="connection">
+                            <group>
+                                <group string="Store">
+                                    <field name="shop_domain" placeholder="your-store.myshopify.com"/>
+                                    <field name="api_version"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </group>
+                                <group string="Credentials" groups="zivoit_shopify_connector.group_manager">
+                                    <field name="auth_mode" widget="radio"/>
+                                    <field name="client_id" invisible="auth_mode != 'client_credentials'"/>
+                                    <field name="client_secret" password="True" invisible="auth_mode != 'client_credentials'"/>
+                                    <field name="access_token" password="True" invisible="auth_mode != 'admin_token'"/>
+                                    <field name="webhook_secret" password="True" invisible="auth_mode != 'admin_token'"/>
+                                </group>
+                                <group string="Shop Details">
+                                    <field name="shop_name"/>
+                                    <field name="shop_plan"/>
+                                    <field name="shop_currency_id"/>
+                                    <field name="shop_timezone"/>
+                                    <field name="shop_taxes_included"/>
+                                </group>
+                                <group string="API Health">
+                                    <field name="last_connected_at"/>
+                                    <field name="api_available"/>
+                                    <field name="api_maximum"/>
+                                    <field name="api_restore_rate"/>
+                                    <field name="webhook_url" widget="CopyClipboardChar"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Orders" name="orders">
+                            <group>
+                                <group string="Import Rules">
+                                    <field name="import_orders_after"/>
+                                    <field name="order_status_filter"/>
+                                    <field name="skip_test_orders"/>
+                                    <field name="import_pos_orders"/>
+                                    <field name="use_presentment_currency"/>
+                                    <field name="use_shopify_order_name"/>
+                                    <field name="order_prefix"/>
+                                    <field name="rounding_tolerance"/>
+                                </group>
+                                <group string="Defaults">
+                                    <field name="warehouse_id"/>
+                                    <field name="pricelist_id"/>
+                                    <field name="team_id"/>
+                                    <field name="user_id"/>
+                                    <field name="auto_create_taxes"/>
+                                    <field name="company_mode" widget="radio"/>
+                                </group>
+                                <group string="Technical Products">
+                                    <field name="shipping_product_id"/>
+                                    <field name="custom_item_product_id"/>
+                                    <field name="tip_product_id"/>
+                                    <field name="adjustment_product_id"/>
+                                </group>
+                            </group>
+                            <separator string="Workflows"/>
+                            <field name="workflow_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="gateways" placeholder="any gateway"/>
+                                    <field name="required_status"/>
+                                    <field name="confirm_order" widget="boolean_toggle"/>
+                                    <field name="create_invoice" widget="boolean_toggle"/>
+                                    <field name="post_invoice" widget="boolean_toggle"/>
+                                    <field name="register_payment" widget="boolean_toggle"/>
+                                    <field name="payment_journal_id"/>
+                                    <field name="validate_delivery" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Products" name="products">
+                            <group>
+                                <group string="Import">
+                                    <field name="auto_create_products"/>
+                                    <field name="update_existing_products"/>
+                                    <field name="sync_images"/>
+                                    <field name="auto_create_categories"/>
+                                </group>
+                                <group string="Export">
+                                    <field name="export_as_draft"/>
+                                    <field name="export_categories"/>
+                                    <field name="publication_gids" placeholder="All sales channels"/>
+                                    <field name="price_pricelist_id"/>
+                                    <field name="compare_at_pricelist_id"/>
+                                </group>
+                            </group>
+                            <separator string="Collections and Categories"/>
+                            <button name="action_import_collections" string="Import Collections" type="object" class="btn-secondary mb-2"/>
+                            <field name="collection_ids">
+                                <list editable="bottom" create="0">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" readonly="1"/>
+                                    <field name="collection_type" readonly="1" widget="badge"/>
+                                    <field name="category_id" options="{'no_create': True}"/>
+                                </list>
+                            </field>
+                            <separator string="Languages"/>
+                            <group><field name="sync_translations" widget="boolean_toggle"/></group>
+                            <div class="mb-2">
+                                <button name="action_sync_languages" string="Refresh Languages" type="object" class="btn-secondary me-2"/>
+                                <button name="action_import_translations" string="Import Translations" type="object" class="btn-secondary me-2"/>
+                                <button name="action_export_translations" string="Export Translations" type="object" class="btn-secondary"/>
+                            </div>
+                            <field name="language_ids">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="name" readonly="1"/>
+                                    <field name="locale" readonly="1"/>
+                                    <field name="primary" readonly="1"/>
+                                    <field name="published" readonly="1"/>
+                                    <field name="lang_id" options="{'no_create': True}" context="{'active_test': False}"/>
+                                    <field name="sync" widget="boolean_toggle" readonly="primary"/>
+                                </list>
+                            </field>
+                            <separator string="Metafield Mapping"/>
+                            <field name="metafield_mapping_ids">
+                                <list editable="bottom">
+                                    <field name="owner_type"/>
+                                    <field name="namespace"/>
+                                    <field name="key"/>
+                                    <field name="value_type"/>
+                                    <field name="field_id" options="{'no_create': True}"/>
+                                    <field name="direction"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Inventory" name="inventory">
+                            <group>
+                                <group string="Rules">
+                                    <field name="stock_source" widget="radio"/>
+                                    <field name="stock_percent"/>
+                                    <field name="smart_buffer_enabled" widget="boolean_toggle"/>
+                                    <field name="smart_buffer_hours" invisible="not smart_buffer_enabled"/>
+                                </group>
+                                <group string="Automation">
+                                    <field name="auto_export_stock" widget="boolean_toggle"/>
+                                    <field name="routing_allow_split" widget="boolean_toggle"/>
+                                    <field name="drift_guard_enabled" widget="boolean_toggle"/>
+                                    <field name="drift_auto_fix" widget="boolean_toggle" invisible="not drift_guard_enabled"/>
+                                </group>
+                            </group>
+                            <div>
+                                <button name="action_scan_drift" string="Run Drift Guard" type="object" class="btn-secondary me-2"/>
+                                <button name="action_import_stock" string="Import Stock" type="object" class="btn-secondary"/>
+                            </div>
+                            <separator string="Location Mapping"/>
+                            <field name="location_ids">
+                                <list editable="bottom" create="0">
+                                    <field name="name" readonly="1"/>
+                                    <field name="city"/>
+                                    <field name="warehouse_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="import_warehouse_id" options="{'no_create': True}"/>
+                                    <field name="export_stock" widget="boolean_toggle"/>
+                                </list>
+                            </field>
+                            <separator string="Smart Warehouse Routing"/>
+                            <field name="routing_rule_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="country_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="state_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="zip_prefixes"/>
+                                    <field name="zip_from"/>
+                                    <field name="zip_to"/>
+                                    <field name="warehouse_id" options="{'no_create': True}"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Fulfilment and Accounting" name="accounting">
+                            <group>
+                                <group string="Fulfilment">
+                                    <field name="auto_export_fulfillment" widget="boolean_toggle"/>
+                                    <field name="notify_customer_on_fulfillment"/>
+                                </group>
+                                <group string="Payouts">
+                                    <field name="clearing_journal_id"/>
+                                    <field name="payout_journal_id"/>
+                                    <field name="fee_account_id"/>
+                                    <field name="adjustment_account_id"/>
+                                </group>
+                            </group>
+                            <button name="action_setup_accounting" string="Create Journal and Accounts" type="object" class="btn-secondary me-2"/>
+                            <button name="action_import_payouts" string="Import Payouts" type="object" class="btn-secondary"/>
+                        </page>
+                        <page string="Automation" name="automation">
+                            <group>
+                                <group string="Schedulers">
+                                    <field name="auto_import_orders" widget="boolean_toggle"/>
+                                    <field name="auto_import_products" widget="boolean_toggle"/>
+                                    <field name="auto_import_checkouts" widget="boolean_toggle"/>
+                                    <field name="auto_import_payouts" widget="boolean_toggle"/>
+                                </group>
+                                <group string="Last Sync">
+                                    <field name="last_order_sync"/>
+                                    <field name="last_product_sync"/>
+                                    <field name="last_customer_sync"/>
+                                    <field name="last_checkout_sync"/>
+                                </group>
+                            </group>
+                            <div class="mb-3">
+                                <button name="action_import_markets" string="Import Markets" type="object" class="btn-secondary me-2"/>
+                                <button name="action_import_segments" string="Import Segments" type="object" class="btn-secondary me-2"/>
+                                <button name="action_import_checkouts" string="Import Checkouts" type="object" class="btn-secondary"/>
+                            </div>
+                            <separator string="Webhooks"/>
+                            <field name="webhook_ids">
+                                <list editable="bottom" create="0" delete="0">
+                                    <field name="topic" readonly="1"/>
+                                    <field name="enabled" widget="boolean_toggle"/>
+                                    <field name="remote_gid"/>
+                                    <field name="received_count"/>
+                                    <field name="last_received_at"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="AI" name="ai">
+                            <div class="alert alert-info" role="alert">
+                                Local AI engines (product matching, risk scoring, demand forecast, error diagnosis, routing) work without any key.
+                                Add an LLM key to enable natural-language features: Content Studio, Copilot and deeper diagnosis.
+                            </div>
+                            <group>
+                                <group string="LLM Provider" groups="zivoit_shopify_connector.group_manager">
+                                    <field name="ai_enabled" widget="boolean_toggle"/>
+                                    <field name="ai_provider" invisible="not ai_enabled"/>
+                                    <field name="ai_api_key" password="True" invisible="not ai_enabled"/>
+                                    <field name="ai_model" invisible="not ai_enabled"/>
+                                    <field name="ai_base_url" invisible="not ai_enabled"/>
+                                </group>
+                                <group string="Policies">
+                                    <field name="ai_privacy_shield" readonly="1"/>
+                                    <field name="ai_auto_match_threshold"/>
+                                    <field name="risk_hold_threshold"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_instances" model="ir.actions.act_window">
+        <field name="name">Stores</field>
+        <field name="res_model">zivo.shopify.instance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_dashboard" model="ir.actions.client">
+        <field name="name">Shopify Command Center</field>
+        <field name="tag">zivo_shopify_dashboard</field>
+    </record>
+</odoo>

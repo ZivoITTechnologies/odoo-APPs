@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_payout_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.payout.list</field>
+        <field name="model">zivo.shopify.payout</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <header><button name="action_process" string="Process" type="object"/></header>
+                <field name="name"/>
+                <field name="instance_id"/>
+                <field name="issued_at"/>
+                <field name="shopify_status" widget="badge"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="gross_amount" sum="Total"/>
+                <field name="fee_amount" sum="Total"/>
+                <field name="net_amount" sum="Total"/>
+                <field name="effective_fee_percent" string="Fee %"/>
+                <field name="anomaly_count"/>
+                <field name="state" widget="badge" decoration-success="state == 'reconciled'" decoration-info="state == 'posted'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_payout_form" model="ir.ui.view">
+        <field name="name">zivo.shopify.payout.form</field>
+        <field name="model">zivo.shopify.payout</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <header>
+                    <button name="action_process" string="Create Entry and Reconcile" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <h1><field name="name"/></h1>
+                    <div class="alert alert-warning" role="alert" invisible="anomaly_count == 0">
+                        <strong>AI anomaly report</strong>
+                        <field name="anomaly_note" nolabel="1"/>
+                        <field name="anomaly_count" invisible="1"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="instance_id"/>
+                            <field name="issued_at"/>
+                            <field name="shopify_status"/>
+                            <field name="move_id"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="gross_amount"/>
+                            <field name="fee_amount"/>
+                            <field name="net_amount"/>
+                            <field name="effective_fee_percent"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list>
+                            <field name="transaction_date"/>
+                            <field name="transaction_type" widget="badge"/>
+                            <field name="raw_type"/>
+                            <field name="order_name"/>
+                            <field name="order_id"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="amount" sum="Total"/>
+                            <field name="fee" sum="Total"/>
+                            <field name="net" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_payouts" model="ir.actions.act_window">
+        <field name="name">Payouts</field>
+        <field name="res_model">zivo.shopify.payout</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="view_move_form" model="ir.ui.view">
+        <field name="name">account.move.form.zivo.shopify</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="zivo_order_id" invisible="1"/>
+                <field name="zivo_refund_gid" invisible="1"/>
+                <button name="action_zivo_refund_on_shopify" string="Refund on Shopify" type="object" groups="zivoit_shopify_connector.group_user"
+                        confirm="This refunds the customer through Shopify. Continue?"
+                        invisible="move_type != 'out_refund' or state != 'posted' or not zivo_order_id or zivo_refund_gid"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

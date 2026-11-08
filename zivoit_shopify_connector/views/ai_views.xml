@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_match_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.match.list</field>
+        <field name="model">zivo.shopify.match</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" decoration-muted="state == 'rejected'">
+                <header>
+                    <button name="action_accept" string="Accept" type="object"/>
+                    <button name="action_reject" string="Reject" type="object"/>
+                </header>
+                <field name="variant_id" string="Shopify Variant"/>
+                <field name="product_id"/>
+                <field name="confidence_percent" widget="progressbar"/>
+                <field name="reason"/>
+                <field name="engine" widget="badge"/>
+                <field name="state" widget="badge" decoration-success="state == 'accepted'"/>
+                <button name="action_accept" string="Accept" type="object" invisible="state != 'suggested'" class="btn-primary"/>
+                <button name="action_reject" string="Reject" type="object" invisible="state != 'suggested'"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_matches" model="ir.actions.act_window">
+        <field name="name">AI Product Matches</field>
+        <field name="res_model">zivo.shopify.match</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('state', '=', 'suggested')]</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Every variant is linked</p><p>Unlinked Shopify variants and their likely Odoo products appear here.</p></field>
+    </record>
+    <record id="view_forecast_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.forecast.list</field>
+        <field name="model">zivo.shopify.forecast</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" decoration-danger="risk == 'critical'" decoration-warning="risk == 'warning'">
+                <field name="product_id"/>
+                <field name="instance_id"/>
+                <field name="daily_velocity"/>
+                <field name="trend_percent"/>
+                <field name="stock_qty"/>
+                <field name="days_of_cover"/>
+                <field name="stockout_date"/>
+                <field name="suggested_reorder"/>
+                <field name="risk" widget="badge" decoration-danger="risk == 'critical'" decoration-warning="risk == 'warning'" decoration-success="risk == 'ok'"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_forecast" model="ir.actions.act_window">
+        <field name="name">AI Demand Forecast</field>
+        <field name="res_model">zivo.shopify.forecast</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="view_ai_log_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.ai.log.list</field>
+        <field name="model">zivo.shopify.ai.log</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="create_date"/>
+                <field name="instance_id"/>
+                <field name="feature"/>
+                <field name="model"/>
+                <field name="input_tokens" sum="Total"/>
+                <field name="output_tokens" sum="Total"/>
+                <field name="state" widget="badge"/>
+                <field name="message"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_ai_log" model="ir.actions.act_window">
+        <field name="name">AI Usage</field>
+        <field name="res_model">zivo.shopify.ai.log</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

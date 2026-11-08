@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_location_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.location.list</field>
+        <field name="model">zivo.shopify.location</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0">
+                <field name="name" readonly="1"/>
+                <field name="instance_id" readonly="1"/>
+                <field name="city"/>
+                <field name="warehouse_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                <field name="import_warehouse_id" options="{'no_create': True}"/>
+                <field name="export_stock" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_locations" model="ir.actions.act_window">
+        <field name="name">Locations</field>
+        <field name="res_model">zivo.shopify.location</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="view_drift_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.drift.list</field>
+        <field name="model">zivo.shopify.drift</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" decoration-muted="state != 'open'">
+                <header>
+                    <button name="action_fix" string="Correct on Shopify" type="object"/>
+                    <button name="action_ignore" string="Ignore" type="object"/>
+                </header>
+                <field name="product_id"/>
+                <field name="instance_id"/>
+                <field name="location_id"/>
+                <field name="odoo_qty"/>
+                <field name="shopify_qty"/>
+                <field name="difference"/>
+                <field name="detected_at"/>
+                <field name="state" widget="badge" decoration-danger="state == 'open'" decoration-success="state == 'fixed'"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_drift" model="ir.actions.act_window">
+        <field name="name">Stock Drift Guard</field>
+        <field name="res_model">zivo.shopify.drift</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('state', '=', 'open')]</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Odoo and Shopify agree</p><p>Drift Guard compares both systems every day.</p></field>
+    </record>
+    <record id="view_picking_form" model="ir.ui.view">
+        <field name="name">stock.picking.form.zivo.shopify</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="zivo_order_gid" invisible="1"/>
+                <field name="zivo_return_gid" invisible="1"/>
+                <button name="action_zivo_export_fulfillment" string="Fulfil on Shopify" type="object" groups="zivoit_shopify_connector.group_user"
+                        invisible="not zivo_order_gid or state != 'done' or zivo_export_state == 'done' or picking_type_code != 'outgoing'"/>
+                <button name="action_zivo_export_return" string="Send Return to Shopify" type="object" groups="zivoit_shopify_connector.group_user"
+                        invisible="not zivo_order_gid or zivo_return_gid or picking_type_code != 'incoming'"/>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="zivo_export_state" invisible="not zivo_order_gid" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

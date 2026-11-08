@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="product_shipping" model="product.product">
+        <field name="name">Shopify Shipping</field>
+        <field name="type">service</field>
+        <field name="invoice_policy">order</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="list_price">0</field>
+    </record>
+    <record id="product_custom" model="product.product">
+        <field name="name">Shopify Custom Item</field>
+        <field name="type">service</field>
+        <field name="invoice_policy">order</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="list_price">0</field>
+    </record>
+    <record id="product_tip" model="product.product">
+        <field name="name">Shopify Tip</field>
+        <field name="type">service</field>
+        <field name="invoice_policy">order</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="list_price">0</field>
+    </record>
+    <record id="product_adjustment" model="product.product">
+        <field name="name">Shopify Adjustment</field>
+        <field name="type">service</field>
+        <field name="invoice_policy">order</field>
+        <field name="purchase_ok" eval="False"/>
+        <field name="list_price">0</field>
+    </record>
+</odoo>

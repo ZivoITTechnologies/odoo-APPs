@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="rule_zivo_shopify_instance_company" model="ir.rule">
+        <field name="name">zivo.shopify.instance multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_job_company" model="ir.rule">
+        <field name="name">zivo.shopify.job multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_job"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_webhook_company" model="ir.rule">
+        <field name="name">zivo.shopify.webhook multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_webhook"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_workflow_company" model="ir.rule">
+        <field name="name">zivo.shopify.workflow multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_workflow"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_market_company" model="ir.rule">
+        <field name="name">zivo.shopify.market multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_market"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_routing_rule_company" model="ir.rule">
+        <field name="name">zivo.shopify.routing.rule multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_routing_rule"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_metafield_mapping_company" model="ir.rule">
+        <field name="name">zivo.shopify.metafield.mapping multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_metafield_mapping"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_product_company" model="ir.rule">
+        <field name="name">zivo.shopify.product multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_product"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_variant_company" model="ir.rule">
+        <field name="name">zivo.shopify.variant multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_variant"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_location_company" model="ir.rule">
+        <field name="name">zivo.shopify.location multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_location"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_variant_level_company" model="ir.rule">
+        <field name="name">zivo.shopify.variant.level multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_variant_level"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_drift_company" model="ir.rule">
+        <field name="name">zivo.shopify.drift multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_drift"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_customer_company" model="ir.rule">
+        <field name="name">zivo.shopify.customer multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_customer"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_transaction_company" model="ir.rule">
+        <field name="name">zivo.shopify.transaction multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_transaction"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_fulfillment_company" model="ir.rule">
+        <field name="name">zivo.shopify.fulfillment multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_fulfillment"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_refund_company" model="ir.rule">
+        <field name="name">zivo.shopify.refund multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_refund"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_return_company" model="ir.rule">
+        <field name="name">zivo.shopify.return multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_return"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_payout_company" model="ir.rule">
+        <field name="name">zivo.shopify.payout multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_payout"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_payout_line_company" model="ir.rule">
+        <field name="name">zivo.shopify.payout.line multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_payout_line"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_ai_log_company" model="ir.rule">
+        <field name="name">zivo.shopify.ai.log multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_ai_log"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_match_company" model="ir.rule">
+        <field name="name">zivo.shopify.match multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_match"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_forecast_company" model="ir.rule">
+        <field name="name">zivo.shopify.forecast multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_forecast"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_language_company" model="ir.rule">
+        <field name="name">zivo.shopify.language multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_language"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_zivo_shopify_collection_company" model="ir.rule">
+        <field name="name">zivo.shopify.collection multi-company</field>
+        <field name="model_id" ref="model_zivo_shopify_collection"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

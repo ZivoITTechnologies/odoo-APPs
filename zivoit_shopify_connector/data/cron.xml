@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="cron_process_jobs" model="ir.cron">
+        <field name="name">Shopify: Process Sync Queue</field>
+        <field name="model_id" ref="model_zivo_shopify_job"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">minutes</field>
+    </record>
+    <record id="cron_export_stock" model="ir.cron">
+        <field name="name">Shopify: Export Stock Changes</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_export_stock()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+    </record>
+    <record id="cron_import_orders" model="ir.cron">
+        <field name="name">Shopify: Import Orders (Safety Net)</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_import_orders()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+    </record>
+    <record id="cron_import_products" model="ir.cron">
+        <field name="name">Shopify: Import Products</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_import_products()</field>
+        <field name="interval_number">6</field>
+        <field name="interval_type">hours</field>
+    </record>
+    <record id="cron_import_checkouts" model="ir.cron">
+        <field name="name">Shopify: Import Abandoned Checkouts</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_import_checkouts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+    </record>
+    <record id="cron_import_payouts" model="ir.cron">
+        <field name="name">Shopify: Import Payouts</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_import_payouts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="cron_forecast" model="ir.cron">
+        <field name="name">Shopify: AI Demand Forecast</field>
+        <field name="model_id" ref="model_zivo_shopify_forecast"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_recompute()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="cron_drift" model="ir.cron">
+        <field name="name">Shopify: Stock Drift Guard</field>
+        <field name="model_id" ref="model_zivo_shopify_instance"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_drift_guard()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="cron_cleanup" model="ir.cron">
+        <field name="name">Shopify: Clean Old Jobs</field>
+        <field name="model_id" ref="model_zivo_shopify_job"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_cleanup()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>

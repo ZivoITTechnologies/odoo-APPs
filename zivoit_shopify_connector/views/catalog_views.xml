@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.product.list</field>
+        <field name="model">zivo.shopify.product</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <header>
+                    <button name="action_export" string="Export" type="object"/>
+                    <button name="action_export_prices" string="Export Prices" type="object"/>
+                    <button name="action_refresh" string="Refresh" type="object"/>
+                    <button name="action_export_translations" string="Export Translations" type="object"/>
+                    <button name="action_import_translations" string="Import Translations" type="object"/>
+                </header>
+                <field name="name"/>
+                <field name="instance_id"/>
+                <field name="product_tmpl_id"/>
+                <field name="vendor"/>
+                <field name="variant_count" string="Variants"/>
+                <field name="unmatched_count" string="Unlinked"/>
+                <field name="last_import_at"/>
+                <field name="last_export_at"/>
+                <field name="status" widget="badge" decoration-success="status == 'ACTIVE'" decoration-warning="status == 'DRAFT'"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_product_form" model="ir.ui.view">
+        <field name="name">zivo.shopify.product.form</field>
+        <field name="model">zivo.shopify.product</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_export" string="Export to Shopify" type="object" class="btn-primary"/>
+                    <button name="%(action_content_wizard)d" string="AI Content Studio" type="action" context="{'default_shopify_product_id': id}"/>
+                    <button name="action_ai_translate" string="AI Translate" type="object" invisible="not shopify_gid"/>
+                    <button name="action_export_prices" string="Export Prices" type="object" invisible="not shopify_gid"/>
+                    <button name="action_publish" string="Publish" type="object" invisible="not shopify_gid or status == 'ACTIVE'"/>
+                    <button name="action_unpublish" string="Unpublish" type="object" invisible="not shopify_gid or status != 'ACTIVE'"/>
+                    <field name="status" widget="statusbar" statusbar_visible="DRAFT,ACTIVE,ARCHIVED"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="instance_id" readonly="1"/>
+                            <field name="product_tmpl_id"/>
+                            <field name="shopify_gid" readonly="1"/>
+                            <field name="handle"/>
+                            <field name="excluded" widget="boolean_toggle"/>
+                            <field name="collection_ids" widget="many2many_tags" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="vendor"/>
+                            <field name="product_type"/>
+                            <field name="tags"/>
+                            <field name="seo_title"/>
+                            <field name="seo_description"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Variants" name="variants">
+                            <field name="variant_ids">
+                                <list editable="bottom" create="0">
+                                    <field name="title" readonly="1"/>
+                                    <field name="sku" readonly="1"/>
+                                    <field name="barcode" readonly="1"/>
+                                    <field name="product_id" options="{'no_create': True}"/>
+                                    <field name="price" readonly="1"/>
+                                    <field name="compare_at_price" readonly="1"/>
+                                    <field name="stock_policy"/>
+                                    <field name="stock_policy_value"/>
+                                    <field name="last_stock_export_at" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Description" name="description">
+                            <field name="description_html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="view_product_search" model="ir.ui.view">
+        <field name="name">zivo.shopify.product.search</field>
+        <field name="model">zivo.shopify.product</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="shopify_gid"/>
+                <field name="vendor"/>
+                <filter name="active_status" string="Active" domain="[('status', '=', 'ACTIVE')]"/>
+                <filter name="draft" string="Draft" domain="[('status', '=', 'DRAFT')]"/>
+                <filter name="not_exported" string="Not on Shopify" domain="[('shopify_gid', '=', False)]"/>
+                <filter name="group_instance" string="Store" context="{'group_by': 'instance_id'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="action_products" model="ir.actions.act_window">
+        <field name="name">Shopify Products</field>
+        <field name="res_model">zivo.shopify.product</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="view_collection_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.collection.list</field>
+        <field name="model">zivo.shopify.collection</field>
+        <field name="arch" type="xml">
+            <list create="0" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="instance_id" readonly="1"/>
+                <field name="handle" readonly="1"/>
+                <field name="collection_type" readonly="1" widget="badge" decoration-info="collection_type == 'manual'"/>
+                <field name="category_id" options="{'no_create': True}"/>
+                <field name="match_note" readonly="1"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_collections" model="ir.actions.act_window">
+        <field name="name">Collections</field>
+        <field name="res_model">zivo.shopify.collection</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="view_product_template_form" model="ir.ui.view">
+        <field name="name">product.template.form.zivo.shopify</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_zivo_open_listings" type="object" class="oe_stat_button" icon="fa-shopping-bag" invisible="zivo_shopify_count == 0" groups="zivoit_shopify_connector.group_user">
+                    <field name="zivo_shopify_count" widget="statinfo" string="Shopify"/>
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>

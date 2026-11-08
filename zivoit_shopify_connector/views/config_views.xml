@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_market_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.market.list</field>
+        <field name="model">zivo.shopify.market</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="0">
+                <field name="name" readonly="1"/>
+                <field name="instance_id" readonly="1"/>
+                <field name="status" widget="badge"/>
+                <field name="country_codes"/>
+                <field name="price_list_currency"/>
+                <field name="pricelist_id" options="{'no_create': True}"/>
+                <field name="warehouse_id" options="{'no_create': True}"/>
+                <button name="action_export_prices" string="Export Prices" type="object"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_markets" model="ir.actions.act_window">
+        <field name="name">Markets</field>
+        <field name="res_model">zivo.shopify.market</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="view_webhook_list" model="ir.ui.view">
+        <field name="name">zivo.shopify.webhook.list</field>
+        <field name="model">zivo.shopify.webhook</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0">
+                <field name="topic"/>
+                <field name="instance_id"/>
+                <field name="enabled" widget="boolean_toggle"/>
+                <field name="remote_gid"/>
+                <field name="received_count"/>
+                <field name="last_received_at"/>
+                <button name="action_toggle" string="Apply" type="object"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_webhooks" model="ir.actions.act_window">
+        <field name="name">Webhooks</field>
+        <field name="res_model">zivo.shopify.webhook</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

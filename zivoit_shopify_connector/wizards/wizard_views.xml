@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_setup_wizard" model="ir.ui.view">
+        <field name="name">zivo.shopify.setup.wizard.form</field>
+        <field name="model">zivo.shopify.setup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Connect a Shopify Store">
+                <field name="step" widget="statusbar" statusbar_visible="credentials,automation,done"/>
+                <sheet>
+                    <group invisible="step != 'credentials'">
+                        <group string="Your Store">
+                            <field name="name" placeholder="My Online Store"/>
+                            <field name="shop_domain" placeholder="your-store.myshopify.com"/>
+                            <field name="auth_mode" widget="radio"/>
+                        </group>
+                        <group string="Credentials">
+                            <field name="client_id" invisible="auth_mode != 'client_credentials'"/>
+                            <field name="client_secret" password="True" invisible="auth_mode != 'client_credentials'"/>
+                            <field name="access_token" password="True" invisible="auth_mode != 'admin_token'"/>
+                            <field name="webhook_secret" password="True" invisible="auth_mode != 'admin_token'"/>
+                        </group>
+                    </group>
+                    <group invisible="step != 'automation'" string="What should we set up?">
+                        <field name="register_webhooks"/>
+                        <field name="setup_accounting"/>
+                        <field name="import_products"/>
+                        <field name="import_customers"/>
+                        <field name="import_markets"/>
+                    </group>
+                    <div invisible="step != 'done'">
+                        <h3>Your store is connected</h3>
+                        <field name="summary" nolabel="1"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_connect" string="Test and Continue" type="object" class="btn-primary" invisible="step != 'credentials'"/>
+                    <button name="action_finish" string="Finish Setup" type="object" class="btn-primary" invisible="step != 'automation'"/>
+                    <button name="action_open_store" string="Open Store" type="object" class="btn-primary" invisible="step != 'done'"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_setup_wizard" model="ir.actions.act_window">
+        <field name="name">Connect a Shopify Store</field>
+        <field name="res_model">zivo.shopify.setup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_export_wizard" model="ir.ui.view">
+        <field name="name">zivo.shopify.export.wizard.form</field>
+        <field name="model">zivo.shopify.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export to Shopify">
+                <group>
+                    <field name="instance_id" options="{'no_create': True}"/>
+                    <field name="status" widget="radio"/>
+                    <field name="product_tmpl_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_export" string="Queue Export" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_export_products" model="ir.actions.act_window">
+        <field name="name">Export to Shopify</field>
+        <field name="res_model">zivo.shopify.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list,form,kanban</field>
+    </record>
+
+    <record id="view_cancel_wizard" model="ir.ui.view">
+        <field name="name">zivo.shopify.cancel.wizard.form</field>
+        <field name="model">zivo.shopify.cancel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cancel on Shopify">
+                <group>
+                    <field name="order_id" readonly="1"/>
+                    <field name="reason"/>
+                    <field name="restock"/>
+                    <field name="refund"/>
+                    <field name="notify_customer"/>
+                    <field name="staff_note"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" string="Cancel Order on Shopify" type="object" class="btn-danger" confirm="This cancels the order on your live store. Continue?"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_order_export_wizard" model="ir.ui.view">
+        <field name="name">zivo.shopify.order.export.wizard.form</field>
+        <field name="model">zivo.shopify.order.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create Order on Shopify">
+                <group>
+                    <field name="order_id" readonly="1"/>
+                    <field name="instance_id" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_export" string="Create on Shopify" type="object" class="btn-primary"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_content_wizard" model="ir.ui.view">
+        <field name="name">zivo.shopify.content.wizard.form</field>
+        <field name="model">zivo.shopify.content.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AI Content Studio">
+                <group>
+                    <group>
+                        <field name="shopify_product_id" readonly="1"/>
+                        <field name="tone"/>
+                        <field name="language"/>
+                    </group>
+                    <group>
+                        <field name="keywords" placeholder="comma, separated"/>
+                        <field name="instructions" placeholder="Anything to emphasise"/>
+                        <field name="engine" invisible="not generated"/>
+                    </group>
+                </group>
+                <div invisible="not generated">
+                    <separator string="Review before applying"/>
+                    <group>
+                        <field name="title"/>
+                        <field name="seo_title"/>
+                        <field name="seo_description"/>
+                        <field name="tags"/>
+                        <field name="description_html"/>
+                        <field name="push_after"/>
+                    </group>
+                </div>
+                <footer>
+                    <button name="action_generate" string="Generate" type="object" class="btn-primary"/>
+                    <button name="action_apply" string="Apply" type="object" class="btn-success" invisible="not generated"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_content_wizard" model="ir.actions.act_window">
+        <field name="name">AI Content Studio</field>
+        <field name="res_model">zivo.shopify.content.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

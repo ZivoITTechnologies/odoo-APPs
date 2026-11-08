@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="zivoit_shopify_connector.Dashboard">
+        <div class="o_action zv_dash">
+            <Layout display="display">
+                <t t-if="state.data">
+                    <div class="zv_wrap" t-if="!state.data.instances.length">
+                        <div class="zv_empty">
+                            <h2>Connect your first Shopify store</h2>
+                            <p>Two minutes with the Client ID and Secret of your Shopify Dev Dashboard app.</p>
+                            <button class="btn btn-primary" t-on-click="() => this.open('action_setup_wizard')">Connect a Store</button>
+                        </div>
+                    </div>
+                    <div class="zv_wrap" t-else="">
+                        <header class="zv_head">
+                            <div>
+                                <h1>Shopify Command Center</h1>
+                                <span class="zv_live"><i class="zv_dot"/>Live, refreshes every 5 seconds</span>
+                            </div>
+                            <select class="form-select zv_store" t-on-change="onStoreChange">
+                                <option value="">All stores</option>
+                                <t t-foreach="state.data.instances" t-as="store" t-key="store.id">
+                                    <option t-att-value="store.id" t-esc="store.name"/>
+                                </t>
+                            </select>
+                        </header>
+
+                        <section class="zv_kpis">
+                            <button class="zv_kpi" t-on-click="() => this.open('action_orders')">
+                                <span>Revenue today</span>
+                                <strong><t t-esc="formatMoney(state.data.kpis.revenue_today)"/> <small t-esc="state.data.currency"/></strong>
+                                <em><t t-esc="state.data.kpis.orders_today"/> orders</em>
+                            </button>
+                            <button class="zv_kpi" t-on-click="() => this.open('action_jobs')">
+                                <span>Sync success, 24h</span>
+                                <strong><t t-esc="state.data.kpis.success_rate"/>%</strong>
+                                <em><t t-esc="state.data.kpis.pending"/> in queue</em>
+                            </button>
+                            <button class="zv_kpi" t-att-class="{ zv_alert: state.data.kpis.failed }" t-on-click="() => this.open('action_failed_jobs')">
+                                <span>Failed jobs</span>
+                                <strong t-esc="state.data.kpis.failed"/>
+                                <em>with AI diagnosis</em>
+                            </button>
+                            <button class="zv_kpi" t-att-class="{ zv_alert: state.data.kpis.risk_holds }" t-on-click="() => this.open('action_orders')">
+                                <span>Risk holds</span>
+                                <strong t-esc="state.data.kpis.risk_holds"/>
+                                <em>orders to review</em>
+                            </button>
+                            <button class="zv_kpi" t-on-click="() => this.open('action_drift')">
+                                <span>Stock drift</span>
+                                <strong t-esc="state.data.kpis.drift"/>
+                                <em>Odoo vs Shopify</em>
+                            </button>
+                            <button class="zv_kpi" t-on-click="() => this.open('action_matches')">
+                                <span>Product matches</span>
+                                <strong t-esc="state.data.kpis.unmatched"/>
+                                <em>awaiting review</em>
+                            </button>
+                        </section>
+
+                        <section class="zv_grid">
+                            <article class="zv_card zv_span2">
+                                <h3>Revenue, last 14 days <small t-esc="state.data.currency"/></h3>
+                                <svg viewBox="0 0 640 200" class="zv_chart" role="img" aria-label="Revenue per day">
+                                    <line x1="0" x2="640" y1="170" y2="170" class="zv_axis"/>
+                                    <t t-foreach="bars" t-as="bar" t-key="bar.label">
+                                        <rect t-att-x="bar.x" t-att-y="bar.y" width="26" t-att-height="bar.height" rx="3" class="zv_bar">
+                                            <title><t t-esc="bar.label"/>: <t t-esc="formatMoney(bar.revenue)"/> (<t t-esc="bar.orders"/> orders)</title>
+                                        </rect>
+                                        <text t-if="bar.showLabel" t-att-x="bar.x + 13" y="190" text-anchor="middle" class="zv_tick" t-esc="bar.label"/>
+                                    </t>
+                                </svg>
+                            </article>
+                            <article class="zv_card">
+                                <h3>Operations</h3>
+                                <ul class="zv_stats">
+                                    <li><span>Products on Shopify</span><b t-esc="state.data.kpis.products"/></li>
+                                    <li><span>Ready to ship</span><b t-esc="state.data.kpis.to_ship"/></li>
+                                    <li><span>Payouts to process</span><b t-esc="state.data.kpis.payouts_todo"/></li>
+                                    <li><span>Last webhook</span><b t-esc="state.data.last_webhook || '-'"/></li>
+                                </ul>
+                                <h3 class="mt-3">API budget</h3>
+                                <div class="zv_gauge"><div t-att-style="`width:${budget}%`"/></div>
+                                <small class="text-muted"><t t-esc="budget"/>% of the Shopify query budget available</small>
+                            </article>
+
+                            <article class="zv_card">
+                                <h3>AI insights</h3>
+                                <ul class="zv_insights">
+                                    <t t-foreach="state.data.insights" t-as="insight" t-key="insight_index">
+                                        <li t-att-class="`zv_${insight.kind}`">
+                                            <b t-esc="insight.title"/>
+                                            <span t-esc="insight.detail"/>
+                                        </li>
+                                    </t>
+                                </ul>
+                            </article>
+                            <article class="zv_card">
+                                <h3>Live activity</h3>
+                                <ul class="zv_feed">
+                                    <t t-foreach="state.data.feed" t-as="row" t-key="row.id">
+                                        <li>
+                                            <i t-att-class="`zv_state zv_s_${row.state}`"/>
+                                            <div>
+                                                <b t-esc="row.name"/>
+                                                <small><t t-esc="row.source"/> · <t t-esc="row.when"/><t t-if="row.error"> · <t t-esc="row.error"/></t></small>
+                                            </div>
+                                        </li>
+                                    </t>
+                                    <li t-if="!state.data.feed.length" class="text-muted">No activity yet</li>
+                                </ul>
+                            </article>
+                            <article class="zv_card">
+                                <h3>Copilot</h3>
+                                <div class="input-group">
+                                    <input class="form-control" placeholder="How many orders are on hold?" t-model="state.question" t-on-keydown="onQuestionKey"/>
+                                    <button class="btn btn-primary" t-att-disabled="state.asking" t-on-click="ask">Ask</button>
+                                </div>
+                                <div class="zv_answer" t-if="state.answer">
+                                    <p t-esc="state.answer"/>
+                                    <small class="text-muted" t-esc="state.engine"/>
+                                </div>
+                                <p class="text-muted mt-3 mb-0" t-if="!state.answer and !state.data.llm_ready">
+                                    Works on local data now. Add an LLM key on the store for free-form questions.
+                                </p>
+                            </article>
+                        </section>
+                    </div>
+                </t>
+            </Layout>
+        </div>
+    </t>
+</templates>
