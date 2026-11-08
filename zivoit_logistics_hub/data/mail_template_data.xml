@@ -14,9 +14,9 @@
     <p t-elif="object.state == 'delivered'">Your order <b t-out="object.sale_id.name or object.name"/> has been delivered. Thank you for shopping with us!</p>
     <p t-elif="object.state == 'ndr'"><t t-out="object.ndr_customer_message or ''"/></p>
     <p t-else="">There is an update on your order <b t-out="object.sale_id.name or object.name"/>.</p>
-    <p>Courier: <t t-out="object.courier_name or object.account_id.name"/> · AWB <b t-out="object.tracking_number"/></p>
+    <p>Courier: <t t-out="object.courier_name or object.account_id.name"/> | AWB <b t-out="object.tracking_number"/></p>
     <p><a t-att-href="object.public_tracking_url" style="background:#1f6feb;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none">Track your shipment</a></p>
-    <p style="color:#888;font-size:12px">— <t t-out="object.company_id.name"/></p>
+    <p style="color:#888;font-size:12px"><t t-out="object.company_id.name"/></p>
 </div>
         </field>
         <field name="auto_delete" eval="True"/>

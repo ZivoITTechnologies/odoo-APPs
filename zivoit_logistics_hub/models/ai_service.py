@@ -139,14 +139,14 @@ class LogisticsAI(models.AbstractModel):
         })
         return {
             'rto_risk': risk['score'], 'rto_risk_level': risk['level'],
-            'rto_risk_reasons': '\n'.join('• %s' % r for r in risk['reasons']),
+            'rto_risk_reasons': '\n'.join('- %s' % r for r in risk['reasons']),
             'address_score': address['score'], 'address_issues': address['text'],
         }
 
     # ------------------------------------------------------------------ carrier recommendation
     @api.model
     def _lane_performance(self, accounts, dest_zip, dest_state=None):
-        """Historical performance per account for the destination (pincode → state fallback)."""
+        """Historical performance per account for the destination (pincode -> state fallback)."""
         Shipment = self.env['zivo.logistics.shipment'].sudo()
         since = fields.Datetime.now() - timedelta(days=180)
         perf = {}

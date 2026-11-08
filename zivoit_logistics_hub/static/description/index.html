@@ -1,35 +1,239 @@
 <section class="oe_container">
-  <div class="oe_row oe_spaced">
-    <h2 class="oe_slogan" style="color:#14305f">ZivoIT Logistics Hub</h2>
-    <h3 class="oe_slogan">One Odoo app for every courier &mdash; with AI that picks the right one</h3>
-    <img src="banner.png" style="max-width:100%;border-radius:12px" alt="ZivoIT Logistics Hub"/>
-  </div>
+    <div class="container" style="max-width:1140px;">
+        <div class="row">
+            <div class="col-12 text-center" style="padding-top:20px;">
+                <img src="zivoit_logistics_hub_cover.png" class="img-fluid" style="border-radius:12px;width:100%;" alt="ZivoIT Logistics Hub cover"/>
+                <h1 style="color:#0e1b3b;font-weight:700;margin-top:30px;">ZivoIT Logistics Hub</h1>
+                <h3 style="color:#22b4dc;font-weight:600;">One Odoo app for every courier, with AI that picks the right one</h3>
+                <p style="font-size:17px;color:#4b5563;margin:14px auto 0;max-width:860px;">
+                    Connect Shiprocket, Delhivery, DTDC, Blue Dart, FedEx, Xpressbees, Shree Maruti and any courier with a REST API from a single app.
+                    Validate a delivery order and the best courier is booked, the label is attached and tracking starts automatically.
+                </p>
+                <p style="font-size:15px;color:#6b7280;margin-top:10px;">Odoo 19 | Community and Enterprise | Built and supported by ZivoIT Technologies</p>
+            </div>
+        </div>
+    </div>
 </section>
+
 <section class="oe_container">
-  <div class="oe_row oe_spaced">
-    <h3>Connectors included</h3>
-    <p>Shiprocket (25+ couriers) &middot; Delhivery &middot; DTDC &middot; Blue Dart &middot; FedEx &middot; Xpressbees &middot; Shree Maruti &middot; any courier with a REST API (no-code template) &middot; offline sandbox courier for demos and training.</p>
-    <h3>Shipping without leaving Odoo</h3>
-    <ul>
-      <li>Rate on the sales order with the recommended courier, price and transit days</li>
-      <li>Validate the delivery order: courier booked, AWB and label attached, tracking started</li>
-      <li>Compare Rates screen, bulk ship with one merged label PDF, cancel, reverse pickup</li>
-      <li>Smart failover to the next best courier when a booking is rejected</li>
-      <li>Allocation rules by COD/prepaid, weight, order value, zone, PIN prefix, state and RTO risk</li>
-      <li>Contract rate cards for couriers without a rate API (zones, slabs, fuel, COD fee, GST)</li>
-      <li>Webhooks + scheduled tracking, normalised statuses, branded customer tracking page and emails</li>
-    </ul>
-    <h3>AI built in (works without an API key)</h3>
-    <ul>
-      <li>AI Best courier: price, speed and the delivered/RTO rate each courier achieved on that destination</li>
-      <li>RTO risk score with reasons; optional hold of high-risk COD orders</li>
-      <li>Address intelligence: PIN code / state check, house number, landmark, mobile validity</li>
-      <li>NDR assistant: failure reason, next action and a customer message draft</li>
-      <li>Predicted delivery date, weight-dispute detection, plain-language shipment search</li>
-      <li>Optional OpenAI, Anthropic Claude, Google Gemini or OpenAI-compatible LLM</li>
-    </ul>
-    <h3>Built for operations teams</h3>
-    <p>API logs with secrets masked, job queue with automatic retries, carrier KPIs, NDR queue, multi-company, Odoo 19.</p>
-    <p>Support: <a href="mailto:info@zivoit.com">info@zivoit.com</a> &middot; <a href="https://www.zivoit.com">www.zivoit.com</a></p>
-  </div>
+    <div class="container" style="max-width:1140px;">
+        <h2 style="color:#0e1b3b;font-weight:700;margin-top:40px;text-align:center;">Why you need this module</h2>
+        <div class="row" style="margin-top:18px;">
+            <div class="col-md-6 col-lg-3" style="padding:8px;">
+                <div style="border:1px solid #e5e7eb;border-radius:12px;padding:18px;height:100%;">
+                    <h5 style="color:#0e1b3b;font-weight:700;">Too many courier panels</h5>
+                    <p style="color:#4b5563;margin:0;">Stop copying orders into Shiprocket, Delhivery and DTDC portals. Book every courier from the Odoo delivery order.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3" style="padding:8px;">
+                <div style="border:1px solid #e5e7eb;border-radius:12px;padding:18px;height:100%;">
+                    <h5 style="color:#0e1b3b;font-weight:700;">COD orders coming back</h5>
+                    <p style="color:#4b5563;margin:0;">An RTO risk score with reasons flags risky Cash on Delivery orders before they ship, and can hold them for you.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3" style="padding:8px;">
+                <div style="border:1px solid #e5e7eb;border-radius:12px;padding:18px;height:100%;">
+                    <h5 style="color:#0e1b3b;font-weight:700;">Guessing the courier</h5>
+                    <p style="color:#4b5563;margin:0;">AI ranks every courier by price, speed and the delivered and RTO rate it achieved on that PIN code in your own history.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3" style="padding:8px;">
+                <div style="border:1px solid #e5e7eb;border-radius:12px;padding:18px;height:100%;">
+                    <h5 style="color:#0e1b3b;font-weight:700;">Failed deliveries pile up</h5>
+                    <p style="color:#4b5563;margin:0;">The NDR queue explains each failed attempt, suggests the next action and drafts the message to the customer.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="container" style="max-width:1140px;">
+        <h2 style="color:#0e1b3b;font-weight:700;margin-top:40px;text-align:center;">Highlights: how it compares</h2>
+        <p style="text-align:center;color:#6b7280;">Compared with a typical single-courier shipping app for Odoo.</p>
+        <div class="table-responsive">
+            <table class="table table-bordered" style="font-size:15px;">
+                <thead style="background:#0e1b3b;color:#ffffff;">
+                    <tr>
+                        <th style="background:#0e1b3b;color:#ffffff;padding:12px;">Feature</th>
+                        <th style="background:#0e1b3b;color:#ffffff;padding:12px;text-align:center;width:190px;">ZivoIT Logistics Hub</th>
+                        <th style="background:#0e1b3b;color:#ffffff;padding:12px;text-align:center;width:190px;">Typical single-courier app</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>One app for many couriers</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Shiprocket connector</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td>Direct Delhivery, DTDC, Blue Dart, FedEx and Xpressbees connectors</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Add a new courier without code (Shree Maruti and regional couriers)</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Live shipping rate on the sales order</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td>AWB and label from the delivery order</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td>Compare all couriers side by side before shipping</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>AI courier recommendation (price, speed and reliability)</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>RTO risk score with reasons for COD orders</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Automatic hold of high-risk COD orders</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Address quality check (PIN code, state, mobile number)</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>NDR assistant with suggested action and customer message</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Smart failover to the next best courier</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Allocation rules (COD, weight, value, zone, PIN code, RTO risk)</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Contract rate cards for couriers without a rate API</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td>Weight dispute detection</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td><td style="text-align:center;color:#b91c1c;font-weight:700;">No</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="container" style="max-width:1140px;">
+        <h2 style="color:#0e1b3b;font-weight:700;margin-top:40px;text-align:center;">Supported couriers</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered" style="font-size:14.5px;text-align:center;">
+                <thead style="background:#0e1b3b;color:#ffffff;">
+                    <tr>
+                        <th style="background:#0e1b3b;color:#ffffff;padding:10px;text-align:left;">Courier</th><th style="background:#0e1b3b;color:#ffffff;">Rates</th><th style="background:#0e1b3b;color:#ffffff;">Book and AWB</th><th style="background:#0e1b3b;color:#ffffff;">Label</th><th style="background:#0e1b3b;color:#ffffff;">Tracking</th>
+                        <th style="background:#0e1b3b;color:#ffffff;">Cancel</th><th style="background:#0e1b3b;color:#ffffff;">Pickup</th><th style="background:#0e1b3b;color:#ffffff;">NDR action</th><th style="background:#0e1b3b;color:#ffffff;">Webhook</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td style="text-align:left;font-weight:600;">Shiprocket (25+ couriers)</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">Delhivery</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">DTDC</td><td style="color:#15803d;font-weight:700;">Yes*</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">Blue Dart</td><td style="color:#15803d;font-weight:700;">Yes*</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">FedEx (domestic and export)</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">Xpressbees</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">Shree Maruti</td><td style="color:#15803d;font-weight:700;">Yes*</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">Any courier with a REST API</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#15803d;font-weight:700;">Yes**</td><td style="color:#b91c1c;font-weight:700;">No</td><td style="color:#b91c1c;font-weight:700;">No</td></tr>
+                    <tr><td style="text-align:left;font-weight:600;">ZivoIT Sandbox (offline demo courier)</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td><td style="color:#15803d;font-weight:700;">Yes</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="color:#6b7280;font-size:14px;">* Rates from your contract rate card (zones, weight slabs, fuel surcharge, COD fee and GST), because this courier has no public rate API.<br/>
+            ** Configured without code through the template connector, using the API document the courier provides.<br/>
+            Carrier credentials and contracts are provided by each courier.</p>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="container" style="max-width:1140px;">
+        <h2 style="color:#0e1b3b;font-weight:700;margin-top:40px;text-align:center;">Features included</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered" style="font-size:15px;">
+                <thead style="background:#0e1b3b;color:#ffffff;">
+                    <tr><th style="background:#0e1b3b;color:#ffffff;padding:12px;width:190px;">Area</th><th style="background:#0e1b3b;color:#ffffff;padding:12px;">Feature</th><th style="background:#0e1b3b;color:#ffffff;padding:12px;text-align:center;width:110px;">Included</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td style="font-weight:600;">Shipping</td><td>Rates on the sales order with the recommended courier, price and transit days</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Shipping</td><td>Automatic booking when the delivery order is validated, AWB and label attached</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Shipping</td><td>Compare Rates screen with AI score, reliability and reasons for every courier and service</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Shipping</td><td>Bulk ship many delivery orders and print all labels as one PDF</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Shipping</td><td>Cancel shipments, schedule pickups and create reverse pickups for returns</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Shipping</td><td>E-way bill number, COD amount and declared value sent to the courier</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Courier selection</td><td>AI Best, cheapest, fastest, most reliable, fixed account or allocation rules</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Courier selection</td><td>Smart failover: if a courier rejects the booking, the next best courier is tried</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Courier selection</td><td>Account limits (maximum weight, maximum COD) and PIN code serviceability cache</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Rates</td><td>Contract rate cards by zone (local, regional, metro, rest of India, special) with fuel surcharge, COD fee and GST</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Tracking</td><td>Scheduled tracking and real-time webhooks with statuses normalised across all couriers</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Tracking</td><td>Public tracking page for customers (link or AWB plus last 4 phone digits), mobile friendly</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Tracking</td><td>Customer emails when a shipment is out for delivery, delivered or a delivery fails</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>Courier ranking from price, speed and delivered / RTO rate per PIN code</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>RTO risk score with the main reasons, on the sales order and the shipment</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>Address intelligence: PIN code and state match, house number, landmark, mobile number</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>NDR assistant: failure reason, suggested action and customer message draft</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>Predicted delivery date from your own delivery history</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>Weight dispute detection when a courier bills a higher weight slab</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>Ask Logistics AI: search shipments in plain English</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">AI</td><td>Optional OpenAI, Anthropic Claude, Google Gemini or OpenAI-compatible model (built-in engine works without a key)</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Operations</td><td>NDR queue, shipment board, carrier performance report and weight dispute report</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Operations</td><td>API logs with passwords and keys masked, job queue with automatic retries</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Operations</td><td>Multi-company, user and administrator access rights, credentials visible to administrators only</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                    <tr><td style="font-weight:600;">Quality</td><td>Automated test suite included (51 tests)</td><td style="text-align:center;color:#15803d;font-weight:700;">Yes</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="container" style="max-width:1140px;">
+        <h2 style="color:#0e1b3b;font-weight:700;margin-top:40px;text-align:center;">Screenshots</h2>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:30px;">1. All your couriers in one place</h4>
+        <p style="color:#4b5563;">Each courier account shows shipments, delivered %, RTO % and average transit days from your own data.</p>
+        <img src="screenshot_01_carrier_accounts.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Carrier accounts"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">2. Compare courier rates with AI</h4>
+        <p style="color:#4b5563;">Every courier and service ranked by AI score with the reason, plus the RTO risk and address score of the order.</p>
+        <img src="screenshot_02_compare_rates_ai.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Compare courier rates"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">3. RTO risk on the sales order</h4>
+        <p style="color:#4b5563;">Cash on Delivery, customer history, address quality and mobile number combined into one score with the reasons listed.</p>
+        <img src="screenshot_03_sale_order_rto_risk.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="RTO risk on sales order"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">4. Validate the delivery: courier booked automatically</h4>
+        <p style="color:#4b5563;">The AWB number and the label are attached to the delivery order.</p>
+        <img src="screenshot_04_delivery_order_booked.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Delivery order booked"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">5. One shipment record for every courier</h4>
+        <p style="color:#4b5563;">Status, dates, weights, charges and the full tracking history in one place.</p>
+        <img src="screenshot_05_shipment_overview.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Shipment overview"/>
+        <img src="screenshot_06_tracking_events.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Tracking events"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">6. Explainable AI on every shipment</h4>
+        <p style="color:#4b5563;">Why the courier was chosen, the AI ranking at booking time, RTO drivers and the delivery prediction.</p>
+        <img src="screenshot_07_ai_insights.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="AI insights"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">7. NDR queue and NDR assistant</h4>
+        <p style="color:#4b5563;">Each failed delivery is classified, the next action is suggested and a customer message is drafted.</p>
+        <img src="screenshot_08_ndr_queue.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="NDR queue"/>
+        <img src="screenshot_09_ndr_assistant.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="NDR assistant"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">8. Shipment board and carrier performance</h4>
+        <img src="screenshot_10_shipment_board.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Shipment board"/>
+        <img src="screenshot_11_carrier_performance.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Carrier performance"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">9. Ask Logistics AI in plain English</h4>
+        <img src="screenshot_12_ask_ai_question.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Ask Logistics AI"/>
+        <img src="screenshot_13_ask_ai_results.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Ask Logistics AI results"/>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">10. Customer tracking page (desktop and mobile)</h4>
+        <div class="row">
+            <div class="col-md-8"><img src="screenshot_19_tracking_page.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Tracking page"/></div>
+            <div class="col-md-4"><img src="screenshot_20_tracking_mobile.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Tracking page on mobile"/></div>
+        </div>
+
+        <h4 style="color:#0e1b3b;font-weight:700;margin-top:36px;">11. Configure once</h4>
+        <p style="color:#4b5563;">Delivery method, allocation rules, no-code courier template, carrier account and AI settings.</p>
+        <img src="screenshot_14_delivery_method.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;" alt="Delivery method"/>
+        <img src="screenshot_15_allocation_rules.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Allocation rules"/>
+        <img src="screenshot_16_template_connector.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Template connector"/>
+        <img src="screenshot_17_carrier_account.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Carrier account"/>
+        <img src="screenshot_18_settings.png" class="img-fluid" style="border:1px solid #e5e7eb;border-radius:10px;margin-top:14px;" alt="Settings"/>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="container" style="max-width:1140px;">
+        <h2 style="color:#0e1b3b;font-weight:700;margin-top:40px;text-align:center;">Get started in 5 steps</h2>
+        <ol style="font-size:16px;color:#374151;line-height:1.9;max-width:860px;margin:16px auto 0;">
+            <li>Install the app. It needs the Inventory, Sales and Delivery apps.</li>
+            <li>Go to Logistics Hub, Configuration, Carrier Accounts. Add your couriers and click Test Connection.</li>
+            <li>Create a delivery method of type "ZivoIT Logistics Hub" and choose AI Best or allocation rules.</li>
+            <li>In Inventory, Configuration, Operation Types, Delivery Orders, enable "Print Label".</li>
+            <li>Validate a delivery order: the courier is booked, the label is attached and tracking starts.</li>
+        </ol>
+        <p style="text-align:center;color:#6b7280;margin-top:14px;">Try everything first with the built-in ZivoIT Sandbox Courier. It needs no credentials.</p>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="container" style="max-width:1140px;padding-bottom:40px;">
+        <div style="background:#0e1b3b;border-radius:14px;padding:28px;text-align:center;margin-top:40px;">
+            <h3 style="color:#ffffff;font-weight:700;margin:0;">Need help or a custom courier?</h3>
+            <p style="color:#c3cfe6;font-size:16px;margin:10px 0 0;">
+                Email <a href="mailto:info@zivoit.com" style="color:#22b4dc;">info@zivoit.com</a> or visit
+                <a href="https://www.zivoit.com" target="_blank" style="color:#22b4dc;">www.zivoit.com</a>
+            </p>
+        </div>
+        <p style="text-align:center;color:#9ca3af;font-size:13px;margin-top:14px;">Screenshots use demo data with a fictional company and customers.</p>
+    </div>
 </section>

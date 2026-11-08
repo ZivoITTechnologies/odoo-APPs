@@ -19,12 +19,14 @@ class RateShop(models.TransientModel):
     line_ids = fields.One2many('zivo.logistics.rate.shop.line', 'wizard_id')
     errors = fields.Text(readonly=True)
     summary = fields.Html(readonly=True)
-    rto_risk = fields.Integer(readonly=True)
-    rto_risk_level = fields.Selection([('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], readonly=True)
-    rto_risk_reasons = fields.Text(readonly=True)
-    address_score = fields.Integer(readonly=True)
-    address_issues = fields.Text(readonly=True)
-    weight_text = fields.Char(readonly=True)
+    rto_risk = fields.Integer(string='RTO Risk %', readonly=True)
+    rto_risk_level = fields.Selection([('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], string='RTO Risk', readonly=True)
+    rto_risk_reasons = fields.Text(string='RTO Risk Drivers', readonly=True)
+    address_score = fields.Integer(string='Address Score', readonly=True)
+    address_issues = fields.Text(string='Address Issues', readonly=True)
+    weight_text = fields.Char(string='Parcel', readonly=True)
+    force_ship = fields.Boolean(string='Override AI safeguards',
+                                help='Ship even if the delivery method would hold this order for RTO risk or address quality.')
     # AI address repair
     suggested_street = fields.Char()
     suggested_street2 = fields.Char()
@@ -60,7 +62,7 @@ class RateShop(models.TransientModel):
             'rto_risk': risk.get('rto_risk', 0), 'rto_risk_level': risk.get('rto_risk_level'),
             'rto_risk_reasons': risk.get('rto_risk_reasons'), 'address_score': risk.get('address_score', 0),
             'address_issues': risk.get('address_issues'),
-            'weight_text': _('%(actual).3f kg actual · %(vol).3f kg volumetric · %(pcs)s package(s) · %(mode)s%(cod)s',
+            'weight_text': _('%(actual).3f kg actual, %(vol).3f kg volumetric, %(pcs)s package(s), %(mode)s%(cod)s',
                              actual=request.total_weight, vol=request.volumetric_weight, pcs=len(request.parcels),
                              mode='COD' if request.is_cod else 'Prepaid',
                              cod=(' %.2f' % request.cod_amount) if request.is_cod else ''),
@@ -102,7 +104,7 @@ class RateShop(models.TransientModel):
 
     def _reopen(self):
         return {'type': 'ir.actions.act_window', 'res_model': self._name, 'res_id': self.id, 'view_mode': 'form',
-                'target': 'new', 'name': _('Compare Courier Rates (AI)')}
+                'target': 'new', 'name': _('Compare Courier Rates (AI)'), 'context': {'dialog_size': 'extra-large'}}
 
 
 class RateShopLine(models.TransientModel):
@@ -116,9 +118,9 @@ class RateShopLine(models.TransientModel):
     service_name = fields.Char(string='Service')
     courier_name = fields.Char(string='Courier')
     price = fields.Float(digits='Product Price')
-    tat_days = fields.Float(string='Transit (days)')
+    tat_days = fields.Float(string='Days', digits=(3, 0))
     ai_score = fields.Float(string='AI Score')
-    reliability = fields.Float(string='Reliability %')
+    reliability = fields.Float(string='Reliability %', digits=(3, 0))
     rank = fields.Integer()
     recommended = fields.Boolean()
     reasons = fields.Char(string='Why')
@@ -138,7 +140,7 @@ class RateShopLine(models.TransientModel):
                 raise UserError(_('Validate the transfer first; the courier will be booked automatically.'))
             if picking.carrier_tracking_ref:
                 raise UserError(_('This transfer already has a tracking number.'))
-            picking.with_context(zivo_force_ship=force).send_to_shipper()
+            picking.with_context(zivo_force_ship=force or self.wizard_id.force_ship).send_to_shipper()
         return {'type': 'ir.actions.act_window_close'}
 
     def action_select(self):
@@ -211,7 +213,8 @@ class AiQuery(models.TransientModel):
         self.ensure_one()
         domain, filters = self.env['zivo.logistics.ai']._nl_domain(self.question)
         action = self.env['ir.actions.act_window']._for_xml_id('zivoit_logistics_hub.action_zivo_shipment')
-        action.update({'domain': domain, 'name': _('AI: %s', self.question), 'context': {'search_default_filter_open': 0}})
+        action.update({'domain': domain, 'name': _('AI: %s', self.question), 'display_name': _('AI: %s', self.question),
+                       'context': {'search_default_filter_open': 0}})
         self.interpretation = str({k: v for k, v in filters.items() if v not in (None, [], False)})
         return action
 
@@ -248,10 +251,10 @@ class BulkShip(models.TransientModel):
             try:
                 with self.env.cr.savepoint():
                     picking.send_to_shipper()
-                lines.append('%s: ✔ %s' % (picking.name, picking.carrier_tracking_ref))
+                lines.append('%s: OK - %s' % (picking.name, picking.carrier_tracking_ref))
                 shipped |= picking
             except UserError as exc:
-                lines.append('%s: ✘ %s' % (picking.name, str(exc).splitlines()[0]))
+                lines.append('%s: FAILED - %s' % (picking.name, str(exc).splitlines()[0]))
         self.write({'result': '\n'.join(lines), 'state': 'done', 'picking_ids': [(6, 0, shipped.ids)]})
         return {'type': 'ir.actions.act_window', 'res_model': self._name, 'res_id': self.id, 'view_mode': 'form', 'target': 'new'}
 

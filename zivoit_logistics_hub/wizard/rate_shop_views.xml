@@ -11,6 +11,7 @@
                         <field name="carrier_id" options="{'no_create': True}"/>
                         <field name="strategy" widget="radio" options="{'horizontal': true}"/>
                         <field name="weight_text"/>
+                        <field name="force_ship" invisible="rto_risk_level != 'high' and address_score &gt;= 60"/>
                     </group>
                     <group>
                         <field name="rto_risk" widget="progressbar"/>
@@ -26,20 +27,18 @@
                 <field name="line_ids" nolabel="1">
                     <list create="0" delete="0" decoration-success="recommended" decoration-bf="recommended">
                         <field name="rank" string="#"/>
-                        <field name="account_id"/>
-                        <field name="service_name"/>
-                        <field name="courier_name" optional="show"/>
-                        <field name="price"/>
+                        <field name="account_id" string="Courier Account" width="185px"/>
+                        <field name="service_name" width="125px"/>
+                        <field name="courier_name" optional="hide"/>
+                        <field name="price" string="Price"/>
                         <field name="tat_days"/>
-                        <field name="reliability" optional="show"/>
+                        <field name="reliability" string="Reliability"/>
                         <field name="ai_score" widget="progressbar"/>
-                        <field name="reasons"/>
+                        <field name="reasons" optional="show"/>
                         <field name="rate_source" optional="hide"/>
                         <field name="recommended" column_invisible="1"/>
                         <button name="action_select" type="object" string="Select" class="btn-link"/>
                         <button name="action_ship" type="object" string="Ship" class="btn-primary"/>
-                        <button name="action_ship_force" type="object" string="Ship anyway" class="btn-link text-danger"
-                                confirm="Ship despite the AI risk / address warnings?"/>
                     </list>
                 </field>
                 <div invisible="not errors" class="text-muted">

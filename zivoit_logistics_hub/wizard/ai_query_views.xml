@@ -7,7 +7,7 @@
             <form>
                 <p class="text-muted">Ask in plain language, e.g. "delayed COD shipments to Hyderabad this week",
                     "high risk orders via Delhivery", "NDR today", "weight disputes this month".</p>
-                <field name="question" placeholder="Ask about your shipments..."/>
+                <field name="question" class="w-100" placeholder="Ask about your shipments..."/>
                 <footer>
                     <button name="action_search" type="object" string="Search" class="btn-primary"/>
                     <button string="Cancel" special="cancel" class="btn-secondary"/>

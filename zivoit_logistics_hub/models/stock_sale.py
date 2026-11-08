@@ -72,7 +72,8 @@ class StockPicking(models.Model):
         wizard = self.env['zivo.logistics.rate.shop'].create({'picking_id': self.id})
         wizard.action_compute()
         return {'type': 'ir.actions.act_window', 'res_model': 'zivo.logistics.rate.shop', 'res_id': wizard.id,
-                'view_mode': 'form', 'target': 'new', 'name': _('Compare Courier Rates (AI)')}
+                'view_mode': 'form', 'target': 'new', 'name': _('Compare Courier Rates (AI)'),
+                'context': {'dialog_size': 'extra-large'}}
 
     def action_zivo_track(self):
         self.zivo_shipment_ids.filtered(lambda s: s.state != 'cancelled').action_track()
@@ -161,8 +162,8 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     zivo_ai_provider = fields.Selection([
-        ('local', 'Built-in AI engine only (no API key)'), ('openai', 'OpenAI'), ('anthropic', 'Anthropic Claude'),
-        ('gemini', 'Google Gemini'), ('openai_compatible', 'OpenAI-compatible endpoint (Azure, OpenRouter, Ollama...)'),
+        ('local', 'Built-in engine (no key)'), ('openai', 'OpenAI'), ('anthropic', 'Anthropic Claude'),
+        ('gemini', 'Google Gemini'), ('openai_compatible', 'OpenAI-compatible (Azure, Ollama...)'),
     ], string='AI Provider', default='local', config_parameter='zivoit_logistics_hub.ai_provider')
     zivo_ai_api_key = fields.Char(string='AI API Key', config_parameter='zivoit_logistics_hub.ai_api_key')
     zivo_ai_model = fields.Char(string='AI Model', config_parameter='zivoit_logistics_hub.ai_model')

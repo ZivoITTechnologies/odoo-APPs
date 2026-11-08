@@ -98,12 +98,12 @@ class DeliveryCarrier(models.Model):
     def _zivo_option_text(self, opt):
         _ = self.env._
         quote = opt['quote']
-        txt = '%s · %s' % (opt['account'].name, quote.service_name or quote.service_code)
+        txt = '%s - %s' % (opt['account'].name, quote.service_name or quote.service_code)
         if quote.courier_name and quote.courier_name not in txt:
             txt += ' (%s)' % quote.courier_name
         if quote.tat_days:
-            txt += _(' · %g days', quote.tat_days)
-        return txt + _(' · AI score %s', opt['ai_score'])
+            txt += _(', %g day', quote.tat_days) if quote.tat_days == 1 else _(', %g days', quote.tat_days)
+        return txt + _(', AI score %s', opt['ai_score'])
 
     # ------------------------------------------------------------------ request builders
     @api.model
@@ -181,7 +181,7 @@ class DeliveryCarrier(models.Model):
         warehouse = picking.picking_type_id.warehouse_id
         pickup = self._zivo_pickup_partner(warehouse, account)
         delivery_partner = picking.partner_id
-        if is_return:  # reverse pickup: customer → warehouse
+        if is_return:  # reverse pickup: customer -> warehouse
             pickup, delivery_partner = picking.partner_id, self._zivo_pickup_partner(warehouse, account)
         return ShipmentRequest(
             reference=picking.name if not sale else '%s-%s' % (sale.name, picking.name.split('/')[-1]),
@@ -240,14 +240,20 @@ class DeliveryCarrier(models.Model):
                               score=ai_values['address_score'], name=picking.name, issues=ai_values.get('address_issues')))
         if (not force and self.zivo_hold_high_risk and request.is_cod
                 and ai_values.get('rto_risk', 0) >= self.zivo_risk_threshold):
-            raise UserError(_('%(name)s is on hold: AI RTO risk %(risk)s%% ≥ %(thr)s%%.\n%(reasons)s\n\n'
+            raise UserError(_('%(name)s is on hold: AI RTO risk %(risk)s%% is at or above %(thr)s%%.\n%(reasons)s\n\n'
                               'Confirm the order with the customer or convert it to prepaid, then use '
                               '"Compare Rates" > Ship anyway.', name=picking.name, risk=ai_values['rto_risk'],
                               thr=self.zivo_risk_threshold, reasons=ai_values.get('rto_risk_reasons')))
         ctx = self._zivo_ctx(partner, picking.company_id, 'stock.picking', picking.id, request.declared_value)
+        manual_note = ''
         if account:
             candidates = [{'account': account, 'quote': None, 'price': picking.zivo_selected_price or 0.0,
                            'ai_score': 0, 'reasons': [_('selected manually')]}]
+            try:  # keep the AI ranking for reference, so overrides can be audited
+                reference, _errors = self._zivo_ranked_options(request, ctx)
+            except (UserError, ProviderError):
+                reference = []
+            manual_note = self._zivo_reasoning(reference, manual_account=account)
         else:
             candidates, errors = self._zivo_ranked_options(request, ctx)
             if not candidates:
@@ -260,8 +266,7 @@ class DeliveryCarrier(models.Model):
             req = self._zivo_request_from_picking(picking, acc)
             if option.get('quote') is not None:
                 req.service_code = option['quote'].service_code
-            reasoning = '\n'.join(_('#%(rank)s %(text)s — %(reasons)s', rank=o.get('rank', ''), text=self._zivo_option_text(o),
-                                    reasons=', '.join(o.get('reasons') or [])) for o in candidates[:5] if o.get('quote'))
+            reasoning = manual_note or self._zivo_reasoning(candidates)
             values = dict(ai_values, quoted_price=option.get('price') or 0.0, ai_recommendation=reasoning or False,
                           rate_source=option['quote'].source if option.get('quote') else 'manual',
                           user_id=self.env.user.id)
@@ -276,6 +281,16 @@ class DeliveryCarrier(models.Model):
                 shipment.message_post(body=_('Smart failover used. Previous attempts:\n%s', '\n'.join(failures)))
             return shipment
         raise UserError('\n'.join(failures))
+
+    def _zivo_reasoning(self, ranked, manual_account=None):
+        """Human readable AI ranking stored on the shipment."""
+        _ = self.env._
+        lines = [_('#%(rank)s %(text)s: %(reasons)s', rank=o.get('rank', ''), text=self._zivo_option_text(o),
+                   reasons=', '.join(o.get('reasons') or [])) for o in ranked[:5] if o.get('quote')]
+        if manual_account:
+            head = _('Courier chosen manually: %s.', manual_account.name)
+            return head + ('\n' + _('AI ranking at booking time:') + '\n' + '\n'.join(lines) if lines else '')
+        return '\n'.join(lines)
 
     def zivo_hub_get_tracking_link(self, picking):
         shipment = picking.zivo_shipment_id

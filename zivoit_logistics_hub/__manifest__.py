@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Logistics Hub - One App for All Couriers (AI)',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'summary': 'Single connector platform for Shiprocket, Delhivery, DTDC, Blue Dart, FedEx, Xpressbees, '
                'Shree Maruti & any courier: AI rate shopping, RTO risk, NDR assistant, live tracking',
     'description': """
@@ -51,7 +51,13 @@ One Odoo app to connect every courier and aggregator from a single screen.
     'demo': [
         'demo/logistics_demo.xml',
     ],
-    'images': ['static/description/banner.png'],
+    'images': [
+        'static/description/zivoit_logistics_hub_cover.png',
+        'static/description/screenshot_02_compare_rates_ai.png',
+        'static/description/screenshot_01_carrier_accounts.png',
+        'static/description/screenshot_08_ndr_queue.png',
+        'static/description/screenshot_19_tracking_page.png',
+    ],
     'installable': True,
     'application': True,
 }

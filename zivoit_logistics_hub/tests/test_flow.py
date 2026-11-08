@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""End-to-end business flows on a real Odoo 19 database (sale → delivery → courier → tracking → NDR/RTO)."""
+"""End-to-end business flows on a real Odoo 19 database (sale -> delivery -> courier -> tracking -> NDR/RTO)."""
 import json
 from datetime import timedelta
 from unittest.mock import patch

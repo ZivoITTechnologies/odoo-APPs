@@ -6,8 +6,10 @@
         <field name="arch" type="xml">
             <form>
                 <div class="alert alert-info" role="alert">
-                    <b>Reason:</b> <field name="ndr_reason" class="oe_inline"/><br/>
-                    <b>AI advice:</b> <field name="ndr_advice" class="oe_inline"/>
+                    <div class="fw-bold">Courier reason</div>
+                    <field name="ndr_reason" nolabel="1"/>
+                    <div class="fw-bold mt-2">AI advice</div>
+                    <field name="ndr_advice" nolabel="1"/>
                 </div>
                 <group>
                     <group>

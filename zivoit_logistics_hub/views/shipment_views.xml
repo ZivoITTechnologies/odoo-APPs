@@ -122,7 +122,6 @@
                             <field name="picked_at"/>
                             <field name="edd"/>
                             <field name="ai_edd"/>
-                            <field name="ai_edd_basis" class="text-muted"/>
                             <field name="delivered_at"/>
                             <field name="transit_days"/>
                         </group>
@@ -162,8 +161,14 @@
                                     <field name="address_issues" nolabel="1" colspan="2"/>
                                 </group>
                             </group>
-                            <group string="Why this carrier">
-                                <field name="ai_recommendation" nolabel="1" colspan="2"/>
+                            <group>
+                                <group string="Why this courier">
+                                    <field name="ai_recommendation" nolabel="1" colspan="2" placeholder="Courier selected manually."/>
+                                </group>
+                                <group string="Delivery prediction">
+                                    <field name="ai_edd" string="Predicted delivery"/>
+                                    <field name="ai_edd_basis" string="Based on"/>
+                                </group>
                             </group>
                         </page>
                         <page string="Failed Delivery (NDR)" name="ndr" invisible="not ndr_count">
@@ -284,10 +289,35 @@
         <field name="context">{'search_default_filter_open': 1}</field>
     </record>
 
+    <record id="view_zivo_ndr_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.ndr.list</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="ndr_count &gt;= 2">
+                <field name="tracking_number"/>
+                <field name="partner_id"/>
+                <field name="dest_city"/>
+                <field name="account_id" string="Courier"/>
+                <field name="payment_mode" optional="hide"/>
+                <field name="cod_amount" string="COD" optional="show"/>
+                <field name="ndr_count" string="Attempts"/>
+                <field name="ndr_reason" string="Courier Reason"/>
+                <field name="ndr_category" string="AI Category" widget="badge"/>
+                <field name="ndr_suggested_action" string="AI Suggests" widget="badge" decoration-danger="ndr_suggested_action == 'rto'"
+                       decoration-info="ndr_suggested_action in ('reattempt', 'change_address')" decoration-warning="ndr_suggested_action == 'contact_customer'"/>
+                <field name="rto_risk" widget="progressbar" optional="show"/>
+                <button name="action_ndr" type="object" string="Resolve" class="btn-primary"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
     <record id="action_zivo_ndr" model="ir.actions.act_window">
         <field name="name">NDR Queue</field>
         <field name="res_model">zivo.logistics.shipment</field>
         <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_zivo_ndr_list"/>
         <field name="context">{'search_default_filter_ndr': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No failed deliveries to handle</p>

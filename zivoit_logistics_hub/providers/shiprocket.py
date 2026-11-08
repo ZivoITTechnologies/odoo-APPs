@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Shiprocket (aggregator: 25+ couriers incl. Delhivery, Blue Dart, DTDC, Xpressbees, Ekart, Shree Maruti...).
 
-API reference: https://apidocs.shiprocket.in — base ``https://apiv2.shiprocket.in/v1/external``.
+API reference: https://apidocs.shiprocket.in - base ``https://apiv2.shiprocket.in/v1/external``.
 Auth: POST /auth/login with an *API user* (Settings > API > Configure). Token valid 240 h.
 """
 from datetime import timedelta

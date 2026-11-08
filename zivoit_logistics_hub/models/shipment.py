@@ -17,8 +17,8 @@ _logger = logging.getLogger(__name__)
 
 RTO_STATES = ('rto_initiated', 'rto_in_transit', 'rto_delivered')
 NDR_CATEGORIES = [(k, v) for k, v in engine.NDR_LABELS.items()]
-NDR_ACTIONS = [('reattempt', 'Re-attempt delivery'), ('change_address', 'Update address & re-attempt'),
-               ('contact_customer', 'Contact customer first'), ('rto', 'Return to origin (RTO)')]
+NDR_ACTIONS = [('reattempt', 'Re-attempt'), ('change_address', 'Fix address'),
+               ('contact_customer', 'Call customer'), ('rto', 'Return (RTO)')]
 
 
 class LogisticsShipment(models.Model):
@@ -102,10 +102,10 @@ class LogisticsShipment(models.Model):
     ndr_state = fields.Selection([('none', 'No NDR'), ('open', 'Action Needed'), ('actioned', 'Actioned'), ('closed', 'Closed')],
                                  default='none', tracking=True, index=True)
     rto_risk = fields.Integer(string='RTO Risk %')
-    rto_risk_level = fields.Selection([('low', 'Low'), ('medium', 'Medium'), ('high', 'High')])
-    rto_risk_reasons = fields.Text()
-    address_score = fields.Integer()
-    address_issues = fields.Text()
+    rto_risk_level = fields.Selection([('low', 'Low'), ('medium', 'Medium'), ('high', 'High')], string='RTO Risk Level')
+    rto_risk_reasons = fields.Text(string='RTO Risk Drivers')
+    address_score = fields.Integer(string='Address Score')
+    address_issues = fields.Text(string='Address Issues')
     ai_recommendation = fields.Text(string='AI Carrier Reasoning')
 
     _tracking_account_uniq = models.Constraint('UNIQUE(account_id, tracking_number)', 'Tracking number already exists for this carrier account.')
@@ -204,6 +204,8 @@ class LogisticsShipment(models.Model):
             'is_return': request.is_return,
         }
         vals.update(ai_values or {})
+        if not vals.get('quoted_price'):
+            vals['quoted_price'] = price
         shipment = self.create(vals)
         if result.label_pdf:
             shipment._store_label(result.label_pdf)
@@ -359,8 +361,8 @@ class LogisticsShipment(models.Model):
     def _on_state_change(self, old, new, result=None):
         self.ensure_one()
         label = dict(NORMALIZED_STATUSES)
-        self.message_post(body=Markup('%s → <b>%s</b>%s') % (
-            label.get(old, old), label.get(new, new), (' — %s' % result.description) if result and result.description else ''))
+        self.message_post(body=Markup('%s to <b>%s</b>%s') % (
+            label.get(old, old), label.get(new, new), (': %s' % result.description) if result and result.description else ''))
         if new == 'ndr':
             self._handle_ndr(result.ndr_reason or result.description if result else '')
         if new in ('out_for_delivery', 'delivered', 'ndr'):
@@ -460,6 +462,7 @@ class LogisticsShipment(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window', 'res_model': 'zivo.logistics.ndr.action', 'view_mode': 'form', 'target': 'new',
+            'name': _('Resolve Failed Delivery (NDR)'),
             'context': {'default_shipment_id': self.id, 'default_action': self.ndr_suggested_action or 'reattempt',
                         'default_message': self.ndr_customer_message},
         }

@@ -2,7 +2,7 @@
 """FedEx REST APIs (OAuth2 client credentials).
 
 Production ``https://apis.fedex.com``, sandbox ``https://apis-sandbox.fedex.com``.
-Rate: /rate/v1/rates/quotes · Ship: /ship/v1/shipments · Cancel: /ship/v1/shipments/cancel ·
+Rate: /rate/v1/rates/quotes | Ship: /ship/v1/shipments | Cancel: /ship/v1/shipments/cancel |
 Track: /track/v1/trackingnumbers.
 """
 from datetime import date, timedelta

@@ -79,7 +79,7 @@ class LogisticsAccount(models.Model):
     cod_enabled = fields.Boolean(string='COD Allowed', default=True)
     max_weight_kg = fields.Float(string='Max Weight (kg)', default=0.0, help='0 = no limit')
     max_cod_amount = fields.Float(string='Max COD Amount', default=0.0, help='0 = no limit')
-    volumetric_divisor = fields.Float(default=5000.0, help='cm³ per kg used for volumetric weight (5000 is standard).')
+    volumetric_divisor = fields.Float(default=5000.0, help='cm3 per kg used for volumetric weight (5000 is standard).')
     auto_pickup = fields.Boolean(string='Auto-schedule Pickup', help='Schedule a pickup right after booking.')
     auto_track = fields.Boolean(string='Auto Tracking', default=True)
     rate_source = fields.Selection([('api', 'Carrier API'), ('rate_card', 'Contract Rate Card'), ('both', 'API, else Rate Card')],

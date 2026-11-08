@@ -203,7 +203,7 @@ def score_rates(options, strategy='ai_best', is_cod=False):
         if o['price'] == pmin:
             reasons.append('lowest price')
         if tat == tmin:
-            reasons.append('fastest (%g days)' % tat)
+            reasons.append('fastest (%g day%s)' % (tat, '' if tat == 1 else 's'))
         perf = o.get('perf') or {}
         if perf.get('samples'):
             reasons.append('%.0f%% delivered / %.0f%% RTO on this lane (%d shipments)' % (
@@ -267,9 +267,9 @@ NDR_RULES = [
 ]
 
 NDR_LABELS = {
-    'refused': 'Refused by customer', 'cod_not_ready': 'COD amount not ready', 'address_issue': 'Address issue',
-    'phone_unreachable': 'Phone unreachable', 'rescheduled': 'Customer rescheduled',
-    'customer_unavailable': 'Customer unavailable', 'other': 'Other',
+    'refused': 'Refused', 'cod_not_ready': 'COD not ready', 'address_issue': 'Address issue',
+    'phone_unreachable': 'Phone unreachable', 'rescheduled': 'Rescheduled',
+    'customer_unavailable': 'Not available', 'other': 'Other',
 }
 
 CUSTOMER_TEMPLATES = {
@@ -351,7 +351,7 @@ NL_STATUS_WORDS = {
 
 
 def parse_nl_query(question, carrier_names=(), now=None):
-    """Keyword parser → filter dict (used when no LLM is configured)."""
+    """Keyword parser -> filter dict (used when no LLM is configured)."""
     q = (question or '').lower()
     now = now or datetime.now()
     out = {'states': [], 'carriers': [], 'cod': None, 'delayed': False, 'high_risk': False,

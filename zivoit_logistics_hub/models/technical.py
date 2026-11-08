@@ -193,7 +193,7 @@ class LogisticsStatusMap(models.Model):
 
     @api.model
     def _resolve(self, provider, raw_status, description=''):
-        """Map → (normalized, mapping record). Unknown statuses are classified by AI and stored
+        """Map -> (normalized, mapping record). Unknown statuses are classified by AI and stored
         as *unverified* suggestions the operations team can approve."""
         key = (raw_status or '').strip().lower()
         if not key:

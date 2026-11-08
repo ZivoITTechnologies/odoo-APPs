@@ -15,13 +15,17 @@
                                    decoration-danger="state == 'error'" decoration-muted="state == 'draft'"/>
                         </div>
                         <div class="text-muted">
-                            <field name="provider"/> · <field name="environment"/>
+                            <field name="provider"/> | <field name="environment"/>
                         </div>
-                        <div class="row mt-2 text-center">
-                            <div class="col-3"><div class="fs-5"><field name="shipment_count"/></div><small class="text-muted">Shipments</small></div>
-                            <div class="col-3"><div class="fs-5"><field name="delivered_rate" widget="float" digits="[3,0]"/>%</div><small class="text-muted">Delivered</small></div>
-                            <div class="col-3"><div class="fs-5"><field name="rto_rate" widget="float" digits="[3,0]"/>%</div><small class="text-muted">RTO</small></div>
-                            <div class="col-3"><div class="fs-5"><field name="avg_tat" widget="float" digits="[3,1]"/></div><small class="text-muted">Avg days</small></div>
+                        <field name="shipment_count" invisible="1"/>
+                        <field name="delivered_rate" invisible="1"/>
+                        <field name="rto_rate" invisible="1"/>
+                        <field name="avg_tat" invisible="1"/>
+                        <div class="d-flex justify-content-between text-center mt-3 mb-1">
+                            <div class="flex-fill"><div class="fs-5 fw-bold" t-out="record.shipment_count.raw_value"/><div class="small text-muted text-nowrap">Shipments</div></div>
+                            <div class="flex-fill"><div class="fs-5 fw-bold text-success" t-out="record.shipment_count.raw_value ? Math.round(record.delivered_rate.raw_value) + '%' : '-'"/><div class="small text-muted text-nowrap">Delivered</div></div>
+                            <div class="flex-fill"><div t-attf-class="fs-5 fw-bold #{record.rto_rate.raw_value &gt; 10 ? 'text-danger' : ''}" t-out="record.shipment_count.raw_value ? Math.round(record.rto_rate.raw_value) + '%' : '-'"/><div class="small text-muted text-nowrap">RTO</div></div>
+                            <div class="flex-fill"><div class="fs-5 fw-bold" t-out="record.avg_tat.raw_value ? record.avg_tat.raw_value.toFixed(1) : '-'"/><div class="small text-muted text-nowrap">Avg days</div></div>
                         </div>
                         <footer class="pt-1">
                             <button name="action_view_shipments" type="object" class="btn btn-link p-0">Shipments</button>

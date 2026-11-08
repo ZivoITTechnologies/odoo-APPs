@@ -3,6 +3,9 @@ import hmac
 import json
 import logging
 
+import pytz
+from markupsafe import Markup
+
 from odoo import http
 from odoo.http import request
 
@@ -11,6 +14,7 @@ from ..providers.base import NORMALIZED_STATUSES, NotSupported, ProviderError
 _logger = logging.getLogger(__name__)
 
 PROGRESS = ['booked', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered']
+DOCTYPE = Markup('<!DOCTYPE html>')
 
 
 class LogisticsHubController(http.Controller):
@@ -58,19 +62,19 @@ class LogisticsHubController(http.Controller):
     def tracking_page(self, token, **kwargs):
         shipment = request.env['zivo.logistics.shipment'].sudo().search([('access_token', '=', token)], limit=1)
         if not shipment or len(token) < 16:
-            return request.render('zivoit_logistics_hub.tracking_lookup', {'error': 'Shipment not found.'}, status=404)
+            return request.render('zivoit_logistics_hub.tracking_lookup', {'error': 'Shipment not found.', 'doctype': DOCTYPE}, status=404)
         return request.render('zivoit_logistics_hub.tracking_page', self._tracking_values(shipment))
 
     @http.route('/logistics/track', type='http', auth='public', methods=['GET', 'POST'], csrf=False, sitemap=False)
     def tracking_lookup(self, awb=None, phone=None, **kwargs):
         if not awb:
-            return request.render('zivoit_logistics_hub.tracking_lookup', {'error': False})
+            return request.render('zivoit_logistics_hub.tracking_lookup', {'error': False, 'doctype': DOCTYPE})
         awb = awb.strip()
         phone_digits = ''.join(ch for ch in (phone or '') if ch.isdigit())
         shipment = request.env['zivo.logistics.shipment'].sudo().search([('tracking_number', '=', awb)], limit=1)
         if not shipment or len(phone_digits) < 4 or not (shipment.dest_phone or '').endswith(phone_digits[-4:]):
             return request.render('zivoit_logistics_hub.tracking_lookup',
-                                  {'error': 'No shipment matches this AWB and phone number.', 'awb': awb})
+                                  {'error': 'No shipment matches this AWB and phone number.', 'awb': awb, 'doctype': DOCTYPE})
         return request.redirect('/logistics/track/%s' % shipment.access_token)
 
     @staticmethod
@@ -86,10 +90,18 @@ class LogisticsHubController(http.Controller):
         else:
             reached = -1
         steps = [{'label': labels[s], 'done': i <= reached, 'current': i == reached} for i, s in enumerate(PROGRESS)]
+        tz = pytz.timezone(shipment.company_id.partner_id.tz or shipment.user_id.tz or 'Asia/Kolkata')
+
+        def local(dt, fmt):
+            return pytz.utc.localize(dt).astimezone(tz).strftime(fmt) if dt else ''
         promise = shipment.edd or shipment.ai_edd
+        events = [{'label': labels.get(ev.normalized_status) or ev.raw_status, 'location': ev.location,
+                   'description': ev.description if (ev.description or '').lower() != (labels.get(ev.normalized_status) or '').lower() else '',
+                   'when': local(ev.event_time, '%d %b %Y, %I:%M %p')}
+                  for ev in shipment.event_ids.sorted('event_time', reverse=True)]
         return {
-            'shipment': shipment, 'company': shipment.company_id, 'state_label': labels.get(state, state),
-            'steps': steps, 'events': shipment.event_ids.sorted('event_time', reverse=True),
-            'labels': labels, 'promise': promise,
+            'doctype': DOCTYPE, 'shipment': shipment, 'company': shipment.company_id, 'state_label': labels.get(state, state),
+            'steps': steps, 'events': events, 'labels': labels, 'promise': local(promise, '%a, %d %b %Y'),
+            'delivered_on': local(shipment.delivered_at, '%a, %d %b %Y'),
             'alert': state in ('ndr', 'exception') or state.startswith('rto') or state in ('cancelled', 'lost'),
         }

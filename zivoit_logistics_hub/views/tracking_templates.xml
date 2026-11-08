@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="tracking_layout" name="Logistics Hub: tracking layout">
-        <t t-out="'&lt;!DOCTYPE html&gt;'"/>
+        <t t-out="doctype"/>
         <html lang="en">
             <head>
                 <meta charset="utf-8"/>
@@ -46,9 +46,9 @@
                 <div t-attf-class="status #{'alert' if alert else ''}" t-esc="state_label"/>
                 <div class="muted" t-if="shipment.status_description" t-esc="shipment.status_description"/>
                 <div class="muted" t-if="promise and shipment.state not in ('delivered', 'cancelled', 'rto_delivered')">
-                    Expected delivery: <b t-esc="promise.strftime('%a, %d %b %Y')"/>
+                    Expected delivery: <b t-esc="promise"/>
                 </div>
-                <div class="muted" t-if="shipment.delivered_at">Delivered on <b t-esc="shipment.delivered_at.strftime('%a, %d %b %Y')"/></div>
+                <div class="muted" t-if="delivered_on">Delivered on <b t-esc="delivered_on"/></div>
                 <div class="steps">
                     <t t-foreach="steps" t-as="step">
                         <div t-attf-class="step #{'done' if step['done'] else ''} #{'current' if step['current'] else ''}">
@@ -70,8 +70,8 @@
                 <ul class="tl">
                     <t t-foreach="events" t-as="ev">
                         <li>
-                            <div><b t-esc="labels.get(ev.normalized_status) or ev.raw_status"/> <span class="muted" t-if="ev.location">· <t t-esc="ev.location"/></span></div>
-                            <div class="muted"><t t-esc="ev.event_time.strftime('%d %b %Y, %H:%M')"/> UTC<t t-if="ev.description"> — <t t-esc="ev.description"/></t></div>
+                            <div><b t-esc="ev['label']"/> <span class="muted" t-if="ev['location']">| <t t-esc="ev['location']"/></span></div>
+                            <div class="muted"><t t-esc="ev['when']"/><t t-if="ev['description']"> - <t t-esc="ev['description']"/></t></div>
                         </li>
                     </t>
                 </ul>
