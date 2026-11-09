@@ -82,7 +82,7 @@ def _clean_record(record_dict, model):
     for key, value in list(record_dict.items()):
         field = model._fields.get(key)
         if field is not None and field.type in ('one2many', 'many2many') and isinstance(value, list) and len(value) > 50:
-            record_dict[key] = value[:50] + ['… %s more' % (len(value) - 50)]
+            record_dict[key] = value[:50] + ['... %s more' % (len(value) - 50)]
     return record_dict
 
 

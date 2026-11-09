@@ -124,7 +124,7 @@ def domain_fields(domain):
 
 def truncate(text, size=MAX_TEXT):
     text = text or ''
-    return text if len(text) <= size else text[:size] + '…'
+    return text if len(text) <= size else text[:size] + '...'
 
 
 def as_list(value):

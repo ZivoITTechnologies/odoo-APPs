@@ -71,7 +71,7 @@
                                 <field name="name" class="fw-bold fs-5"/>
                                 <div class="text-muted small">
                                     <i class="fa fa-building-o me-1" title="Entity"/><field name="entity_label"/>
-                                    <span class="mx-1">·</span><field name="client_type"/>
+                                    <span class="mx-1">|</span><field name="client_type"/>
                                 </div>
                             </div>
                             <field name="state" widget="badge" decoration-success="state == 'active'" decoration-warning="state == 'paused'" decoration-muted="state == 'draft'"/>
@@ -92,7 +92,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-3 small">
                             <span t-if="record.auth_mode.raw_value == 'oauth'">
-                                <i class="fa fa-sign-in me-1" title="Sign in with Odoo"/>Sign in with Odoo ·
+                                <i class="fa fa-sign-in me-1" title="Sign in with Odoo"/>Sign in with Odoo |
                                 <field name="oauth_session_count"/> signed in
                             </span>
                             <span t-else="">

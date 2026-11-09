@@ -105,7 +105,7 @@ class ZivoMcpOauthController(http.Controller):
             'authorization_servers': [base],
             'scopes_supported': SCOPES,
             'bearer_methods_supported': ['header'],
-            'resource_name': 'Odoo – %s' % company.name,
+            'resource_name': 'Odoo - %s' % company.name,
             'resource_documentation': 'https://www.zivoit.com',
         })
 
@@ -273,7 +273,7 @@ class ZivoMcpOauthController(http.Controller):
             if not code or code.client_id != client:
                 return _oauth_error('invalid_grant', 'Unknown authorization code.')
             if code.used:
-                # replayed code: revoke what it produced (RFC 6749 §4.1.2)
+                # replayed code: revoke what it produced (RFC 6749 section 4.1.2)
                 Token.search([('client_id', '=', client.id), ('user_id', '=', code.user_id.id),
                               ('create_date', '>=', code.create_date)]).action_revoke()
                 return _oauth_error('invalid_grant', 'The authorization code was already used.')

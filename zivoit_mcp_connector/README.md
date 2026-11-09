@@ -1,12 +1,12 @@
 # Claude AI & ChatGPT MCP Connector for Odoo 19 (`zivoit_mcp_connector`)
 
-ZivoIT Technologies · https://www.zivoit.com · info@zivoit.com · License OPL-1 · Depends: base, web, mail
+ZivoIT Technologies | https://www.zivoit.com | info@zivoit.com | License OPL-1 | Depends: base, web, mail
 
 Turns Odoo 19.0 (Community, Enterprise, Odoo.sh, on-premise) into a Model Context Protocol server at
 `https://<your-odoo>/mcp` with a built-in OAuth 2.1 "Sign in with Odoo".
 
 ## Quick start (people)
-1. Install the app. A read-only connector "Claude & ChatGPT – Sign in with Odoo" is created and active.
+1. Install the app. A read-only connector "Claude & ChatGPT - Sign in with Odoo" is created and active.
 2. Administrators can connect at once; give others the **AI Connector / User** right.
 3. Claude: Settings > Connectors > Add custom connector > URL `https://<your-odoo>/mcp` > Connect.
    ChatGPT (developer mode), Cursor, VS Code: add a remote MCP server with the same URL.
@@ -22,7 +22,7 @@ Create a connector with **Integration user + API key**, click **Create Integrati
 **Generate API Key**. Use `Authorization: Bearer <key>` (AnythingMCP "Odoo (MCP server)": ODOO_URL + key).
 
 ## Endpoints
-* `POST /mcp` (alias `/zivoit/mcp`): MCP Streamable HTTP, protocol 2024-11-05 … 2025-11-25, JSON responses.
+* `POST /mcp` (alias `/zivoit/mcp`): MCP Streamable HTTP, protocol 2024-11-05 ... 2025-11-25, JSON responses.
 * `/.well-known/oauth-protected-resource[/mcp]`, `/.well-known/oauth-authorization-server[/mcp]`
 * `/oauth/register` (RFC 7591), `/oauth/authorize` (login + consent, PKCE S256), `/oauth/token`
   (authorization_code, refresh_token with rotation), `/oauth/revoke` (RFC 7009).

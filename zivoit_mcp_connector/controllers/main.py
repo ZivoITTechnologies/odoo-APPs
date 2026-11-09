@@ -84,7 +84,7 @@ class ZivoMcpController(http.Controller):
         else:
             uid = env['res.users.apikeys']._check_credentials(scope='mcp', key=key)
             if not uid:
-                Log._log_simple(False, 'auth_failed', 'Invalid or expired API key %s…' % key[:4], ip, user_agent)
+                Log._log_simple(False, 'auth_failed', 'Invalid or expired API key %s...' % key[:4], ip, user_agent)
                 return _json(protocol.error_response(None, -32001, 'Invalid or expired API key.'), 401, challenge)
             connector = env['zivo.mcp.connector'].search(
                 [('user_id', '=', uid), ('auth_mode', '=', 'api_key'), ('state', '!=', 'draft')], limit=1)

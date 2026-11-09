@@ -104,7 +104,7 @@
                         </group>
                     </group>
                     <group string="Prompt">
-                        <field name="template" nolabel="1" colspan="2" placeholder="Using the Odoo tools, give me the P&amp;L of {company} for {period}…"/>
+                        <field name="template" nolabel="1" colspan="2" placeholder="Using the Odoo tools, give me the P&amp;L of {company} for {period}..."/>
                     </group>
                     <field name="argument_ids">
                         <list editable="bottom">

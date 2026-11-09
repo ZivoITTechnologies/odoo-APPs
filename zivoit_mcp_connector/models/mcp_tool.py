@@ -28,7 +28,7 @@ class ZivoMcpTool(models.Model):
     input_schema = fields.Text(compute='_compute_description', string="Parameters (JSON Schema)")
     call_count = fields.Integer(compute='_compute_call_count', string="Calls (30 days)")
     available = fields.Boolean(compute='_compute_available', string="App Installed",
-                               help="Tools that need an app (Accounting, Sales, Inventory, CRM…) appear only once it is installed.")
+                               help="Tools that need an app (Accounting, Sales, Inventory, CRM...) appear only once it is installed.")
     required_apps = fields.Char(compute='_compute_available', string="Needs")
 
     _technical_name_uniq = models.Constraint('unique(technical_name)', 'Each MCP tool name must be unique.')

@@ -10,14 +10,14 @@
             <div class="container py-5">
                 <div class="card border-0 shadow-sm mx-auto" style="max-width: 520px; border-radius: 14px; overflow: hidden;">
                     <div style="background: linear-gradient(120deg, #0e1b3b 0%, #17305c 100%); padding: 22px 28px;">
-                        <div style="color: #2bb5d8; letter-spacing: .18em; font-size: .72rem; font-weight: 600;">SIGN IN WITH ODOO · MCP</div>
+                        <div style="color: #2bb5d8; letter-spacing: .18em; font-size: .72rem; font-weight: 600;">SIGN IN WITH ODOO | MCP</div>
                         <div class="text-white fs-4 fw-bold mt-1">Connect an AI assistant</div>
                     </div>
                     <div class="card-body p-4">
                         <t t-out="0"/>
                     </div>
                 </div>
-                <div class="text-center small text-muted mt-3">Secured by the AI Connector for Odoo · ZivoIT Technologies</div>
+                <div class="text-center small text-muted mt-3">Secured by the AI Connector for Odoo | ZivoIT Technologies</div>
             </div>
         </t>
     </template>

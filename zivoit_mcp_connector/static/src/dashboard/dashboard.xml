@@ -6,7 +6,7 @@
             <div t-if="d" class="container-fluid py-3 px-4">
                 <div class="o_zivo_hero d-flex flex-wrap align-items-center justify-content-between mb-4">
                     <div>
-                        <div class="o_zivo_eyebrow">ODOO 19 · MODEL CONTEXT PROTOCOL</div>
+                        <div class="o_zivo_eyebrow">ODOO 19 | MODEL CONTEXT PROTOCOL</div>
                         <h2 class="mb-1">AI Connector Dashboard</h2>
                         <div class="text-white-50">Claude, ChatGPT and other AI assistants working on live Odoo data: signed in, governed and audited.</div>
                     </div>
@@ -23,7 +23,7 @@
                         <div class="o_zivo_kpi">
                             <div class="o_zivo_kpi_label">Active connectors</div>
                             <div class="o_zivo_kpi_value"><t t-esc="d.kpis.active_connectors"/><small class="text-muted"> / <t t-esc="d.kpis.connectors"/></small></div>
-                            <div class="o_zivo_kpi_hint"><t t-esc="d.kpis.sessions"/> signed-in sessions · <t t-esc="d.kpis.entities"/> companies</div>
+                            <div class="o_zivo_kpi_hint"><t t-esc="d.kpis.sessions"/> signed-in sessions | <t t-esc="d.kpis.entities"/> companies</div>
                         </div>
                     </div>
                     <div class="col-6 col-lg-3">
@@ -52,7 +52,7 @@
                 <div class="row g-3 mb-4">
                     <div class="col-lg-8">
                         <div class="o_zivo_card h-100">
-                            <div class="o_zivo_card_title">Tool calls · last 14 days</div>
+                            <div class="o_zivo_card_title">Tool calls | last 14 days</div>
                             <div class="o_zivo_chart">
                                 <t t-foreach="d.days" t-as="day" t-key="day.label">
                                     <div class="o_zivo_bar_col" t-att-title="day.label + ': ' + day.total + ' calls'">
@@ -69,7 +69,7 @@
                     </div>
                     <div class="col-lg-4">
                         <div class="o_zivo_card h-100">
-                            <div class="o_zivo_card_title">Most used tools · 30 days</div>
+                            <div class="o_zivo_card_title">Most used tools | 30 days</div>
                             <div t-if="!d.top_tools.length" class="text-muted">No tool call yet.</div>
                             <t t-foreach="d.top_tools" t-as="tool" t-key="tool.name">
                                 <div class="o_zivo_tool_row">
@@ -89,21 +89,21 @@
                                 <thead><tr><th>Connector</th><th>Entity</th><th>Mode</th><th class="text-end">Today</th><th class="text-end">30d</th><th>Status</th></tr></thead>
                                 <tbody>
                                     <tr t-foreach="d.connectors" t-as="c" t-key="c.id" class="o_zivo_click" t-on-click="() => this.openConnector(c.id)">
-                                        <td><b t-esc="c.name"/><div class="small text-muted" t-esc="c.auth + ' · ' + c.client"/></td>
+                                        <td><b t-esc="c.name"/><div class="small text-muted" t-esc="c.auth + ' | ' + c.client"/></td>
                                         <td t-esc="c.entity"/>
                                         <td><span t-attf-class="badge #{c.mode == 'read_only' ? 'text-bg-info' : 'text-bg-warning'}" t-esc="c.mode == 'read_only' ? 'Read only' : 'Read &amp; write'"/></td>
                                         <td class="text-end" t-esc="c.calls_today"/>
                                         <td class="text-end" t-esc="c.calls_30d"/>
                                         <td><span t-attf-class="badge #{c.state == 'active' ? 'text-bg-success' : (c.state == 'paused' ? 'text-bg-warning' : 'text-bg-secondary')}" t-esc="c.state_label"/></td>
                                     </tr>
-                                    <tr t-if="!d.connectors.length"><td colspan="6" class="text-muted">No connector yet — create one to connect AnythingMCP or Claude.</td></tr>
+                                    <tr t-if="!d.connectors.length"><td colspan="6" class="text-muted">No connector yet - create one to connect AnythingMCP or Claude.</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     <div class="col-lg-6">
                         <div class="o_zivo_card h-100">
-                            <div class="o_zivo_card_title d-flex justify-content-between">Live activity <a href="#" class="small" t-on-click.prevent="() => this.openLogs()">Audit log →</a></div>
+                            <div class="o_zivo_card_title d-flex justify-content-between">Live activity <a href="#" class="small" t-on-click.prevent="() => this.openLogs()">Audit log -></a></div>
                             <table class="table table-sm align-middle mb-0">
                                 <thead><tr><th>Time</th><th>Connector</th><th>Tool</th><th class="text-end">Rows</th><th class="text-end">ms</th><th>Status</th></tr></thead>
                                 <tbody>
@@ -115,7 +115,7 @@
                                         <td class="text-end small" t-esc="r.duration"/>
                                         <td><span t-attf-class="badge #{r.status == 'success' ? 'text-bg-success' : 'text-bg-danger'}" t-esc="r.status_label"/></td>
                                     </tr>
-                                    <tr t-if="!d.recent.length"><td colspan="6" class="text-muted">Waiting for the first AI request…</td></tr>
+                                    <tr t-if="!d.recent.length"><td colspan="6" class="text-muted">Waiting for the first AI request...</td></tr>
                                 </tbody>
                             </table>
                         </div>

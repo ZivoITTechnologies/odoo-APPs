@@ -37,7 +37,7 @@ class ZivoMcpConnector(models.Model):
     _inherit = ['mail.thread']
     _order = 'sequence, name'
 
-    name = fields.Char(required=True, tracking=True, help="e.g. 'US Entity – Claude via AnythingMCP'.")
+    name = fields.Char(required=True, tracking=True, help="e.g. 'US Entity - Claude via AnythingMCP'.")
     entity_label = fields.Char(
         string="Entity Name", tracking=True,
         help="How the AI should call this entity in its answers, e.g. 'US Entity'. Defaults to the company name.")
@@ -351,7 +351,7 @@ class ZivoMcpConnector(models.Model):
             if group:
                 groups |= group
         user = self.env['res.users'].with_context(no_reset_password=True).create({
-            'name': _('AI Integration – %s', label),
+            'name': _('AI Integration - %s', label),
             'login': login,
             'company_id': self.company_ids[:1].id,
             'company_ids': [(6, 0, self.company_ids.ids)],
