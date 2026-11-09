@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_zivo_mcp" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.zivo.mcp</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="AI Connector" string="AI Connector" name="zivoit_mcp_connector" groups="zivoit_mcp_connector.group_zivo_mcp_manager">
+                    <block title="MCP Endpoint" name="zivo_mcp_endpoint">
+                        <setting id="zivo_mcp_endpoint_url" string="Endpoint" help="Address of the MCP server. In AnythingMCP use the Odoo address as ODOO_URL; the connector calls ODOO_URL/mcp.">
+                            <field name="zivoit_mcp_endpoint_url" widget="CopyClipboardChar"/>
+                        </setting>
+                        <setting id="zivo_mcp_public_url" string="Public Odoo URL" help="Only if AI platforms reach Odoo through another address than web.base.url.">
+                            <field name="zivoit_mcp_public_url" placeholder="https://erp.example.com"/>
+                        </setting>
+                        <setting id="zivo_mcp_disable" help="Emergency switch: refuse every AI request on this database.">
+                            <field name="zivoit_mcp_endpoint_disabled"/>
+                        </setting>
+                        <setting id="zivo_mcp_origins" string="Allowed Browser Origins" help="Requests sent from a browser must come from one of these origins (DNS-rebinding protection).">
+                            <field name="zivoit_mcp_allowed_origins" placeholder="https://app.example.com"/>
+                        </setting>
+                    </block>
+                    <block title="Sign in with Odoo (OAuth 2.1)" name="zivo_mcp_oauth">
+                        <setting id="zivo_mcp_oauth_disable" help="Claude, ChatGPT and Cursor connect with the person's own Odoo login. Turn off to allow API keys only.">
+                            <field name="zivoit_mcp_oauth_disabled"/>
+                        </setting>
+                        <setting id="zivo_mcp_oauth_dcr" help="AI apps register themselves on first connection (RFC 7591). Turn off to allow only applications you create.">
+                            <field name="zivoit_mcp_oauth_dcr_disabled"/>
+                        </setting>
+                        <setting id="zivo_mcp_oauth_ttl" string="Token Lifetimes" help="Access tokens are refreshed automatically; the session ends after its lifetime without use.">
+                            <div class="d-flex gap-3">
+                                <span><field name="zivoit_mcp_oauth_access_ttl" class="o_light_label" style="width: 4rem"/> minutes</span>
+                                <span><field name="zivoit_mcp_oauth_refresh_ttl" class="o_light_label" style="width: 4rem"/> days</span>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Audit Log" name="zivo_mcp_audit">
+                        <setting id="zivo_mcp_retention" string="Retention" help="Audit log entries older than this are deleted automatically.">
+                            <field name="zivoit_mcp_log_retention_days" class="o_light_label" style="width: 5rem"/> days
+                        </setting>
+                        <setting id="zivo_mcp_payloads" help="Keep tool, model, status and timing but not the arguments sent by the AI.">
+                            <field name="zivoit_mcp_hide_payloads"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_zivo_mcp_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'zivoit_mcp_connector', 'bin_size': False}</field>
+    </record>
+</odoo>

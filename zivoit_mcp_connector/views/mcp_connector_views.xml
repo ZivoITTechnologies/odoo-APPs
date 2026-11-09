@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ search -->
+    <record id="zivo_mcp_connector_view_search" model="ir.ui.view">
+        <field name="name">zivo.mcp.connector.search</field>
+        <field name="model">zivo.mcp.connector</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="entity_label"/>
+                <field name="user_id"/>
+                <field name="company_ids"/>
+                <filter name="active_state" string="Active" domain="[('state', '=', 'active')]"/>
+                <filter name="paused" string="Paused" domain="[('state', '=', 'paused')]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter name="read_write" string="Write Enabled" domain="[('access_mode', '=', 'read_write')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_client" string="Client" context="{'group_by': 'client_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================ list -->
+    <record id="zivo_mcp_connector_view_list" model="ir.ui.view">
+        <field name="name">zivo.mcp.connector.list</field>
+        <field name="model">zivo.mcp.connector</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'paused'" sample="1">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="entity_label" optional="show"/>
+                <field name="user_id" optional="show"/>
+                <field name="company_ids" widget="many2many_tags" groups="base.group_multi_company" optional="show"/>
+                <field name="auth_mode" optional="show"/>
+                <field name="client_type" optional="hide"/>
+                <field name="access_mode" widget="badge" decoration-info="access_mode == 'read_only'" decoration-warning="access_mode == 'read_write'"/>
+                <field name="tool_count" string="Tools" optional="show"/>
+                <field name="call_count_today" string="Calls Today"/>
+                <field name="error_count_7d" string="Errors (7d)" decoration-danger="error_count_7d &gt; 0" optional="show"/>
+                <field name="last_call_date" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'active'" decoration-warning="state == 'paused'" decoration-muted="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ kanban -->
+    <record id="zivo_mcp_connector_view_kanban" model="ir.ui.view">
+        <field name="name">zivo.mcp.connector.kanban</field>
+        <field name="model">zivo.mcp.connector</field>
+        <field name="arch" type="xml">
+            <kanban highlight_color="color" class="o_zivo_mcp_kanban" sample="1">
+                <field name="state"/>
+                <field name="access_mode"/>
+                <field name="auth_mode"/>
+                <field name="error_count_7d"/>
+                <templates>
+                    <t t-name="menu">
+                        <a role="menuitem" type="open" class="dropdown-item">Configure</a>
+                        <a role="menuitem" name="action_view_logs" type="object" class="dropdown-item">Audit Log</a>
+                        <a role="menuitem" name="action_test_connection" type="object" class="dropdown-item">Test Connection</a>
+                        <field name="color" widget="kanban_color_picker"/>
+                    </t>
+                    <t t-name="card">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div>
+                                <field name="name" class="fw-bold fs-5"/>
+                                <div class="text-muted small">
+                                    <i class="fa fa-building-o me-1" title="Entity"/><field name="entity_label"/>
+                                    <span class="mx-1">·</span><field name="client_type"/>
+                                </div>
+                            </div>
+                            <field name="state" widget="badge" decoration-success="state == 'active'" decoration-warning="state == 'paused'" decoration-muted="state == 'draft'"/>
+                        </div>
+                        <div class="row g-0 mt-3 text-center o_zivo_mcp_stats">
+                            <div class="col-4 border-end">
+                                <div class="fs-4 fw-bold text-primary"><field name="call_count_today"/></div>
+                                <div class="small text-muted">Calls today</div>
+                            </div>
+                            <div class="col-4 border-end">
+                                <div class="fs-4 fw-bold"><field name="call_count_30d"/></div>
+                                <div class="small text-muted">Tool calls (30d)</div>
+                            </div>
+                            <div class="col-4">
+                                <div t-attf-class="fs-4 fw-bold #{record.error_count_7d.raw_value ? 'text-danger' : 'text-success'}"><field name="error_count_7d"/></div>
+                                <div class="small text-muted">Errors (7d)</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 small">
+                            <span t-if="record.auth_mode.raw_value == 'oauth'">
+                                <i class="fa fa-sign-in me-1" title="Sign in with Odoo"/>Sign in with Odoo ·
+                                <field name="oauth_session_count"/> signed in
+                            </span>
+                            <span t-else="">
+                                <i class="fa fa-key me-1" title="API key"/><field name="user_id"/>
+                            </span>
+                            <span>
+                                <span t-if="record.access_mode.raw_value == 'read_only'" class="badge text-bg-info">Read only</span>
+                                <span t-else="" class="badge text-bg-warning">Read &amp; write</span>
+                                <span class="badge text-bg-light ms-1"><field name="tool_count"/> tools</span>
+                            </span>
+                        </div>
+                        <field name="last_call_date" invisible="1"/>
+                        <div class="small text-muted mt-2" t-if="record.last_call_date.raw_value">Last call: <field name="last_call_date"/></div>
+                        <div class="small text-muted mt-2" t-else="">No call yet</div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ form -->
+    <record id="zivo_mcp_connector_view_form" model="ir.ui.view">
+        <field name="name">zivo.mcp.connector.form</field>
+        <field name="model">zivo.mcp.connector</field>
+        <field name="arch" type="xml">
+            <form string="AI Connector">
+                <header>
+                    <button name="action_activate" string="Activate" type="object" class="btn-primary" invisible="state == 'active'" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                    <button name="action_generate_key" string="Generate API Key" type="object" class="btn-primary" invisible="auth_mode != 'api_key' or not user_id or state != 'active'" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                    <button name="action_generate_key" string="Generate API Key" type="object" invisible="auth_mode != 'api_key' or not user_id or state == 'active'" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                    <button name="action_test_connection" string="Test Connection" type="object" invisible="auth_mode == 'api_key' and not user_id"/>
+                    <button name="action_create_integration_user" string="Create Integration User" type="object" class="btn-primary" invisible="auth_mode != 'api_key' or user_id" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                    <button name="action_pause" string="Pause" type="object" invisible="state != 'active'" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                    <button name="action_revoke_keys" string="Revoke Keys" type="object" invisible="auth_mode != 'api_key' or not key_count" groups="zivoit_mcp_connector.group_zivo_mcp_manager"
+                            confirm="Revoke every API key of the integration user? AI clients using them will stop working immediately."/>
+                    <button name="action_reset_draft" string="Set to Draft" type="object" invisible="state == 'draft'" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,paused"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-list-alt">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="call_count_30d"/></span>
+                                <span class="o_stat_text">Tool Calls</span>
+                            </div>
+                        </button>
+                        <button name="action_view_errors" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="error_count_7d"/></span>
+                                <span class="o_stat_text">Errors (7d)</span>
+                            </div>
+                        </button>
+                        <button name="action_view_sessions" type="object" class="oe_stat_button" icon="fa-users" invisible="auth_mode != 'oauth'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="oauth_session_count"/></span>
+                                <span class="o_stat_text">Signed-in</span>
+                            </div>
+                        </button>
+                        <div class="oe_stat_button" name="success_rate_box">
+                            <div class="fa fa-fw fa-check-circle o_button_icon" role="img" aria-label="Success"/>
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="success_rate" widget="integer"/> %</span>
+                                <span class="o_stat_text">Success</span>
+                            </div>
+                        </div>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="key_count" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Claude for the finance team"/></h1>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="auth_mode" widget="radio"/>
+                            <field name="client_type"/>
+                            <field name="user_id" options="{'no_quick_create': True}" invisible="auth_mode != 'api_key'" required="auth_mode == 'api_key' and state == 'active'"/>
+                            <field name="allowed_user_ids" widget="many2many_tags" options="{'no_create': True}" invisible="auth_mode != 'oauth'"
+                                   placeholder="Everyone with the AI Connector / User right"/>
+                            <field name="entity_label" placeholder="e.g. Northwind US"/>
+                            <field name="company_ids" widget="many2many_tags" options="{'no_create': True}" groups="base.group_multi_company"
+                                   placeholder="All companies of the signed-in user"/>
+                            <field name="access_mode" widget="radio"/>
+                        </group>
+                        <group string="Endpoint">
+                            <field name="endpoint_url" widget="CopyClipboardChar"/>
+                            <field name="odoo_url" widget="CopyClipboardChar" invisible="auth_mode != 'api_key'"/>
+                            <field name="last_call_date"/>
+                            <field name="avg_duration_ms" widget="integer"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning mb-2" role="alert" invisible="access_mode != 'read_write'">
+                        <i class="fa fa-pencil-square-o me-1" title="Write mode"/>
+                        Write mode: the AI may create and update records <b>only</b> on models where Create / Update are ticked under Model Access, and only if write tools are enabled.
+                    </div>
+                    <notebook>
+                        <page string="Connect" name="connect" invisible="auth_mode != 'oauth'">
+                            <div class="alert alert-info" role="alert">
+                                <i class="fa fa-info-circle me-1" title="Info"/>
+                                Paste the MCP endpoint into your AI app. People sign in with their own Odoo login and approve access; no key to copy.
+                                Odoo must be reachable on a public HTTPS address (set <b>Public Odoo URL</b> in Settings if it differs from the address shown).
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h5 class="mt-2"><i class="fa fa-comments me-1" title="Claude"/>Claude (web, desktop, mobile)</h5>
+                                    <field name="snippet_claude_web" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                    <h5 class="mt-3"><i class="fa fa-terminal me-1" title="Claude Code"/>Claude Code</h5>
+                                    <field name="snippet_claude_code" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h5 class="mt-2"><i class="fa fa-commenting me-1" title="ChatGPT"/>ChatGPT</h5>
+                                    <field name="snippet_chatgpt" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                    <h5 class="mt-3"><i class="fa fa-code me-1" title="Other"/>Cursor, VS Code and other MCP clients</h5>
+                                    <p class="text-muted small">Add a remote (HTTP) MCP server with the endpoint above; the client opens the Odoo sign-in page automatically.</p>
+                                </div>
+                            </div>
+                        </page>
+                        <page string="Setup" name="setup" invisible="auth_mode != 'api_key'">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <h5 class="mt-2"><i class="fa fa-plug me-1" title="AnythingMCP"/>AnythingMCP</h5>
+                                    <p class="text-muted small mb-1">Connectors &gt; Store &gt; <b>Odoo (MCP server)</b>, or a generic MCP server connector with a Bearer token.</p>
+                                    <field name="snippet_anythingmcp" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                    <h5 class="mt-3"><i class="fa fa-terminal me-1" title="Claude Code"/>Claude Code</h5>
+                                    <field name="snippet_claude_code" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                </div>
+                                <div class="col-lg-6">
+                                    <h5 class="mt-2"><i class="fa fa-desktop me-1" title="Claude Desktop"/>Claude Desktop with a key (claude_desktop_config.json)</h5>
+                                    <field name="snippet_claude_desktop" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                    <h5 class="mt-3"><i class="fa fa-code me-1" title="cURL"/>Quick test (cURL)</h5>
+                                    <field name="snippet_curl" widget="CopyClipboardText" nolabel="1" class="o_zivo_snippet"/>
+                                </div>
+                            </div>
+                            <h5 class="mt-3"><i class="fa fa-key me-1" title="Keys"/>API keys of the integration user</h5>
+                            <field name="key_summary" nolabel="1"/>
+                        </page>
+                        <page string="Model Access" name="models">
+                            <group>
+                                <group>
+                                    <field name="restrict_models"/>
+                                </group>
+                                <group>
+                                    <button name="action_load_preset" type="object" string="Add Business Models Preset" icon="fa-magic" class="btn-link" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                                </group>
+                            </group>
+                            <field name="model_access_ids">
+                                <list editable="bottom">
+                                    <field name="model_id" options="{'no_create': True}"/>
+                                    <field name="model_name"/>
+                                    <field name="perm_read"/>
+                                    <field name="perm_create" column_invisible="parent.access_mode != 'read_write'"/>
+                                    <field name="perm_write" column_invisible="parent.access_mode != 'read_write'"/>
+                                </list>
+                            </field>
+                            <group string="Hidden Fields">
+                                <field name="excluded_field_ids" widget="many2many_tags" nolabel="1" colspan="2" options="{'no_create': True}"
+                                       placeholder="Passwords, keys, tokens and binary fields are always hidden. Add more, e.g. hr.employee wage"/>
+                            </group>
+                        </page>
+                        <page string="Tools" name="tools">
+                            <div class="d-flex justify-content-end">
+                                <button name="action_enable_all_read_tools" type="object" string="Enable All Read Tools" class="btn-link" icon="fa-check-square-o" groups="zivoit_mcp_connector.group_zivo_mcp_manager"/>
+                            </div>
+                            <field name="tool_ids" nolabel="1">
+                                <list decoration-muted="not available">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="technical_name"/>
+                                    <field name="category" widget="badge" decoration-info="category == 'core'" decoration-success="category == 'finance'" decoration-warning="category == 'write'"/>
+                                    <field name="available" widget="boolean" optional="show"/>
+                                    <field name="required_apps" optional="show"/>
+                                    <field name="description" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Security" name="security">
+                            <group>
+                                <group string="Limits">
+                                    <field name="max_records"/>
+                                    <field name="rate_limit"/>
+                                    <field name="expiry_date"/>
+                                </group>
+                                <group string="Network">
+                                    <field name="allowed_ips" placeholder="e.g. 18.197.0.0/16, 203.0.113.10"/>
+                                    <field name="allow_url_key"/>
+                                </group>
+                            </group>
+                            <group string="Instructions for the AI">
+                                <field name="instructions" nolabel="1" colspan="2"
+                                       placeholder="e.g. Our fiscal year ends on 31 March. Always report amounts in USD thousands. Treat 'US Entity' as the trading company."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ actions -->
+    <record id="action_zivo_mcp_connector" model="ir.actions.act_window">
+        <field name="name">Connectors</field>
+        <field name="res_model">zivo.mcp.connector</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="zivo_mcp_connector_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Claude and other AI assistants to this Odoo</p>
+            <p>Create one connector per AI platform or entity. Each connector acts as a dedicated integration user,
+               read-only by default, with its own API key, tools, model allow-list and audit log.</p>
+        </field>
+    </record>
+</odoo>

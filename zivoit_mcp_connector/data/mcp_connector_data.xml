@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="connector_default_oauth" model="zivo.mcp.connector">
+            <field name="name">Claude &amp; ChatGPT – Sign in with Odoo</field>
+            <field name="auth_mode">oauth</field>
+            <field name="client_type">claude</field>
+            <field name="access_mode">read_only</field>
+            <field name="company_ids" eval="[(5, 0, 0)]"/>
+            <field name="restrict_models" eval="False"/>
+            <field name="state">active</field>
+            <field name="color">10</field>
+            <field name="sequence">1</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ sessions -->
+    <record id="zivo_mcp_oauth_token_view_search" model="ir.ui.view">
+        <field name="name">zivo.mcp.oauth.token.search</field>
+        <field name="model">zivo.mcp.oauth.token</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="client_id"/>
+                <field name="connector_id"/>
+                <filter name="active_sessions" string="Active" domain="[('active_session', '=', True)]"/>
+                <filter name="revoked" string="Revoked" domain="[('revoked', '=', True)]"/>
+                <group>
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_client" string="Application" context="{'group_by': 'client_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zivo_mcp_oauth_token_view_list" model="ir.ui.view">
+        <field name="name">zivo.mcp.oauth.token.list</field>
+        <field name="model">zivo.mcp.oauth.token</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" decoration-muted="not active_session">
+                <field name="client_id"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="connector_id"/>
+                <field name="create_date" string="Connected On"/>
+                <field name="last_used"/>
+                <field name="last_ip" optional="hide"/>
+                <field name="refresh_expires"/>
+                <field name="active_session" widget="boolean"/>
+                <button name="action_revoke" type="object" string="Disconnect" icon="fa-ban" class="text-danger"
+                        invisible="not active_session" confirm="Disconnect this AI assistant? It will have to sign in again."/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_zivo_mcp_oauth_token" model="ir.actions.act_window">
+        <field name="name">AI Sessions</field>
+        <field name="res_model">zivo.mcp.oauth.token</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="zivo_mcp_oauth_token_view_search"/>
+        <field name="context">{'search_default_active_sessions': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No AI assistant connected yet</p>
+            <p>In Claude: Settings &gt; Connectors &gt; Add custom connector, paste <b>https://your-odoo/mcp</b>, then log in to Odoo and click Allow.</p>
+        </field>
+    </record>
+
+    <record id="action_zivo_mcp_my_sessions" model="ir.actions.act_window">
+        <field name="name">My AI Sessions</field>
+        <field name="res_model">zivo.mcp.oauth.token</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'search_default_active_sessions': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect Claude or ChatGPT to Odoo</p>
+            <p>In Claude: Settings &gt; Connectors &gt; Add custom connector, paste this database's address followed by <b>/mcp</b>, then log in and click Allow.
+               Your assistant will see exactly what you can see in Odoo.</p>
+        </field>
+    </record>
+
+    <!-- ============================================================ clients -->
+    <record id="zivo_mcp_oauth_client_view_list" model="ir.ui.view">
+        <field name="name">zivo.mcp.oauth.client.list</field>
+        <field name="model">zivo.mcp.oauth.client</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="client_id"/>
+                <field name="redirect_hosts"/>
+                <field name="registration"/>
+                <field name="is_public"/>
+                <field name="session_count" string="Active Sessions"/>
+                <field name="create_date" string="Registered On"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_mcp_oauth_client_view_form" model="ir.ui.view">
+        <field name="name">zivo.mcp.oauth.client.form</field>
+        <field name="model">zivo.mcp.oauth.client</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_secret" type="object" string="Generate Client Secret"
+                            confirm="Generate a new client secret? The previous one stops working."/>
+                    <button name="action_revoke_sessions" type="object" string="Disconnect All Sessions"
+                            confirm="Disconnect every session of this application?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sessions" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="session_count" widget="statinfo" string="Sessions"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Claude (organization)"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="client_id" widget="CopyClipboardChar"/>
+                            <field name="is_public"/>
+                            <field name="registration"/>
+                        </group>
+                        <group>
+                            <field name="connector_id"/>
+                            <field name="redirect_hosts"/>
+                        </group>
+                    </group>
+                    <group string="Redirect URIs">
+                        <field name="redirect_uris" nolabel="1" colspan="2"
+                               placeholder="https://claude.ai/api/mcp/auth_callback&#10;https://claude.com/api/mcp/auth_callback"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_mcp_oauth_client" model="ir.actions.act_window">
+        <field name="name">Applications (OAuth)</field>
+        <field name="res_model">zivo.mcp.oauth.client</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">AI applications register themselves automatically</p>
+            <p>Claude, ChatGPT and Cursor register here the first time someone connects. Create one manually to give
+               an application a fixed client ID and secret (Claude: Advanced settings of a custom connector).</p>
+        </field>
+    </record>
+</odoo>

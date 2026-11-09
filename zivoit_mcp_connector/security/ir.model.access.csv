@@ -1,0 +1,19 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_zivo_mcp_connector_auditor,zivo.mcp.connector auditor,model_zivo_mcp_connector,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_connector_manager,zivo.mcp.connector manager,model_zivo_mcp_connector,group_zivo_mcp_manager,1,1,1,1
+access_zivo_mcp_model_access_auditor,zivo.mcp.model.access auditor,model_zivo_mcp_model_access,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_model_access_manager,zivo.mcp.model.access manager,model_zivo_mcp_model_access,group_zivo_mcp_manager,1,1,1,1
+access_zivo_mcp_tool_auditor,zivo.mcp.tool auditor,model_zivo_mcp_tool,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_tool_manager,zivo.mcp.tool manager,model_zivo_mcp_tool,group_zivo_mcp_manager,1,1,0,0
+access_zivo_mcp_log_auditor,zivo.mcp.log auditor,model_zivo_mcp_log,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_log_manager,zivo.mcp.log manager,model_zivo_mcp_log,group_zivo_mcp_manager,1,0,0,1
+access_zivo_mcp_prompt_auditor,zivo.mcp.prompt auditor,model_zivo_mcp_prompt,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_prompt_manager,zivo.mcp.prompt manager,model_zivo_mcp_prompt,group_zivo_mcp_manager,1,1,1,1
+access_zivo_mcp_prompt_argument_auditor,zivo.mcp.prompt.argument auditor,model_zivo_mcp_prompt_argument,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_prompt_argument_manager,zivo.mcp.prompt.argument manager,model_zivo_mcp_prompt_argument,group_zivo_mcp_manager,1,1,1,1
+access_zivo_mcp_key_wizard_manager,zivo.mcp.key.wizard manager,model_zivo_mcp_key_wizard,group_zivo_mcp_manager,1,1,1,0
+access_zivo_mcp_oauth_client_auditor,zivo.mcp.oauth.client auditor,model_zivo_mcp_oauth_client,group_zivo_mcp_auditor,1,0,0,0
+access_zivo_mcp_oauth_client_manager,zivo.mcp.oauth.client manager,model_zivo_mcp_oauth_client,group_zivo_mcp_manager,1,1,1,1
+access_zivo_mcp_oauth_code_manager,zivo.mcp.oauth.code manager,model_zivo_mcp_oauth_code,group_zivo_mcp_manager,1,0,0,0
+access_zivo_mcp_oauth_token_user,zivo.mcp.oauth.token user,model_zivo_mcp_oauth_token,group_zivo_mcp_user,1,0,0,0
+access_zivo_mcp_oauth_token_manager,zivo.mcp.oauth.token manager,model_zivo_mcp_oauth_token,group_zivo_mcp_manager,1,1,0,1

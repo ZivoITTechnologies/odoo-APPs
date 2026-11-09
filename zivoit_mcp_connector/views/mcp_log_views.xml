@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_mcp_log_view_search" model="ir.ui.view">
+        <field name="name">zivo.mcp.log.search</field>
+        <field name="model">zivo.mcp.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tool_name"/>
+                <field name="model_name"/>
+                <field name="connector_id"/>
+                <field name="message"/>
+                <field name="ip_address"/>
+                <filter name="tool_calls" string="Tool Calls" domain="[('method', '=', 'tools/call')]"/>
+                <separator/>
+                <filter name="success" string="Success" domain="[('status', '=', 'success')]"/>
+                <filter name="failures" string="Errors &amp; Denials" domain="[('status', '!=', 'success')]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('create_date', '&gt;=', 'today')]"/>
+                <filter name="last_7_days" string="Last 7 Days" domain="[('create_date', '&gt;=', '-7d')]"/>
+                <filter name="create_date" string="Date" date="create_date"/>
+                <group>
+                    <filter name="group_connector" string="Connector" context="{'group_by': 'connector_id'}"/>
+                    <filter name="group_tool" string="Tool" context="{'group_by': 'tool_name'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zivo_mcp_log_view_list" model="ir.ui.view">
+        <field name="name">zivo.mcp.log.list</field>
+        <field name="model">zivo.mcp.log</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" decoration-danger="status in ('error', 'denied', 'auth_failed')" decoration-warning="status == 'rate_limited'">
+                <field name="create_date" string="Time"/>
+                <field name="connector_id"/>
+                <field name="method"/>
+                <field name="tool_name"/>
+                <field name="model_name" optional="show"/>
+                <field name="result_count" optional="show"/>
+                <field name="duration_ms" widget="integer" optional="show"/>
+                <field name="status" widget="badge" decoration-success="status == 'success'" decoration-danger="status in ('error', 'denied', 'auth_failed')" decoration-warning="status == 'rate_limited'"/>
+                <field name="message" optional="hide"/>
+                <field name="ip_address" optional="hide"/>
+                <field name="user_agent" optional="hide"/>
+                <field name="call_count" column_invisible="1" sum="Calls"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_mcp_log_view_form" model="ir.ui.view">
+        <field name="name">zivo.mcp.log.form</field>
+        <field name="model">zivo.mcp.log</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="method"/> <field name="tool_name" class="text-muted"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="connector_id"/>
+                            <field name="user_id"/>
+                            <field name="status" widget="badge" decoration-success="status == 'success'" decoration-danger="status != 'success'"/>
+                            <field name="model_name"/>
+                        </group>
+                        <group>
+                            <field name="create_date" string="Time"/>
+                            <field name="duration_ms" widget="integer"/>
+                            <field name="result_count"/>
+                            <field name="ip_address"/>
+                            <field name="user_agent"/>
+                        </group>
+                    </group>
+                    <group string="Message" invisible="not message">
+                        <field name="message" nolabel="1" colspan="2"/>
+                    </group>
+                    <group string="Arguments sent by the AI" invisible="not arguments">
+                        <field name="arguments" nolabel="1" colspan="2" widget="ace" options="{'mode': 'javascript'}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_mcp_log_view_graph" model="ir.ui.view">
+        <field name="name">zivo.mcp.log.graph</field>
+        <field name="model">zivo.mcp.log</field>
+        <field name="arch" type="xml">
+            <graph string="AI Calls" type="bar" stacked="1">
+                <field name="create_date" interval="day"/>
+                <field name="status"/>
+                <field name="call_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="zivo_mcp_log_view_pivot" model="ir.ui.view">
+        <field name="name">zivo.mcp.log.pivot</field>
+        <field name="model">zivo.mcp.log</field>
+        <field name="arch" type="xml">
+            <pivot string="AI Calls">
+                <field name="tool_name" type="row"/>
+                <field name="status" type="col"/>
+                <field name="call_count" type="measure"/>
+                <field name="duration_ms" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_zivo_mcp_log" model="ir.actions.act_window">
+        <field name="name">Audit Log</field>
+        <field name="res_model">zivo.mcp.log</field>
+        <field name="view_mode">list,graph,pivot,form</field>
+        <field name="search_view_id" ref="zivo_mcp_log_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No AI request yet</p>
+            <p>Every request an AI assistant sends to Odoo is recorded here: tool, model, arguments, result size, timing and status.</p>
+        </field>
+    </record>
+
+    <record id="action_zivo_mcp_log_analysis" model="ir.actions.act_window">
+        <field name="name">Usage Analysis</field>
+        <field name="res_model">zivo.mcp.log</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="search_view_id" ref="zivo_mcp_log_view_search"/>
+        <field name="context">{'search_default_tool_calls': 1}</field>
+    </record>
+</odoo>

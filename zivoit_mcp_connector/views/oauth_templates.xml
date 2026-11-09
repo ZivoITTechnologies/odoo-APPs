@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="oauth_layout" name="AI Connector: sign-in layout">
+        <t t-call="web.frontend_layout">
+            <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
+            <t t-set="body_classname" t-value="'bg-100'"/>
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="title">Connect an AI assistant</t>
+            <div class="container py-5">
+                <div class="card border-0 shadow-sm mx-auto" style="max-width: 520px; border-radius: 14px; overflow: hidden;">
+                    <div style="background: linear-gradient(120deg, #0e1b3b 0%, #17305c 100%); padding: 22px 28px;">
+                        <div style="color: #2bb5d8; letter-spacing: .18em; font-size: .72rem; font-weight: 600;">SIGN IN WITH ODOO · MCP</div>
+                        <div class="text-white fs-4 fw-bold mt-1">Connect an AI assistant</div>
+                    </div>
+                    <div class="card-body p-4">
+                        <t t-out="0"/>
+                    </div>
+                </div>
+                <div class="text-center small text-muted mt-3">Secured by the AI Connector for Odoo · ZivoIT Technologies</div>
+            </div>
+        </t>
+    </template>
+
+    <template id="oauth_consent" name="AI Connector: consent">
+        <t t-call="zivoit_mcp_connector.oauth_layout">
+            <form method="post" action="/oauth/authorize" class="o_zivo_consent">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <t t-foreach="params.items()" t-as="item">
+                    <input type="hidden" t-att-name="item[0]" t-att-value="item[1]"/>
+                </t>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3"
+                         style="width: 48px; height: 48px; background: #e7f6fb; color: #0f7fa3; font-size: 22px;">
+                        <i class="fa fa-plug" title="Application"/>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-5" t-esc="client.name"/>
+                        <div class="text-muted small">returns to <b t-esc="client_host"/></div>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    <b t-esc="client.name"/> wants to access <b t-esc="company.name"/> on Odoo as
+                    <b t-esc="user.name"/> (<t t-esc="user.login"/>).
+                </p>
+                <div t-if="len(connectors) &gt; 1" class="mb-3">
+                    <label class="form-label fw-bold small text-uppercase text-muted">Access profile</label>
+                    <t t-foreach="connectors" t-as="c">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="connector_id" t-att-value="c.id"
+                                   t-att-id="'zc_%s' % c.id" t-att-checked="c == default_connector and 'checked' or None"/>
+                            <label class="form-check-label" t-att-for="'zc_%s' % c.id">
+                                <t t-esc="c.name"/>
+                                <span t-if="c.access_mode == 'read_only'" class="badge text-bg-info ms-1">Read only</span>
+                                <span t-else="" class="badge text-bg-warning ms-1">Read &amp; write</span>
+                            </label>
+                        </div>
+                    </t>
+                </div>
+                <input t-else="" type="hidden" name="connector_id" t-att-value="default_connector.id"/>
+                <div class="rounded p-3 mb-3" style="background: #f4f7fb;">
+                    <div class="small fw-bold text-uppercase text-muted mb-2">The assistant will be able to</div>
+                    <ul class="mb-0 ps-3 small">
+                        <li>read the Odoo data <b>you</b> can see, with your access rights</li>
+                        <li t-if="default_connector.access_mode == 'read_only'">only read: it cannot create, change or delete anything</li>
+                        <li t-else="">create or update records on approved models after asking you; never delete</li>
+                        <li>use reports such as statements, sales, stock and pipeline, when those apps are installed</li>
+                    </ul>
+                </div>
+                <p class="small text-muted">Only allow applications you trust. Every request is recorded in Odoo's
+                    audit log and you can disconnect at any time under <b>AI Connector &gt; My AI Sessions</b>.</p>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" name="decision" value="deny" class="btn btn-light flex-fill">Deny</button>
+                    <button type="submit" name="decision" value="allow" class="btn btn-primary flex-fill">Allow access</button>
+                </div>
+            </form>
+        </t>
+    </template>
+
+    <template id="oauth_error" name="AI Connector: sign-in error">
+        <t t-call="zivoit_mcp_connector.oauth_layout">
+            <div class="alert alert-warning mb-3" role="alert">
+                <i class="fa fa-exclamation-triangle me-1" title="Error"/>
+                <t t-esc="message"/>
+            </div>
+            <a href="/odoo" class="btn btn-light">Back to Odoo</a>
+        </t>
+    </template>
+</odoo>

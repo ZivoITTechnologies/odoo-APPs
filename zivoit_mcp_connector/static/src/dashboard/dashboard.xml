@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="zivoit_mcp_connector.Dashboard">
+        <div class="o_zivo_dashboard h-100 overflow-auto">
+            <t t-if="state.data" t-set="d" t-value="state.data"/>
+            <div t-if="d" class="container-fluid py-3 px-4">
+                <div class="o_zivo_hero d-flex flex-wrap align-items-center justify-content-between mb-4">
+                    <div>
+                        <div class="o_zivo_eyebrow">ODOO 19 · MODEL CONTEXT PROTOCOL</div>
+                        <h2 class="mb-1">AI Connector Dashboard</h2>
+                        <div class="text-white-50">Claude, ChatGPT and other AI assistants working on live Odoo data: signed in, governed and audited.</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="o_zivo_endpoint" t-on-click="copyEndpoint" title="Copy MCP endpoint">
+                            <i class="fa fa-link me-2"/><span t-esc="d.endpoint"/><i class="fa fa-clone ms-2"/>
+                        </div>
+                        <button class="btn btn-light btn-sm mt-2" t-on-click="newConnector"><i class="fa fa-plus me-1"/>New Connector</button>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="o_zivo_kpi">
+                            <div class="o_zivo_kpi_label">Active connectors</div>
+                            <div class="o_zivo_kpi_value"><t t-esc="d.kpis.active_connectors"/><small class="text-muted"> / <t t-esc="d.kpis.connectors"/></small></div>
+                            <div class="o_zivo_kpi_hint"><t t-esc="d.kpis.sessions"/> signed-in sessions · <t t-esc="d.kpis.entities"/> companies</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="o_zivo_kpi" t-on-click="() => this.openLogs([['method', '=', 'tools/call']])">
+                            <div class="o_zivo_kpi_label">AI tool calls today</div>
+                            <div class="o_zivo_kpi_value text-primary" t-esc="d.kpis.calls_today"/>
+                            <div class="o_zivo_kpi_hint"><t t-esc="d.kpis.calls_30d"/> in the last 30 days</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="o_zivo_kpi">
+                            <div class="o_zivo_kpi_label">Success rate (30d)</div>
+                            <div class="o_zivo_kpi_value text-success"><t t-esc="d.kpis.success_rate"/>%</div>
+                            <div class="o_zivo_kpi_hint">Average response <t t-esc="d.kpis.avg_ms"/> ms</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="o_zivo_kpi" t-on-click="() => this.openLogs([['status', '!=', 'success']])">
+                            <div class="o_zivo_kpi_label">Errors &amp; denials (7d)</div>
+                            <div t-attf-class="o_zivo_kpi_value #{d.kpis.errors_7d ? 'text-danger' : 'text-success'}" t-esc="d.kpis.errors_7d"/>
+                            <div class="o_zivo_kpi_hint">Auth failures, blocked models, rate limits</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-8">
+                        <div class="o_zivo_card h-100">
+                            <div class="o_zivo_card_title">Tool calls · last 14 days</div>
+                            <div class="o_zivo_chart">
+                                <t t-foreach="d.days" t-as="day" t-key="day.label">
+                                    <div class="o_zivo_bar_col" t-att-title="day.label + ': ' + day.total + ' calls'">
+                                        <div class="o_zivo_bar_stack" t-att-style="'height:' + barHeight(day.total, d.max_day)">
+                                            <div class="o_zivo_bar_err" t-att-style="'flex-grow:' + day.error"/>
+                                            <div class="o_zivo_bar_ok" t-att-style="'flex-grow:' + day.ok"/>
+                                        </div>
+                                        <div class="o_zivo_bar_label" t-esc="day.label"/>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="small text-muted mt-2"><span class="o_zivo_dot ok"/>Success <span class="o_zivo_dot err ms-3"/>Error / denied</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="o_zivo_card h-100">
+                            <div class="o_zivo_card_title">Most used tools · 30 days</div>
+                            <div t-if="!d.top_tools.length" class="text-muted">No tool call yet.</div>
+                            <t t-foreach="d.top_tools" t-as="tool" t-key="tool.name">
+                                <div class="o_zivo_tool_row">
+                                    <div class="d-flex justify-content-between small"><span t-esc="tool.label"/><b t-esc="tool.count"/></div>
+                                    <div class="o_zivo_tool_track"><div class="o_zivo_tool_fill" t-att-style="'width:' + toolWidth(tool.count)"/></div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <div class="o_zivo_card h-100">
+                            <div class="o_zivo_card_title">Connectors</div>
+                            <table class="table table-sm align-middle mb-0">
+                                <thead><tr><th>Connector</th><th>Entity</th><th>Mode</th><th class="text-end">Today</th><th class="text-end">30d</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="d.connectors" t-as="c" t-key="c.id" class="o_zivo_click" t-on-click="() => this.openConnector(c.id)">
+                                        <td><b t-esc="c.name"/><div class="small text-muted" t-esc="c.auth + ' · ' + c.client"/></td>
+                                        <td t-esc="c.entity"/>
+                                        <td><span t-attf-class="badge #{c.mode == 'read_only' ? 'text-bg-info' : 'text-bg-warning'}" t-esc="c.mode == 'read_only' ? 'Read only' : 'Read &amp; write'"/></td>
+                                        <td class="text-end" t-esc="c.calls_today"/>
+                                        <td class="text-end" t-esc="c.calls_30d"/>
+                                        <td><span t-attf-class="badge #{c.state == 'active' ? 'text-bg-success' : (c.state == 'paused' ? 'text-bg-warning' : 'text-bg-secondary')}" t-esc="c.state_label"/></td>
+                                    </tr>
+                                    <tr t-if="!d.connectors.length"><td colspan="6" class="text-muted">No connector yet — create one to connect AnythingMCP or Claude.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="o_zivo_card h-100">
+                            <div class="o_zivo_card_title d-flex justify-content-between">Live activity <a href="#" class="small" t-on-click.prevent="() => this.openLogs()">Audit log →</a></div>
+                            <table class="table table-sm align-middle mb-0">
+                                <thead><tr><th>Time</th><th>Connector</th><th>Tool</th><th class="text-end">Rows</th><th class="text-end">ms</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="d.recent" t-as="r" t-key="r.id" class="o_zivo_click" t-on-click="() => this.openLog(r.id)">
+                                        <td class="small text-nowrap" t-esc="r.time"/>
+                                        <td class="small" t-esc="r.connector"/>
+                                        <td class="small font-monospace" t-esc="r.tool"/>
+                                        <td class="text-end small" t-esc="r.count"/>
+                                        <td class="text-end small" t-esc="r.duration"/>
+                                        <td><span t-attf-class="badge #{r.status == 'success' ? 'text-bg-success' : 'text-bg-danger'}" t-esc="r.status_label"/></td>
+                                    </tr>
+                                    <tr t-if="!d.recent.length"><td colspan="6" class="text-muted">Waiting for the first AI request…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="tool_ai_tool_mcp_retrieve_initial_context" model="zivo.mcp.tool">
+            <field name="name">Retrieve Initial Context</field>
+            <field name="technical_name">ai_tool_mcp_retrieve_initial_context</field>
+            <field name="category">core</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">1</field>
+        </record>
+        <record id="tool_ai_tool_get_models" model="zivo.mcp.tool">
+            <field name="name">Get Models</field>
+            <field name="technical_name">ai_tool_get_models</field>
+            <field name="category">core</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">2</field>
+        </record>
+        <record id="tool_ai_tool_get_fields" model="zivo.mcp.tool">
+            <field name="name">Get Fields</field>
+            <field name="technical_name">ai_tool_get_fields</field>
+            <field name="category">core</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">3</field>
+        </record>
+        <record id="tool_ai_tool_search" model="zivo.mcp.tool">
+            <field name="name">Search Records</field>
+            <field name="technical_name">ai_tool_search</field>
+            <field name="category">core</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">4</field>
+        </record>
+        <record id="tool_ai_tool_read_group" model="zivo.mcp.tool">
+            <field name="name">Group &amp; Total Records</field>
+            <field name="technical_name">ai_tool_read_group</field>
+            <field name="category">core</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">5</field>
+        </record>
+        <record id="tool_zivo_read_records" model="zivo.mcp.tool">
+            <field name="name">Read Records by ID</field>
+            <field name="technical_name">zivo_read_records</field>
+            <field name="category">core</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">6</field>
+        </record>
+        <record id="tool_zivo_kpi_snapshot" model="zivo.mcp.tool">
+            <field name="name">KPI Snapshot</field>
+            <field name="technical_name">zivo_kpi_snapshot</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">10</field>
+        </record>
+        <record id="tool_zivo_profit_and_loss" model="zivo.mcp.tool">
+            <field name="name">Profit &amp; Loss</field>
+            <field name="technical_name">zivo_profit_and_loss</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">11</field>
+        </record>
+        <record id="tool_zivo_balance_sheet" model="zivo.mcp.tool">
+            <field name="name">Balance Sheet</field>
+            <field name="technical_name">zivo_balance_sheet</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">12</field>
+        </record>
+        <record id="tool_zivo_trial_balance" model="zivo.mcp.tool">
+            <field name="name">Trial Balance</field>
+            <field name="technical_name">zivo_trial_balance</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">13</field>
+        </record>
+        <record id="tool_zivo_aged_receivables" model="zivo.mcp.tool">
+            <field name="name">Aged Receivables</field>
+            <field name="technical_name">zivo_aged_receivables</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">14</field>
+        </record>
+        <record id="tool_zivo_aged_payables" model="zivo.mcp.tool">
+            <field name="name">Aged Payables</field>
+            <field name="technical_name">zivo_aged_payables</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">15</field>
+        </record>
+        <record id="tool_zivo_sales_analysis" model="zivo.mcp.tool">
+            <field name="name">Sales Analysis</field>
+            <field name="technical_name">zivo_sales_analysis</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">16</field>
+        </record>
+        <record id="tool_zivo_purchase_analysis" model="zivo.mcp.tool">
+            <field name="name">Purchase Analysis</field>
+            <field name="technical_name">zivo_purchase_analysis</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">17</field>
+        </record>
+        <record id="tool_zivo_inventory_snapshot" model="zivo.mcp.tool">
+            <field name="name">Inventory Snapshot</field>
+            <field name="technical_name">zivo_inventory_snapshot</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">18</field>
+        </record>
+        <record id="tool_zivo_crm_pipeline" model="zivo.mcp.tool">
+            <field name="name">CRM Pipeline</field>
+            <field name="technical_name">zivo_crm_pipeline</field>
+            <field name="category">finance</field>
+            <field name="is_write" eval="False"/>
+            <field name="default_enabled" eval="True"/>
+            <field name="sequence">19</field>
+        </record>
+        <record id="tool_ai_tool_create_records" model="zivo.mcp.tool">
+            <field name="name">Create Records</field>
+            <field name="technical_name">ai_tool_create_records</field>
+            <field name="category">write</field>
+            <field name="is_write" eval="True"/>
+            <field name="default_enabled" eval="False"/>
+            <field name="sequence">30</field>
+        </record>
+        <record id="tool_ai_tool_update_records" model="zivo.mcp.tool">
+            <field name="name">Update Records</field>
+            <field name="technical_name">ai_tool_update_records</field>
+            <field name="category">write</field>
+            <field name="is_write" eval="True"/>
+            <field name="default_enabled" eval="False"/>
+            <field name="sequence">31</field>
+        </record>
+    </data>
+</odoo>

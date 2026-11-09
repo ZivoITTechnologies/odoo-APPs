@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_zivo_mcp_dashboard" model="ir.actions.client">
+        <field name="name">AI Connector Dashboard</field>
+        <field name="tag">zivo_mcp_dashboard</field>
+    </record>
+
+    <menuitem id="menu_zivo_mcp_root" name="AI Connector" sequence="85"
+              web_icon="zivoit_mcp_connector,static/description/icon.png"
+              groups="group_zivo_mcp_user"/>
+    <menuitem id="menu_zivo_mcp_dashboard" name="Dashboard" parent="menu_zivo_mcp_root" action="action_zivo_mcp_dashboard" sequence="1" groups="group_zivo_mcp_auditor"/>
+    <menuitem id="menu_zivo_mcp_my_sessions" name="My AI Sessions" parent="menu_zivo_mcp_root" action="action_zivo_mcp_my_sessions" sequence="5"/>
+    <menuitem id="menu_zivo_mcp_connectors" name="Connectors" parent="menu_zivo_mcp_root" action="action_zivo_mcp_connector" sequence="10" groups="group_zivo_mcp_auditor"/>
+    <menuitem id="menu_zivo_mcp_monitoring" name="Monitoring" parent="menu_zivo_mcp_root" sequence="20" groups="group_zivo_mcp_auditor"/>
+    <menuitem id="menu_zivo_mcp_log" name="Audit Log" parent="menu_zivo_mcp_monitoring" action="action_zivo_mcp_log" sequence="1"/>
+    <menuitem id="menu_zivo_mcp_sessions" name="Signed-in Sessions" parent="menu_zivo_mcp_monitoring" action="action_zivo_mcp_oauth_token" sequence="2"/>
+    <menuitem id="menu_zivo_mcp_analysis" name="Usage Analysis" parent="menu_zivo_mcp_monitoring" action="action_zivo_mcp_log_analysis" sequence="3"/>
+    <menuitem id="menu_zivo_mcp_config" name="Configuration" parent="menu_zivo_mcp_root" sequence="90" groups="group_zivo_mcp_auditor"/>
+    <menuitem id="menu_zivo_mcp_tools" name="Tools" parent="menu_zivo_mcp_config" action="action_zivo_mcp_tool" sequence="1"/>
+    <menuitem id="menu_zivo_mcp_prompts" name="Prompt Library" parent="menu_zivo_mcp_config" action="action_zivo_mcp_prompt" sequence="2"/>
+    <menuitem id="menu_zivo_mcp_clients" name="Applications (OAuth)" parent="menu_zivo_mcp_config" action="action_zivo_mcp_oauth_client" sequence="3" groups="group_zivo_mcp_manager"/>
+    <menuitem id="menu_zivo_mcp_settings" name="Settings" parent="menu_zivo_mcp_config" action="action_zivo_mcp_settings" sequence="10" groups="group_zivo_mcp_manager"/>
+</odoo>

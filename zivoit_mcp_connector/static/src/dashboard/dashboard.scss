@@ -1,0 +1,52 @@
+// Part of ZivoIT Technologies.
+$zivo-navy: #0f1d3a;
+$zivo-cyan: #22b3d6;
+
+.o_zivo_dashboard {
+    background: var(--o-view-background-color, #f6f7fb);
+    .o_zivo_hero {
+        background: linear-gradient(120deg, $zivo-navy 0%, #17305c 60%, #1b4a7a 100%);
+        color: #fff;
+        border-radius: 14px;
+        padding: 22px 26px;
+        h2 { color: #fff; font-weight: 700; }
+    }
+    .o_zivo_eyebrow { color: $zivo-cyan; letter-spacing: .18em; font-size: .75rem; font-weight: 600; margin-bottom: 4px; }
+    .o_zivo_endpoint {
+        display: inline-block; cursor: pointer; background: rgba(255, 255, 255, .1);
+        border: 1px solid rgba(255, 255, 255, .25); border-radius: 8px; padding: 6px 12px;
+        font-family: var(--font-monospace, monospace); font-size: .85rem;
+        &:hover { background: rgba(255, 255, 255, .18); }
+    }
+    .o_zivo_kpi, .o_zivo_card {
+        background: var(--o-view-background-color, #fff);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        padding: 16px 18px;
+        box-shadow: 0 1px 2px rgba(15, 29, 58, .05);
+    }
+    .o_zivo_kpi { cursor: pointer; transition: box-shadow .15s; &:hover { box-shadow: 0 4px 14px rgba(15, 29, 58, .12); } }
+    .o_zivo_kpi_label { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: #6b7280; }
+    .o_zivo_kpi_value { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+    .o_zivo_kpi_hint { font-size: .8rem; color: #6b7280; }
+    .o_zivo_card_title { font-weight: 600; margin-bottom: 12px; }
+    .o_zivo_chart { display: flex; align-items: flex-end; gap: 8px; height: 190px; padding-top: 6px; }
+    .o_zivo_bar_col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .o_zivo_bar_stack { width: 100%; max-width: 34px; display: flex; flex-direction: column; border-radius: 6px 6px 0 0; overflow: hidden; }
+    .o_zivo_bar_ok { background: $zivo-cyan; flex-basis: 0; }
+    .o_zivo_bar_err { background: #e45d5d; flex-basis: 0; }
+    .o_zivo_bar_label { font-size: .65rem; color: #6b7280; margin-top: 4px; white-space: nowrap; }
+    .o_zivo_dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle;
+        &.ok { background: $zivo-cyan; } &.err { background: #e45d5d; } }
+    .o_zivo_tool_row { margin-bottom: 12px; }
+    .o_zivo_tool_track { height: 8px; background: #eef1f6; border-radius: 4px; margin-top: 4px; }
+    .o_zivo_tool_fill { height: 8px; background: linear-gradient(90deg, $zivo-navy, $zivo-cyan); border-radius: 4px; }
+    .o_zivo_click { cursor: pointer; }
+}
+.o_zivo_snippet {
+    font-family: var(--font-monospace, monospace);
+    font-size: .8rem;
+    white-space: pre-wrap;
+    background: #0f1d3a; color: #d7f3fb; border-radius: 8px; padding: 10px 12px; display: block;
+    .o_field_CopyClipboardText, span { white-space: pre-wrap; }
+}

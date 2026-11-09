@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="prompt_pl_comparison" model="zivo.mcp.prompt">
+            <field name="name">Profit &amp; Loss with comparison</field>
+            <field name="technical_name">pl_comparison</field>
+            <field name="category">finance</field>
+            <field name="sequence">10</field>
+            <field name="description">P&amp;L for an entity and period compared with the previous period.</field>
+            <field name="template">Using the Odoo tools, give me the Profit &amp; Loss of {company} for {period}, compared with the previous period. Show revenue, cost of revenue, gross profit and margin, operating expenses and net profit with the variance in amount and %, then comment in three bullet points on what changed most.</field>
+        </record>
+        <record id="prompt_pl_comparison_arg_company" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_pl_comparison"/>
+            <field name="sequence">1</field>
+            <field name="name">company</field>
+            <field name="description">Company / entity name</field>
+            <field name="required" eval="True"/>
+            <field name="default_value"></field>
+        </record>
+        <record id="prompt_pl_comparison_arg_period" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_pl_comparison"/>
+            <field name="sequence">2</field>
+            <field name="name">period</field>
+            <field name="description">Period, e.g. Q3 2026 or 2026-07-01 to 2026-09-30</field>
+            <field name="required" eval="True"/>
+            <field name="default_value"></field>
+        </record>
+        <record id="prompt_balance_sheet_all" model="zivo.mcp.prompt">
+            <field name="name">Balance Sheet for all entities</field>
+            <field name="technical_name">balance_sheet_all</field>
+            <field name="category">finance</field>
+            <field name="sequence">20</field>
+            <field name="description">One labelled Balance Sheet per entity as of a date.</field>
+            <field name="template">Using zivo_balance_sheet, give me the Balance Sheet of every company I can access as of {date}. Present one clearly labelled statement per entity in its own currency with totals for assets, liabilities and equity, the working capital, and flag any entity whose balance sheet does not balance.</field>
+        </record>
+        <record id="prompt_balance_sheet_all_arg_date" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_balance_sheet_all"/>
+            <field name="sequence">1</field>
+            <field name="name">date</field>
+            <field name="description">Report date (YYYY-MM-DD)</field>
+            <field name="required" eval="True"/>
+            <field name="default_value"></field>
+        </record>
+        <record id="prompt_top_customers" model="zivo.mcp.prompt">
+            <field name="name">Top customers by sales</field>
+            <field name="technical_name">top_customers</field>
+            <field name="category">sales</field>
+            <field name="sequence">30</field>
+            <field name="description">Ranked sales analysis per entity.</field>
+            <field name="template">Using zivo_sales_analysis grouped by customer, list our top {limit} customers by sales for {period}, per entity, with each customer's share of total sales and growth versus the same period last year.</field>
+        </record>
+        <record id="prompt_top_customers_arg_period" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_top_customers"/>
+            <field name="sequence">1</field>
+            <field name="name">period</field>
+            <field name="description">Period, e.g. this year</field>
+            <field name="required" eval="True"/>
+            <field name="default_value"></field>
+        </record>
+        <record id="prompt_top_customers_arg_limit" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_top_customers"/>
+            <field name="sequence">2</field>
+            <field name="name">limit</field>
+            <field name="description">Number of customers</field>
+            <field name="required" eval="False"/>
+            <field name="default_value">10</field>
+        </record>
+        <record id="prompt_overdue_payables" model="zivo.mcp.prompt">
+            <field name="name">Overdue supplier bills</field>
+            <field name="technical_name">overdue_payables</field>
+            <field name="category">purchase</field>
+            <field name="sequence">40</field>
+            <field name="description">Vendor bills overdue by more than N days.</field>
+            <field name="template">Using zivo_aged_payables with min_days_overdue={days} and include_documents=true, list the supplier bills overdue by more than {days} days with vendor, bill number, due date, days overdue and amount due, grouped by entity, and total them.</field>
+        </record>
+        <record id="prompt_overdue_payables_arg_days" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_overdue_payables"/>
+            <field name="sequence">1</field>
+            <field name="name">days</field>
+            <field name="description">Minimum days overdue</field>
+            <field name="required" eval="False"/>
+            <field name="default_value">30</field>
+        </record>
+        <record id="prompt_overdue_receivables" model="zivo.mcp.prompt">
+            <field name="name">Collections: overdue customers</field>
+            <field name="technical_name">overdue_receivables</field>
+            <field name="category">finance</field>
+            <field name="sequence">50</field>
+            <field name="description">Customers to chase, with ageing.</field>
+            <field name="template">Using zivo_aged_receivables, show customers with overdue balances as of today, ageing buckets per customer and the ten largest overdue invoices. Suggest a collection priority list.</field>
+        </record>
+        <record id="prompt_monthly_margin" model="zivo.mcp.prompt">
+            <field name="name">Monthly gross margin trend</field>
+            <field name="technical_name">monthly_margin</field>
+            <field name="category">management</field>
+            <field name="sequence">60</field>
+            <field name="description">Gross margin month by month this year.</field>
+            <field name="template">Using zivo_profit_and_loss with granularity=month for {company} from the start of the fiscal year to today, show revenue, gross profit and gross margin % per month as a table and comment on the trend.</field>
+        </record>
+        <record id="prompt_monthly_margin_arg_company" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_monthly_margin"/>
+            <field name="sequence">1</field>
+            <field name="name">company</field>
+            <field name="description">Company / entity name (leave empty for all)</field>
+            <field name="required" eval="False"/>
+            <field name="default_value"></field>
+        </record>
+        <record id="prompt_ceo_dashboard" model="zivo.mcp.prompt">
+            <field name="name">CEO morning brief</field>
+            <field name="technical_name">ceo_dashboard</field>
+            <field name="category">management</field>
+            <field name="sequence">70</field>
+            <field name="description">Headline KPIs for every entity.</field>
+            <field name="template">Using zivo_kpi_snapshot, give me a short morning brief for every entity: revenue month-to-date and year-to-date, margins, cash and bank, overdue receivables and payables, and anything that needs my attention today.</field>
+        </record>
+        <record id="prompt_stock_review" model="zivo.mcp.prompt">
+            <field name="name">Inventory value and low stock</field>
+            <field name="technical_name">stock_review</field>
+            <field name="category">inventory</field>
+            <field name="sequence">80</field>
+            <field name="description">Stock value by category and items to reorder.</field>
+            <field name="template">Using zivo_inventory_snapshot, show the stock value by product category and list storable products at or below {threshold} units on hand.</field>
+        </record>
+        <record id="prompt_stock_review_arg_threshold" model="zivo.mcp.prompt.argument">
+            <field name="prompt_id" ref="prompt_stock_review"/>
+            <field name="sequence">1</field>
+            <field name="name">threshold</field>
+            <field name="description">Low-stock threshold</field>
+            <field name="required" eval="False"/>
+            <field name="default_value">5</field>
+        </record>
+    </data>
+</odoo>
