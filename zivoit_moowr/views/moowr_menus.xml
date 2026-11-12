@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_moowr_root" name="MOOWR" web_icon="zivoit_moowr,static/description/icon.png"
+              groups="group_moowr_user" sequence="45"/>
+    <menuitem id="menu_moowr_overview" name="Overview" parent="menu_moowr_root" action="action_moowr_dashboard" sequence="1"/>
+    <menuitem id="menu_moowr_operations" name="Operations" parent="menu_moowr_root" sequence="10"/>
+    <menuitem id="menu_moowr_boe" name="Bills of Entry" parent="menu_moowr_operations" action="action_moowr_boe" sequence="1"/>
+    <menuitem id="menu_moowr_clearance" name="Clearances" parent="menu_moowr_operations" action="action_moowr_clearance" sequence="2"/>
+    <menuitem id="menu_moowr_batch" name="Production Batches" parent="menu_moowr_operations" action="action_moowr_batch" sequence="3"/>
+    <menuitem id="menu_moowr_registers" name="Registers" parent="menu_moowr_root" sequence="20"/>
+    <menuitem id="menu_moowr_ledger" name="Bonded Register" parent="menu_moowr_registers" action="action_moowr_ledger" sequence="1"/>
+    <menuitem id="menu_moowr_stock" name="Bonded Stock by Bill of Entry" parent="menu_moowr_registers" action="action_moowr_boe_line" sequence="2"/>
+    <menuitem id="menu_moowr_duty_ledger" name="Duty Ledger" parent="menu_moowr_registers" action="action_moowr_duty_ledger" sequence="3"/>
+    <menuitem id="menu_moowr_returns" name="Monthly Returns" parent="menu_moowr_registers" action="action_moowr_return" sequence="4"/>
+    <menuitem id="menu_moowr_config" name="Configuration" parent="menu_moowr_root" sequence="90" groups="group_moowr_manager"/>
+    <menuitem id="menu_moowr_licence" name="Licences" parent="menu_moowr_config" action="action_moowr_licence" sequence="1"/>
+    <menuitem id="menu_moowr_products" name="Bonded Products" parent="menu_moowr_config" action="action_moowr_products" sequence="2"/>
+</odoo>

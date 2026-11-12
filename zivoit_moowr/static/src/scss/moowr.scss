@@ -1,0 +1,22 @@
+.o_moowr_dashboard {
+    --KanbanRecord-width: 1040px;
+    .o_kanban_record { width: 100%; max-width: 1040px; flex: 1 1 100%; }
+    .o_moowr_card { padding: 18px 20px; }
+    .o_moowr_eyebrow { font-size: 11px; letter-spacing: .14em; color: #1287C6; font-weight: 700; }
+    .o_moowr_title { font-size: 22px; font-weight: 700; color: #0B1F44; }
+    .o_moowr_sub { color: #5B6475; margin-top: 2px; }
+    .o_moowr_kpis {
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0;
+        .o_moowr_kpi {
+            display: flex; flex-direction: column; border: 1px solid #D6E1EE; border-radius: 10px; padding: 12px 14px;
+            color: #0B1F44; text-decoration: none; background: #fff;
+            > span:first-child { font-size: 13px; color: #5B6475; text-transform: uppercase; letter-spacing: .04em; }
+            .o_moowr_val, .o_moowr_val * { font-size: 26px; font-weight: 700; line-height: 1.25; margin: 4px 0 2px; }
+            small { color: #5B6475; }
+            &:hover { border-color: #1C8FD3; }
+        }
+        .o_moowr_kpi_main { background: linear-gradient(135deg, #0B1F44, #1A4FA0); color: #fff;
+            > span:first-child, small, small * { color: #C9DDF3; } }
+    }
+    .o_moowr_actions { display: flex; gap: 8px; flex-wrap: wrap; }
+}

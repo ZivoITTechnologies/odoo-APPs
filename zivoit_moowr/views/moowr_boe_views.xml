@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_moowr_boe_list" model="ir.ui.view">
+        <field name="name">moowr.boe.list</field>
+        <field name="model">moowr.boe</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('closed', 'cancel')" decoration-info="state == 'draft'">
+                <field name="name"/>
+                <field name="boe_date"/>
+                <field name="partner_id"/>
+                <field name="purchase_id" optional="show"/>
+                <field name="port_code" optional="hide"/>
+                <field name="licence_id" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount_assessable" sum="Total"/>
+                <field name="amount_duty" sum="Total"/>
+                <field name="duty_balance" string="Duty Still in Bond"/>
+                <field name="receipt_progress" widget="progressbar" string="Received"/>
+                <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_boe_form" model="ir.ui.view">
+        <field name="name">moowr.boe.form</field>
+        <field name="model">moowr.boe</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm Into Bond" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_close" type="object" string="Close" invisible="state != 'confirmed'"/>
+                    <button name="action_reopen" type="object" string="Reopen" invisible="state != 'closed'"/>
+                    <button name="action_draft" type="object" string="Reset to Draft" invisible="state not in ('confirmed', 'cancel')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_ledger" type="object" class="oe_stat_button" icon="fa-book">
+                            <field name="ledger_count" widget="statinfo" string="Register Entries"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. 4567891" readonly="state != 'draft'"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="boe_date" readonly="state != 'draft'"/>
+                            <field name="licence_id" readonly="state != 'draft'"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="purchase_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="port_code" readonly="state != 'draft'"/>
+                            <field name="igm_number" readonly="state != 'draft'"/>
+                            <field name="exchange_rate" readonly="state != 'draft'"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Goods" name="lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="tariff_code" optional="show"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id" optional="show"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="assessable_value"/>
+                                    <field name="bcd_rate" optional="show"/>
+                                    <field name="bcd_amount" optional="show"/>
+                                    <field name="sws_rate" optional="hide"/>
+                                    <field name="sws_amount" optional="show"/>
+                                    <field name="igst_rate" optional="show"/>
+                                    <field name="igst_amount" optional="show"/>
+                                    <field name="duty_amount" sum="Total"/>
+                                    <field name="qty_received" optional="show"/>
+                                    <field name="qty_balance" optional="show"/>
+                                    <field name="purchase_line_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="amount_assessable"/>
+                                <field name="amount_bcd"/>
+                                <field name="amount_sws"/>
+                                <field name="amount_igst"/>
+                                <field name="amount_duty" class="oe_subtotal_footer_separator"/>
+                                <field name="duty_balance"/>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_moowr_boe_search" model="ir.ui.view">
+        <field name="name">moowr.boe.search</field>
+        <field name="model">moowr.boe</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="purchase_id"/>
+                <field name="line_ids" string="Product" filter_domain="[('line_ids.product_id', 'ilike', self)]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="in_bond" string="In Bond" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="closed" string="Closed" domain="[('state', '=', 'closed')]"/>
+                <separator/>
+                <filter name="boe_date" string="Date" date="boe_date"/>
+                <group>
+                    <filter name="group_partner" string="Supplier" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'boe_date:month'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_boe" model="ir.actions.act_window">
+        <field name="name">Bills of Entry</field>
+        <field name="res_model">moowr.boe</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_moowr_boe_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Record your first into-bond bill of entry</p>
+            <p>Create it from a purchase order with the "Create Bill of Entry" button, or enter it here. Confirmed bills of entry are matched automatically when the goods are received.</p>
+        </field>
+    </record>
+
+    <!-- Bonded stock by bill of entry line -->
+    <record id="view_moowr_boe_line_list" model="ir.ui.view">
+        <field name="name">moowr.boe.line.list</field>
+        <field name="model">moowr.boe.line</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" decoration-danger="age_days &gt; 90 and qty_balance &gt; 0">
+                <field name="boe_id"/>
+                <field name="boe_date"/>
+                <field name="product_id"/>
+                <field name="quantity" optional="hide"/>
+                <field name="qty_received"/>
+                <field name="qty_consumed"/>
+                <field name="qty_cleared" optional="show"/>
+                <field name="qty_exported" optional="show"/>
+                <field name="qty_scrapped" optional="hide"/>
+                <field name="qty_returned" optional="hide"/>
+                <field name="qty_balance"/>
+                <field name="uom_id"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="value_balance" sum="Total" optional="show"/>
+                <field name="duty_balance" sum="Total"/>
+                <field name="date_first_receipt" optional="hide"/>
+                <field name="age_days"/>
+                <field name="interest_exposure" optional="show"/>
+                <field name="licence_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_boe_line_pivot" model="ir.ui.view">
+        <field name="name">moowr.boe.line.pivot</field>
+        <field name="model">moowr.boe.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Bonded Stock">
+                <field name="product_id" type="row"/>
+                <field name="qty_balance" type="measure"/>
+                <field name="duty_balance" type="measure"/>
+                <field name="value_balance" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_moowr_boe_line_search" model="ir.ui.view">
+        <field name="name">moowr.boe.line.search</field>
+        <field name="model">moowr.boe.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="boe_id"/>
+                <filter name="in_bond" string="In Bond" domain="[('qty_balance', '&gt;', 0), ('boe_state', '=', 'confirmed')]"/>
+                <filter name="fully_used" string="Fully Used" domain="[('qty_balance', '=', 0), ('qty_received', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
+                    <filter name="group_boe" string="Bill of Entry" context="{'group_by': 'boe_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_boe_line" model="ir.actions.act_window">
+        <field name="name">Bonded Stock by Bill of Entry</field>
+        <field name="res_model">moowr.boe.line</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="search_view_id" ref="view_moowr_boe_line_search"/>
+        <field name="context">{'search_default_in_bond': 1}</field>
+    </record>
+</odoo>

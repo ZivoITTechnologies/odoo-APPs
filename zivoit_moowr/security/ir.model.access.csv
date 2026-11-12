@@ -1,0 +1,18 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_moowr_licence_user,moowr.licence user,model_moowr_licence,group_moowr_user,1,0,0,0
+access_moowr_licence_manager,moowr.licence manager,model_moowr_licence,group_moowr_manager,1,1,1,1
+access_moowr_licence_stock,moowr.licence stock,model_moowr_licence,stock.group_stock_user,1,0,0,0
+access_moowr_boe_user,moowr.boe user,model_moowr_boe,group_moowr_user,1,1,1,0
+access_moowr_boe_manager,moowr.boe manager,model_moowr_boe,group_moowr_manager,1,1,1,1
+access_moowr_boe_stock,moowr.boe stock,model_moowr_boe,stock.group_stock_user,1,0,0,0
+access_moowr_boe_line_user,moowr.boe.line user,model_moowr_boe_line,group_moowr_user,1,1,1,1
+access_moowr_boe_line_stock,moowr.boe.line stock,model_moowr_boe_line,stock.group_stock_user,1,1,0,0
+access_moowr_batch_user,moowr.batch user,model_moowr_batch,group_moowr_user,1,0,0,0
+access_moowr_batch_stock,moowr.batch stock,model_moowr_batch,stock.group_stock_user,1,1,1,0
+access_moowr_ledger_user,moowr.ledger user,model_moowr_ledger,group_moowr_user,1,0,0,0
+access_moowr_ledger_stock,moowr.ledger stock,model_moowr_ledger,stock.group_stock_user,1,1,1,0
+access_moowr_clearance_user,moowr.clearance user,model_moowr_clearance,group_moowr_user,1,1,1,0
+access_moowr_clearance_manager,moowr.clearance manager,model_moowr_clearance,group_moowr_manager,1,1,1,1
+access_moowr_clearance_stock,moowr.clearance stock,model_moowr_clearance,stock.group_stock_user,1,1,1,0
+access_moowr_return_user,moowr.return user,model_moowr_return,group_moowr_user,1,1,1,0
+access_moowr_return_manager,moowr.return manager,model_moowr_return,group_moowr_manager,1,1,1,1

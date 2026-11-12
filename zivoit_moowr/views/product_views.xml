@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_moowr" model="ir.ui.view">
+        <field name="name">product.template.form.moowr</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="MOOWR" name="moowr" groups="zivoit_moowr.group_moowr_user">
+                    <group>
+                        <group string="Bonded Treatment">
+                            <field name="moowr_goods_type"/>
+                            <field name="moowr_tariff_code"/>
+                        </group>
+                        <group string="Default Duty Rates">
+                            <field name="moowr_bcd_rate"/>
+                            <field name="moowr_sws_rate"/>
+                            <field name="moowr_igst_rate"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_search_view_moowr" model="ir.ui.view">
+        <field name="name">product.template.search.moowr</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='filter_to_sell']" position="before">
+                <filter string="MOOWR Goods" name="moowr_goods" domain="[('moowr_goods_type', '!=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_moowr_products" model="ir.actions.act_window">
+        <field name="name">Bonded Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_moowr_goods': 1}</field>
+    </record>
+</odoo>

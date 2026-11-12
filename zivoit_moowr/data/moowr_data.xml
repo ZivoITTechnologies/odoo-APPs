@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_moowr_clearance" model="ir.sequence">
+            <field name="name">MOOWR Clearance</field>
+            <field name="code">moowr.clearance</field>
+            <field name="prefix">MCL/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="ir_cron_moowr_reminders" model="ir.cron">
+            <field name="name">MOOWR: monthly return and licence reminders</field>
+            <field name="model_id" ref="model_moowr_licence"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_moowr_reminders()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

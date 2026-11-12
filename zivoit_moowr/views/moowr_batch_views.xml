@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_moowr_batch_list" model="ir.ui.view">
+        <field name="name">moowr.batch.list</field>
+        <field name="model">moowr.batch</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="qty_produced"/>
+                <field name="qty_out"/>
+                <field name="qty_balance"/>
+                <field name="uom_id"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="unit_duty"/>
+                <field name="duty_content" sum="Total" optional="show"/>
+                <field name="duty_balance" sum="Total"/>
+                <field name="licence_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_batch_form" model="ir.ui.view">
+        <field name="name">moowr.batch.form</field>
+        <field name="model">moowr.batch</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="production_id"/>
+                            <field name="product_id"/>
+                            <field name="date"/>
+                            <field name="qty_produced"/>
+                            <field name="qty_out"/>
+                            <field name="qty_balance"/>
+                            <field name="uom_id"/>
+                        </group>
+                        <group string="Imported Input Content">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="value_content"/>
+                            <field name="bcd_content"/>
+                            <field name="sws_content"/>
+                            <field name="igst_content"/>
+                            <field name="duty_content"/>
+                            <field name="unit_duty"/>
+                            <field name="duty_balance"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Imported Inputs Used" name="inputs">
+                            <field name="input_ids">
+                                <list>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="boe_id"/>
+                                    <field name="batch_id"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="value"/>
+                                    <field name="duty_amount" sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Removals" name="removals">
+                            <field name="ledger_ids">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="move_type"/>
+                                    <field name="reference"/>
+                                    <field name="quantity"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="duty_amount" sum="Total"/>
+                                    <field name="clearance_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_moowr_batch_search" model="ir.ui.view">
+        <field name="name">moowr.batch.search</field>
+        <field name="model">moowr.batch</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="production_id"/>
+                <filter name="in_bond" string="In Bond" domain="[('qty_balance', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_batch" model="ir.actions.act_window">
+        <field name="name">Production Batches</field>
+        <field name="res_model">moowr.batch</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_moowr_batch_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No bonded production yet</p>
+            <p>When a manufacturing order is completed in a bonded location, its imported input value and duty are carried into a batch here.</p>
+        </field>
+    </record>
+</odoo>

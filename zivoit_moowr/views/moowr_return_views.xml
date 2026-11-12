@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_moowr_return_list" model="ir.ui.view">
+        <field name="name">moowr.return.list</field>
+        <field name="model">moowr.return</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="is_late and state == 'draft'">
+                <field name="name"/>
+                <field name="licence_id" optional="hide"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="due_date"/>
+                <field name="is_late" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="receipt_duty"/>
+                <field name="home_duty"/>
+                <field name="closing_duty"/>
+                <field name="submission_date"/>
+                <field name="state" widget="badge" decoration-success="state == 'submitted'" decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_return_form" model="ir.ui.view">
+        <field name="name">moowr.return.form</field>
+        <field name="model">moowr.return</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_export_xlsx" type="object" string="Download Excel" class="btn-primary"/>
+                    <button name="action_print_pdf" type="object" string="Print PDF"/>
+                    <button name="action_submit" type="object" string="Mark as Submitted" invisible="state != 'draft'"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft" invisible="state != 'submitted'" groups="zivoit_moowr.group_moowr_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Late" bg_color="text-bg-danger" invisible="not is_late"/>
+                    <div class="oe_title">
+                        <span class="text-muted">MOOWR monthly return</span>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="licence_id" readonly="state != 'draft'"/>
+                            <field name="date_from" readonly="state != 'draft'"/>
+                            <field name="date_to"/>
+                            <field name="due_date"/>
+                            <field name="is_late" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="submission_date" readonly="state != 'draft'"/>
+                            <field name="acknowledgement" readonly="state != 'draft'"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Summary for the Period">
+                        <group>
+                            <field name="receipt_qty_lines"/>
+                            <field name="receipt_value"/>
+                            <field name="receipt_duty"/>
+                            <field name="removal_lines"/>
+                        </group>
+                        <group>
+                            <field name="home_duty"/>
+                            <field name="interest_total"/>
+                            <field name="export_value"/>
+                            <field name="closing_duty"/>
+                        </group>
+                    </group>
+                    <p class="text-muted">The Excel file has four sheets: receipts, operations, removals and the closing stock balance by bill of entry and production batch, as required under Regulation 17 of the MOOWR Regulations, 2019.</p>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_moowr_return_search" model="ir.ui.view">
+        <field name="name">moowr.return.search</field>
+        <field name="model">moowr.return</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="licence_id"/>
+                <filter name="draft" string="Not Submitted" domain="[('state', '=', 'draft')]"/>
+                <filter name="submitted" string="Submitted" domain="[('state', '=', 'submitted')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_return" model="ir.actions.act_window">
+        <field name="name">Monthly Returns</field>
+        <field name="res_model">moowr.return</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_moowr_return_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Prepare a monthly return</p>
+            <p>Returns are created automatically at the start of each month. Download the Excel file, file it with the bond officer within the due date and record the acknowledgement here.</p>
+        </field>
+    </record>
+</odoo>

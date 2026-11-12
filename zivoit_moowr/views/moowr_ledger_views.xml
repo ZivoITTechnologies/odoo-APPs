@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_moowr_ledger_list" model="ir.ui.view">
+        <field name="name">moowr.ledger.list</field>
+        <field name="model">moowr.ledger</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false" decoration-success="direction == 'in'">
+                <field name="date"/>
+                <field name="move_type" widget="badge"/>
+                <field name="direction" column_invisible="1"/>
+                <field name="reference"/>
+                <field name="product_id"/>
+                <field name="signed_quantity" string="Quantity"/>
+                <field name="uom_id"/>
+                <field name="boe_id" optional="show"/>
+                <field name="batch_id" optional="show"/>
+                <field name="production_id" optional="hide"/>
+                <field name="partner_id" optional="hide"/>
+                <field name="clearance_id" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="value" sum="Total" optional="show"/>
+                <field name="duty_amount" sum="Total"/>
+                <field name="interest_amount" sum="Total" optional="hide"/>
+                <field name="licence_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_ledger_form" model="ir.ui.view">
+        <field name="name">moowr.ledger.form</field>
+        <field name="model">moowr.ledger</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="move_type"/>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="uom_id"/>
+                            <field name="reference"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="boe_id"/>
+                            <field name="boe_line_id"/>
+                            <field name="batch_id"/>
+                            <field name="output_batch_id"/>
+                            <field name="production_id"/>
+                            <field name="picking_id"/>
+                            <field name="clearance_id"/>
+                        </group>
+                        <group string="Value and Duty">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="value"/>
+                            <field name="bcd_amount"/>
+                            <field name="sws_amount"/>
+                            <field name="igst_amount"/>
+                            <field name="duty_amount"/>
+                        </group>
+                        <group string="Interest">
+                            <field name="interest_days"/>
+                            <field name="interest_amount"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_moowr_ledger_pivot" model="ir.ui.view">
+        <field name="name">moowr.ledger.pivot</field>
+        <field name="model">moowr.ledger</field>
+        <field name="arch" type="xml">
+            <pivot string="Duty Ledger">
+                <field name="date" interval="month" type="row"/>
+                <field name="move_type" type="col"/>
+                <field name="duty_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_moowr_ledger_graph" model="ir.ui.view">
+        <field name="name">moowr.ledger.graph</field>
+        <field name="model">moowr.ledger</field>
+        <field name="arch" type="xml">
+            <graph string="Duty Movement" type="bar" stacked="1">
+                <field name="date" interval="month"/>
+                <field name="move_type"/>
+                <field name="duty_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_moowr_ledger_search" model="ir.ui.view">
+        <field name="name">moowr.ledger.search</field>
+        <field name="model">moowr.ledger</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="boe_id"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <filter name="in" string="Received / Produced" domain="[('direction', '=', 'in')]"/>
+                <filter name="out" string="Consumed / Removed" domain="[('direction', '=', 'out')]"/>
+                <separator/>
+                <filter name="receipt" string="Receipts" domain="[('move_type', '=', 'receipt')]"/>
+                <filter name="consumption" string="Consumption" domain="[('move_type', '=', 'consumption')]"/>
+                <filter name="home" string="Home Clearances" domain="[('move_type', '=', 'home')]"/>
+                <filter name="export" string="Exports" domain="[('move_type', '=', 'export')]"/>
+                <filter name="scrap" string="Scrap" domain="[('move_type', '=', 'scrap')]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_type" string="Movement" context="{'group_by': 'move_type'}"/>
+                    <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
+                    <filter name="group_boe" string="Bill of Entry" context="{'group_by': 'boe_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_ledger" model="ir.actions.act_window">
+        <field name="name">Bonded Register</field>
+        <field name="res_model">moowr.ledger</field>
+        <field name="view_mode">list,pivot,graph,form</field>
+        <field name="search_view_id" ref="view_moowr_ledger_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No bonded movements yet</p>
+            <p>Every receipt, consumption, production and removal in a bonded location is recorded here automatically.</p>
+        </field>
+    </record>
+
+    <record id="action_moowr_duty_ledger" model="ir.actions.act_window">
+        <field name="name">Duty Ledger</field>
+        <field name="res_model">moowr.ledger</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_moowr_ledger_search"/>
+    </record>
+</odoo>

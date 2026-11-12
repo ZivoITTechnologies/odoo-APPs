@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_location_form_moowr" model="ir.ui.view">
+        <field name="name">stock.location.form.moowr</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+            <field name="usage" position="after">
+                <field name="moowr_licence_id" invisible="usage not in ('internal', 'view', 'transit')"
+                       groups="zivoit_moowr.group_moowr_user" options="{'no_create': True}"/>
+                <field name="moowr_bonded" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_location_tree_moowr" model="ir.ui.view">
+        <field name="name">stock.location.list.moowr</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_tree2"/>
+        <field name="arch" type="xml">
+            <field name="usage" position="after">
+                <field name="moowr_licence_id" optional="show" groups="zivoit_moowr.group_moowr_user"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_picking_form_moowr" model="ir.ui.view">
+        <field name="name">stock.picking.form.moowr</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_moowr_clearances" type="object" class="oe_stat_button" icon="fa-university"
+                        invisible="moowr_clearance_count == 0" groups="zivoit_moowr.group_moowr_user">
+                    <field name="moowr_clearance_count" widget="statinfo" string="MOOWR"/>
+                </button>
+            </xpath>
+            <xpath expr="//group/field[@name='owner_id']" position="after">
+                <field name="moowr_is_bonded" invisible="1"/>
+                <field name="moowr_clearance_type" invisible="not moowr_is_bonded or picking_type_code == 'incoming'"
+                       readonly="state in ('done', 'cancel')"/>
+                <field name="moowr_document_number" invisible="not moowr_is_bonded or picking_type_code == 'incoming'"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids']/list/field[@name='description_picking']" position="after">
+                <field name="moowr_boe_line_id" optional="hide" groups="zivoit_moowr.group_moowr_user"
+                       column_invisible="parent.picking_type_code != 'incoming'"
+                       readonly="state in ('done', 'cancel')" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

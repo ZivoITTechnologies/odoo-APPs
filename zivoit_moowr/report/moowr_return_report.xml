@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_moowr_return_document">
+        <t t-call="web.external_layout">
+            <t t-set="d" t-value="o._get_return_data()"/>
+            <t t-set="cur" t-value="o.currency_id"/>
+            <div class="page" style="font-size: 9pt;">
+                <h4>MOOWR Monthly Return - <span t-out="o.name"/></h4>
+                <table class="table table-sm table-borderless" style="width: 100%; margin-bottom: 8px;">
+                    <tr>
+                        <td><strong>Licence (Section 58):</strong> <span t-out="o.licence_id.name"/></td>
+                        <td><strong>Section 65 permission:</strong> <span t-out="o.licence_id.permission_number or '-'"/></td>
+                        <td><strong>Customs station:</strong> <span t-out="o.licence_id.customs_station or '-'"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Period:</strong> <span t-out="o.date_from"/> to <span t-out="o.date_to"/></td>
+                        <td><strong>Due date:</strong> <span t-out="o.due_date"/></td>
+                        <td><strong>Bond officer:</strong> <span t-out="o.licence_id.bond_officer or '-'"/></td>
+                    </tr>
+                </table>
+
+                <h5>A. Goods received into the warehouse</h5>
+                <table class="table table-sm table-bordered">
+                    <thead><tr><th>Date</th><th>Bill of Entry</th><th>Supplier</th><th>Product</th><th class="text-end">Quantity</th><th class="text-end">Assessable Value</th><th class="text-end">Duty Deferred</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="d['receipts']" t-as="r">
+                            <td t-out="r['date']"/><td t-out="r['boe']"/><td t-out="r['supplier']"/><td t-out="r['product']"/>
+                            <td class="text-end"><span t-out="r['qty']" t-options="{'widget': 'float', 'precision': 2}"/> <span t-out="r['uom']"/></td>
+                            <td class="text-end" t-out="r['value']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                            <td class="text-end" t-out="r['duty']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                        </tr>
+                        <tr t-if="not d['receipts']"><td colspan="7" class="text-muted">No receipts in this period.</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>B. Manufacturing and other operations</h5>
+                <table class="table table-sm table-bordered">
+                    <thead><tr><th>Order</th><th>Movement</th><th>Product</th><th class="text-end">Quantity</th><th>Source</th><th class="text-end">Duty Content</th></tr></thead>
+                    <tbody>
+                        <t t-foreach="d['operations']" t-as="op">
+                            <tr t-foreach="op['outputs']" t-as="x" style="background-color: #EEF5FC;">
+                                <td t-out="op['reference']"/><td>Produced</td><td t-out="x['product']"/>
+                                <td class="text-end"><span t-out="x['qty']" t-options="{'widget': 'float', 'precision': 2}"/> <span t-out="x['uom']"/></td>
+                                <td t-out="x['source']"/><td class="text-end" t-out="x['duty']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                            </tr>
+                            <tr t-foreach="op['inputs']" t-as="x">
+                                <td t-out="op['reference']"/><td>Consumed</td><td t-out="x['product']"/>
+                                <td class="text-end"><span t-out="x['qty']" t-options="{'widget': 'float', 'precision': 2}"/> <span t-out="x['uom']"/></td>
+                                <td t-out="x['source']"/><td class="text-end" t-out="x['duty']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                            </tr>
+                        </t>
+                        <tr t-if="not d['operations']"><td colspan="6" class="text-muted">No operations in this period.</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>C. Goods removed from the warehouse</h5>
+                <table class="table table-sm table-bordered">
+                    <thead><tr><th>Date</th><th>Type</th><th>Document</th><th>Product</th><th class="text-end">Quantity</th><th>Source</th><th class="text-end">Duty</th><th class="text-end">Interest</th><th class="text-end">Payable</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="d['removals']" t-as="r">
+                            <td t-out="r['date']"/><td t-out="r['type']"/><td t-out="r['document']"/><td t-out="r['product']"/>
+                            <td class="text-end"><span t-out="r['qty']" t-options="{'widget': 'float', 'precision': 2}"/> <span t-out="r['uom']"/></td>
+                            <td t-out="r['source']"/>
+                            <td class="text-end" t-out="r['duty']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                            <td class="text-end" t-out="r['interest']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                            <td class="text-end" t-out="r['payable']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                        </tr>
+                        <tr t-if="not d['removals']"><td colspan="9" class="text-muted">No removals in this period.</td></tr>
+                    </tbody>
+                </table>
+
+                <h5>D. Stock balance in the warehouse</h5>
+                <table class="table table-sm table-bordered">
+                    <thead><tr><th>Goods</th><th>Source</th><th>Product</th><th class="text-end">Opening</th><th class="text-end">In</th><th class="text-end">Consumed</th><th class="text-end">Removed</th><th class="text-end">Closing</th><th class="text-end">Duty in Bond</th></tr></thead>
+                    <tbody>
+                        <tr t-foreach="d['balances']" t-as="b">
+                            <td t-out="b['kind']"/><td t-out="b['source']"/><td t-out="b['product']"/>
+                            <td class="text-end" t-out="b['opening']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            <td class="text-end" t-out="b['in']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            <td class="text-end" t-out="b['consumed']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            <td class="text-end" t-out="b['removed']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            <td class="text-end" t-out="b['closing']" t-options="{'widget': 'float', 'precision': 2}"/>
+                            <td class="text-end" t-out="b['duty_closing']" t-options="{'widget': 'monetary', 'display_currency': cur}"/>
+                        </tr>
+                        <tr t-if="not d['balances']"><td colspan="9" class="text-muted">No bonded stock.</td></tr>
+                    </tbody>
+                </table>
+                <p style="margin-top: 24px;">Certified that the above particulars are true and correct as per the records maintained under Regulation 17 of the Manufacture and Other Operations in Warehouse Regulations, 2019.</p>
+                <p style="margin-top: 36px;">Authorised signatory: ______________________ &#160;&#160;&#160; Date: ____________</p>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_moowr_return">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="zivoit_moowr.report_moowr_return_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

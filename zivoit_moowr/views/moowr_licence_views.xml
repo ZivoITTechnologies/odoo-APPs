@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_moowr_licence_kanban" model="ir.ui.view">
+        <field name="name">moowr.licence.kanban</field>
+        <field name="model">moowr.licence</field>
+        <field name="arch" type="xml">
+            <kanban class="o_moowr_dashboard" create="false">
+                <field name="currency_id"/>
+                <field name="validity_state"/>
+                <templates>
+                    <t t-name="card" class="p-0">
+                        <div class="o_moowr_card">
+                            <div class="o_moowr_card_head d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="o_moowr_eyebrow">MOOWR LICENCE</div>
+                                    <field name="name" class="o_moowr_title"/>
+                                    <div class="o_moowr_sub">
+                                        <field name="warehouse_id"/> <span t-if="record.customs_station.raw_value"> | Port <field name="customs_station"/></span>
+                                    </div>
+                                </div>
+                                <field name="validity_state" widget="badge"
+                                       decoration-success="validity_state in ('valid', 'open')"
+                                       decoration-warning="validity_state == 'expiring'"
+                                       decoration-danger="validity_state == 'expired'"/>
+                            </div>
+                            <div class="o_moowr_kpis">
+                                <a class="o_moowr_kpi o_moowr_kpi_main" name="action_open_stock" type="object">
+                                    <span>Duty deferred in bond</span>
+                                    <div class="o_moowr_val"><field name="duty_in_bond" widget="monetary"/></div>
+                                    <small>Assessable value <field name="value_in_bond" widget="monetary"/></small>
+                                </a>
+                                <a class="o_moowr_kpi" name="action_open_open_boes" type="object">
+                                    <span>Bills of entry in bond</span>
+                                    <div class="o_moowr_val"><field name="open_boe_count"/></div>
+                                </a>
+                                <a class="o_moowr_kpi" name="action_open_pending_clearances" type="object">
+                                    <span>Clearances to file or pay</span>
+                                    <div class="o_moowr_val"><field name="pending_clearance_count"/></div>
+                                    <small>Payable <field name="pending_duty" widget="monetary"/></small>
+                                </a>
+                                <a class="o_moowr_kpi" name="action_open_aged" type="object">
+                                    <span>Inputs past interest-free period</span>
+                                    <div class="o_moowr_val"><field name="aged_line_count"/></div>
+                                </a>
+                                <a class="o_moowr_kpi" name="action_open_returns" type="object">
+                                    <span>Next monthly return due</span>
+                                    <div class="o_moowr_val"><field name="next_return_due"/></div>
+                                    <small><field name="open_return_count"/> not submitted</small>
+                                </a>
+                                <a class="o_moowr_kpi" name="action_open_clearances" type="object">
+                                    <span>Duty paid this month</span>
+                                    <div class="o_moowr_val"><field name="duty_paid_month" widget="monetary"/></div>
+                                </a>
+                            </div>
+                            <div class="o_moowr_actions">
+                                <a role="button" class="btn btn-primary btn-sm" name="action_open_boes" type="object">Bills of Entry</a>
+                                <a role="button" class="btn btn-secondary btn-sm" name="action_open_ledger" type="object">Bonded Register</a>
+                                <a role="button" class="btn btn-secondary btn-sm" name="action_open_batches" type="object">Production Batches</a>
+                                <a role="button" class="btn btn-secondary btn-sm" name="action_create_last_return" type="object">Last Month's Return</a>
+                            </div>
+                            <field name="customs_station" invisible="1"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_moowr_licence_list" model="ir.ui.view">
+        <field name="name">moowr.licence.list</field>
+        <field name="model">moowr.licence</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="permission_number"/>
+                <field name="warehouse_id"/>
+                <field name="customs_station"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="validity_state" widget="badge" decoration-success="validity_state in ('valid', 'open')"
+                       decoration-warning="validity_state == 'expiring'" decoration-danger="validity_state == 'expired'"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_licence_form" model="ir.ui.view">
+        <field name="name">moowr.licence.form</field>
+        <field name="model">moowr.licence</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_create_last_return" type="object" string="Prepare Last Month's Return" class="btn-primary"/>
+                    <button name="action_assign_warehouse_locations" type="object" string="Mark Warehouse Stock as Bonded"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_boes" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="open_boe_count" widget="statinfo" string="BoEs in Bond"/>
+                        </button>
+                        <button name="action_open_stock" type="object" class="oe_stat_button" icon="fa-cubes">
+                            <field name="duty_in_bond" widget="statinfo" string="Duty in Bond"/>
+                        </button>
+                        <button name="action_open_pending_clearances" type="object" class="oe_stat_button" icon="fa-truck">
+                            <field name="pending_clearance_count" widget="statinfo" string="Clearances Pending"/>
+                        </button>
+                        <button name="action_open_returns" type="object" class="oe_stat_button" icon="fa-calendar">
+                            <field name="open_return_count" widget="statinfo" string="Returns Open"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. HYD/MOOWR/2026/014"/></h1>
+                    </div>
+                    <group>
+                        <group string="Licence">
+                            <field name="permission_number"/>
+                            <field name="warehouse_id"/>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                            <field name="validity_state" widget="badge" decoration-success="validity_state in ('valid', 'open')"
+                                   decoration-warning="validity_state == 'expiring'" decoration-danger="validity_state == 'expired'"/>
+                            <field name="responsible_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Customs">
+                            <field name="customs_station"/>
+                            <field name="jurisdiction"/>
+                            <field name="bond_officer"/>
+                            <field name="bond_number"/>
+                            <field name="bond_amount"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bonded Locations" name="locations">
+                            <field name="location_ids" readonly="1">
+                                <list>
+                                    <field name="complete_name"/>
+                                    <field name="usage"/>
+                                </list>
+                            </field>
+                            <p class="text-muted">Set the MOOWR licence on any internal location (Inventory &gt; Configuration &gt; Locations) to make it and its sub-locations bonded.</p>
+                        </page>
+                        <page string="Duty &amp; Compliance Rules" name="rules">
+                            <group>
+                                <group>
+                                    <field name="defer_igst"/>
+                                    <field name="require_boe"/>
+                                    <field name="return_due_day"/>
+                                </group>
+                                <group>
+                                    <field name="interest_free_days"/>
+                                    <field name="interest_rate"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_moowr_licence_search" model="ir.ui.view">
+        <field name="name">moowr.licence.search</field>
+        <field name="model">moowr.licence</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="warehouse_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_dashboard" model="ir.actions.act_window">
+        <field name="name">Overview</field>
+        <field name="res_model">moowr.licence</field>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_moowr_licence_kanban"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first MOOWR licence</p>
+            <p>Go to Configuration &gt; Licences, enter the Section 58 licence and Section 65 permission, and choose the bonded warehouse.</p>
+        </field>
+    </record>
+
+    <record id="action_moowr_licence" model="ir.actions.act_window">
+        <field name="name">Licences</field>
+        <field name="res_model">moowr.licence</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('view_moowr_licence_list')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_moowr_licence_form')})]"/>
+    </record>
+</odoo>

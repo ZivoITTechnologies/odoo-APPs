@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_moowr_clearance_list" model="ir.ui.view">
+        <field name="name">moowr.clearance.list</field>
+        <field name="model">moowr.clearance</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="clearance_type" widget="badge"/>
+                <field name="partner_id"/>
+                <field name="picking_id" optional="show"/>
+                <field name="document_number"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount_value" sum="Total" optional="show"/>
+                <field name="amount_duty" sum="Total" optional="show"/>
+                <field name="amount_interest" sum="Total" optional="hide"/>
+                <field name="amount_payable" sum="Total"/>
+                <field name="duty_forgone" sum="Total" optional="show"/>
+                <field name="state" widget="badge" decoration-warning="state in ('draft', 'filed')" decoration-success="state in ('paid', 'done')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_moowr_clearance_form" model="ir.ui.view">
+        <field name="name">moowr.clearance.form</field>
+        <field name="model">moowr.clearance</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <header>
+                    <button name="action_file" type="object" string="Mark as Filed" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_mark_paid" type="object" string="Mark Duty Paid" class="btn-primary" invisible="state != 'filed'"/>
+                    <button name="action_mark_destroyed" type="object" string="Destroyed under Supervision" invisible="clearance_type != 'scrap' or state not in ('draft', 'filed')"/>
+                    <button name="action_print" type="object" string="Print"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft" invisible="state != 'filed'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,filed,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <field name="clearance_type" widget="badge"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="licence_id" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="picking_id" readonly="1"/>
+                            <field name="production_id" readonly="1" invisible="not production_id"/>
+                        </group>
+                        <group>
+                            <field name="document_number" readonly="state not in ('draft',)"/>
+                            <field name="document_date" readonly="state not in ('draft',)"/>
+                            <field name="payment_reference" invisible="clearance_type not in ('home', 'scrap')" readonly="state in ('paid', 'done')"/>
+                            <field name="payment_date" invisible="clearance_type not in ('home', 'scrap')" readonly="state in ('paid', 'done')"/>
+                            <field name="destroyed" invisible="clearance_type != 'scrap'" readonly="1"/>
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Goods Removed" name="goods">
+                            <field name="ledger_ids" readonly="1">
+                                <list>
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="boe_id"/>
+                                    <field name="batch_id"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="value"/>
+                                    <field name="bcd_amount" optional="show"/>
+                                    <field name="sws_amount" optional="show"/>
+                                    <field name="igst_amount" optional="show"/>
+                                    <field name="duty_amount"/>
+                                    <field name="interest_days" optional="show"/>
+                                    <field name="interest_amount" optional="show"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer">
+                                <field name="amount_value"/>
+                                <field name="amount_bcd"/>
+                                <field name="amount_sws"/>
+                                <field name="amount_igst"/>
+                                <field name="amount_duty"/>
+                                <field name="amount_interest"/>
+                                <field name="amount_payable" class="oe_subtotal_footer_separator"/>
+                                <field name="duty_forgone"/>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_moowr_clearance_search" model="ir.ui.view">
+        <field name="name">moowr.clearance.search</field>
+        <field name="model">moowr.clearance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="document_number"/>
+                <filter name="to_file" string="To File" domain="[('state', '=', 'draft')]"/>
+                <filter name="to_pay" string="Duty to Pay" domain="[('state', '=', 'filed')]"/>
+                <separator/>
+                <filter name="home" string="Home Consumption" domain="[('clearance_type', '=', 'home')]"/>
+                <filter name="export" string="Export" domain="[('clearance_type', '=', 'export')]"/>
+                <filter name="scrap" string="Scrap" domain="[('clearance_type', '=', 'scrap')]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'clearance_type'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_moowr_clearance" model="ir.actions.act_window">
+        <field name="name">Clearances</field>
+        <field name="res_model">moowr.clearance</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_moowr_clearance_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No removals from bond yet</p>
+            <p>Clearances are created automatically when goods leave a bonded location: deliveries, exports, scrap and supplier returns. Duty and interest are calculated for you.</p>
+        </field>
+    </record>
+</odoo>
