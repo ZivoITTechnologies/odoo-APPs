@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="pwa_app" name="ZivoIT Field Tracker (offline app)">
+        <html lang="en">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+                <meta name="theme-color" content="#0b1f3a"/>
+                <meta name="mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-capable" content="yes"/>
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+                <title>ZivoIT Field Tracker</title>
+                <link rel="manifest" href="/zivoit_tracking/manifest.webmanifest"/>
+                <link rel="icon" href="/zivoit_field_tracking/static/app/icons/icon-192.png"/>
+                <link rel="apple-touch-icon" href="/zivoit_field_tracking/static/app/icons/icon-192.png"/>
+                <link rel="stylesheet" href="/zivoit_field_tracking/static/app/app.css"/>
+            </head>
+            <body t-att-data-boot="boot_json">
+                <header class="zv-top">
+                    <img class="zv-logo" src="/zivoit_field_tracking/static/app/icons/icon-192.png" alt=""/>
+                    <div class="zv-title">
+                        <div class="zv-app">Field Tracker</div>
+                        <div class="zv-user" id="zv-user"><t t-out="user.name"/></div>
+                    </div>
+                    <span class="zv-pill" id="zv-net">…</span>
+                </header>
+
+                <main>
+                    <section class="zv-card zv-hero" id="zv-hero">
+                        <div class="zv-hero-state" id="zv-state">Day not started</div>
+                        <div class="zv-hero-sub" id="zv-state-sub">Tap Start Day to begin tracking. Works without network.</div>
+                        <button class="zv-btn zv-btn-start" id="zv-toggle" type="button">Start Day</button>
+                    </section>
+
+                    <section class="zv-grid">
+                        <div class="zv-stat"><div class="zv-num" id="zv-km">0.0</div><div class="zv-lbl">km today</div></div>
+                        <div class="zv-stat"><div class="zv-num" id="zv-count">0</div><div class="zv-lbl">points today</div></div>
+                        <div class="zv-stat zv-stat-warn"><div class="zv-num" id="zv-pending">0</div><div class="zv-lbl">waiting upload</div></div>
+                        <div class="zv-stat"><div class="zv-num" id="zv-acc">–</div><div class="zv-lbl">GPS accuracy</div></div>
+                    </section>
+
+                    <section class="zv-card">
+                        <div class="zv-row"><span>Last GPS fix</span><b id="zv-lastfix">–</b></div>
+                        <div class="zv-row"><span>Last upload</span><b id="zv-lastsync">–</b></div>
+                        <div class="zv-row"><span>Battery</span><b id="zv-batt">–</b></div>
+                        <div class="zv-row"><span>Keep screen on</span>
+                            <label class="zv-switch"><input type="checkbox" id="zv-wake" checked="checked"/><span></span></label></div>
+                        <button class="zv-btn zv-btn-ghost" id="zv-sync" type="button">Upload now</button>
+                    </section>
+
+                    <section class="zv-card" id="zv-visit-card">
+                        <div class="zv-card-title">Customer visit</div>
+                        <div id="zv-active-visit" class="zv-active-visit" hidden="hidden">
+                            <div class="zv-av-name" id="zv-av-name"></div>
+                            <div class="zv-av-time" id="zv-av-time"></div>
+                            <select id="zv-outcome" class="zv-input">
+                                <option value="">Outcome…</option>
+                                <option value="order">Order Taken</option>
+                                <option value="follow_up">Follow-up Needed</option>
+                                <option value="collection">Payment Collected</option>
+                                <option value="demo">Demo / Presentation</option>
+                                <option value="no_interest">Not Interested</option>
+                                <option value="closed">Shop Closed</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <textarea id="zv-note" class="zv-input" rows="2" placeholder="Notes"></textarea>
+                            <button class="zv-btn zv-btn-out" id="zv-checkout" type="button">Check Out</button>
+                        </div>
+                        <div id="zv-customer-picker">
+                            <input id="zv-search" class="zv-input" type="search" placeholder="Search customer to check in…"/>
+                            <ul class="zv-list" id="zv-customers"></ul>
+                            <div class="zv-muted" id="zv-cust-info"></div>
+                        </div>
+                    </section>
+
+                    <div class="zv-note" id="zv-hint">
+                        Keep this app open while you work. Phones pause GPS for web apps when the screen is locked -
+                        for locked-screen tracking ask your manager for the Traccar Client setup.
+                    </div>
+                    <div class="zv-foot">ZivoIT Technologies · <span id="zv-ver"></span></div>
+                </main>
+                <div class="zv-toast" id="zv-toast" hidden="hidden"></div>
+                <script src="/zivoit_field_tracking/static/app/app.js"></script>
+            </body>
+        </html>
+    </template>
+
+    <template id="pwa_not_allowed" name="ZivoIT Field Tracker - not allowed">
+        <html lang="en">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <title>Field Tracker</title>
+                <link rel="stylesheet" href="/zivoit_field_tracking/static/app/app.css"/>
+            </head>
+            <body>
+                <main>
+                    <section class="zv-card zv-hero">
+                        <div class="zv-hero-state">Tracking not enabled</div>
+                        <div class="zv-hero-sub">Hello <t t-out="user.name"/>, your user has no
+                            "Field Tracking" access. Please ask your Odoo administrator to enable it.</div>
+                        <a class="zv-btn zv-btn-ghost" href="/odoo">Back to Odoo</a>
+                    </section>
+                </main>
+            </body>
+        </html>
+    </template>
+</odoo>

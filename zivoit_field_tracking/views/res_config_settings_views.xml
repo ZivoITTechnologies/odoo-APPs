@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_zivo_tracking" model="ir.ui.view">
+        <field name="name">res.config.settings.form.zivo.tracking</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="90"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Field Tracking" string="Field Tracking" name="zivoit_field_tracking"
+                     groups="zivoit_field_tracking.group_field_manager">
+                    <block title="GPS Capture on the Phone" name="zivo_capture">
+                        <setting string="GPS Interval" help="Record a point at most every N seconds while moving.">
+                            <field name="zivo_interval_sec" class="text-center" style="width: 8ch;"/> <span>seconds</span>
+                        </setting>
+                        <setting string="Minimum Movement" help="Skip a point when the salesperson moved less than this.">
+                            <field name="zivo_min_distance_m" class="text-center" style="width: 8ch;"/> <span>metres</span>
+                        </setting>
+                        <setting string="Accuracy Limit" help="Fixes less accurate than this are kept but excluded from distance and stops.">
+                            <field name="zivo_max_accuracy_m" class="text-center" style="width: 8ch;"/> <span>metres</span>
+                        </setting>
+                        <setting string="GPS Spike Filter" help="Ignore jumps that would require a speed above this.">
+                            <field name="zivo_max_speed_kmh" class="text-center" style="width: 8ch;"/> <span>km/h</span>
+                        </setting>
+                    </block>
+                    <block title="Offline &amp; Live Status" name="zivo_status">
+                        <setting string="Offline Detection" help="A point reaching Odoo later than this is flagged 'Captured Offline'.">
+                            <field name="zivo_offline_threshold_min" class="text-center" style="width: 8ch;"/> <span>minutes</span>
+                        </setting>
+                        <setting string="Live Map Status" help="Last GPS fix younger than 'Live' is green, younger than 'Delayed' is amber, older is 'No signal'.">
+                            <div><span class="me-2">Live within</span><field name="zivo_live_minutes" class="text-center" style="width: 6ch;"/><span class="ms-1">min</span></div>
+                            <div><span class="me-2">Delayed within</span><field name="zivo_delayed_minutes" class="text-center" style="width: 6ch;"/><span class="ms-1">min</span></div>
+                        </setting>
+                    </block>
+                    <block title="Customer Visits &amp; Stops" name="zivo_visits">
+                        <setting string="Geo-fence Radius" help="A check-in further than this from the customer's location is flagged.">
+                            <field name="zivo_geofence_radius_m" class="text-center" style="width: 8ch;"/> <span>metres</span>
+                        </setting>
+                        <setting string="Learn Customer Location" help="When a customer has no GPS location yet, use the first accurate check-in.">
+                            <field name="zivo_learn_customer_location"/>
+                        </setting>
+                        <setting string="Stop Detection" help="Stay within the radius for at least the duration to count as a stop.">
+                            <div><field name="zivo_stop_radius_m" class="text-center" style="width: 6ch;"/><span class="ms-1">m for</span>
+                                 <field name="zivo_stop_minutes" class="text-center" style="width: 6ch;"/><span class="ms-1">min</span></div>
+                        </setting>
+                    </block>
+                    <block title="Map &amp; Data" name="zivo_map">
+                        <setting string="Map Tiles" help="Any XYZ tile server (OpenStreetMap, MapTiler, your own). Leave the default for OpenStreetMap.">
+                            <field name="zivo_tile_url" class="w-100"/>
+                            <field name="zivo_tile_attribution" class="w-100"/>
+                        </setting>
+                        <setting string="Data Retention" help="Location points older than this are deleted every night (0 = keep forever).">
+                            <field name="zivo_retention_days" class="text-center" style="width: 8ch;"/> <span>days</span>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="zivo_track_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'zivoit_field_tracking', 'bin_size': False}</field>
+    </record>
+</odoo>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_track_device_view_list" model="ir.ui.view">
+        <field name="name">zivo.track.device.list</field>
+        <field name="model">zivo.track.device</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="mock_detected">
+                <field name="name"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="source"/>
+                <field name="last_seen"/>
+                <field name="last_fix_time"/>
+                <field name="last_battery"/>
+                <field name="mock_detected"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_track_device_view_form" model="ir.ui.view">
+        <field name="name">zivo.track.device.form</field>
+        <field name="model">zivo.track.device</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_regenerate_token" type="object" string="New Identifier"
+                            confirm="The phone will stop syncing until the new identifier is entered on it. Continue?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_points" type="object" class="oe_stat_button" icon="fa-map-marker">
+                            <field name="point_count" widget="statinfo" string="Points"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon" title="Mock GPS seen" bg_color="text-bg-warning" invisible="not mock_detected or not active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Device">
+                            <field name="user_id"/>
+                            <field name="source"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="user_agent"/>
+                        </group>
+                        <group string="Last Known">
+                            <field name="last_seen"/>
+                            <field name="last_fix_time"/>
+                            <field name="last_latitude"/>
+                            <field name="last_longitude"/>
+                            <field name="last_battery"/>
+                            <field name="mock_detected"/>
+                        </group>
+                    </group>
+                    <group string="Phone Setup" name="setup">
+                        <field name="token" readonly="1" widget="CopyClipboardChar"/>
+                        <field name="traccar_url" widget="CopyClipboardChar"/>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="source == 'pwa'">
+                        <h5><i class="fa fa-mobile"/> Background tracking with Traccar Client (free, Android / iOS)</h5>
+                        <ol class="mb-0">
+                            <li>Install <b>Traccar Client</b> from Google Play / App Store.</li>
+                            <li>Settings: <b>Device identifier</b> = the identifier above, <b>Server URL</b> = the Traccar / OsmAnd Server URL above.</li>
+                            <li>Keep <b>Offline buffering</b> ON (default). Allow location "All the time" and disable battery optimisation for the app.</li>
+                            <li>Switch <b>Continuous tracking</b> on. Positions recorded without signal are uploaded automatically when the network returns.</li>
+                        </ol>
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="source != 'pwa'">
+                        <h5><i class="fa fa-wifi"/> Offline web app</h5>
+                        Open <b>/zivoit_tracking/app</b> on the phone once while online (logged in), then use
+                        "Add to Home screen". After that it opens and records GPS without any network.
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_track_device_action" model="ir.actions.act_window">
+        <field name="name">Tracking Devices</field>
+        <field name="res_model">zivo.track.device</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_source': 'traccar'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Register a phone</p>
+            <p>The offline web app registers itself automatically. Create a device here to connect
+               Traccar Client / OsmAnd for background tracking with the screen locked.</p>
+        </field>
+    </record>
+</odoo>

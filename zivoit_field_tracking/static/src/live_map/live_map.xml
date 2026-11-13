@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="zivoit_field_tracking.LiveMap">
+        <div class="o_action zv-live">
+            <div class="zv-live-bar">
+                <div class="zv-live-brand">
+                    <i class="fa fa-map-marker me-2"/>
+                    <span t-if="state.mode === 'live'">Live Field Map</span>
+                    <span t-else="">Route Replay · <t t-esc="state.route.session.name"/></span>
+                </div>
+                <t t-if="state.mode === 'live'">
+                    <div class="zv-chips">
+                        <button t-attf-class="zv-chip #{state.filter === 'all' ? 'active' : ''}" t-on-click="() => this.setFilter('all')">
+                            All <b t-esc="counts.all"/>
+                        </button>
+                        <t t-foreach="['live', 'delayed', 'nosignal', 'ended', 'notstarted']" t-as="st" t-key="st">
+                            <button t-attf-class="zv-chip #{state.filter === st ? 'active' : ''}" t-on-click="() => this.setFilter(st)">
+                                <span class="zv-dot" t-attf-style="background: #{STATUS[st].color}"/>
+                                <t t-esc="STATUS[st].label"/> <b t-esc="counts[st]"/>
+                            </button>
+                        </t>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="zv-chips">
+                        <span class="zv-kpi"><b t-esc="state.route.session.distance_km.toFixed(1)"/> km</span>
+                        <span class="zv-kpi"><b t-esc="state.route.session.point_count"/> points</span>
+                        <span class="zv-kpi zv-kpi-off"><b t-esc="state.route.session.offline_point_count"/> captured offline</span>
+                        <span class="zv-kpi"><b t-esc="state.route.stops.length"/> stops</span>
+                        <span class="zv-kpi"><b t-esc="state.route.visits.length"/> visits</span>
+                    </div>
+                </t>
+                <div class="zv-live-actions">
+                    <t t-if="state.mode === 'route'">
+                        <button class="btn btn-secondary btn-sm" t-on-click="openSession"><i class="fa fa-list"/> Day Log</button>
+                        <button class="btn btn-primary btn-sm" t-on-click="backToLive"><i class="fa fa-arrow-left"/> Live Map</button>
+                    </t>
+                    <t t-else="">
+                        <button class="btn btn-secondary btn-sm" t-on-click="refresh" title="Refresh"><i class="fa fa-refresh"/></button>
+                    </t>
+                </div>
+            </div>
+            <div class="zv-live-body">
+                <aside class="zv-side">
+                    <t t-if="state.mode === 'live'">
+                        <input class="form-control form-control-sm mb-2" type="search" placeholder="Search salesperson…" t-on-input="onSearch"/>
+                        <div class="zv-side-list">
+                            <t t-foreach="visibleUsers" t-as="u" t-key="u.user_id">
+                                <div t-attf-class="zv-user-row #{state.selectedUser === u.user_id ? 'selected' : ''}" t-on-click="() => this.focusUser(u)">
+                                    <div class="zv-user-top">
+                                        <span class="zv-dot" t-attf-style="background: #{STATUS[u.status].color}"/>
+                                        <span class="zv-user-name" t-esc="u.name"/>
+                                        <span class="zv-user-badge" t-attf-style="color: #{STATUS[u.status].color}" t-esc="STATUS[u.status].label"/>
+                                    </div>
+                                    <div class="zv-user-meta">
+                                        <span t-if="u.fix_time"><i class="fa fa-clock-o"/> <t t-esc="ago(u.fix_time)"/></span>
+                                        <span><i class="fa fa-road"/> <t t-esc="u.distance_km.toFixed(1)"/> km</span>
+                                        <span t-if="u.battery"><i class="fa fa-battery-half"/> <t t-esc="Math.round(u.battery)"/>%</span>
+                                        <span t-if="u.visit_count"><i class="fa fa-briefcase"/> <t t-esc="u.visit_count"/></span>
+                                    </div>
+                                    <div class="zv-user-meta" t-if="u.offline_points">
+                                        <span class="zv-off"><i class="fa fa-cloud-upload"/> <t t-esc="u.offline_points"/> points synced after no-signal</span>
+                                    </div>
+                                    <div class="zv-user-meta" t-if="u.is_mock"><span class="text-danger"><i class="fa fa-warning"/> Mock GPS</span></div>
+                                    <button class="btn btn-link btn-sm p-0 zv-route-btn" t-if="u.session_id" t-on-click.stop="() => this.openTodayRoute(u)">
+                                        <i class="fa fa-map"/> Today's route
+                                    </button>
+                                </div>
+                            </t>
+                            <div t-if="!visibleUsers.length" class="text-muted small p-2">
+                                No salesperson to show. Give users the "Field Tracking: Salesperson" access right.
+                            </div>
+                        </div>
+                        <div class="zv-side-route">
+                            <div class="fw-bold small mb-1">Replay a day</div>
+                            <select class="form-select form-select-sm mb-1" t-model="state.routeUserId">
+                                <t t-foreach="state.users" t-as="u" t-key="u.user_id">
+                                    <option t-att-value="u.user_id" t-esc="u.name"/>
+                                </t>
+                            </select>
+                            <input type="date" class="form-control form-control-sm mb-1" t-model="state.routeDate"/>
+                            <button class="btn btn-primary btn-sm w-100" t-on-click="loadRouteByDate"><i class="fa fa-play"/> Show route</button>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="zv-legend">
+                            <div><span class="zv-line zv-line-on"/> Uploaded live</div>
+                            <div><span class="zv-line zv-line-off"/> Recorded with no signal, synced later</div>
+                            <div><span class="zv-dot" style="background:#b197fc"/> Stop</div>
+                            <div><span class="zv-dot" style="background:#12a150"/> Visit inside geo-fence</div>
+                            <div><span class="zv-dot" style="background:#d6336c"/> Visit outside geo-fence</div>
+                        </div>
+                        <div class="zv-replay" t-if="state.route.points.length">
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-primary btn-sm" t-on-click="toggleReplay">
+                                    <i t-attf-class="fa #{state.playing ? 'fa-pause' : 'fa-play'}"/>
+                                </button>
+                                <input type="range" class="form-range" min="0" t-att-max="state.route.points.length - 1"
+                                       t-att-value="state.replayIndex" t-on-input="onReplayInput"/>
+                            </div>
+                            <div class="small mt-1" t-if="replayPoint">
+                                <b t-esc="formatTime(replayPoint.time)"/>
+                                <span t-if="replayPoint.offline" class="zv-off"> · offline (+<t t-esc="Math.round(replayPoint.delay)"/> min)</span>
+                                <span t-if="replayPoint.accuracy"> · ±<t t-esc="Math.round(replayPoint.accuracy)"/> m</span>
+                            </div>
+                        </div>
+                        <div class="zv-visits" t-if="state.route.visits.length">
+                            <div class="fw-bold small mb-1">Visits</div>
+                            <t t-foreach="state.route.visits" t-as="v" t-key="v.id">
+                                <div class="zv-visit-row">
+                                    <span t-attf-class="zv-dot #{v.within_geofence ? 'bg-success' : 'bg-danger'}"/>
+                                    <span t-esc="v.partner"/>
+                                    <span class="text-muted ms-auto" t-esc="formatTime(v.check_in)"/>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <div class="alert alert-warning small mt-2 mb-0 py-1" t-if="state.message" t-esc="state.message"/>
+                </aside>
+                <div class="zv-map-wrap">
+                    <div class="zv-map" t-ref="map"/>
+                    <div class="zv-tiles-off" t-if="state.tilesFailed">
+                        <i class="fa fa-info-circle"/> Map tiles unavailable – positions and routes are still shown.
+                        Set another tile server in Field Tracking › Settings.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

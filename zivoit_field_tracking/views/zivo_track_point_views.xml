@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_track_point_view_list" model="ir.ui.view">
+        <field name="name">zivo.track.point.list</field>
+        <field name="model">zivo.track.point</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-warning="captured_offline" decoration-danger="is_mock" decoration-muted="low_accuracy">
+                <field name="fix_time"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+                <field name="accuracy" optional="show"/>
+                <field name="speed_kmh" optional="show"/>
+                <field name="battery" optional="show"/>
+                <field name="received_time" optional="show"/>
+                <field name="delay_minutes" optional="show"/>
+                <field name="captured_offline" widget="boolean_toggle" readonly="1"/>
+                <field name="is_mock" optional="hide"/>
+                <field name="source" optional="hide"/>
+                <field name="session_id" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_track_point_view_form" model="ir.ui.view">
+        <field name="name">zivo.track.point.form</field>
+        <field name="model">zivo.track.point</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <sheet>
+                    <div class="oe_title"><h1><field name="fix_time"/></h1></div>
+                    <group>
+                        <group string="Position">
+                            <field name="user_id"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="accuracy"/>
+                            <field name="altitude"/>
+                            <field name="speed_kmh"/>
+                            <field name="heading"/>
+                        </group>
+                        <group string="Sync">
+                            <field name="received_time"/>
+                            <field name="delay_minutes"/>
+                            <field name="captured_offline"/>
+                            <field name="device_id"/>
+                            <field name="source"/>
+                            <field name="session_id"/>
+                            <field name="battery"/>
+                            <field name="is_charging"/>
+                            <field name="is_mock"/>
+                            <field name="low_accuracy"/>
+                            <field name="event"/>
+                            <field name="client_uid" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_track_point_view_search" model="ir.ui.view">
+        <field name="name">zivo.track.point.search</field>
+        <field name="model">zivo.track.point</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <field name="device_id"/>
+                <field name="session_id"/>
+                <filter name="today" string="Today" domain="[('fix_time', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="offline" string="Captured Offline" domain="[('captured_offline', '=', True)]"/>
+                <filter name="mock" string="Mock Location" domain="[('is_mock', '=', True)]"/>
+                <filter name="low_acc" string="Low Accuracy" domain="[('low_accuracy', '=', True)]"/>
+                <separator/>
+                <filter name="fix_time" string="GPS Date" date="fix_time"/>
+                <group>
+                    <filter name="group_user" string="Salesperson" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_day" string="Day" context="{'group_by': 'fix_time:day'}"/>
+                    <filter name="group_source" string="Source" context="{'group_by': 'source'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zivo_track_point_view_pivot" model="ir.ui.view">
+        <field name="name">zivo.track.point.pivot</field>
+        <field name="model">zivo.track.point</field>
+        <field name="arch" type="xml">
+            <pivot string="Location Points">
+                <field name="user_id" type="row"/>
+                <field name="fix_time" interval="day" type="col"/>
+                <field name="captured_offline" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="zivo_track_point_view_graph" model="ir.ui.view">
+        <field name="name">zivo.track.point.graph</field>
+        <field name="model">zivo.track.point</field>
+        <field name="arch" type="xml">
+            <graph string="Location Points" type="bar" stacked="1">
+                <field name="fix_time" interval="day"/>
+                <field name="captured_offline"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="zivo_track_point_action" model="ir.actions.act_window">
+        <field name="name">Location Points</field>
+        <field name="res_model">zivo.track.point</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No location received yet</p>
+            <p>Open <b>/zivoit_tracking/app</b> on the salesperson's phone or connect Traccar Client.
+               Points recorded without network appear here (orange) as soon as the phone is back online.</p>
+        </field>
+    </record>
+</odoo>

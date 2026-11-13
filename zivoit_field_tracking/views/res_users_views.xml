@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_zivo_tracking" model="ir.ui.view">
+        <field name="name">res.users.form.zivo.tracking</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Field Tracking" name="zivo_field_tracking" groups="zivoit_field_tracking.group_field_manager">
+                    <group>
+                        <field name="zivo_tracking_enabled"/>
+                    </group>
+                    <p class="text-muted" invisible="zivo_tracking_enabled">
+                        Give this user the "Field Tracking: Salesperson" access right to enable tracking.
+                    </p>
+                    <field name="zivo_device_ids" context="{'default_user_id': id, 'default_source': 'traccar'}">
+                        <list>
+                            <field name="name"/>
+                            <field name="source"/>
+                            <field name="last_seen"/>
+                            <field name="last_battery"/>
+                            <field name="mock_detected"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

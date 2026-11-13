@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_track_live_map_action" model="ir.actions.client">
+        <field name="name">Live Map</field>
+        <field name="tag">zivo_track_live_map</field>
+    </record>
+
+    <record id="zivo_track_open_app_action" model="ir.actions.act_url">
+        <field name="name">Open Field App</field>
+        <field name="url">/zivoit_tracking/app</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_root" name="Field Tracking" sequence="34"
+              web_icon="zivoit_field_tracking,static/description/icon.png"
+              groups="zivoit_field_tracking.group_field_user"/>
+
+    <menuitem id="menu_live_map" name="Live Map" parent="menu_root" sequence="1" action="zivo_track_live_map_action"/>
+    <menuitem id="menu_field_app" name="Field App (Phone)" parent="menu_root" sequence="2" action="zivo_track_open_app_action"/>
+
+    <menuitem id="menu_activity" name="Activity" parent="menu_root" sequence="10"/>
+    <menuitem id="menu_sessions" name="Day Logs" parent="menu_activity" sequence="1" action="zivo_track_session_action"/>
+    <menuitem id="menu_visits" name="Customer Visits" parent="menu_activity" sequence="2" action="zivo_track_visit_action"/>
+    <menuitem id="menu_points" name="Location Points" parent="menu_activity" sequence="3" action="zivo_track_point_action"/>
+
+    <menuitem id="menu_config" name="Configuration" parent="menu_root" sequence="90"
+              groups="zivoit_field_tracking.group_field_manager"/>
+    <menuitem id="menu_settings" name="Settings" parent="menu_config" sequence="1" action="zivo_track_settings_action"/>
+    <menuitem id="menu_devices" name="Tracking Devices" parent="menu_config" sequence="2" action="zivo_track_device_action"/>
+</odoo>

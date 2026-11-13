@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_point_user,zivo.track.point user,model_zivo_track_point,group_field_user,1,0,0,0
+access_point_manager,zivo.track.point manager,model_zivo_track_point,group_field_manager,1,1,1,1
+access_session_user,zivo.track.session user,model_zivo_track_session,group_field_user,1,1,0,0
+access_session_manager,zivo.track.session manager,model_zivo_track_session,group_field_manager,1,1,1,1
+access_visit_user,zivo.track.visit user,model_zivo_track_visit,group_field_user,1,1,1,0
+access_visit_manager,zivo.track.visit manager,model_zivo_track_visit,group_field_manager,1,1,1,1
+access_device_user,zivo.track.device user,model_zivo_track_device,group_field_user,1,1,1,0
+access_device_manager,zivo.track.device manager,model_zivo_track_device,group_field_manager,1,1,1,1

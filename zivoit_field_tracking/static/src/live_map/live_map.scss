@@ -1,0 +1,128 @@
+.zv-live {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f2f5fa;
+
+    .zv-live-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 10px 16px;
+        background: #0b1f3a;
+        color: #fff;
+    }
+    .zv-live-brand { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
+    .zv-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .zv-chip {
+        border: 0;
+        background: rgba(255, 255, 255, .1);
+        color: #fff;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: .85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        &.active { background: #1f6feb; }
+        b { font-weight: 800; }
+    }
+    .zv-kpi {
+        background: rgba(255, 255, 255, .1);
+        border-radius: 8px;
+        padding: 4px 10px;
+        font-size: .85rem;
+        &.zv-kpi-off { background: rgba(240, 140, 0, .3); }
+    }
+    .zv-live-actions { display: flex; gap: 6px; }
+    .zv-live-body { flex: 1; display: flex; min-height: 0; }
+    .zv-side {
+        width: 320px;
+        flex: 0 0 320px;
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        background: #fff;
+        border-right: 1px solid #e3e8ef;
+        overflow: auto;
+    }
+    .zv-side-list { flex: 1; overflow: auto; }
+    .zv-user-row {
+        border: 1px solid #e3e8ef;
+        border-radius: 10px;
+        padding: 9px 10px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        &:hover { border-color: #1f6feb; }
+        &.selected { border-color: #1f6feb; background: #e8f1ff; }
+    }
+    .zv-user-top { display: flex; align-items: center; gap: 8px; }
+    .zv-user-name { font-weight: 700; flex: 1; }
+    .zv-user-badge { font-size: .75rem; font-weight: 700; }
+    .zv-user-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: .8rem; color: #66758a; margin-top: 3px; }
+    .zv-route-btn { font-size: .8rem; margin-top: 3px; }
+    .zv-off { color: #d9480f; font-weight: 600; }
+    .zv-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: 0 0 10px; }
+    .zv-side-route { border-top: 1px solid #e3e8ef; padding-top: 10px; margin-top: 6px; }
+    .zv-legend > div { display: flex; align-items: center; gap: 8px; font-size: .85rem; margin-bottom: 5px; }
+    .zv-line { width: 28px; height: 0; border-top: 4px solid #1f6feb; display: inline-block; }
+    .zv-line-off { border-top: 4px dashed #f08c00; }
+    .zv-replay, .zv-visits { border-top: 1px solid #e3e8ef; margin-top: 10px; padding-top: 10px; }
+    .zv-visit-row { display: flex; align-items: center; gap: 8px; font-size: .85rem; padding: 3px 0; }
+    .zv-map-wrap { flex: 1; position: relative; }
+    .zv-map {
+        position: absolute;
+        inset: 0;
+        background-color: #eef2f7;
+        background-image:
+            linear-gradient(rgba(11, 31, 58, .05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(11, 31, 58, .05) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+    .zv-tiles-off {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        z-index: 500;
+        background: rgba(255, 255, 255, .95);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: .8rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+    }
+}
+
+.zv-marker { background: transparent; border: 0; }
+.zv-marker-pin {
+    width: 34px;
+    height: 34px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    span { transform: rotate(45deg); color: #fff; font-weight: 800; font-size: 12px; }
+}
+.zv-visit {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 2px solid #fff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    &.zv-visit-ok { background: #12a150; }
+    &.zv-visit-bad { background: #d6336c; }
+}
+.zv-pop { font-size: 12.5px; line-height: 1.5; .zv-off { color: #d9480f; font-weight: 600; } }
+
+@media (max-width: 768px) {
+    .zv-live .zv-live-body { flex-direction: column-reverse; }
+    .zv-live .zv-side { width: 100%; flex: 0 0 45%; border-right: 0; }
+    .zv-live .zv-map-wrap { min-height: 50vh; }
+}

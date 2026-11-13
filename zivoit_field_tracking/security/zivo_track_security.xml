@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_field_tracking" model="res.groups.privilege">
+        <field name="name">Field Tracking</field>
+        <field name="sequence">35</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <record id="group_field_user" model="res.groups">
+        <field name="name">Salesperson: Tracked (own data)</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_field_tracking"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">The user's phone can send GPS locations. The user sees only his own day logs, points and visits.</field>
+    </record>
+
+    <record id="group_field_manager" model="res.groups">
+        <field name="name">Manager: Live map of all field staff</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_field_tracking"/>
+        <field name="implied_ids" eval="[(4, ref('group_field_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Sees the live map, routes and visits of every salesperson and configures tracking.</field>
+    </record>
+
+    <data noupdate="1">
+        <!-- multi-company -->
+        <record id="rule_point_company" model="ir.rule">
+            <field name="name">Field points: multi-company</field>
+            <field name="model_id" ref="model_zivo_track_point"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_session_company" model="ir.rule">
+            <field name="name">Field day logs: multi-company</field>
+            <field name="model_id" ref="model_zivo_track_session"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_visit_company" model="ir.rule">
+            <field name="name">Field visits: multi-company</field>
+            <field name="model_id" ref="model_zivo_track_visit"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- salesperson: own records only -->
+        <record id="rule_point_own" model="ir.rule">
+            <field name="name">Field points: own</field>
+            <field name="model_id" ref="model_zivo_track_point"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_field_user'))]"/>
+        </record>
+        <record id="rule_session_own" model="ir.rule">
+            <field name="name">Field day logs: own</field>
+            <field name="model_id" ref="model_zivo_track_session"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_field_user'))]"/>
+        </record>
+        <record id="rule_visit_own" model="ir.rule">
+            <field name="name">Field visits: own</field>
+            <field name="model_id" ref="model_zivo_track_visit"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_field_user'))]"/>
+        </record>
+        <record id="rule_device_own" model="ir.rule">
+            <field name="name">Field devices: own</field>
+            <field name="model_id" ref="model_zivo_track_device"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_field_user'))]"/>
+        </record>
+
+        <!-- manager: everything -->
+        <record id="rule_point_manager" model="ir.rule">
+            <field name="name">Field points: manager all</field>
+            <field name="model_id" ref="model_zivo_track_point"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
+        </record>
+        <record id="rule_session_manager" model="ir.rule">
+            <field name="name">Field day logs: manager all</field>
+            <field name="model_id" ref="model_zivo_track_session"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
+        </record>
+        <record id="rule_visit_manager" model="ir.rule">
+            <field name="name">Field visits: manager all</field>
+            <field name="model_id" ref="model_zivo_track_visit"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
+        </record>
+        <record id="rule_device_manager" model="ir.rule">
+            <field name="name">Field devices: manager all</field>
+            <field name="model_id" ref="model_zivo_track_device"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
+        </record>
+    </data>
+</odoo>

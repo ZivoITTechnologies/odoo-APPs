@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_track_session_view_list" model="ir.ui.view">
+        <field name="name">zivo.track.session.list</field>
+        <field name="model">zivo.track.session</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-info="state == 'active'">
+                <field name="date"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="start_time" optional="show"/>
+                <field name="end_time" optional="show"/>
+                <field name="first_fix" optional="hide"/>
+                <field name="last_fix" optional="show"/>
+                <field name="distance_km" sum="Total km"/>
+                <field name="duration_hours" widget="float_time" optional="show"/>
+                <field name="point_count" sum="Points"/>
+                <field name="offline_point_count" sum="Offline"/>
+                <field name="max_delay_minutes" optional="hide"/>
+                <field name="stop_count" optional="show"/>
+                <field name="visit_count"/>
+                <field name="state" widget="badge" decoration-info="state == 'active'" decoration-success="state == 'closed'"/>
+                <button name="action_open_route" type="object" string="Route" icon="fa-map-marker" class="btn-link"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_track_session_view_form" model="ir.ui.view">
+        <field name="name">zivo.track.session.form</field>
+        <field name="model">zivo.track.session</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_open_route" type="object" string="Replay Route" class="btn-primary" icon="fa-map"/>
+                    <button name="action_end_day" type="object" string="End Day" invisible="state != 'active'"
+                            groups="zivoit_field_tracking.group_field_manager"/>
+                    <button name="action_reopen" type="object" string="Reopen" invisible="state != 'closed'"
+                            groups="zivoit_field_tracking.group_field_manager"/>
+                    <button name="action_recompute" type="object" string="Recompute" groups="zivoit_field_tracking.group_field_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group string="Day">
+                            <field name="user_id" readonly="1"/>
+                            <field name="date" readonly="1"/>
+                            <field name="start_time" readonly="1"/>
+                            <field name="end_time" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        </group>
+                        <group string="Tracking">
+                            <field name="distance_km"/>
+                            <field name="duration_hours" widget="float_time"/>
+                            <field name="first_fix"/>
+                            <field name="last_fix"/>
+                            <field name="point_count"/>
+                            <field name="offline_point_count"/>
+                            <field name="max_delay_minutes"/>
+                            <field name="stop_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Customer Visits" name="visits">
+                            <field name="visit_ids" readonly="1">
+                                <list>
+                                    <field name="check_in_time"/>
+                                    <field name="partner_id"/>
+                                    <field name="duration_minutes"/>
+                                    <field name="geofence_status" widget="badge" decoration-success="geofence_status == 'inside'" decoration-danger="geofence_status == 'outside'"/>
+                                    <field name="distance_from_customer_m"/>
+                                    <field name="outcome"/>
+                                    <field name="captured_offline"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Location Points" name="points">
+                            <field name="point_ids" readonly="1">
+                                <list limit="80" decoration-warning="captured_offline">
+                                    <field name="fix_time"/>
+                                    <field name="latitude"/>
+                                    <field name="longitude"/>
+                                    <field name="accuracy"/>
+                                    <field name="speed_kmh"/>
+                                    <field name="battery"/>
+                                    <field name="delay_minutes"/>
+                                    <field name="captured_offline"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_track_session_view_search" model="ir.ui.view">
+        <field name="name">zivo.track.session.search</field>
+        <field name="model">zivo.track.session</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="user_id"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="active_days" string="In Field" domain="[('state', '=', 'active')]"/>
+                <filter name="with_offline" string="Had Offline Data" domain="[('offline_point_count', '&gt;', 0)]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_user" string="Salesperson" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zivo_track_session_view_pivot" model="ir.ui.view">
+        <field name="name">zivo.track.session.pivot</field>
+        <field name="model">zivo.track.session</field>
+        <field name="arch" type="xml">
+            <pivot string="Field Day Logs">
+                <field name="user_id" type="row"/>
+                <field name="date" interval="week" type="col"/>
+                <field name="distance_km" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="zivo_track_session_view_graph" model="ir.ui.view">
+        <field name="name">zivo.track.session.graph</field>
+        <field name="model">zivo.track.session</field>
+        <field name="arch" type="xml">
+            <graph string="Distance by Salesperson" type="bar">
+                <field name="user_id"/>
+                <field name="distance_km" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="zivo_track_session_action" model="ir.actions.act_window">
+        <field name="name">Day Logs</field>
+        <field name="res_model">zivo.track.session</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No field day recorded yet</p>
+            <p>A day log is created automatically for every salesperson and day as soon as locations arrive.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_track_visit_view_list" model="ir.ui.view">
+        <field name="name">zivo.track.visit.list</field>
+        <field name="model">zivo.track.visit</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="geofence_status == 'outside'">
+                <field name="check_in_time"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="partner_id"/>
+                <field name="check_out_time" optional="show"/>
+                <field name="duration_minutes" sum="Minutes"/>
+                <field name="geofence_status" widget="badge" decoration-success="geofence_status == 'inside'" decoration-danger="geofence_status == 'outside'"/>
+                <field name="distance_from_customer_m" optional="show"/>
+                <field name="outcome" optional="show"/>
+                <field name="captured_offline" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'in_progress'" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_track_visit_view_form" model="ir.ui.view">
+        <field name="name">zivo.track.visit.form</field>
+        <field name="model">zivo.track.visit</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_check_out" type="object" string="Check Out" class="btn-primary" invisible="state != 'in_progress'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Outside geo-fence" bg_color="text-bg-danger" invisible="geofence_status != 'outside'"/>
+                    <widget name="web_ribbon" title="Verified" bg_color="text-bg-success" invisible="geofence_status != 'inside'"/>
+                    <div class="oe_title"><h1><field name="partner_id" placeholder="Customer"/></h1></div>
+                    <group>
+                        <group string="Visit">
+                            <field name="user_id"/>
+                            <field name="check_in_time"/>
+                            <field name="check_out_time"/>
+                            <field name="duration_minutes"/>
+                            <field name="outcome"/>
+                            <field name="session_id" readonly="1"/>
+                        </group>
+                        <group string="Location Proof">
+                            <field name="check_in_latitude" readonly="1"/>
+                            <field name="check_in_longitude" readonly="1"/>
+                            <field name="check_in_accuracy" readonly="1"/>
+                            <field name="distance_from_customer_m"/>
+                            <field name="geofence_status"/>
+                            <field name="captured_offline"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Visit notes..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_track_visit_view_calendar" model="ir.ui.view">
+        <field name="name">zivo.track.visit.calendar</field>
+        <field name="model">zivo.track.visit</field>
+        <field name="arch" type="xml">
+            <calendar string="Visits" date_start="check_in_time" date_stop="check_out_time" color="user_id" mode="week">
+                <field name="partner_id"/>
+                <field name="outcome"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="zivo_track_visit_view_search" model="ir.ui.view">
+        <field name="name">zivo.track.visit.search</field>
+        <field name="model">zivo.track.visit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <filter name="today" string="Today" domain="[('check_in_time', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="outside" string="Outside Geo-fence" domain="[('geofence_status', '=', 'outside')]"/>
+                <filter name="offline" string="Recorded Offline" domain="[('captured_offline', '=', True)]"/>
+                <separator/>
+                <filter name="check_in_time" string="Date" date="check_in_time"/>
+                <group>
+                    <filter name="group_user" string="Salesperson" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_outcome" string="Outcome" context="{'group_by': 'outcome'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zivo_track_visit_action" model="ir.actions.act_window">
+        <field name="name">Customer Visits</field>
+        <field name="res_model">zivo.track.visit</field>
+        <field name="view_mode">list,form,calendar,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No visit yet</p>
+            <p>Salespeople check in at customers from the offline web app - even without signal.</p>
+        </field>
+    </record>
+</odoo>

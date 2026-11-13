@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="demo_user_ravi" model="res.users">
+        <field name="name">Ravi Kumar</field>
+        <field name="login">ravi.field@example.com</field>
+        <field name="email">ravi.field@example.com</field>
+        <field name="tz">Asia/Kolkata</field>
+        <field name="group_ids" eval="[(4, ref('zivoit_field_tracking.group_field_user'))]"/>
+    </record>
+    <record id="demo_user_sneha" model="res.users">
+        <field name="name">Sneha Reddy</field>
+        <field name="login">sneha.field@example.com</field>
+        <field name="email">sneha.field@example.com</field>
+        <field name="tz">Asia/Kolkata</field>
+        <field name="group_ids" eval="[(4, ref('zivoit_field_tracking.group_field_user'))]"/>
+    </record>
+    <record id="demo_user_arjun" model="res.users">
+        <field name="name">Arjun Rao</field>
+        <field name="login">arjun.field@example.com</field>
+        <field name="email">arjun.field@example.com</field>
+        <field name="tz">Asia/Kolkata</field>
+        <field name="group_ids" eval="[(4, ref('zivoit_field_tracking.group_field_user'))]"/>
+    </record>
+    <record id="demo_user_priya" model="res.users">
+        <field name="name">Priya Sharma</field>
+        <field name="login">priya.field@example.com</field>
+        <field name="email">priya.field@example.com</field>
+        <field name="tz">Asia/Kolkata</field>
+        <field name="group_ids" eval="[(4, ref('zivoit_field_tracking.group_field_user'))]"/>
+    </record>
+    <function model="zivo.track.demo" name="_generate"/>
+</odoo>
