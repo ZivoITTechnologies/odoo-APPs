@@ -61,8 +61,8 @@ Track field salespeople live on a map - even in areas with no mobile signal.
         ],
     },
     'images': [
-        'static/description/banner.png',
         'static/description/main_screenshot.png',
+        'static/description/banner.png',
     ],
     'installable': True,
     'application': True,
