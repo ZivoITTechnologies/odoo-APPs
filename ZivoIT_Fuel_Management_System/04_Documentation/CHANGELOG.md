@@ -1,5 +1,8 @@
 # Changelog
 
+## 19.0.2.0.2
+- Packaging release for Odoo Apps registration: version bump to force a clean rescan, plus a publish kit (checker, scripts, error guide). No functional changes.
+
 ## 19.0.2.0.1 — App Store release fix
 - Fixed: uninstalling the app no longer fails when posted vouchers, bills or slips exist (deletion rules moved to `@api.ondelete`).
 - All translatable strings now use `self.env._` / `request.env._` (Odoo 19 standard).

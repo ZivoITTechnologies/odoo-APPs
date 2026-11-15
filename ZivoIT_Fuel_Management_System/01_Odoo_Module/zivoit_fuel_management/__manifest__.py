@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Fuel Management System',
-    'version': '19.0.2.0.1',
+    'version': '19.0.2.0.2',
     'category': 'Industries',
     'summary': 'ZivoIT Fuel Management System - AI-enabled petrol pump ERP: nozzle shifts, credit billing with payment status and UPI QR, '
                'tanks and DIP, own tanker fleet, trips, doorstep delivery, maintenance, accounts, payroll '
