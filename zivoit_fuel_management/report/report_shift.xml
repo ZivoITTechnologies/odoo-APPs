@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_shift">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="web.basic_layout">
+                <t t-set="company" t-value="res_company"/>
+                <div class="page bpcl-rpt">
+                    <t t-set="report_title">Daily Sales Report</t>
+                    <t t-set="report_subtitle" t-value="'%s | %s | %s' % (o.name, o.date.strftime('%d-%m-%Y'), o.shift_id.name)"/>
+                    <t t-call="zivoit_fuel_management.report_bpcl_header"/>
+                    <h6 class="bpcl-rpt-h">Nozzle Readings</h6>
+                    <table class="table table-sm bpcl-rpt-table">
+                        <thead>
+                            <tr><th>Nozzle</th><th>Product</th><th>Attendant</th>
+                                <th class="text-end">Opening</th><th class="text-end">Closing</th>
+                                <th class="text-end">Testing</th><th class="text-end">Sale (Ltr)</th>
+                                <th class="text-end">Rate</th><th class="text-end">Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="o.line_ids" t-as="l">
+                                <td t-out="l.nozzle_id.name"/><td t-out="l.product_id.name"/>
+                                <td t-out="l.employee_id.name or ''"/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(l.opening)"/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(l.closing)"/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(l.testing_qty)"/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(l.sale_qty)"/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(l.rate)"/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(l.amount)"/>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="bpcl-rpt-total"><td colspan="6">Total</td>
+                                <td class="text-end" t-out="'{:,.2f}'.format(o.total_qty)"/><td/>
+                                <td class="text-end" t-out="'{:,.2f}'.format(o.total_amount)"/></tr>
+                        </tfoot>
+                    </table>
+                    <table style="width:100%;">
+                        <tr>
+                            <td style="width:50%; vertical-align:top;">
+                                <h6 class="bpcl-rpt-h">Product Summary</h6>
+                                <table class="table table-sm bpcl-rpt-table">
+                                    <thead><tr><th>Product</th><th class="text-end">Testing</th><th class="text-end">Sale (Ltr)</th><th class="text-end">Amount</th></tr></thead>
+                                    <tr t-foreach="o.product_summary()" t-as="r">
+                                        <td t-out="r['product'].name"/>
+                                        <td class="text-end" t-out="'{:,.2f}'.format(r['testing'])"/>
+                                        <td class="text-end" t-out="'{:,.2f}'.format(r['qty'])"/>
+                                        <td class="text-end" t-out="'{:,.2f}'.format(r['amount'])"/>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="vertical-align:top; padding-left:16px;">
+                                <h6 class="bpcl-rpt-h">Collection Summary</h6>
+                                <table class="bpcl-rpt-summary" style="width:100%;">
+                                    <tr><td>Total Fuel Sale</td><td class="text-end" t-out="'{:,.2f}'.format(o.total_amount)"/></tr>
+                                    <tr><td>Less: Credit Slips</td><td class="text-end" t-out="'{:,.2f}'.format(o.credit_amount)"/></tr>
+                                    <tr><td>Less: Card (POS)</td><td class="text-end" t-out="'{:,.2f}'.format(o.card_amount)"/></tr>
+                                    <tr><td>Less: UPI / Wallet</td><td class="text-end" t-out="'{:,.2f}'.format(o.upi_amount)"/></tr>
+                                    <tr><td>Less: Fleet Card</td><td class="text-end" t-out="'{:,.2f}'.format(o.fleet_card_amount)"/></tr>
+                                    <tr class="fw-bold"><td>Expected Cash</td><td class="text-end" t-out="'{:,.2f}'.format(o.expected_cash)"/></tr>
+                                    <tr><td>Cash Collected</td><td class="text-end" t-out="'{:,.2f}'.format(o.cash_collected or o.expected_cash)"/></tr>
+                                    <tr class="fw-bold"><td>Short (-) / Excess (+)</td><td class="text-end" t-out="'{:,.2f}'.format(o.short_excess)"/></tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%; margin-top:30px;">
+                        <tr><td>Shift In-charge: <t t-out="o.manager_id.name or ''"/></td><td class="text-end">Manager's Signature</td></tr>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

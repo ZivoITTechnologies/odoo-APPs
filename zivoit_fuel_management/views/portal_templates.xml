@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Card on the standard /my page -->
+    <template id="portal_my_home_fuel" name="Fuel Account" inherit_id="portal.portal_my_home" priority="5">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/zivoit_fuel_management/static/description/icon.png'"/>
+                <t t-set="title">Fuel Account</t>
+                <t t-set="url" t-value="'/my/fuel'"/>
+                <t t-set="text">Balance, ledger, statements, bills and filling slips</t>
+                <t t-set="placeholder_count" t-value="'pump_bill_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- ============================ App shell ============================ -->
+    <template id="portal_fuel_layout" name="Fuel Portal Layout">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <t t-set="title" t-value="'%s | %s' % (page_title or 'My Fuel Account', company.pump_outlet_name or company.name)"/>
+            <t t-set="x_icon" t-value="'/zivoit_fuel_management/static/description/icon.png'"/>
+            <t t-set="body_classname" t-value="'bpf-body'"/>
+            <input type="checkbox" id="bpf-nav" class="bpf-nav-toggle" aria-label="Toggle menu"/>
+            <div class="bpf-app">
+                <aside class="bpf-side">
+                    <div class="bpf-brand">
+                        <img t-attf-src="/web/binary/company_logo?company=#{company.id}" alt="Logo"/>
+                        <div>
+                            <div class="bpf-brand-name" t-out="company.pump_outlet_name or company.name"/>
+                            <div class="bpf-brand-sub">Customer Fuel Account</div>
+                        </div>
+                    </div>
+                    <nav class="bpf-nav">
+                        <a href="/my/fuel" t-attf-class="#{'active' if active_menu == 'dashboard' else ''}"><i class="fa fa-th-large"/> Dashboard</a>
+                        <a href="/my/fuel/ledger" t-attf-class="#{'active' if active_menu == 'ledger' else ''}"><i class="fa fa-book"/> Ledger Detail</a>
+                        <a href="/my/fuel/monthly" t-attf-class="#{'active' if active_menu == 'monthly' else ''}"><i class="fa fa-calendar"/> Month View</a>
+                        <a href="/my/fuel/statement" t-attf-class="#{'active' if active_menu == 'statement' else ''}"><i class="fa fa-file-text-o"/> Statements</a>
+                        <a href="/my/fuel/bills" t-attf-class="#{'active' if active_menu == 'bills' else ''}"><i class="fa fa-files-o"/> Filling Bills</a>
+                        <a href="/my/fuel/slips" t-attf-class="#{'active' if active_menu == 'slips' else ''}"><i class="fa fa-tint"/> Filling Slips</a>
+                        <a href="/my/fuel/vehicles" t-attf-class="#{'active' if active_menu == 'vehicles' else ''}"><i class="fa fa-truck"/> My Vehicles</a>
+                        <a href="/my/fuel/indent" t-attf-class="#{'active' if active_menu == 'indent' else ''}"><i class="fa fa-paper-plane"/> Indent Request</a>
+                        <a href="/my/fuel/rates" t-attf-class="#{'active' if active_menu == 'rates' else ''}"><i class="fa fa-tag"/> Fuel Rates</a>
+                        <a href="#" class="bpf-ai-open" t-if="company.pump_ai_enabled"><i class="fa fa-magic"/> AI Assistant <span class="bpf-new">NEW</span></a>
+                    </nav>
+                    <div class="bpf-side-foot">
+                        <a href="/my/security"><i class="fa fa-lock"/> Change Password</a>
+                        <a href="/web/session/logout?redirect=/web/login"><i class="fa fa-sign-out"/> Logout</a>
+                    </div>
+                </aside>
+                <label for="bpf-nav" class="bpf-scrim"/>
+                <div class="bpf-main">
+                    <header class="bpf-top">
+                        <label for="bpf-nav" class="bpf-burger" title="Menu"><i class="fa fa-bars"/></label>
+                        <div class="bpf-top-title">
+                            <h1 t-out="page_title"/>
+                            <div class="bpf-top-sub" t-if="page_sub" t-out="page_sub"/>
+                        </div>
+                        <div class="bpf-user">
+                            <div class="bpf-avatar" t-out="(partner.name or '?')[:1]"/>
+                            <div class="d-none d-md-block">
+                                <div class="bpf-user-name" t-out="partner.name"/>
+                                <div class="bpf-user-code">Code <t t-out="partner.pump_code"/></div>
+                            </div>
+                        </div>
+                    </header>
+                    <main class="bpf-content">
+                        <t t-out="0"/>
+                    </main>
+                    <div t-if="company.pump_ai_enabled" class="bpf-ai" id="bpf-ai" t-att-data-name="partner.name"
+                         t-att-data-vehicle="partner.pump_vehicle_ids[:1].name or ''">
+                        <button type="button" class="bpf-ai-fab bpf-ai-open" title="Ask AI"><i class="fa fa-magic"/><span>Ask AI</span></button>
+                        <div class="bpf-ai-panel" role="dialog" aria-label="AI Assistant">
+                            <div class="bpf-ai-head">
+                                <div class="bpf-ai-avatar"><i class="fa fa-magic"/></div>
+                                <div><div class="fw-bold">Fuel Assistant</div><div class="bpf-ai-sub">Answers from your live account data</div></div>
+                                <button type="button" class="bpf-ai-close" title="Close">×</button>
+                            </div>
+                            <div class="bpf-ai-body"/>
+                            <div class="bpf-ai-chips">
+                                <button type="button">What is my balance?</button>
+                                <button type="button">Diesel taken last month</button>
+                                <button type="button">Today's rates</button>
+                                <button type="button">Latest bill status</button>
+                                <button type="button">Mileage of my vehicles</button>
+                                <button type="button">Statement for last month</button>
+                            </div>
+                            <form class="bpf-ai-form">
+                                <input type="text" name="question" maxlength="500" autocomplete="off" placeholder="Ask about balance, bills, vehicles..."/>
+                                <button type="submit" title="Send"><i class="fa fa-paper-plane"/></button>
+                            </form>
+                        </div>
+                    </div>
+                    <footer class="bpf-foot">
+                        <span>© <t t-out="company.pump_outlet_name or company.name"/> · Fuel Station</span>
+                        <span t-if="company.phone"><i class="fa fa-phone"/> <t t-out="company.phone"/></span>
+                    </footer>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Reusable period filter -->
+    <template id="portal_fuel_period_filter" name="Period filter">
+        <form method="get" class="bpf-filter" t-att-action="action_url">
+            <div class="bpf-field">
+                <label>From</label>
+                <input type="date" name="date_from" class="form-control" t-att-value="date_from"/>
+            </div>
+            <div class="bpf-field">
+                <label>To</label>
+                <input type="date" name="date_to" class="form-control" t-att-value="date_to"/>
+            </div>
+            <t t-out="0"/>
+            <button type="submit" class="btn bpf-btn-primary"><i class="fa fa-search"/> Show</button>
+            <div class="bpf-presets">
+                <a t-foreach="presets" t-as="pr"
+                   t-attf-href="#{action_url}?date_from=#{pr[1]}&amp;date_to=#{pr[2]}"
+                   t-attf-class="bpf-chip #{'on' if pr[1] == date_from and pr[2] == date_to else ''}" t-out="pr[0]"/>
+            </div>
+        </form>
+    </template>
+
+    <!-- ============================ Dashboard ============================ -->
+    <template id="portal_fuel_dashboard" name="Fuel Portal Dashboard">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Dashboard</t>
+            <t t-set="page_sub" t-value="'As on %s' % dfmt(today)"/>
+            <section class="bpf-hero">
+                <div>
+                    <div class="bpf-hero-hi">Welcome back,</div>
+                    <div class="bpf-hero-name" t-out="partner.name"/>
+                    <div class="bpf-hero-meta">
+                        Customer Code <b t-out="partner.pump_code"/> ·
+                        <t t-out="vehicle_count"/> vehicle(s) ·
+                        Credit days <t t-out="partner.pump_credit_days"/>
+                    </div>
+                </div>
+                <div class="bpf-hero-actions">
+                    <a t-attf-href="/my/fuel/ledger/pdf?date_from=#{today.replace(day=1)}&amp;date_to=#{today}" class="btn bpf-btn-yellow"><i class="fa fa-download"/> This month's statement</a>
+                    <a href="/my/fuel/indent" class="btn bpf-btn-ghost"><i class="fa fa-truck"/> Raise Indent</a>
+                </div>
+            </section>
+
+            <section class="bpf-stats">
+                <div class="bpf-stat main">
+                    <div class="bpf-stat-label">Outstanding Balance</div>
+                    <div t-attf-class="bpf-stat-value #{'cr' if partner.pump_balance &lt; 0 else ''}" t-out="drcr(partner.pump_balance)"/>
+                    <div class="bpf-stat-foot" t-if="last_bill">Last bill <b t-out="last_bill.name"/> · <t t-out="currency.symbol"/> <t t-out="fmt(last_bill.amount_total)"/></div>
+                </div>
+                <div class="bpf-stat">
+                    <div class="bpf-stat-label">Credit Limit</div>
+                    <div class="bpf-stat-value"><t t-out="currency.symbol"/> <t t-out="fmt(partner.pump_credit_limit)"/></div>
+                    <div class="bpf-meter" t-if="partner.pump_credit_limit">
+                        <div t-attf-class="bpf-meter-fill #{'over' if used_pct_raw &gt; 100 else ('warn' if used_pct_raw &gt; 80 else '')}" t-attf-style="width: #{used_pct}%"/>
+                    </div>
+                    <div class="bpf-stat-foot" t-if="partner.pump_credit_limit"><t t-out="'%.1f' % used_pct_raw"/>% utilised</div>
+                </div>
+                <div class="bpf-stat">
+                    <div class="bpf-stat-label">Available Credit</div>
+                    <div t-attf-class="bpf-stat-value #{'neg' if partner.pump_available_credit &lt; 0 else 'pos'}"><t t-out="currency.symbol"/> <t t-out="fmt(partner.pump_available_credit)"/></div>
+                    <div class="bpf-stat-foot">After unbilled slips</div>
+                </div>
+                <div class="bpf-stat">
+                    <div class="bpf-stat-label">Unbilled Slips</div>
+                    <div class="bpf-stat-value"><t t-out="currency.symbol"/> <t t-out="fmt(partner.pump_unbilled)"/></div>
+                    <div class="bpf-stat-foot" t-if="last_receipt">Last payment <t t-out="dfmt(last_receipt.date)"/> · <t t-out="currency.symbol"/> <t t-out="fmt(last_receipt.credit)"/></div>
+                </div>
+            </section>
+
+            <section t-if="insights" class="bpf-insights">
+                <div class="bpf-insights-head"><i class="fa fa-magic"/> AI Insights for you
+                    <button type="button" class="btn btn-sm bpf-btn-outline bpf-ai-open ms-auto"><i class="fa fa-comments"/> Ask the assistant</button></div>
+                <div class="bpf-insight-grid">
+                    <div t-foreach="insights" t-as="c" t-attf-class="bpf-insight #{c['level']}">
+                        <i t-attf-class="fa #{c['icon']}"/>
+                        <div><div class="fw-bold" t-out="c['title']"/><div class="small" t-out="c['text']"/></div>
+                    </div>
+                </div>
+            </section>
+
+            <section t-if="open_bills" class="bpf-card bpf-due">
+                <div class="bpf-card-head"><h3>Bills to pay</h3><a href="/my/fuel/bills">All bills <i class="fa fa-arrow-right"/></a></div>
+                <div class="bpf-due-row" t-foreach="open_bills[:4]" t-as="b">
+                    <div><a t-attf-href="/my/fuel/bill/#{b.id}" class="fw-bold" t-out="b.name"/>
+                        <div class="small text-muted"><t t-out="dfmt(b.date_from)"/> – <t t-out="dfmt(b.date_to)"/> · due <t t-out="dfmt(b.due_date)"/></div></div>
+                    <div class="text-end"><b><t t-out="currency.symbol"/> <t t-out="fmt(b.amount_due)"/></b>
+                        <div><span t-attf-class="bpf-badge pay-#{b.payment_state}" t-out="dict(b._fields['payment_state'].selection)[b.payment_state]"/></div></div>
+                </div>
+            </section>
+
+            <h2 class="bpf-h2">Today's Fuel Rates</h2>
+            <section class="bpf-rates">
+                <div t-foreach="rates" t-as="r" class="bpf-rate" t-attf-style="--prod: #{r['product'].color or '#0b5fa5'}">
+                    <div class="bpf-rate-name" t-out="r['product'].name"/>
+                    <div class="bpf-rate-val"><span t-out="currency.symbol"/><t t-out="fmt(r['rate'])"/><small>/<t t-out="r['product'].uom"/></small></div>
+                    <div class="bpf-rate-foot">
+                        <span t-if="r['change'] &gt; 0" class="up"><i class="fa fa-caret-up"/> <t t-out="fmt(r['change'])"/></span>
+                        <span t-elif="r['change'] &lt; 0" class="down"><i class="fa fa-caret-down"/> <t t-out="fmt(-r['change'])"/></span>
+                        <span t-else="" class="flat">No change</span>
+                        <span t-if="r['date']">w.e.f. <t t-out="dfmt(r['date'])"/></span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="bpf-cols">
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>Recent Filling Slips</h3><a href="/my/fuel/slips">View all <i class="fa fa-arrow-right"/></a></div>
+                    <div class="table-responsive">
+                        <table class="table bpf-table mb-0">
+                            <thead><tr><th>Date</th><th>Vehicle</th><th>Product</th><th class="text-end">Qty</th><th class="text-end">Amount</th><th/></tr></thead>
+                            <tbody>
+                                <tr t-foreach="recent_slips" t-as="s">
+                                    <td class="bpf-nw" t-out="dfmt(s.date)"/>
+                                    <td><b t-out="s.vehicle_no or '-'"/></td>
+                                    <td t-out="s.product_id.name"/>
+                                    <td class="text-end" t-out="fmt(s.qty)"/>
+                                    <td class="text-end" t-out="fmt(s.amount)"/>
+                                    <td><span t-attf-class="bpf-badge #{s.state}" t-out="'Billed' if s.state == 'billed' else 'Unbilled'"/></td>
+                                </tr>
+                                <tr t-if="not recent_slips"><td colspan="6" class="text-center text-muted py-4">No filling slips yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>This Month</h3><span class="text-muted small" t-out="today.strftime('%B %Y')"/></div>
+                    <div class="bpf-month-total"><t t-out="currency.symbol"/> <t t-out="fmt(month_total)"/><small><t t-out="fmt(month_qty)"/> units filled</small></div>
+                    <div t-foreach="month_summary" t-as="m" class="bpf-month-row" t-attf-style="--prod: #{m['product'].color or '#0b5fa5'}">
+                        <span class="dot"/>
+                        <span class="flex-grow-1" t-out="m['product'].name"/>
+                        <span class="text-muted me-3"><t t-out="fmt(m['qty'])"/></span>
+                        <b t-out="fmt(m['amount'])"/>
+                    </div>
+                    <div t-if="not month_summary" class="text-muted py-3">No purchases this month.</div>
+                    <div class="bpf-quick">
+                        <a href="/my/fuel/monthly"><i class="fa fa-calendar"/> Month view</a>
+                        <a href="/my/fuel/bills"><i class="fa fa-files-o"/> Bills</a>
+                        <a href="/my/fuel/indent"><i class="fa fa-truck"/> Indents <span t-if="open_indents" class="bpf-pill" t-out="open_indents"/></a>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================ Ledger ============================ -->
+    <template id="portal_fuel_ledger" name="Fuel Portal Ledger">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Ledger Detail</t>
+            <t t-set="page_sub" t-value="'%s to %s' % (dfmt(date_from), dfmt(date_to))"/>
+            <section class="bpf-card">
+                <t t-call="zivoit_fuel_management.portal_fuel_period_filter">
+                    <t t-set="action_url" t-value="'/my/fuel/ledger'"/>
+                </t>
+                <div class="bpf-toolbar">
+                    <a class="btn bpf-btn-outline" t-attf-href="/my/fuel/ledger/pdf?date_from=#{date_from}&amp;date_to=#{date_to}"><i class="fa fa-file-pdf-o"/> PDF</a>
+                    <a class="btn bpf-btn-outline" t-attf-href="/my/fuel/ledger/xlsx?date_from=#{date_from}&amp;date_to=#{date_to}"><i class="fa fa-file-excel-o"/> Excel</a>
+                    <button type="button" class="btn bpf-btn-outline" onclick="window.print()"><i class="fa fa-print"/> Print</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table bpf-table bpf-ledger">
+                        <thead>
+                            <tr><th>#</th><th>Date</th><th>Particulars</th><th>V. Type</th><th>V. No.</th>
+                                <th class="text-end">Debit</th><th class="text-end">Credit</th><th class="text-end">Balance</th><th>Cheque / UTR</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bpf-opening">
+                                <td>1</td><td class="bpf-nw" t-out="dfmt(date_from)"/><td>Opening Balance</td><td/><td/>
+                                <td class="text-end" t-out="fmt(data['opening']) if data['opening'] &gt; 0 else ''"/>
+                                <td class="text-end" t-out="fmt(-data['opening']) if data['opening'] &lt; 0 else ''"/>
+                                <td class="text-end fw-bold bpf-nw" t-out="drcr(data['opening'])"/><td/>
+                            </tr>
+                            <tr t-foreach="data['lines']" t-as="l">
+                                <td t-out="l_index + 2"/>
+                                <td class="bpf-nw" t-out="dfmt(l['date'])"/>
+                                <td>
+                                    <t t-out="l['particulars']"/>
+                                    <a t-if="l['origin_model'] == 'pump.bill'" class="ms-1 small" t-attf-href="/my/fuel/bill/#{l['origin_id']}/pdf?view=1" target="_blank"><i class="fa fa-external-link"/></a>
+                                </td>
+                                <td><span t-attf-class="bpf-vtype #{'bill' if l['vtype'] == 'Period Bill' else ('rcpt' if l['vtype'] == 'Receipt' else '')}" t-out="l['vtype']"/></td>
+                                <td t-out="l['vno']"/>
+                                <td class="text-end" t-out="fmt(l['debit']) if l['debit'] else ''"/>
+                                <td class="text-end" t-out="fmt(l['credit']) if l['credit'] else ''"/>
+                                <td class="text-end fw-bold bpf-nw" t-out="drcr(l['balance'])"/>
+                                <td class="small" t-out="l['cheque']"/>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr><td colspan="5">Total</td>
+                                <td class="text-end" t-out="fmt(data['total_debit'])"/>
+                                <td class="text-end" t-out="fmt(data['total_credit'])"/>
+                                <td class="text-end" t-out="drcr(data['closing'])"/><td/></tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="bpf-closing">
+                    <div><span>Closing Balance</span><b t-out="drcr(data['closing'])"/></div>
+                    <div><span>Credit Limit</span><b><t t-out="currency.symbol"/> <t t-out="fmt(data['credit_limit'])"/></b></div>
+                    <div><span>Unbilled Slips</span><b><t t-out="currency.symbol"/> <t t-out="fmt(data['unbilled'])"/></b></div>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <!-- ============================ Monthly ============================ -->
+    <template id="portal_fuel_monthly" name="Fuel Portal Monthly">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Month View</t>
+            <t t-set="page_sub" t-value="'Financial Year %s' % data['fy']"/>
+            <section class="bpf-card">
+                <form method="get" action="/my/fuel/monthly" class="bpf-filter">
+                    <div class="bpf-field">
+                        <label>Financial Year</label>
+                        <select name="fy" class="form-select" onchange="this.form.submit()">
+                            <option t-foreach="years" t-as="y" t-att-value="y[0]" t-att-selected="y[0] == fy_year" t-out="y[1]"/>
+                        </select>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table bpf-table">
+                        <thead><tr><th>Month</th><th class="text-end">Opening</th><th class="text-end">Bills (Dr)</th>
+                            <th class="text-end">Payments (Cr)</th><th class="text-end">Closing</th><th class="text-center">Entries</th><th/></tr></thead>
+                        <tbody>
+                            <tr t-foreach="data['rows']" t-as="r" t-attf-class="#{'text-muted' if r['date_from'] &gt; today else ''}">
+                                <td class="fw-bold" t-out="r['month']"/>
+                                <td class="text-end" t-out="drcr(r['opening'])"/>
+                                <td class="text-end" t-out="fmt(r['debit'])"/>
+                                <td class="text-end" t-out="fmt(r['credit'])"/>
+                                <td class="text-end fw-bold" t-out="drcr(r['closing'])"/>
+                                <td class="text-center" t-out="r['count']"/>
+                                <td class="text-end text-nowrap">
+                                    <t t-if="r['date_from'] &lt;= today">
+                                        <a class="bpf-link" t-attf-href="/my/fuel/ledger?date_from=#{r['date_from']}&amp;date_to=#{r['date_to']}">Ledger</a>
+                                        <a class="bpf-link" t-attf-href="/my/fuel/ledger/pdf?date_from=#{r['date_from']}&amp;date_to=#{r['date_to']}"><i class="fa fa-file-pdf-o"/></a>
+                                        <a class="bpf-link" t-attf-href="/my/fuel/ledger/xlsx?date_from=#{r['date_from']}&amp;date_to=#{r['date_to']}"><i class="fa fa-file-excel-o"/></a>
+                                    </t>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot><tr><td>Total</td><td/><td class="text-end" t-out="fmt(data['total_debit'])"/>
+                            <td class="text-end" t-out="fmt(data['total_credit'])"/><td/><td/><td/></tr></tfoot>
+                    </table>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <!-- ============================ Statement ============================ -->
+    <template id="portal_fuel_statement" name="Fuel Portal Statement">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Party Statement</t>
+            <t t-set="page_sub" t-value="'%s to %s' % (dfmt(date_from), dfmt(date_to))"/>
+            <section class="bpf-card">
+                <t t-call="zivoit_fuel_management.portal_fuel_period_filter">
+                    <t t-set="action_url" t-value="'/my/fuel/statement'"/>
+                </t>
+                <div class="bpf-toolbar">
+                    <a class="btn bpf-btn-primary" t-attf-href="/my/fuel/ledger/pdf?date_from=#{date_from}&amp;date_to=#{date_to}"><i class="fa fa-file-pdf-o"/> Download PDF</a>
+                    <a class="btn bpf-btn-outline" t-attf-href="/my/fuel/ledger/xlsx?date_from=#{date_from}&amp;date_to=#{date_to}"><i class="fa fa-file-excel-o"/> Download Excel</a>
+                </div>
+                <div class="bpf-summary">
+                    <div><span>Opening</span><b t-out="drcr(data['opening'])"/></div>
+                    <div><span>Billed</span><b>+ <t t-out="fmt(data['total_debit'])"/></b></div>
+                    <div><span>Received</span><b>− <t t-out="fmt(data['total_credit'])"/></b></div>
+                    <div class="hl"><span>Closing</span><b t-out="drcr(data['closing'])"/></div>
+                </div>
+            </section>
+            <div class="bpf-cols even">
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>Bills in period</h3><span class="bpf-pill" t-out="len(bills)"/></div>
+                    <table class="table bpf-table mb-0">
+                        <thead><tr><th>Bill</th><th>Period</th><th class="text-end">Amount</th><th/></tr></thead>
+                        <tbody>
+                            <tr t-foreach="bills" t-as="b">
+                                <td><b t-out="b.name"/><div class="small text-muted" t-out="dfmt(b.date)"/></td>
+                                <td class="small"><t t-out="dfmt(b.date_from)"/> – <t t-out="dfmt(b.date_to)"/></td>
+                                <td class="text-end" t-out="fmt(b.amount_total)"/>
+                                <td class="text-end"><a class="bpf-link" t-attf-href="/my/fuel/bill/#{b.id}/pdf"><i class="fa fa-download"/></a></td>
+                            </tr>
+                            <tr t-if="not bills"><td colspan="4" class="text-muted text-center py-3">No bills in this period.</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>Payments received</h3><span class="bpf-pill" t-out="len(receipts)"/></div>
+                    <table class="table bpf-table mb-0">
+                        <thead><tr><th>Date</th><th>Voucher</th><th>Reference</th><th class="text-end">Amount</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="receipts" t-as="r">
+                                <td class="bpf-nw" t-out="dfmt(r['date'])"/><td t-out="r['vno']"/>
+                                <td class="small" t-out="r['cheque'] or r['particulars']"/>
+                                <td class="text-end" t-out="fmt(r['credit'])"/>
+                            </tr>
+                            <tr t-if="not receipts"><td colspan="4" class="text-muted text-center py-3">No payments in this period.</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================ Bills ============================ -->
+    <template id="portal_fuel_bills" name="Fuel Portal Bills">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Filling Bills</t>
+            <t t-set="page_sub" t-value="'%s bill(s) · %s to %s' % (len(bills), dfmt(date_from), dfmt(date_to))"/>
+            <section class="bpf-card">
+                <t t-call="zivoit_fuel_management.portal_fuel_period_filter">
+                    <t t-set="action_url" t-value="'/my/fuel/bills'"/>
+                </t>
+                <div class="table-responsive">
+                    <table class="table bpf-table">
+                        <thead><tr><th>Bill No.</th><th>Bill Date</th><th>Period</th><th class="text-center">Slips</th>
+                            <th class="text-end">Qty</th><th class="text-end">Amount</th><th class="text-end">Balance Due</th><th>Status</th><th>Due Date</th><th class="text-end">Open</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="bills" t-as="b">
+                                <td class="fw-bold"><a t-attf-href="/my/fuel/bill/#{b.id}" t-out="b.name"/></td>
+                                <td class="bpf-nw" t-out="dfmt(b.date)"/>
+                                <td class="small"><t t-out="dfmt(b.date_from)"/> – <t t-out="dfmt(b.date_to)"/></td>
+                                <td class="text-center" t-out="b.slip_count"/>
+                                <td class="text-end" t-out="fmt(b.qty_total)"/>
+                                <td class="text-end fw-bold" t-out="fmt(b.amount_total)"/>
+                                <td class="text-end" t-out="fmt(b.amount_due)"/>
+                                <td><span t-attf-class="bpf-badge pay-#{b.payment_state}" t-out="dict(b._fields['payment_state'].selection)[b.payment_state]"/></td>
+                                <td t-attf-class="small bpf-nw #{'text-danger' if b.payment_state == 'overdue' else ''}" t-out="dfmt(b.due_date)"/>
+                                <td class="text-end text-nowrap">
+                                    <a class="bpf-link" t-attf-href="/my/fuel/bill/#{b.id}"><i class="fa fa-eye"/> View</a>
+                                    <a class="bpf-link" t-attf-href="/my/fuel/bill/#{b.id}/pdf"><i class="fa fa-download"/> PDF</a>
+                                </td>
+                            </tr>
+                            <tr t-if="not bills"><td colspan="10" class="text-center text-muted py-4">No bills for the selected period.</td></tr>
+                        </tbody>
+                        <tfoot t-if="bills"><tr><td colspan="4">Total</td><td class="text-end" t-out="fmt(sum(bills.mapped('qty_total')))"/>
+                            <td class="text-end" t-out="fmt(sum(bills.mapped('amount_total')))"/>
+                            <td class="text-end" t-out="fmt(sum(bills.mapped('amount_due')))"/><td/><td/><td/></tr></tfoot>
+                    </table>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <!-- ============================ Slips ============================ -->
+    <template id="portal_fuel_slips" name="Fuel Portal Slips">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Filling Slips</t>
+            <t t-set="page_sub" t-value="'%s slip(s) · %s to %s' % (len(slips), dfmt(date_from), dfmt(date_to))"/>
+            <section class="bpf-card">
+                <t t-call="zivoit_fuel_management.portal_fuel_period_filter">
+                    <t t-set="action_url" t-value="'/my/fuel/slips'"/>
+                    <div class="bpf-field">
+                        <label>Vehicle</label>
+                        <input type="text" name="vehicle" class="form-control" placeholder="e.g. TS09" t-att-value="f_vehicle"/>
+                    </div>
+                    <div class="bpf-field">
+                        <label>Product</label>
+                        <select name="product" class="form-select">
+                            <option value="">All</option>
+                            <option t-foreach="products" t-as="p" t-att-value="p.id" t-att-selected="str(p.id) == f_product" t-out="p.name"/>
+                        </select>
+                    </div>
+                    <div class="bpf-field">
+                        <label>Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All</option>
+                            <option value="confirmed" t-att-selected="f_status == 'confirmed'">Unbilled</option>
+                            <option value="billed" t-att-selected="f_status == 'billed'">Billed</option>
+                        </select>
+                    </div>
+                </t>
+                <div class="bpf-toolbar">
+                    <a class="btn bpf-btn-outline" t-attf-href="/my/fuel/slips/xlsx?#{qs}"><i class="fa fa-file-excel-o"/> Excel</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table bpf-table">
+                        <thead><tr><th>Date</th><th>Slip</th><th>Vehicle</th><th>Product</th><th class="text-end">Qty</th>
+                            <th class="text-end">Rate</th><th class="text-end">Amount</th><th>Status</th><th/></tr></thead>
+                        <tbody>
+                            <tr t-foreach="slips" t-as="s">
+                                <td class="bpf-nw" t-out="dfmt(s.date)"/>
+                                <td><t t-out="s.name"/><div class="small text-muted" t-if="s.slip_no">Book #<t t-out="s.slip_no"/></div></td>
+                                <td class="fw-bold" t-out="s.vehicle_no or '-'"/>
+                                <td t-out="s.product_id.name"/>
+                                <td class="text-end" t-out="fmt(s.qty)"/>
+                                <td class="text-end" t-out="fmt(s.rate - s.discount)"/>
+                                <td class="text-end fw-bold" t-out="fmt(s.amount)"/>
+                                <td>
+                                    <span t-attf-class="bpf-badge #{s.state}" t-out="'Billed' if s.state == 'billed' else 'Unbilled'"/>
+                                    <div class="small text-muted" t-if="s.bill_id" t-out="s.bill_id.name"/>
+                                </td>
+                                <td class="text-end"><a class="bpf-link" t-attf-href="/my/fuel/slip/#{s.id}/pdf" target="_blank" title="Print slip"><i class="fa fa-print"/></a></td>
+                            </tr>
+                            <tr t-if="not slips"><td colspan="9" class="text-center text-muted py-4">No slips match the filters.</td></tr>
+                        </tbody>
+                        <tfoot t-if="slips"><tr><td colspan="4">Total</td>
+                            <td class="text-end" t-out="fmt(sum(slips.mapped('qty')))"/><td/>
+                            <td class="text-end" t-out="fmt(sum(slips.mapped('amount')))"/><td/><td/></tr></tfoot>
+                    </table>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <!-- ============================ Indent ============================ -->
+    <template id="portal_fuel_indent" name="Fuel Portal Indent">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Indent Request</t>
+            <t t-set="page_sub">Request fuel for your vehicle — the station confirms and fills against it</t>
+            <div class="bpf-cols">
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>New Indent</h3></div>
+                    <div t-if="error" class="alert alert-danger" t-out="error"/>
+                    <div t-if="success" class="alert alert-success" t-out="success"/>
+                    <div t-if="prefill and prefill.get('product')" class="alert alert-info"><i class="fa fa-magic"/> Prepared by the AI assistant — review the details and press Submit.</div>
+                    <form method="post" action="/my/fuel/indent" class="bpf-form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date</label>
+                                <input type="date" name="date" class="form-control" t-att-value="today" required="required"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vehicle</label>
+                                <select name="vehicle_id" class="form-select">
+                                    <option value="">— Select vehicle —</option>
+                                    <option t-foreach="vehicles" t-as="v" t-att-value="v.id" t-att-selected="str(v.id) == str(prefill.get('vehicle'))" t-out="v.name"/>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Product</label>
+                                <select name="product_id" class="form-select" required="required">
+                                    <option t-foreach="products" t-as="p" t-att-value="p.id" t-att-selected="str(p.id) == str(prefill.get('product'))" t-out="'%s — %s %s' % (p.name, currency.symbol, fmt(p.current_rate))"/>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">Indent by</label>
+                                <div class="bpf-seg">
+                                    <input type="radio" name="indent_type" id="it_qty" value="qty" t-att-checked="prefill.get('type') != 'full' or None"/><label for="it_qty">Quantity</label>
+                                    <input type="radio" name="indent_type" id="it_amt" value="amount"/><label for="it_amt">Amount</label>
+                                    <input type="radio" name="indent_type" id="it_full" value="full" t-att-checked="prefill.get('type') == 'full' or None"/><label for="it_full">Tank Full</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Quantity / Amount</label>
+                                <input type="number" step="0.01" min="0" name="qty" class="form-control" t-att-value="prefill.get('qty') or None" placeholder="Litres or ₹ (not needed for Tank Full)"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Comment</label>
+                                <input type="text" name="comment" class="form-control" maxlength="200" placeholder="Driver name, trip, etc."/>
+                            </div>
+                        </div>
+                        <div class="bpf-credit-note">
+                            Available credit: <b><t t-out="currency.symbol"/> <t t-out="fmt(partner.pump_available_credit)"/></b>
+                            · Outstanding <t t-out="drcr(partner.pump_balance)"/>
+                            · Limit <t t-out="currency.symbol"/> <t t-out="fmt(partner.pump_credit_limit)"/>
+                        </div>
+                        <button type="submit" class="btn bpf-btn-primary mt-3"><i class="fa fa-paper-plane"/> Submit Indent</button>
+                    </form>
+                </section>
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>My Indents</h3></div>
+                    <div class="bpf-indent" t-foreach="indents" t-as="i">
+                        <div>
+                            <div class="fw-bold"><t t-out="i.name"/> · <t t-out="i.vehicle_id.name or 'Any vehicle'"/></div>
+                            <div class="small text-muted">
+                                <t t-out="dfmt(i.date)"/> · <t t-out="i.product_id.name"/> ·
+                                <t t-if="i.indent_type == 'qty'"><t t-out="fmt(i.qty)"/> L</t>
+                                <t t-elif="i.indent_type == 'amount'"><t t-out="currency.symbol"/> <t t-out="fmt(i.amount)"/></t>
+                                <t t-else="">Tank full</t>
+                            </div>
+                        </div>
+                        <span t-attf-class="bpf-badge #{i.state}" t-out="dict(i._fields['state'].selection)[i.state]"/>
+                    </div>
+                    <div t-if="not indents" class="text-muted py-3">No indents yet.</div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================ Rates ============================ -->
+    <template id="portal_fuel_rates" name="Fuel Portal Rates">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">Fuel Rates</t>
+            <t t-set="page_sub">Current selling prices and the last 60 days of revisions</t>
+            <section class="bpf-rates">
+                <div t-foreach="products" t-as="p" class="bpf-rate" t-attf-style="--prod: #{p.color or '#0b5fa5'}">
+                    <div class="bpf-rate-name" t-out="p.name"/>
+                    <div class="bpf-rate-val"><span t-out="currency.symbol"/><t t-out="fmt(p.current_rate)"/><small>/<t t-out="p.uom"/></small></div>
+                    <div class="bpf-rate-foot"><span t-if="p.rate_date">w.e.f. <t t-out="dfmt(p.rate_date)"/></span></div>
+                </div>
+            </section>
+            <section class="bpf-card mt-3">
+                <div class="bpf-card-head"><h3>Rate Revisions</h3></div>
+                <div class="table-responsive">
+                    <table class="table bpf-table">
+                        <thead><tr><th>Effective Date</th><th>Product</th><th class="text-end">Rate</th><th class="text-end">Change</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="rates" t-as="r">
+                                <td t-out="dfmt(r.date)"/>
+                                <td t-out="r.product_id.name"/>
+                                <td class="text-end fw-bold" t-out="fmt(r.rate)"/>
+                                <td t-attf-class="text-end #{'text-danger' if r.change &gt; 0 else ('text-success' if r.change &lt; 0 else 'text-muted')}"
+                                    t-out="('+' if r.change &gt; 0 else '') + fmt(r.change) if r.previous_rate else '—'"/>
+                            </tr>
+                            <tr t-if="not rates"><td colspan="4" class="text-center text-muted py-4">No rate revisions in the last 60 days.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </t>
+    </template>
+
+
+    <!-- ============================ Bill detail ============================ -->
+    <template id="portal_fuel_bill_detail" name="Fuel Portal Bill Detail">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title" t-value="'Bill %s' % bill.name"/>
+            <t t-set="page_sub" t-value="'%s to %s · %s slips' % (dfmt(bill.date_from), dfmt(bill.date_to), bill.slip_count)"/>
+            <section class="bpf-bill-hero">
+                <div>
+                    <div class="bpf-bill-label" t-out="'Paid in full' if bill.payment_state == 'paid' else 'Balance due on this bill'"/>
+                    <div class="bpf-bill-amt"><t t-out="currency.symbol"/> <t t-out="fmt(bill.amount_due if bill.payment_state != 'paid' else bill.amount_total)"/></div>
+                    <div>Pay by <b t-out="dfmt(bill.due_date)"/>
+                        <span t-attf-class="bpf-badge pay-#{bill.payment_state} ms-2" t-out="dict(bill._fields['payment_state'].selection)[bill.payment_state]"/>
+                        <span t-if="bill.days_overdue" class="ms-1 small">(<t t-out="bill.days_overdue"/> days late)</span></div>
+                    <div class="bpf-bill-meta">Bill amount <t t-out="fmt(bill.amount_total)"/> · paid <t t-out="fmt(bill.amount_paid)"/> ·
+                        account outstanding today <b t-out="drcr(partner.pump_balance)"/></div>
+                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                        <a t-attf-href="/my/fuel/bill/#{bill.id}/pdf" class="btn bpf-btn-yellow"><i class="fa fa-download"/> Download PDF</a>
+                        <a t-attf-href="/my/fuel/bill/#{bill.id}/pdf?view=1" target="_blank" class="btn bpf-btn-ghost"><i class="fa fa-print"/> Print</a>
+                    </div>
+                </div>
+                <div t-if="qr and bill.payment_state != 'paid'" class="bpf-bill-qr"><img t-att-src="qr" alt="UPI QR"/><div>Scan &amp; pay <t t-out="currency.symbol"/> <t t-out="fmt(bill.amount_due)"/></div></div>
+            </section>
+            <section class="bpf-card">
+                <div class="bpf-card-head"><h3>Account position on the bill date (<t t-out="dfmt(bill.date)"/>)</h3></div>
+                <div class="bpf-flow">
+                    <div><span>Balance as per last bill<t t-if="acc['prev_bill']"> (<t t-out="acc['prev_bill'].name"/>)</t></span><b t-out="fmt(acc['opening'])"/></div>
+                    <div class="op">−</div>
+                    <div class="green"><span>Payments received</span><b t-out="fmt(acc['received'])"/></div>
+                    <div class="op">+</div>
+                    <div><span>Other debits</span><b t-out="fmt(acc['other_debits'])"/></div>
+                    <div class="op">+</div>
+                    <div><span>This bill</span><b t-out="fmt(bill.amount_total)"/></div>
+                    <div class="op">=</div>
+                    <div class="hl"><span>Total outstanding</span><b t-out="fmt(acc['total'])"/></div>
+                </div>
+                <div class="small text-muted mt-2">This bill: paid <t t-out="fmt(bill.amount_paid)"/> · balance due on this bill <b t-out="fmt(bill.amount_due)"/> (payments are adjusted against the oldest bill first).</div>
+            </section>
+            <div class="bpf-cols">
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>Filling details by vehicle</h3></div>
+                    <div class="table-responsive">
+                        <table class="table bpf-table">
+                            <thead><tr><th>Date</th><th>Slip</th><th>Product</th><th class="text-end">Odometer</th><th class="text-end">Qty</th><th class="text-end">Rate</th><th class="text-end">Amount</th></tr></thead>
+                            <tbody>
+                                <t t-foreach="bill.vehicle_summary()" t-as="v">
+                                    <tr class="bpf-group"><td colspan="7"><i class="fa fa-truck" title="Vehicle"/> <b t-out="v['vehicle']"/> · <t t-out="v['fills']"/> fill(s) · <t t-out="fmt(v['qty'])"/> L · <t t-out="currency.symbol"/> <t t-out="fmt(v['amount'])"/></td></tr>
+                                    <tr t-foreach="v['sales']" t-as="s">
+                                        <td class="bpf-nw" t-out="dfmt(s.date)"/>
+                                        <td><t t-out="s.slip_no or s.name"/> <a t-attf-href="/my/fuel/slip/#{s.id}/pdf" target="_blank" class="bpf-link"><i class="fa fa-print"/></a></td>
+                                        <td t-out="s.product_id.name"/>
+                                        <td class="text-end" t-out="'{:,.0f}'.format(s.odometer) if s.odometer else '-'"/>
+                                        <td class="text-end" t-out="fmt(s.qty)"/>
+                                        <td class="text-end" t-out="fmt(s.rate - s.discount)"/>
+                                        <td class="text-end fw-bold" t-out="fmt(s.amount)"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot><tr><td colspan="4">Bill total</td><td class="text-end" t-out="fmt(bill.qty_total)"/><td/><td class="text-end" t-out="fmt(bill.amount_total)"/></tr></tfoot>
+                        </table>
+                    </div>
+                </section>
+                <section class="bpf-card">
+                    <div class="bpf-card-head"><h3>Product summary</h3></div>
+                    <div t-foreach="bill.product_summary()" t-as="r" class="bpf-month-row" t-attf-style="--prod: #{r['product'].color or '#0b5fa5'}">
+                        <span class="dot"/><span class="flex-grow-1" t-out="r['product'].name"/>
+                        <span class="text-muted me-3"><t t-out="fmt(r['qty'])"/></span><b t-out="fmt(r['amount'])"/>
+                    </div>
+                    <div class="bpf-card-head mt-4"><h3>How to pay</h3></div>
+                    <div class="small">
+                        <div t-if="company.pump_upi_id">UPI: <b t-out="company.pump_upi_id"/></div>
+                        <div t-if="company.pump_bank_account"><t t-out="company.pump_bank_name"/> · A/c <b t-out="company.pump_bank_account"/> · IFSC <t t-out="company.pump_bank_ifsc"/></div>
+                        <div class="mt-1">Quote <b t-out="bill.name"/> as the payment reference.</div>
+                    </div>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================ Vehicles ============================ -->
+    <template id="portal_fuel_vehicles" name="Fuel Portal Vehicles">
+        <t t-call="zivoit_fuel_management.portal_fuel_layout">
+            <t t-set="page_title">My Vehicles</t>
+            <t t-set="page_sub" t-value="'%s registered vehicle(s) · mileage from odometer readings on slips' % len(rows)"/>
+            <section t-if="anomalies" class="bpf-insight danger mb-3">
+                <i class="fa fa-exclamation-triangle"/>
+                <div><div class="fw-bold">AI flagged <t t-out="len(anomalies)"/> unusual filling(s) in the last 30 days</div>
+                    <div class="small"><t t-foreach="anomalies[:4]" t-as="a"><t t-out="a['vehicle']"/> on <t t-out="a['date']"/>: <t t-out="a['flag']"/><t t-if="not a_last"> · </t></t></div></div>
+            </section>
+            <div class="bpf-veh-grid">
+                <div t-foreach="rows" t-as="r" class="bpf-veh">
+                    <t t-set="v" t-value="r['v']"/>
+                    <div class="bpf-veh-head">
+                        <div class="bpf-plate" t-out="v.name"/>
+                        <span class="text-muted small" t-out="dict(v._fields['vehicle_type'].selection).get(v.vehicle_type)"/>
+                    </div>
+                    <div class="bpf-veh-stats">
+                        <div><span>This month</span><b><t t-out="fmt(v.month_qty)"/> L</b></div>
+                        <div><span>Spend</span><b><t t-out="currency.symbol"/> <t t-out="fmt(v.month_amount)"/></b></div>
+                        <div><span>Avg mileage</span><b t-out="('%.1f km/L' % v.avg_kmpl) if v.avg_kmpl else '—'"/></div>
+                        <div><span>Last fill</span><b t-out="dfmt(v.last_fill_date) or '—'"/></div>
+                    </div>
+                    <t t-set="c" t-value="[x for x in chart if x['v'] == v][0]"/>
+                    <div class="bpf-spark">
+                        <div t-foreach="c['vals']" t-as="val" class="bar" t-attf-style="height: #{max(4, val / c['max'] * 100)}%" t-att-title="'%s: %.0f L' % (months[val_index].strftime('%b'), val)">
+                            <span t-out="months[val_index].strftime('%b')"/>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <a class="btn btn-sm bpf-btn-outline" t-attf-href="/my/fuel/slips?vehicle=#{v.name}&amp;date_from=#{months[0]}&amp;date_to=#{today}">Slips</a>
+                        <a class="btn btn-sm bpf-btn-outline" t-attf-href="/my/fuel/indent?vehicle=#{v.id}&amp;product=#{v.product_id.id or ''}">Indent</a>
+                    </div>
+                </div>
+            </div>
+            <div t-if="not rows" class="bpf-card text-muted">No vehicles registered. Ask the station to add your vehicles.</div>
+        </t>
+    </template>
+
+    <!-- ============================ Not linked ============================ -->
+    <template id="portal_fuel_not_linked" name="Fuel Portal - not linked">
+        <t t-call="web.frontend_layout">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+            <div class="bpf-empty">
+                <img t-attf-src="/web/binary/company_logo?company=#{company.id}" alt="Logo"/>
+                <h2>No fuel credit account linked</h2>
+                <p>Your login is not linked to a credit customer of <b t-out="company.pump_outlet_name or company.name"/>.
+                    Please contact the station office.</p>
+                <a href="/my" class="btn bpf-btn-primary">Back to My Account</a>
+                <a href="/web/session/logout?redirect=/web/login" class="btn btn-link">Logout</a>
+            </div>
+        </t>
+    </template>
+</odoo>

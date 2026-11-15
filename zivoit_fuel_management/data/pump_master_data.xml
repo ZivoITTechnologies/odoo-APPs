@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ============ Chart of ledger accounts ============ -->
+        <record id="acc_cash" model="pump.account"><field name="code">1001</field><field name="name">Cash in Hand</field><field name="account_type">cash</field></record>
+        <record id="acc_bank" model="pump.account"><field name="code">1101</field><field name="name">Bank - Current Account</field><field name="account_type">bank</field></record>
+        <record id="acc_card" model="pump.account"><field name="code">1201</field><field name="name">Card (POS) Settlement</field><field name="account_type">card</field></record>
+        <record id="acc_upi" model="pump.account"><field name="code">1202</field><field name="name">UPI / Wallet Settlement</field><field name="account_type">card</field></record>
+        <record id="acc_fleet" model="pump.account"><field name="code">1203</field><field name="name">Fleet Card (SmartFleet) Settlement</field><field name="account_type">card</field></record>
+        <record id="acc_debtors" model="pump.account"><field name="code">1301</field><field name="name">Sundry Debtors - Credit Customers</field><field name="account_type">receivable</field></record>
+        <record id="acc_credit_clearing" model="pump.account"><field name="code">1302</field><field name="name">Unbilled Credit Sales (Clearing)</field><field name="account_type">clearing</field></record>
+        <record id="acc_staff_advance" model="pump.account"><field name="code">1401</field><field name="name">Staff Advances</field><field name="account_type">asset</field></record>
+        <record id="acc_security_deposit" model="pump.account"><field name="code">1501</field><field name="name">Security Deposit with Oil Company</field><field name="account_type">asset</field></record>
+        <record id="acc_creditors" model="pump.account"><field name="code">2001</field><field name="name">Sundry Creditors - Suppliers</field><field name="account_type">payable</field></record>
+        <record id="acc_customer_deposit" model="pump.account"><field name="code">2101</field><field name="name">Customer Security Deposits</field><field name="account_type">liability</field></record>
+        <record id="acc_capital" model="pump.account"><field name="code">3001</field><field name="name">Proprietor Capital</field><field name="account_type">equity</field></record>
+        <record id="acc_opening" model="pump.account"><field name="code">3999</field><field name="name">Opening Balance Adjustment</field><field name="account_type">equity</field></record>
+        <record id="acc_sale_ms" model="pump.account"><field name="code">4001</field><field name="name">Sales - Petrol (MS)</field><field name="account_type">income</field></record>
+        <record id="acc_sale_hsd" model="pump.account"><field name="code">4002</field><field name="name">Sales - Diesel (HSD)</field><field name="account_type">income</field></record>
+        <record id="acc_sale_premium" model="pump.account"><field name="code">4003</field><field name="name">Sales - Premium Fuel</field><field name="account_type">income</field></record>
+        <record id="acc_sale_lube" model="pump.account"><field name="code">4010</field><field name="name">Sales - Lubricants</field><field name="account_type">income</field></record>
+        <record id="acc_commission" model="pump.account"><field name="code">4100</field><field name="name">Dealer Commission / Other Income</field><field name="account_type">income</field></record>
+        <record id="acc_purchase_fuel" model="pump.account"><field name="code">5001</field><field name="name">Purchase - Fuel</field><field name="account_type">expense</field></record>
+        <record id="acc_purchase_lube" model="pump.account"><field name="code">5002</field><field name="name">Purchase - Lubricants</field><field name="account_type">expense</field></record>
+        <record id="acc_salary" model="pump.account"><field name="code">6001</field><field name="name">Salaries &amp; Wages</field><field name="account_type">expense</field></record>
+        <record id="acc_electricity" model="pump.account"><field name="code">6002</field><field name="name">Electricity Charges</field><field name="account_type">expense</field></record>
+        <record id="acc_maintenance" model="pump.account"><field name="code">6003</field><field name="name">Repairs &amp; Maintenance</field><field name="account_type">expense</field></record>
+        <record id="acc_bank_charges" model="pump.account"><field name="code">6004</field><field name="name">Bank &amp; Card Charges</field><field name="account_type">expense</field></record>
+        <record id="acc_general_exp" model="pump.account"><field name="code">6010</field><field name="name">General Expenses</field><field name="account_type">expense</field></record>
+        <record id="acc_fleet_fuel" model="pump.account"><field name="code">6030</field><field name="name">Fleet - Fuel Consumption</field><field name="account_type">expense</field></record>
+        <record id="acc_fleet_maintenance" model="pump.account"><field name="code">6031</field><field name="name">Fleet - Repairs &amp; Maintenance</field><field name="account_type">expense</field></record>
+        <record id="acc_trip_expense" model="pump.account"><field name="code">6032</field><field name="name">Fleet - Trip Expenses (Toll, Allowance)</field><field name="account_type">expense</field></record>
+        <record id="acc_short_excess" model="pump.account"><field name="code">6020</field><field name="name">Cash Short / Excess</field><field name="account_type">expense</field></record>
+
+        <!-- ============ Fleet service types ============ -->
+        <record id="svc_engine_oil" model="fleet.service.type"><field name="name">Engine Oil &amp; Filter Change</field><field name="category">service</field></record>
+        <record id="svc_general" model="fleet.service.type"><field name="name">General Service</field><field name="category">service</field></record>
+        <record id="svc_tyre" model="fleet.service.type"><field name="name">Tyre Rotation / Replacement</field><field name="category">service</field></record>
+        <record id="svc_brake" model="fleet.service.type"><field name="name">Brake Inspection</field><field name="category">service</field></record>
+        <record id="svc_calibration" model="fleet.service.type"><field name="name">Tanker Calibration &amp; Valve Check</field><field name="category">service</field></record>
+        <record id="svc_breakdown" model="fleet.service.type"><field name="name">Breakdown Repair</field><field name="category">service</field></record>
+
+        <!-- ============ Shifts ============ -->
+        <record id="shift_1" model="pump.shift"><field name="name">Shift 1 (06:00-14:00)</field><field name="sequence">1</field><field name="start_time">6</field><field name="end_time">14</field></record>
+        <record id="shift_2" model="pump.shift"><field name="name">Shift 2 (14:00-22:00)</field><field name="sequence">2</field><field name="start_time">14</field><field name="end_time">22</field></record>
+        <record id="shift_3" model="pump.shift"><field name="name">Shift 3 (22:00-06:00)</field><field name="sequence">3</field><field name="start_time">22</field><field name="end_time">6</field></record>
+
+        <!-- ============ Supplier ============ -->
+        <record id="partner_bpcl_supplier" model="res.partner">
+            <field name="name">Oil Marketing Company (Supplier)</field>
+            <field name="is_company" eval="True"/>
+            <field name="is_pump_supplier" eval="True"/>
+        </record>
+
+        <!-- ============ Products ============ -->
+        <record id="product_ms" model="pump.product">
+            <field name="name">Petrol (MS)</field><field name="code">MS</field><field name="sequence">1</field>
+            <field name="hsn_code">27101241</field><field name="tax_note">VAT (outside GST)</field>
+            <field name="color">#16a34a</field>
+            <field name="income_account_id" ref="acc_sale_ms"/><field name="purchase_account_id" ref="acc_purchase_fuel"/>
+        </record>
+        <record id="product_hsd" model="pump.product">
+            <field name="name">Diesel (HSD)</field><field name="code">HSD</field><field name="sequence">2</field>
+            <field name="hsn_code">27101943</field><field name="tax_note">VAT (outside GST)</field>
+            <field name="color">#0b5fa5</field>
+            <field name="income_account_id" ref="acc_sale_hsd"/><field name="purchase_account_id" ref="acc_purchase_fuel"/>
+        </record>
+        <record id="product_speed" model="pump.product">
+            <field name="name">Speed (Premium Petrol)</field><field name="code">SPD</field><field name="sequence">3</field>
+            <field name="hsn_code">27101241</field><field name="tax_note">VAT (outside GST)</field>
+            <field name="color">#e11d48</field>
+            <field name="income_account_id" ref="acc_sale_premium"/><field name="purchase_account_id" ref="acc_purchase_fuel"/>
+        </record>
+        <record id="product_lube_4t" model="pump.product">
+            <field name="name">MAK 4T Plus 20W40 (1 Ltr)</field><field name="code">MAK4T</field><field name="sequence">10</field>
+            <field name="product_type">lube</field><field name="uom">Nos</field>
+            <field name="hsn_code">27101980</field><field name="tax_note">GST 18%</field><field name="color">#f59e0b</field>
+            <field name="income_account_id" ref="acc_sale_lube"/><field name="purchase_account_id" ref="acc_purchase_lube"/>
+        </record>
+        <record id="product_lube_15w40" model="pump.product">
+            <field name="name">MAK Multigrade 15W40 (5 Ltr)</field><field name="code">MAK15</field><field name="sequence">11</field>
+            <field name="product_type">lube</field><field name="uom">Nos</field>
+            <field name="hsn_code">27101980</field><field name="tax_note">GST 18%</field><field name="color">#a855f7</field>
+            <field name="income_account_id" ref="acc_sale_lube"/><field name="purchase_account_id" ref="acc_purchase_lube"/>
+        </record>
+    </data>
+
+    <record id="ir_cron_pump_fleet_alerts" model="ir.cron">
+        <field name="name">Fuel Station: fleet document &amp; maintenance alerts</field>
+        <field name="model_id" ref="fleet.model_fleet_vehicle"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_pump_fleet_alerts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

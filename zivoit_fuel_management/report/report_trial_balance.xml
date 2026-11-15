@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_trial_balance">
+        <t t-call="web.basic_layout">
+            <t t-set="company" t-value="res_company"/>
+            <div class="page bpcl-rpt">
+                <t t-set="report_title">Trial Balance</t>
+                <t t-set="report_subtitle" t-value="'%s to %s' % (date_from.strftime('%d-%m-%Y'), date_to.strftime('%d-%m-%Y'))"/>
+                <t t-call="zivoit_fuel_management.report_bpcl_header"/>
+                <table class="table table-sm bpcl-rpt-table">
+                    <thead>
+                        <tr><th>Code</th><th>Account</th><th>Group</th>
+                            <th class="text-end">Opening</th><th class="text-end">Debit</th>
+                            <th class="text-end">Credit</th><th class="text-end">Closing</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="rows" t-as="r">
+                            <td t-out="r['code']"/><td t-out="r['name']"/><td t-out="r['type']"/>
+                            <td class="text-end" t-out="drcr(r['opening'])"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(r['debit'])"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(r['credit'])"/>
+                            <td class="text-end" t-out="drcr(r['closing'])"/>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="bpcl-rpt-total">
+                            <td colspan="3">Total</td>
+                            <td class="text-end" t-out="drcr(sum(r['opening'] for r in rows))"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(sum(r['debit'] for r in rows))"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(sum(r['credit'] for r in rows))"/>
+                            <td class="text-end" t-out="drcr(sum(r['closing'] for r in rows))"/>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_bill_document">
+        <t t-call="web.basic_layout">
+            <t t-set="company" t-value="res_company"/>
+            <t t-set="p" t-value="o.partner_id"/>
+            <t t-set="acc" t-value="o.account_summary()"/>
+            <t t-set="sym" t-value="o.currency_id.symbol or ''"/>
+            <t t-set="m" t-value="lambda v: '{:,.2f}'.format(v or 0.0)"/>
+            <div class="page bpcl-rpt bpcl-bill">
+                <t t-set="report_title">Credit Bill</t>
+                <t t-set="report_subtitle" t-value="'Tax-exempt fuel supply on credit'"/>
+                <t t-call="zivoit_fuel_management.report_bpcl_header"/>
+
+                <!-- 1. Who / what / how much -->
+                <table class="bb-top">
+                    <tr>
+                        <td class="bb-to">
+                            <div class="bb-label">Bill To</div>
+                            <div class="bb-name" t-out="p.name"/>
+                            <div t-out="', '.join(x for x in [p.street, p.city, p.zip] if x)"/>
+                            <div t-if="p.vat">GSTIN: <t t-out="p.vat"/></div>
+                            <div>Customer Code: <b t-out="p.pump_code"/> · Credit days: <t t-out="p.pump_credit_days"/></div>
+                        </td>
+                        <td class="bb-meta">
+                            <table>
+                                <tr><td>Bill No.</td><td><b t-out="o.name"/></td></tr>
+                                <tr><td>Bill Date</td><td t-out="o.date.strftime('%d-%m-%Y')"/></tr>
+                                <tr><td>Billing Period</td><td><t t-out="o.date_from.strftime('%d-%m-%Y')"/> to <t t-out="o.date_to.strftime('%d-%m-%Y')"/></td></tr>
+                                <tr><td>Fillings</td><td><t t-out="o.slip_count"/> slips · <t t-out="m(o.qty_total)"/> Ltr</td></tr>
+                            </table>
+                        </td>
+                        <td class="bb-pay">
+                            <div class="bb-pay-label">Amount Payable</div>
+                            <div class="bb-pay-amt"><t t-out="sym"/> <t t-out="m(acc['total'])"/></div>
+                            <div class="bb-pay-due">Pay by <b t-out="o.due_date and o.due_date.strftime('%d %b %Y')"/></div>
+                            <div t-attf-class="bb-stamp bb-#{o.payment_state}"
+                                 t-out="dict(o._fields['payment_state'].selection).get(o.payment_state, '').upper()"/>
+                            <div class="bb-pay-due" t-if="o.payment_state in ('partial', 'overdue')">Balance due on this bill: <b><t t-out="sym"/> <t t-out="m(o.amount_due)"/></b></div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- 2. Account summary -->
+                <div class="bb-h">Account Summary</div>
+                <table class="bb-sum">
+                    <tr>
+                        <td>
+                            <div class="bb-label">Balance as per last bill<t t-if="acc['prev_bill']"> (<t t-out="acc['prev_bill'].name"/>)</t></div>
+                            <div class="bb-num"><t t-out="m(acc['opening'])"/></div>
+                        </td>
+                        <td class="bb-op">−</td>
+                        <td>
+                            <div class="bb-label">Payments received since</div>
+                            <div class="bb-num bb-green"><t t-out="m(acc['received'])"/></div>
+                        </td>
+                        <td class="bb-op">+</td>
+                        <td>
+                            <div class="bb-label">Other debits</div>
+                            <div class="bb-num"><t t-out="m(acc['other_debits'])"/></div>
+                        </td>
+                        <td class="bb-op">+</td>
+                        <td>
+                            <div class="bb-label">This bill</div>
+                            <div class="bb-num"><t t-out="m(o.amount_total)"/></div>
+                        </td>
+                        <td class="bb-op">=</td>
+                        <td class="bb-total">
+                            <div class="bb-label">Total Outstanding</div>
+                            <div class="bb-num"><t t-out="m(acc['total'])"/></div>
+                        </td>
+                    </tr>
+                </table>
+                <div class="bb-small" t-if="acc['receipts']">
+                    Payments received:
+                    <t t-foreach="acc['receipts']" t-as="r"><t t-out="r.date.strftime('%d-%m')"/> <t t-out="m(r.credit)"/> (<t t-out="r.voucher_id.cheque_no or r.voucher_id.name"/>)<t t-if="not r_last">; </t></t>
+                </div>
+
+                <!-- 3. Vehicle-wise & product summary -->
+                <table style="width:100%; margin-top:8px;">
+                    <tr>
+                        <td style="width:62%; vertical-align:top; padding-right:10px;">
+                            <div class="bb-h">Vehicle-wise Summary</div>
+                            <table class="table table-sm bpcl-rpt-table">
+                                <thead><tr><th>Vehicle</th><th>Product</th><th class="text-center">Fills</th><th class="text-end">Qty</th><th class="text-end">Amount</th><th class="text-end">Share</th></tr></thead>
+                                <tr t-foreach="o.vehicle_summary()" t-as="v">
+                                    <td><b t-out="v['vehicle']"/></td>
+                                    <td t-out="v['products']"/>
+                                    <td class="text-center" t-out="v['fills']"/>
+                                    <td class="text-end" t-out="m(v['qty'])"/>
+                                    <td class="text-end" t-out="m(v['amount'])"/>
+                                    <td class="text-end" t-out="'{:.0f}%'.format(v['amount'] / o.amount_total * 100 if o.amount_total else 0)"/>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="vertical-align:top;">
+                            <div class="bb-h">Product Summary</div>
+                            <table class="table table-sm bpcl-rpt-table">
+                                <thead><tr><th>Product</th><th class="text-end">Qty</th><th class="text-end">Amount</th></tr></thead>
+                                <tr t-foreach="o.product_summary()" t-as="r">
+                                    <td t-out="r['product'].name"/>
+                                    <td class="text-end" t-out="m(r['qty'])"/>
+                                    <td class="text-end" t-out="m(r['amount'])"/>
+                                </tr>
+                                <tr class="bpcl-rpt-total"><td>Total</td><td class="text-end" t-out="m(o.qty_total)"/><td class="text-end" t-out="m(o.amount_total)"/></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- 4. Filling details grouped by vehicle -->
+                <div class="bb-h">Filling Details</div>
+                <table class="table table-sm bpcl-rpt-table bb-detail">
+                    <thead>
+                        <tr><th>#</th><th>Date</th><th>Slip No.</th><th>Product</th><th class="text-end">Odometer</th>
+                            <th class="text-end">Qty</th><th class="text-end">Rate</th><th class="text-end">Amount</th></tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="n" t-value="0"/>
+                        <t t-foreach="o.vehicle_summary()" t-as="v">
+                            <tr class="bb-group"><td colspan="8"><t t-out="v['vehicle']"/> — <t t-out="v['fills']"/> fill(s)</td></tr>
+                            <tr t-foreach="v['sales']" t-as="s">
+                                <t t-set="n" t-value="n + 1"/>
+                                <td t-out="n"/>
+                                <td t-out="s.date.strftime('%d-%m-%Y')"/>
+                                <td><t t-out="s.slip_no or s.name"/><t t-if="s.source == 'delivery'"> (doorstep)</t></td>
+                                <td t-out="s.product_id.name"/>
+                                <td class="text-end" t-out="'{:,.0f}'.format(s.odometer) if s.odometer else '-'"/>
+                                <td class="text-end" t-out="m(s.qty)"/>
+                                <td class="text-end" t-out="m(s.rate - s.discount)"/>
+                                <td class="text-end" t-out="m(s.amount)"/>
+                            </tr>
+                            <tr class="bb-sub"><td colspan="5" class="text-end">Subtotal <t t-out="v['vehicle']"/></td>
+                                <td class="text-end" t-out="m(v['qty'])"/><td/><td class="text-end" t-out="m(v['amount'])"/></tr>
+                        </t>
+                    </tbody>
+                    <tfoot>
+                        <tr class="bpcl-rpt-total"><td colspan="5">Bill Total</td>
+                            <td class="text-end" t-out="m(o.qty_total)"/><td/><td class="text-end" t-out="m(o.amount_total)"/></tr>
+                    </tfoot>
+                </table>
+                <div class="bb-small"><b>This bill in words:</b> <t t-out="o.currency_id.amount_to_text(o.amount_total)"/></div>
+
+                <!-- 5. How to pay -->
+                <table class="bb-howto">
+                    <tr>
+                        <td t-if="o.upi_qr_data_uri(acc['total'])" style="width:120px; text-align:center;">
+                            <img t-att-src="o.upi_qr_data_uri(acc['total'])" style="width:108px; height:108px;"/>
+                            <div class="bb-small">Scan to pay by UPI</div>
+                        </td>
+                        <td>
+                            <div class="bb-h" style="margin-top:0;">How to pay</div>
+                            <div t-if="company.pump_upi_id">UPI: <b t-out="company.pump_upi_id"/></div>
+                            <div t-if="company.pump_bank_account">Bank: <t t-out="company.pump_bank_name"/> · A/c <b t-out="company.pump_bank_account"/> · IFSC <t t-out="company.pump_bank_ifsc"/></div>
+                            <div>Please quote bill no. <b t-out="o.name"/> in the payment reference.</div>
+                            <div t-if="company.pump_bill_terms" class="bb-terms" t-out="company.pump_bill_terms"/>
+                        </td>
+                    </tr>
+                </table>
+                <table style="width:100%; margin-top:26px;">
+                    <tr>
+                        <td>Customer's Signature</td>
+                        <td class="text-end">For <t t-out="company.pump_outlet_name or company.name"/><br/><br/>Authorised Signatory</td>
+                    </tr>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_bill">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="zivoit_fuel_management.report_bill_document"/>
+        </t>
+    </template>
+</odoo>

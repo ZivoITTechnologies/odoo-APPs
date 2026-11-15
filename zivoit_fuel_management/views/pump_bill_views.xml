@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pump_bill_list" model="ir.ui.view">
+        <field name="name">pump.bill.list</field>
+        <field name="model">pump.bill</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancel'" decoration-info="state == 'draft'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="slip_count"/>
+                <field name="qty_total" sum="Qty"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="due_date" optional="show"/>
+                <field name="amount_due" sum="Due"/>
+                <field name="payment_state" widget="badge" decoration-success="payment_state == 'paid'"
+                       decoration-warning="payment_state == 'partial'" decoration-danger="payment_state == 'overdue'"
+                       decoration-info="payment_state == 'not_paid'"/>
+                <field name="state" widget="badge" decoration-success="state == 'posted'"/>
+                <button name="action_print" type="object" icon="fa-print" title="Print" invisible="state != 'posted'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pump_bill_form" model="ir.ui.view">
+        <field name="name">pump.bill.form</field>
+        <field name="model">pump.bill</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_load_slips" type="object" string="Load Unbilled Slips" invisible="state != 'draft'"/>
+                    <button name="action_post" type="object" string="Post Bill" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_print" type="object" string="Print Bill" class="btn-primary" invisible="state != 'posted'"/>
+                    <button name="action_cancel" type="object" string="Cancel Bill" invisible="state != 'posted'"
+                            groups="zivoit_fuel_management.group_pump_manager" confirm="Cancel this bill and release its slips?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Paid" bg_color="text-bg-success" invisible="payment_state != 'paid' or state != 'posted'"/>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger" invisible="payment_state != 'overdue'"/>
+                    <widget name="web_ribbon" title="Partially Paid" bg_color="text-bg-warning" invisible="payment_state != 'partial'"/>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="due_date"/>
+                        </group>
+                        <group>
+                            <field name="date_from" readonly="state != 'draft'"/>
+                            <field name="date_to" readonly="state != 'draft'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="previous_balance" invisible="state != 'posted'"/>
+                            <field name="amount_total" class="fs-4 fw-bold"/>
+                            <field name="amount_paid" invisible="state != 'posted'"/>
+                            <field name="amount_due" invisible="state != 'posted'" class="fw-bold"/>
+                            <field name="payment_state" invisible="state != 'posted'"/>
+                            <field name="voucher_id" invisible="not voucher_id"/>
+                        </group>
+                    </group>
+                    <field name="sale_ids" readonly="1">
+                        <list>
+                            <field name="date"/><field name="name"/><field name="slip_no"/><field name="vehicle_no"/>
+                            <field name="product_id"/><field name="qty" sum="Qty"/><field name="rate"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="amount" sum="Amount"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pump_bill_search" model="ir.ui.view">
+        <field name="name">pump.bill.search</field>
+        <field name="model">pump.bill</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="posted" string="Posted" domain="[('state', '=', 'posted')]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="date" string="Bill Date" date="date"/>
+                <group>
+                    <filter name="g_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
+                    <filter name="g_month" string="Month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pump_bill" model="ir.actions.act_window">
+        <field name="name">Period Bills</field>
+        <field name="res_model">pump.bill</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
