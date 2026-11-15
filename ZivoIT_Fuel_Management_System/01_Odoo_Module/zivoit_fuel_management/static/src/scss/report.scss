@@ -1,0 +1,59 @@
+.bpcl-rpt {
+    font-size: 11px;
+    color: #13233a;
+    .bpcl-rpt-head-table { width: 100%; td { vertical-align: middle; padding: 2px 6px; } }
+    .bpcl-rpt-outlet { font-size: 18px; font-weight: 700; color: #0a2f5c; }
+    .bpcl-rpt-sub { font-size: 10px; color: #55657a; }
+    .bpcl-rpt-title { font-size: 17px; font-weight: 700; color: #0b5fa5; text-transform: uppercase; letter-spacing: 1px; }
+    .bpcl-rpt-band { height: 0; margin: 6px 0 10px; border-top: 4px solid #0a2f5c; border-bottom: 3px solid #ffd400; }
+    .bpcl-rpt-info { width: 100%; margin-bottom: 10px; border: 1px solid #d5dfeb; td { padding: 6px 10px; vertical-align: top; } }
+    .bpcl-rpt-label { color: #55657a; font-size: 10px; text-transform: uppercase; }
+    .bpcl-rpt-h { color: #0a2f5c; font-weight: 700; margin: 8px 0 4px; }
+    .bpcl-rpt-table {
+        thead th { background: #0a2f5c; color: #fff; font-weight: 600; border: 0; padding: 4px 6px; }
+        td { padding: 3px 6px; border-color: #e1e8f0; }
+        tbody tr:nth-child(even) td { background: #f5f8fc; }
+        .bpcl-rpt-total td { background: #fff3b0 !important; font-weight: 700; border-top: 2px solid #0a2f5c; }
+        .bpcl-rpt-opening td { font-style: italic; }
+    }
+    .bpcl-rpt-summary { margin-left: auto; min-width: 45%; td { padding: 3px 8px; border-bottom: 1px solid #e1e8f0; } }
+    .bpcl-rpt-terms { margin-top: 14px; padding: 8px 10px; border-left: 4px solid #ffd400; background: #fafbfd; font-size: 10px; }
+    .bpcl-rpt-bank { margin-top: 8px; font-size: 10px; }
+    .bpcl-rpt-foot { margin-top: 14px; text-align: center; color: #8391a4; font-size: 9px; }
+}
+.bpcl-slip {
+    font-size: 11px;
+    .bpcl-slip-table { width: 100%; td { padding: 3px 2px; border-bottom: 1px dotted #c9d3df; } td:first-child { color: #55657a; width: 34%; } }
+    .bpcl-slip-amt td { font-size: 14px; font-weight: 700; color: #0a2f5c; }
+}
+
+// ---------- Credit bill (clear layout)
+.bpcl-bill {
+    .bb-top { width: 100%; border: 1px solid #d5dfeb; margin-bottom: 8px;
+        > tbody > tr > td, > tr > td { vertical-align: top; padding: 8px 10px; } }
+    .bb-label { font-size: 9px; color: #55657a; text-transform: uppercase; letter-spacing: .4px; }
+    .bb-name { font-size: 14px; font-weight: 700; color: #0a2f5c; }
+    .bb-to { width: 38%; border-right: 1px solid #e1e8f0; }
+    .bb-meta { width: 30%; table td { padding: 1px 6px 1px 0; } table td:first-child { color: #55657a; } }
+    .bb-pay { background: #0a2f5c; color: #fff; text-align: center; width: 32%; }
+    .bb-pay-label { font-size: 10px; text-transform: uppercase; color: #ffd400; letter-spacing: 1px; }
+    .bb-pay-amt { font-size: 22px; font-weight: 800; margin: 2px 0; }
+    .bb-pay-due { font-size: 11px; }
+    .bb-stamp { display: inline-block; margin-top: 6px; padding: 2px 10px; border: 2px solid #fff; font-weight: 800;
+        font-size: 11px; letter-spacing: 1px; border-radius: 4px; }
+    .bb-paid { background: #16a34a; border-color: #16a34a; }
+    .bb-overdue { background: #e11d48; border-color: #e11d48; }
+    .bb-partial { background: #f59e0b; border-color: #f59e0b; color: #13233a; }
+    .bb-h { font-size: 11px; font-weight: 800; color: #0a2f5c; text-transform: uppercase; letter-spacing: .6px;
+        margin: 10px 0 4px; border-bottom: 2px solid #ffd400; display: inline-block; padding-bottom: 1px; }
+    .bb-sum { width: 100%; td { text-align: center; padding: 6px 4px; background: #f5f8fc; border: 1px solid #e1e8f0; }
+        .bb-op { background: transparent; border: 0; font-size: 16px; font-weight: 700; color: #55657a; width: 14px; }
+        .bb-num { font-size: 13px; font-weight: 700; color: #0a2f5c; }
+        .bb-green { color: #15803d; }
+        .bb-total { background: #fff3b0; .bb-num { font-size: 15px; } } }
+    .bb-small { font-size: 9.5px; color: #33445c; margin-top: 4px; }
+    .bb-detail { .bb-group td { background: #e7f0fb !important; font-weight: 700; color: #0a2f5c; }
+        .bb-sub td { background: #fafbfd !important; font-style: italic; } }
+    .bb-howto { width: 100%; margin-top: 10px; border: 1px dashed #9fb6d2; td { padding: 6px 10px; vertical-align: top; } }
+    .bb-terms { white-space: pre-line; font-size: 9px; color: #55657a; margin-top: 4px; }
+}

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_statement_document">
+        <t t-call="web.basic_layout">
+            <t t-set="company" t-value="res_company"/>
+            <div class="page bpcl-rpt">
+                <t t-set="report_title">Account Statement</t>
+                <t t-set="report_subtitle" t-value="'%s to %s' % (d['date_from'].strftime('%d-%m-%Y'), d['date_to'].strftime('%d-%m-%Y'))"/>
+                <t t-call="zivoit_fuel_management.report_bpcl_header"/>
+                <t t-set="p" t-value="d['partner']"/>
+                <table class="bpcl-rpt-info">
+                    <tr>
+                        <td style="width:55%;">
+                            <div class="bpcl-rpt-label">Customer</div>
+                            <div class="fw-bold fs-6" t-out="p.name"/>
+                            <div t-out="', '.join(x for x in [p.street, p.city, p.zip] if x)"/>
+                            <div t-if="p.vat">GSTIN: <t t-out="p.vat"/></div>
+                        </td>
+                        <td>
+                            <div><span class="bpcl-rpt-label">Customer Code:</span> <t t-out="p.pump_code"/></div>
+                            <div><span class="bpcl-rpt-label">Credit Limit:</span> <t t-out="'{:,.2f}'.format(d['credit_limit'])"/></div>
+                            <div><span class="bpcl-rpt-label">Credit Days:</span> <t t-out="p.pump_credit_days"/></div>
+                            <div><span class="bpcl-rpt-label">Unbilled Slips:</span> <t t-out="'{:,.2f}'.format(d['unbilled'])"/></div>
+                        </td>
+                    </tr>
+                </table>
+                <table class="table table-sm bpcl-rpt-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Date</th><th>Particulars</th><th>V. Type</th><th>V. No.</th>
+                            <th class="text-end">Debit</th><th class="text-end">Credit</th><th class="text-end">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bpcl-rpt-opening">
+                            <td>1</td><td t-out="d['date_from'].strftime('%d-%m-%Y')"/><td>Opening Balance</td><td/><td/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(d['opening']) if d['opening'] &gt; 0 else ''"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(-d['opening']) if d['opening'] &lt; 0 else ''"/>
+                            <td class="text-end" t-out="drcr(d['opening'])"/>
+                        </tr>
+                        <tr t-foreach="d['lines']" t-as="l">
+                            <td t-out="l_index + 2"/>
+                            <td t-out="l['date'].strftime('%d-%m-%Y')"/>
+                            <td>
+                                <t t-out="l['particulars']"/>
+                                <div t-if="l['cheque'] and l['cheque'] not in (l['particulars'] or '')" class="text-muted small">Ref: <t t-out="l['cheque']"/></div>
+                            </td>
+                            <td t-out="l['vtype']"/>
+                            <td t-out="l['vno']"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(l['debit']) if l['debit'] else ''"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(l['credit']) if l['credit'] else ''"/>
+                            <td class="text-end" t-out="drcr(l['balance'])"/>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="bpcl-rpt-total">
+                            <td colspan="5">Total for the period</td>
+                            <td class="text-end" t-out="'{:,.2f}'.format(d['total_debit'])"/>
+                            <td class="text-end" t-out="'{:,.2f}'.format(d['total_credit'])"/>
+                            <td class="text-end" t-out="drcr(d['closing'])"/>
+                        </tr>
+                    </tfoot>
+                </table>
+                <table class="bpcl-rpt-summary">
+                    <tr><td>Opening Balance</td><td class="text-end" t-out="drcr(d['opening'])"/></tr>
+                    <tr><td>Add: Bills / Debits</td><td class="text-end" t-out="'{:,.2f}'.format(d['total_debit'])"/></tr>
+                    <tr><td>Less: Receipts / Credits</td><td class="text-end" t-out="'{:,.2f}'.format(d['total_credit'])"/></tr>
+                    <tr class="fw-bold"><td>Closing Balance</td><td class="text-end" t-out="drcr(d['closing'])"/></tr>
+                </table>
+                <div class="bpcl-rpt-terms" t-if="company.pump_bill_terms">
+                    <b>Terms</b>
+                    <div t-out="company.pump_bill_terms" style="white-space:pre-line;"/>
+                </div>
+                <t t-call="zivoit_fuel_management.report_bpcl_footer_bank"/>
+                <div class="bpcl-rpt-foot">This is a computer generated statement. Please report discrepancies within 7 days.</div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_statement">
+        <t t-foreach="statements" t-as="d">
+            <t t-call="zivoit_fuel_management.report_statement_document"/>
+        </t>
+    </template>
+</odoo>

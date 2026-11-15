@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pump_product_list" model="ir.ui.view">
+        <field name="name">pump.product.list</field>
+        <field name="model">pump.product</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="product_type"/>
+                <field name="uom"/>
+                <field name="current_rate"/>
+                <field name="rate_date"/>
+                <field name="stock_qty"/>
+                <field name="tax_note" optional="hide"/>
+                <field name="color" widget="color" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pump_product_form" model="ir.ui.view">
+        <field name="name">pump.product.form</field>
+        <field name="model">pump.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Diesel (HSD)"/></h1>
+                    </div>
+                    <group>
+                        <group string="Product">
+                            <field name="code"/>
+                            <field name="product_type"/>
+                            <field name="uom"/>
+                            <field name="hsn_code"/>
+                            <field name="tax_note"/>
+                            <field name="color" widget="color"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Pricing &amp; Accounts">
+                            <field name="current_rate"/>
+                            <field name="rate_date"/>
+                            <field name="stock_qty" invisible="product_type != 'fuel'"/>
+                            <field name="income_account_id"/>
+                            <field name="purchase_account_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Rate History" name="rates">
+                            <field name="rate_ids">
+                                <list editable="top">
+                                    <field name="date"/>
+                                    <field name="rate"/>
+                                    <field name="previous_rate"/>
+                                    <field name="change" decoration-danger="change &gt; 0" decoration-success="change &lt; 0"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Tanks" name="tanks" invisible="product_type != 'fuel'">
+                            <field name="tank_ids" readonly="1">
+                                <list>
+                                    <field name="name"/><field name="capacity"/><field name="stock_qty"/>
+                                    <field name="fill_percent" widget="progressbar"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pump_product" model="ir.actions.act_window">
+        <field name="name">Products &amp; Fuels</field>
+        <field name="res_model">pump.product</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html"><p class="o_view_nocontent_smiling_face">Add your fuels and lubricants</p></field>
+    </record>
+
+    <record id="view_pump_rate_list" model="ir.ui.view">
+        <field name="name">pump.rate.list</field>
+        <field name="model">pump.rate</field>
+        <field name="arch" type="xml">
+            <list editable="top" default_order="date desc">
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="rate"/>
+                <field name="previous_rate"/>
+                <field name="change" decoration-danger="change &gt; 0" decoration-success="change &lt; 0"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pump_rate_search" model="ir.ui.view">
+        <field name="name">pump.rate.search</field>
+        <field name="model">pump.rate</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="date"/>
+                <group>
+                    <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_pump_rate_graph" model="ir.ui.view">
+        <field name="name">pump.rate.graph</field>
+        <field name="model">pump.rate</field>
+        <field name="arch" type="xml">
+            <graph type="line" string="Rate Trend">
+                <field name="date" interval="day"/>
+                <field name="product_id"/>
+                <field name="rate" type="measure" operator="max"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_pump_rate" model="ir.actions.act_window">
+        <field name="name">Sale Rate History</field>
+        <field name="res_model">pump.rate</field>
+        <field name="view_mode">list,graph</field>
+    </record>
+</odoo>
