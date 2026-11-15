@@ -2,7 +2,7 @@
 import calendar
 from datetime import date as dt_date, timedelta
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import AccessError, UserError
 
 VTYPE_LABEL = {
@@ -105,7 +105,7 @@ class ResPartner(models.Model):
     def write(self, vals):
         if 'pump_credit_limit' in vals and not self.env.su and \
                 not self.env.user.has_group('zivoit_fuel_management.group_pump_manager'):
-            raise UserError(_('Only a Petrol Pump Manager can change credit limits.'))
+            raise UserError(self.env._('Only a Petrol Pump Manager can change credit limits.'))
         res = super().write(vals)
         if vals.get('is_pump_customer'):
             for p in self.filtered(lambda x: not x.pump_code):
@@ -119,7 +119,7 @@ class ResPartner(models.Model):
         if self.env.su or self.env.user.has_group('zivoit_fuel_management.group_pump_user'):
             return
         if self.commercial_partner_id != self.env.user.partner_id.commercial_partner_id:
-            raise AccessError(_('You can only view your own account.'))
+            raise AccessError(self.env._('You can only view your own account.'))
 
     def pump_ledger(self, date_from, date_to):
         """Customer ledger with opening balance and running balance."""
@@ -212,37 +212,37 @@ class ResPartner(models.Model):
     # ------------------------------------------------------------------
     def action_pump_slips(self):
         self.ensure_one()
-        return {'type': 'ir.actions.act_window', 'name': _('Filling Slips'), 'res_model': 'pump.credit.sale',
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Filling Slips'), 'res_model': 'pump.credit.sale',
                 'view_mode': 'list,form', 'domain': [('partner_id', '=', self.commercial_partner_id.id)],
                 'context': {'default_partner_id': self.commercial_partner_id.id}}
 
     def action_pump_bills(self):
         self.ensure_one()
-        return {'type': 'ir.actions.act_window', 'name': _('Period Bills'), 'res_model': 'pump.bill',
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Period Bills'), 'res_model': 'pump.bill',
                 'view_mode': 'list,form', 'domain': [('partner_id', '=', self.commercial_partner_id.id)],
                 'context': {'default_partner_id': self.commercial_partner_id.id}}
 
     def action_pump_ledger(self):
         self.ensure_one()
-        return {'type': 'ir.actions.act_window', 'name': _('Customer Ledger'),
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Customer Ledger'),
                 'res_model': 'pump.ledger.wizard', 'view_mode': 'form', 'target': 'new',
                 'context': {'default_partner_id': self.commercial_partner_id.id}}
 
     def action_pump_receipt(self):
         self.ensure_one()
-        return {'type': 'ir.actions.act_window', 'name': _('Quick Receipt'),
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Quick Receipt'),
                 'res_model': 'pump.quick.voucher.wizard', 'view_mode': 'form', 'target': 'new',
                 'context': {'default_partner_id': self.commercial_partner_id.id, 'default_voucher_type': 'receipt'}}
 
     def action_pump_portal_access(self):
         self.ensure_one()
-        return {'type': 'ir.actions.act_window', 'name': _('Customer Portal Login'),
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Customer Portal Login'),
                 'res_model': 'pump.portal.access.wizard', 'view_mode': 'form', 'target': 'new',
                 'context': {'default_partner_id': self.id}}
 
     def action_pump_opening_balance(self):
         self.ensure_one()
-        return {'type': 'ir.actions.act_window', 'name': _('Opening Balance'),
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Opening Balance'),
                 'res_model': 'pump.opening.wizard', 'view_mode': 'form', 'target': 'new',
                 'context': {'default_partner_id': self.commercial_partner_id.id}}
 
@@ -256,7 +256,7 @@ class ResPartner(models.Model):
                     p.pump_exposure + extra_amount > p.pump_credit_limit + 0.005:
                 if not self.env.user.has_group('zivoit_fuel_management.group_pump_manager') or \
                         not self.env.context.get('pump_override_limit'):
-                    raise UserError(_(
+                    raise UserError(self.env._(
                         'Credit limit exceeded for %(p)s.\nLimit: %(l).2f | Outstanding + unbilled: %(e).2f | '
                         'This slip: %(a).2f.\nRecord a receipt or ask a manager to increase the limit.',
                         p=p.display_name, l=p.pump_credit_limit, e=p.pump_exposure, a=extra_amount))

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import AccessError
 
 
@@ -12,7 +12,7 @@ class PumpDashboard(models.AbstractModel):
     @api.model
     def get_dashboard_data(self, date=None):
         if not self.env.user.has_group('zivoit_fuel_management.group_pump_user'):
-            raise AccessError(_('Only fuel station users can open the dashboard.'))
+            raise AccessError(self.env._('Only fuel station users can open the dashboard.'))
         day = fields.Date.to_date(date) if date else fields.Date.context_today(self)
         Line = self.env['pump.shift.sheet.line']
         VLine = self.env['pump.voucher.line']

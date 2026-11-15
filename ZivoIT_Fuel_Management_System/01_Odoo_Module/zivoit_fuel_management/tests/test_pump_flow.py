@@ -204,7 +204,7 @@ class TestPumpFlow(PumpCommon):
         bill = self.env['pump.bill'].generate_bills(self.d0, self.today, self.customer)
         html, _t = report._render_qweb_html('zivoit_fuel_management.action_report_bill', bill.ids)
         self.assertIn(bill.name.encode(), html)
-        from odoo.addons.zivoit_fuel_management.controllers.excel import ledger_xlsx
+        from ..controllers.excel import ledger_xlsx
         content = ledger_xlsx(self.env, self.customer, self.d0, self.today)
         self.assertTrue(content.startswith(b'PK'))
 

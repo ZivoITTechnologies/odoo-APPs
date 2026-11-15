@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 from .pump_account import PARTNER_BALANCE_FIELDS
@@ -82,7 +82,7 @@ class PumpCreditSale(models.Model):
     def _check_values(self):
         for s in self:
             if s.qty <= 0 or s.rate <= 0:
-                raise ValidationError(_('Quantity and rate must be positive.'))
+                raise ValidationError(self.env._('Quantity and rate must be positive.'))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -98,7 +98,7 @@ class PumpCreditSale(models.Model):
         for s in self.filtered(lambda x: x.state == 'draft'):
             if s.vehicle_id and s.vehicle_id.tank_capacity and s.product_id.product_type == 'fuel' \
                     and s.qty > s.vehicle_id.tank_capacity * 1.05 and not self.env.context.get('pump_override_limit'):
-                raise UserError(_('%(q).2f L is more than the tank capacity of %(v)s (%(c).0f L). Check the slip.',
+                raise UserError(self.env._('%(q).2f L is more than the tank capacity of %(v)s (%(c).0f L). Check the slip.',
                                   q=s.qty, v=s.vehicle_id.name, c=s.vehicle_id.tank_capacity))
             s.partner_id._pump_check_credit(s.amount)
             if s.name in (False, '/'):
@@ -110,21 +110,21 @@ class PumpCreditSale(models.Model):
 
     def action_cancel(self):
         if any(s.state == 'billed' for s in self):
-            raise UserError(_('Billed slips cannot be cancelled. Cancel the bill first.'))
+            raise UserError(self.env._('Billed slips cannot be cancelled. Cancel the bill first.'))
         self.write({'state': 'cancel'})
 
     def action_draft(self):
         self.filtered(lambda s: s.state == 'cancel').write({'state': 'draft'})
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_confirmed(self):
         if any(s.state in ('confirmed', 'billed') for s in self):
-            raise UserError(_('Confirmed slips cannot be deleted; cancel them instead.'))
-        return super().unlink()
+            raise UserError(self.env._('Confirmed slips cannot be deleted; cancel them instead.'))
 
     def write(self, vals):
         locked = {'partner_id', 'product_id', 'qty', 'rate', 'discount', 'date'}
         if locked & set(vals) and any(s.state == 'billed' for s in self):
-            raise UserError(_('Billed slips cannot be modified.'))
+            raise UserError(self.env._('Billed slips cannot be modified.'))
         res = super().write(vals)
         if {'state', 'amount', 'qty', 'rate', 'partner_id', 'discount'} & set(vals):
             self.env.flush_all()
@@ -168,9 +168,9 @@ class PumpIndent(models.Model):
     def _check_qty(self):
         for r in self:
             if r.indent_type == 'qty' and r.qty <= 0:
-                raise ValidationError(_('Enter a quantity for the indent.'))
+                raise ValidationError(self.env._('Enter a quantity for the indent.'))
             if r.indent_type == 'amount' and r.amount <= 0:
-                raise ValidationError(_('Enter an amount for the indent.'))
+                raise ValidationError(self.env._('Enter an amount for the indent.'))
 
     def action_approve(self):
         self.filtered(lambda r: r.state == 'requested').write({'state': 'approved'})
@@ -181,7 +181,7 @@ class PumpIndent(models.Model):
     def action_create_slip(self):
         self.ensure_one()
         if self.state not in ('requested', 'approved'):
-            raise UserError(_('Only open indents can be converted.'))
+            raise UserError(self.env._('Only open indents can be converted.'))
         rate = self.product_id.get_rate(fields.Date.context_today(self))
         qty = self.qty
         if self.indent_type == 'amount' and rate:

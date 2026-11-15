@@ -1,5 +1,11 @@
 # Changelog
 
+## 19.0.2.0.1 — App Store release fix
+- Fixed: uninstalling the app no longer fails when posted vouchers, bills or slips exist (deletion rules moved to `@api.ondelete`).
+- All translatable strings now use `self.env._` / `request.env._` (Odoo 19 standard).
+- Removed the deprecated `description` and superfluous `installable` manifest keys; version bumped so the App Store rescans.
+- Minor clean-up: logging instead of silent exception handling; relative import in tests.
+
 ## 19.0.2.0.0 — Fuel & Fleet Suite (AI)
 - **New:** Fleet integration with Odoo Fleet:
   - tankers with compartments, bowsers and service vehicles;

@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
 from datetime import timedelta
 
-from odoo import fields, http, _
+from odoo import fields, http
 from odoo.addons.portal.controllers.portal import CustomerPortal
 from odoo.addons.portal.controllers.web import Home
 from odoo.exceptions import ValidationError
 from odoo.http import content_disposition, request
 
 from .excel import ledger_xlsx, slips_xlsx, xlsx_response
+
+_logger = logging.getLogger(__name__)
 
 
 def _parse_date(value, default):
@@ -244,9 +247,9 @@ class PumpCustomerPortal(CustomerPortal):
     def fuel_ai_ask(self, question='', **kw):
         partner = self._pump_partner()
         if not partner:
-            return request.make_json_response({'answer': _('Your login is not linked to a fuel account.'), 'links': []})
+            return request.make_json_response({'answer': request.env._('Your login is not linked to a fuel account.'), 'links': []})
         if not request.env.company.sudo().pump_ai_enabled:
-            return request.make_json_response({'answer': _('The assistant is turned off by the station.'), 'links': []})
+            return request.make_json_response({'answer': request.env._('The assistant is turned off by the station.'), 'links': []})
         res = request.env['pump.ai'].sudo().ask(question, partner=partner, mode='customer')
         return request.make_json_response({'answer': res['answer'], 'links': res.get('links', []),
                                            'source': res.get('source')})
@@ -274,7 +277,7 @@ class PumpCustomerPortal(CustomerPortal):
             try:
                 domain.append(('product_id', '=', int(kw['product'])))
             except ValueError:
-                pass
+                _logger.debug('Ignoring invalid product filter %r', kw.get('product'))
         if kw.get('status') in ('confirmed', 'billed'):
             domain.append(('state', '=', kw['status']))
         return domain
@@ -328,13 +331,13 @@ class PumpCustomerPortal(CustomerPortal):
                 if vehicle and vehicle.partner_id != partner:
                     vehicle = request.env['pump.vehicle']
                 if not product:
-                    raise ValidationError(_('Please select a product.'))
+                    raise ValidationError(request.env._('Please select a product.'))
                 itype = kw.get('indent_type') if kw.get('indent_type') in ('qty', 'amount', 'full') else 'qty'
                 qty = float(kw.get('qty') or 0)
                 amount = qty if itype == 'amount' else 0.0
                 est = amount or qty * product.get_rate()
                 if partner.pump_credit_limit and partner.pump_exposure + est > partner.pump_credit_limit:
-                    raise ValidationError(_('This indent exceeds your available credit of %.2f.',
+                    raise ValidationError(request.env._('This indent exceeds your available credit of %.2f.',
                                             partner.pump_available_credit))
                 ind = Indent.create({
                     'partner_id': partner.id, 'vehicle_id': vehicle.id if vehicle else False,
@@ -343,8 +346,8 @@ class PumpCustomerPortal(CustomerPortal):
                     'comment': (kw.get('comment') or '')[:200], 'source': 'portal',
                     'date': _parse_date(kw.get('date'), fields.Date.context_today(request.env.user)),
                 })
-                ind.message_post(body=_('Indent raised from customer portal by %s', request.env.user.name))
-                success = _('Indent %s submitted. The station will confirm it shortly.', ind.name)
+                ind.message_post(body=request.env._('Indent raised from customer portal by %s', request.env.user.name))
+                success = request.env._('Indent %s submitted. The station will confirm it shortly.', ind.name)
             except (ValueError, ValidationError) as e:
                 error = str(e.args[0]) if getattr(e, 'args', None) else str(e)
         prefill = {k: kw.get(k, '') for k in ('vehicle', 'product', 'qty', 'type')} \

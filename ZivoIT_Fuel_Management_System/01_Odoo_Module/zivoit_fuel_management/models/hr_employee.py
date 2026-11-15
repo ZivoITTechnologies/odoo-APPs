@@ -2,7 +2,7 @@
 import calendar
 from datetime import date as dt_date
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 PUMP_ROLES = [('manager', 'Manager'), ('cashier', 'Cashier'), ('dsm', 'Filler / DSM'),
@@ -67,7 +67,7 @@ class PumpSalarySheet(models.Model):
     @api.depends('month', 'year')
     def _compute_name(self):
         for s in self:
-            s.name = _('Salary %(m)s %(y)s', m=calendar.month_name[int(s.month)] if s.month else '', y=s.year)
+            s.name = self.env._('Salary %(m)s %(y)s', m=calendar.month_name[int(s.month)] if s.month else '', y=s.year)
 
     @api.depends('line_ids.net')
     def _compute_total(self):
@@ -94,13 +94,13 @@ class PumpSalarySheet(models.Model):
     def action_post(self):
         for s in self.filtered(lambda x: x.state == 'draft'):
             if not s.line_ids:
-                raise UserError(_('Compute the salary sheet first.'))
+                raise UserError(self.env._('Compute the salary sheet first.'))
             credit_acc = self.env.ref('zivoit_fuel_management.acc_cash' if s.pay_account == 'cash' else 'zivoit_fuel_management.acc_bank')
             lines = [{'account_id': self.env.ref('zivoit_fuel_management.acc_salary').id, 'debit': s.total_net + sum(s.line_ids.mapped('advance')),
                       'name': s.name}]
             if sum(s.line_ids.mapped('advance')):
                 lines.append({'account_id': self.env.ref('zivoit_fuel_management.acc_staff_advance').id,
-                              'credit': sum(s.line_ids.mapped('advance')), 'name': _('Advance recovered')})
+                              'credit': sum(s.line_ids.mapped('advance')), 'name': self.env._('Advance recovered')})
             lines.append({'account_id': credit_acc.id, 'credit': s.total_net, 'name': s.name})
             voucher = self.env['pump.voucher']._create_posted(
                 lines, voucher_type='payment', date=dt_date(s.year, int(s.month), 1).replace(

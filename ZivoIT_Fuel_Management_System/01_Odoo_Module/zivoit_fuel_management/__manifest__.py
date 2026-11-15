@@ -1,30 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Fuel Management System',
-    'version': '19.0.2.0.0',
+    'version': '19.0.2.0.1',
     'category': 'Industries',
     'summary': 'ZivoIT Fuel Management System - AI-enabled petrol pump ERP: nozzle shifts, credit billing with payment status and UPI QR, '
                'tanks and DIP, own tanker fleet, trips, doorstep delivery, maintenance, accounts, payroll '
                'and a customer self-service portal with an AI assistant.',
-    'description': """
-ZivoIT Fuel Management System (AI enabled)
-==========================================
-A complete fuel station platform for oil-company retail outlets (BPCL, IOCL, HPCL and private dealers):
-
-* Admin dashboard with AI insights, Ask AI box, fleet status and stock-out forecast
-* Shift sheets from nozzle meter readings with card, UPI, fleet-card and cash reconciliation
-* Credit customers, vehicles, credit limits, filling slips, indents and period bills
-* Clear credit bills: amount payable, payment status (paid / partial / overdue), vehicle-wise summary, UPI QR
-* Tanks, DIP chart, DIP variance, tanker receipts and stock ledger
-* Own fleet (Odoo Fleet): tankers with compartments, delivery bowsers, depot and doorstep-delivery trips,
-  trip expenses, fleet fuel logs with km/L, preventive maintenance, job cards, document expiry alerts
-* Double-entry ledger: receipts, payments, journals, contra, card/UPI settlement, day book, trial balance
-* Staff roles, attendance and monthly salary sheet
-* AI engine: stock-out forecast, suspicious slip detection, credit-risk grade and suggested limit,
-  staff and customer assistant (built-in, works offline; optional Anthropic Claude or OpenAI)
-* Customer portal: dashboard, ledger, month view, statements, bills, slips, vehicles, indents, rates, AI chat,
-  PDF and Excel downloads
-""",
     'author': 'ZivoIT Technologies',
     'website': 'https://www.zivoit.com',
     'license': 'OPL-1',
@@ -82,5 +63,4 @@ A complete fuel station platform for oil-company retail outlets (BPCL, IOCL, HPC
     'support': 'info@zivoit.com',
     'maintainer': 'ZivoIT Technologies',
     'application': True,
-    'installable': True,
 }

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-15 17:07+0000\n"
-"PO-Revision-Date: 2026-11-15 17:07+0000\n"
+"POT-Creation-Date: 2026-11-15 17:51+0000\n"
+"PO-Revision-Date: 2026-11-15 17:51+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1158,11 +1158,6 @@ msgstr ""
 #. module: zivoit_fuel_management
 #: model:ir.model.fields.selection,name:zivoit_fuel_management.selection__res_partner__pump_risk_grade__b
 msgid "B - Moderate"
-msgstr ""
-
-#. module: zivoit_fuel_management
-#: model:ir.model,name:zivoit_fuel_management.model_pump_demo
-msgid "Fuel Station Demo Data Loader"
 msgstr ""
 
 #. module: zivoit_fuel_management
@@ -3239,6 +3234,11 @@ msgid "Fuel Station AI Engine"
 msgstr ""
 
 #. module: zivoit_fuel_management
+#: model:ir.model,name:zivoit_fuel_management.model_pump_demo
+msgid "Fuel Station Demo Data Loader"
+msgstr ""
+
+#. module: zivoit_fuel_management
 #: model_terms:ir.ui.view,arch_db:zivoit_fuel_management.login_layout_bpcl
 msgid "Fuel Station Management"
 msgstr ""
@@ -4565,6 +4565,12 @@ msgstr ""
 #. module: zivoit_fuel_management
 #: model:ir.model.fields.selection,name:zivoit_fuel_management.selection__pump_bill__payment_state__not_paid
 msgid "Not Paid"
+msgstr ""
+
+#. module: zivoit_fuel_management
+#. odoo-python
+#: code:addons/zivoit_fuel_management/controllers/excel.py:0
+msgid "Not allowed"
 msgstr ""
 
 #. module: zivoit_fuel_management

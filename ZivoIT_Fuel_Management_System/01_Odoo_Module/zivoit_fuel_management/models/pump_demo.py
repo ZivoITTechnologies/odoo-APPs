@@ -4,12 +4,15 @@
 All customer, employee and vehicle names are fictional.
 """
 import base64
+import logging
 import math
 import random
 from datetime import timedelta
 
 from odoo import api, fields, models
 from odoo.tools.misc import file_open
+
+_logger = logging.getLogger(__name__)
 
 DEMO_DAYS = 75
 
@@ -59,7 +62,7 @@ class PumpDemo(models.AbstractModel):
             with file_open('zivoit_fuel_management/static/src/img/bpcl_logo.png', 'rb') as f:
                 vals['logo'] = base64.b64encode(f.read())
         except OSError:
-            pass
+            _logger.info('Demo logo not found; company logo left unchanged')
         company.write(vals)
         ref('partner_bpcl_supplier').name = 'Bharat Petroleum Corporation Ltd.'
         inr = env.ref('base.INR')

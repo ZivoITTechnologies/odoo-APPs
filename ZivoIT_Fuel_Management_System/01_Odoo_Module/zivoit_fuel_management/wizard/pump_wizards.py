@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -19,7 +19,7 @@ class PumpLedgerWizard(models.TransientModel):
 
     def _check(self):
         if self.date_from > self.date_to:
-            raise ValidationError(_('From date must be before To date.'))
+            raise ValidationError(self.env._('From date must be before To date.'))
 
     def action_pdf(self):
         self._check()
@@ -35,7 +35,7 @@ class PumpLedgerWizard(models.TransientModel):
     def action_view(self):
         self._check()
         return {
-            'type': 'ir.actions.act_window', 'name': _('Ledger: %s', self.partner_id.display_name),
+            'type': 'ir.actions.act_window', 'name': self.env._('Ledger: %s', self.partner_id.display_name),
             'res_model': 'pump.voucher.line', 'view_mode': 'list,pivot',
             'views': [(self.env.ref('zivoit_fuel_management.view_voucher_line_ledger_list').id, 'list'), (False, 'pivot')],
             'domain': [('partner_id', '=', self.partner_id.commercial_partner_id.id), ('state', '=', 'posted'),
@@ -79,35 +79,35 @@ class PumpQuickVoucherWizard(models.TransientModel):
     def action_confirm(self):
         self.ensure_one()
         if self.amount <= 0:
-            raise UserError(_('Amount must be positive.'))
+            raise UserError(self.env._('Amount must be positive.'))
         ref = lambda x: self.env.ref('zivoit_fuel_management.%s' % x)
         money = ref('acc_cash' if self.via == 'cash' else 'acc_bank')
         partner = self.partner_id.commercial_partner_id if self.partner_id else False
         label = self.narration or ''
         if self.voucher_type == 'receipt':
             if not partner:
-                raise UserError(_('Select the customer.'))
+                raise UserError(self.env._('Select the customer.'))
             receivable = ref('acc_debtors') if partner.is_pump_customer else (self.account_id or ref('acc_commission'))
-            label = label or _('Receipt %(m)s %(c)s', m=dict(self._fields['payment_mode'].selection).get(self.payment_mode), c=self.cheque_no or '')
+            label = label or self.env._('Receipt %(m)s %(c)s', m=dict(self._fields['payment_mode'].selection).get(self.payment_mode), c=self.cheque_no or '')
             lines = [{'account_id': money.id, 'debit': self.amount, 'name': label},
                      {'account_id': receivable.id, 'credit': self.amount, 'name': label,
                       'partner_id': partner.id if receivable.account_type in ('receivable', 'payable') else False}]
         elif self.voucher_type == 'payment':
             target = self.account_id or (ref('acc_creditors') if partner else False)
             if not target:
-                raise UserError(_('Select the expense / ledger account.'))
-            label = label or _('Payment - %s', target.name)
+                raise UserError(self.env._('Select the expense / ledger account.'))
+            label = label or self.env._('Payment - %s', target.name)
             lines = [{'account_id': target.id, 'debit': self.amount, 'name': label,
                       'partner_id': partner.id if partner and target.account_type in ('receivable', 'payable') else False},
                      {'account_id': money.id, 'credit': self.amount, 'name': label}]
         elif self.contra_direction == 'settle':
             if not self.settle_account_id:
-                raise UserError(_('Select the card / UPI settlement account.'))
+                raise UserError(self.env._('Select the card / UPI settlement account.'))
             if self.charges < 0 or self.charges >= self.amount:
-                raise UserError(_('Charges must be between 0 and the settled amount.'))
-            label = label or _('Settlement - %s', self.settle_account_id.name)
+                raise UserError(self.env._('Charges must be between 0 and the settled amount.'))
+            label = label or self.env._('Settlement - %s', self.settle_account_id.name)
             lines = [{'account_id': ref('acc_bank').id, 'debit': self.amount - self.charges, 'name': label},
-                     {'account_id': ref('acc_bank_charges').id, 'debit': self.charges, 'name': _('MDR / bank charges')},
+                     {'account_id': ref('acc_bank_charges').id, 'debit': self.charges, 'name': self.env._('MDR / bank charges')},
                      {'account_id': self.settle_account_id.id, 'credit': self.amount, 'name': label}]
         else:
             cash, bank = ref('acc_cash'), ref('acc_bank')
@@ -150,12 +150,12 @@ class PumpBillGenerateWizard(models.TransientModel):
     def action_generate(self):
         self.ensure_one()
         if self.date_from > self.date_to:
-            raise ValidationError(_('From date must be before To date.'))
+            raise ValidationError(self.env._('From date must be before To date.'))
         bills = self.env['pump.bill'].generate_bills(self.date_from, self.date_to, self.partner_ids or None,
                                                      self.bill_date, post=self.post)
         if not bills:
-            raise UserError(_('No unbilled filling slips found for the selected period.'))
-        return {'type': 'ir.actions.act_window', 'name': _('Generated Bills'), 'res_model': 'pump.bill',
+            raise UserError(self.env._('No unbilled filling slips found for the selected period.'))
+        return {'type': 'ir.actions.act_window', 'name': self.env._('Generated Bills'), 'res_model': 'pump.bill',
                 'view_mode': 'list,form', 'domain': [('id', 'in', bills.ids)]}
 
 
@@ -212,7 +212,7 @@ class PumpPortalAccessWizard(models.TransientModel):
     def action_grant(self):
         self.ensure_one()
         if len(self.password) < 6:
-            raise UserError(_('Use a password of at least 6 characters.'))
+            raise UserError(self.env._('Use a password of at least 6 characters.'))
         portal = self.env.ref('base.group_portal')
         user = self.existing_user_id
         if user:
@@ -224,10 +224,10 @@ class PumpPortalAccessWizard(models.TransientModel):
                 'name': self.partner_id.name, 'login': self.login, 'password': self.password,
                 'partner_id': self.partner_id.id, 'group_ids': [(6, 0, [portal.id])],
             })
-        self.partner_id.message_post(body=_('Customer portal login granted: %s', self.login))
+        self.partner_id.message_post(body=self.env._('Customer portal login granted: %s', self.login))
         return {'type': 'ir.actions.client', 'tag': 'display_notification',
-                'params': {'title': _('Portal access ready'), 'type': 'success', 'sticky': True,
-                           'message': _('Login: %(l)s — share the password securely with the customer. '
+                'params': {'title': self.env._('Portal access ready'), 'type': 'success', 'sticky': True,
+                           'message': self.env._('Login: %(l)s — share the password securely with the customer. '
                                         'Portal URL: /my/fuel', l=user.login),
                            'next': {'type': 'ir.actions.act_window_close'}}}
 
@@ -247,10 +247,10 @@ class PumpOpeningWizard(models.TransientModel):
         partner = self.partner_id.commercial_partner_id
         self.env['pump.voucher']._create_posted([
             {'account_id': ref('acc_debtors').id, 'partner_id': partner.id,
-             'debit': amt if amt > 0 else 0.0, 'credit': -amt if amt < 0 else 0.0, 'name': _('Opening Balance')},
+             'debit': amt if amt > 0 else 0.0, 'credit': -amt if amt < 0 else 0.0, 'name': self.env._('Opening Balance')},
             {'account_id': ref('acc_opening').id, 'credit': amt if amt > 0 else 0.0,
-             'debit': -amt if amt < 0 else 0.0, 'name': _('Opening Balance')},
-        ], voucher_type='opening', date=self.date, partner_id=partner.id, narration=_('Opening balance'))
+             'debit': -amt if amt < 0 else 0.0, 'name': self.env._('Opening Balance')},
+        ], voucher_type='opening', date=self.date, partner_id=partner.id, narration=self.env._('Opening balance'))
         return {'type': 'ir.actions.act_window_close'}
 
 

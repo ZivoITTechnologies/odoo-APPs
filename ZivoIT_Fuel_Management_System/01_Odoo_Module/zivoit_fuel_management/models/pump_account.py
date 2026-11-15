@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_compare, float_is_zero
 
@@ -68,7 +68,7 @@ class PumpAccount(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Entries: %s', self.display_name),
+            'name': self.env._('Entries: %s', self.display_name),
             'res_model': 'pump.voucher.line',
             'view_mode': 'list,pivot',
             'domain': [('account_id', '=', self.id), ('state', '=', 'posted')],
@@ -113,16 +113,16 @@ class PumpVoucher(models.Model):
     def _check_balanced(self):
         for v in self:
             if not v.line_ids:
-                raise UserError(_('Voucher %s has no lines.', v.name))
+                raise UserError(self.env._('Voucher %s has no lines.', v.name))
             amt_dr = sum(v.line_ids.mapped('debit'))
             amt_cr = sum(v.line_ids.mapped('credit'))
             if float_compare(amt_dr, amt_cr, precision_digits=2) != 0:
-                raise UserError(_('Voucher is not balanced: Debit %(dr).2f vs Credit %(cr).2f.', dr=amt_dr, cr=amt_cr))
+                raise UserError(self.env._('Voucher is not balanced: Debit %(dr).2f vs Credit %(cr).2f.', dr=amt_dr, cr=amt_cr))
             if float_is_zero(amt_dr, precision_digits=2):
-                raise UserError(_('Voucher amount cannot be zero.'))
+                raise UserError(self.env._('Voucher amount cannot be zero.'))
             for line in v.line_ids:
                 if line.account_id.account_type in ('receivable', 'payable') and not line.partner_id:
-                    raise UserError(_('A party is required on line for account %s.', line.account_id.display_name))
+                    raise UserError(self.env._('A party is required on line for account %s.', line.account_id.display_name))
 
     def action_post(self):
         for v in self.filtered(lambda x: x.state == 'draft'):
@@ -141,7 +141,7 @@ class PumpVoucher(models.Model):
     def action_cancel(self):
         for v in self:
             if v.origin_model and not self.env.context.get('pump_from_origin'):
-                raise UserError(_('Voucher %s was generated automatically; cancel its source document instead.', v.name))
+                raise UserError(self.env._('Voucher %s was generated automatically; cancel its source document instead.', v.name))
         self.write({'state': 'cancel'})
         self._invalidate_balances()
         return True
@@ -149,13 +149,13 @@ class PumpVoucher(models.Model):
     def action_draft(self):
         for v in self:
             if v.origin_model:
-                raise UserError(_('Automatic vouchers cannot be reset to draft.'))
+                raise UserError(self.env._('Automatic vouchers cannot be reset to draft.'))
         self.write({'state': 'draft'})
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_posted(self):
         if any(v.state == 'posted' for v in self):
-            raise UserError(_('Posted vouchers cannot be deleted. Cancel them instead.'))
-        return super().unlink()
+            raise UserError(self.env._('Posted vouchers cannot be deleted. Cancel them instead.'))
 
     @api.model
     def _create_posted(self, vals_list_lines, **vals):
@@ -210,4 +210,4 @@ class PumpVoucherLine(models.Model):
         for line in self:
             if line.account_id.account_type == 'receivable' and line.partner_id \
                     and line.partner_id.commercial_partner_id != line.partner_id:
-                raise ValidationError(_('Use the company (commercial) contact on receivable lines.'))
+                raise ValidationError(self.env._('Use the company (commercial) contact on receivable lines.'))

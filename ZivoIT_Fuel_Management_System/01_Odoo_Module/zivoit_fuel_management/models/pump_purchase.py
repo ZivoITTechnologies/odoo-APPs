@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -39,19 +39,19 @@ class PumpPurchase(models.Model):
     def _check(self):
         for p in self:
             if p.qty <= 0 or p.rate <= 0:
-                raise ValidationError(_('Quantity and rate must be positive.'))
+                raise ValidationError(self.env._('Quantity and rate must be positive.'))
 
     def action_post(self):
         for p in self.filtered(lambda x: x.state == 'draft'):
             recv = p.received_qty or p.qty
             if p.tank_id.capacity and p.tank_id.stock_qty + recv > p.tank_id.capacity * 1.02:
-                raise UserError(_('Tank %(t)s has only %(u).0f Ltr ullage.', t=p.tank_id.name, u=p.tank_id.ullage))
+                raise UserError(self.env._('Tank %(t)s has only %(u).0f Ltr ullage.', t=p.tank_id.name, u=p.tank_id.ullage))
             if p.name in (False, '/'):
                 p.name = self.env['ir.sequence'].next_by_code('pump.purchase') or '/'
             self.env['pump.stock.move'].create({
                 'date': p.date, 'tank_id': p.tank_id.id, 'qty': recv, 'move_type': 'purchase',
                 'reference': '%s %s' % (p.name, p.invoice_no or ''), 'res_model': p._name, 'res_id': p.id})
-            label = _('%(prod)s %(q).0f Ltr - Inv %(inv)s', prod=p.product_id.name, q=p.qty, inv=p.invoice_no or '')
+            label = self.env._('%(prod)s %(q).0f Ltr - Inv %(inv)s', prod=p.product_id.name, q=p.qty, inv=p.invoice_no or '')
             credit_acc = self.env.ref('zivoit_fuel_management.acc_bank') if p.paid_from == 'bank' \
                 else self.env.ref('zivoit_fuel_management.acc_creditors')
             voucher = self.env['pump.voucher']._create_posted([

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -90,21 +90,21 @@ class PumpShiftSheet(models.Model):
         for s in self.filtered(lambda x: x.state == 'draft'):
             s._compute_totals()
             if not s.line_ids:
-                raise UserError(_('Add nozzle readings before posting.'))
+                raise UserError(self.env._('Add nozzle readings before posting.'))
             prev_open = self.search([('state', '=', 'draft'), ('id', '!=', s.id), '|',
                                      ('date', '<', s.date), '&', ('date', '=', s.date),
                                      ('shift_sequence', '<', s.shift_sequence)], limit=1)
             if prev_open:
-                raise UserError(_('Post earlier sheet %s first so meter readings stay in sequence.', prev_open.name))
+                raise UserError(self.env._('Post earlier sheet %s first so meter readings stay in sequence.', prev_open.name))
             for line in s.line_ids:
                 if line.closing < line.opening:
-                    raise UserError(_('Closing reading is lower than opening on nozzle %s.', line.nozzle_id.name))
+                    raise UserError(self.env._('Closing reading is lower than opening on nozzle %s.', line.nozzle_id.name))
                 if abs(line.opening - line.nozzle_id.last_reading) > 0.01:
-                    raise UserError(_('Opening reading of %(n)s (%(o).2f) does not match last closing (%(l).2f).',
+                    raise UserError(self.env._('Opening reading of %(n)s (%(o).2f) does not match last closing (%(l).2f).',
                                       n=line.nozzle_id.name, o=line.opening, l=line.nozzle_id.last_reading))
             if s.name in (False, '/'):
                 s.name = self.env['ir.sequence'].next_by_code('pump.shift.sheet') or '/'
-            label = _('Shift sale %(d)s %(s)s', d=s.date.strftime('%d-%m-%Y'), s=s.shift_id.name)
+            label = self.env._('Shift sale %(d)s %(s)s', d=s.date.strftime('%d-%m-%Y'), s=s.shift_id.name)
             lines = []
             by_product = {}
             for line in s.line_ids:
@@ -118,20 +118,20 @@ class PumpShiftSheet(models.Model):
                 lines.append({'account_id': product.income_account_id.id, 'credit': amount,
                               'name': '%s - %s' % (label, product.name)})
             lines += [
-                {'account_id': acc('acc_credit_clearing').id, 'debit': s.credit_amount, 'name': _('Credit slips')},
-                {'account_id': acc('acc_card').id, 'debit': s.card_amount, 'name': _('Card sale')},
-                {'account_id': acc('acc_upi').id, 'debit': s.upi_amount, 'name': _('UPI sale')},
-                {'account_id': acc('acc_fleet').id, 'debit': s.fleet_card_amount, 'name': _('Fleet card sale')},
+                {'account_id': acc('acc_credit_clearing').id, 'debit': s.credit_amount, 'name': self.env._('Credit slips')},
+                {'account_id': acc('acc_card').id, 'debit': s.card_amount, 'name': self.env._('Card sale')},
+                {'account_id': acc('acc_upi').id, 'debit': s.upi_amount, 'name': self.env._('UPI sale')},
+                {'account_id': acc('acc_fleet').id, 'debit': s.fleet_card_amount, 'name': self.env._('Fleet card sale')},
             ]
             if s.cash_collected:
-                lines.append({'account_id': acc('acc_cash').id, 'debit': s.cash_collected, 'name': _('Cash collected')})
+                lines.append({'account_id': acc('acc_cash').id, 'debit': s.cash_collected, 'name': self.env._('Cash collected')})
                 diff = s.cash_collected - s.expected_cash
                 lines.append({'account_id': acc('acc_short_excess').id, 'debit': -diff if diff < 0 else 0.0,
-                              'credit': diff if diff > 0 else 0.0, 'name': _('Cash short / excess')})
+                              'credit': diff if diff > 0 else 0.0, 'name': self.env._('Cash short / excess')})
             else:
-                lines.append({'account_id': acc('acc_cash').id, 'debit': s.expected_cash, 'name': _('Cash sale')})
+                lines.append({'account_id': acc('acc_cash').id, 'debit': s.expected_cash, 'name': self.env._('Cash sale')})
             if any(l.get('debit', 0) < -0.005 for l in lines if l['account_id'] == acc('acc_cash').id):
-                raise UserError(_('Non-cash collections exceed the total sale. Check card/UPI/credit amounts.'))
+                raise UserError(self.env._('Non-cash collections exceed the total sale. Check card/UPI/credit amounts.'))
             voucher = self.env['pump.voucher']._create_posted(
                 lines, voucher_type='shift', date=s.date, shift_id=s.shift_id.id, ref=s.name,
                 narration=label, origin_model=s._name, origin_id=s.id)
@@ -145,7 +145,7 @@ class PumpShiftSheet(models.Model):
             later = self.search([('state', '=', 'posted'), ('id', '!=', s.id), '|', ('date', '>', s.date),
                                  '&', ('date', '=', s.date), ('shift_sequence', '>', s.shift_sequence)], limit=1)
             if s.state == 'posted' and later:
-                raise UserError(_('Cancel later sheet %s first.', later.name))
+                raise UserError(self.env._('Cancel later sheet %s first.', later.name))
             if s.voucher_id:
                 s.voucher_id.with_context(pump_from_origin=True).action_cancel()
             self.env['pump.stock.move'].search([('res_model', '=', s._name), ('res_id', '=', s.id)]).unlink()
@@ -210,7 +210,7 @@ class PumpShiftSheetLine(models.Model):
     def _check_reading(self):
         for l in self:
             if l.closing < l.opening:
-                raise ValidationError(_('Closing reading (%(c).2f) cannot be below opening (%(o).2f) on %(n)s.',
+                raise ValidationError(self.env._('Closing reading (%(c).2f) cannot be below opening (%(o).2f) on %(n)s.',
                                         c=l.closing, o=l.opening, n=l.nozzle_id.name))
             if l.testing_qty < 0 or l.testing_qty > (l.closing - l.opening) + 0.001:
-                raise ValidationError(_('Testing quantity must be between 0 and the metered quantity.'))
+                raise ValidationError(self.env._('Testing quantity must be between 0 and the metered quantity.'))

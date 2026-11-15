@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -38,11 +38,11 @@ class PumpTank(models.Model):
         Move = self.env['pump.stock.move']
         for t in self:
             if Move.search_count([('tank_id', '=', t.id), ('move_type', '=', 'opening')]):
-                raise UserError(_('Opening stock already posted for %s.', t.name))
+                raise UserError(self.env._('Opening stock already posted for %s.', t.name))
             if t.opening_stock <= 0:
-                raise UserError(_('Enter the opening stock first.'))
+                raise UserError(self.env._('Enter the opening stock first.'))
             Move.create({'date': t.opening_date or fields.Date.context_today(self), 'tank_id': t.id,
-                         'qty': t.opening_stock, 'move_type': 'opening', 'reference': _('Opening stock')})
+                         'qty': t.opening_stock, 'move_type': 'opening', 'reference': self.env._('Opening stock')})
         return True
 
     def volume_from_dip(self, dip_mm):
@@ -50,7 +50,7 @@ class PumpTank(models.Model):
         self.ensure_one()
         chart = self.dip_chart_ids.sorted('dip_mm')
         if not chart:
-            raise UserError(_('No DIP chart defined for tank %s.', self.name))
+            raise UserError(self.env._('No DIP chart defined for tank %s.', self.name))
         if dip_mm <= chart[0].dip_mm:
             return chart[0].volume * (dip_mm / chart[0].dip_mm) if chart[0].dip_mm else chart[0].volume
         for lo, hi in zip(chart, chart[1:]):
@@ -62,7 +62,7 @@ class PumpTank(models.Model):
     def action_stock_moves(self):
         self.ensure_one()
         return {
-            'type': 'ir.actions.act_window', 'name': _('Stock Ledger: %s', self.name),
+            'type': 'ir.actions.act_window', 'name': self.env._('Stock Ledger: %s', self.name),
             'res_model': 'pump.stock.move', 'view_mode': 'list,pivot',
             'domain': [('tank_id', '=', self.id)],
         }
@@ -150,7 +150,7 @@ class PumpDipReading(models.Model):
                 self.env['pump.stock.move'].create({
                     'date': r.date, 'tank_id': r.tank_id.id, 'qty': r.variance,
                     'move_type': 'gain' if r.variance > 0 else 'loss',
-                    'reference': _('DIP %s', r.date), 'res_model': r._name, 'res_id': r.id,
+                    'reference': self.env._('DIP %s', r.date), 'res_model': r._name, 'res_id': r.id,
                 })
             r.state = 'posted'
 
@@ -199,5 +199,5 @@ class PumpStockMove(models.Model):
     def _check_capacity(self):
         for m in self:
             if m.qty > 0 and m.tank_id.capacity and m.tank_id.stock_qty > m.tank_id.capacity * 1.02:
-                raise ValidationError(_('Tank %(t)s would exceed its capacity of %(c).0f Ltr.',
+                raise ValidationError(self.env._('Tank %(t)s would exceed its capacity of %(c).0f Ltr.',
                                         t=m.tank_id.name, c=m.tank_id.capacity))

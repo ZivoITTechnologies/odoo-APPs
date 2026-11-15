@@ -142,7 +142,7 @@ class PumpExcelController(http.Controller):
     @http.route('/fuel/ledger/xlsx/<int:partner_id>', type='http', auth='user')
     def admin_ledger_xlsx(self, partner_id, date_from=None, date_to=None, **kw):
         if not request.env.user.has_group('zivoit_fuel_management.group_pump_user'):
-            raise AccessError('Not allowed')
+            raise AccessError(request.env._('Not allowed'))
         partner = request.env['res.partner'].browse(partner_id).exists()
         if not partner:
             raise request.not_found()

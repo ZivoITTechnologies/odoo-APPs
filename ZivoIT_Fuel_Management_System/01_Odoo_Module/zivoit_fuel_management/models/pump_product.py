@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -83,4 +83,4 @@ class PumpRate(models.Model):
     def _check_rate(self):
         for r in self:
             if r.rate <= 0:
-                raise ValidationError(_('Rate must be positive.'))
+                raise ValidationError(self.env._('Rate must be positive.'))

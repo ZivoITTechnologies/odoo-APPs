@@ -2,7 +2,7 @@
 import base64
 from urllib.parse import quote
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -61,7 +61,7 @@ class PumpBill(models.Model):
         self.ensure_one()
         res = {}
         for s in self.sale_ids.sorted(lambda x: (x.date, x.id)):
-            key = s.vehicle_no or _('Unregistered')
+            key = s.vehicle_no or self.env._('Unregistered')
             r = res.setdefault(key, {'vehicle': key, 'fills': 0, 'qty': 0.0, 'amount': 0.0, 'products': set(),
                                      'first': s.date, 'last': s.date, 'sales': []})
             r['fills'] += 1
@@ -154,18 +154,18 @@ class PumpBill(models.Model):
             if not b.sale_ids:
                 b.action_load_slips()
             if not b.sale_ids:
-                raise UserError(_('No unbilled slips for %s in the selected period.', b.partner_id.display_name))
+                raise UserError(self.env._('No unbilled slips for %s in the selected period.', b.partner_id.display_name))
             if b.name in (False, '/'):
                 b.name = self.env['ir.sequence'].next_by_code('pump.bill') or '/'
             partner = b.partner_id.commercial_partner_id
             b.previous_balance = partner._pump_balances().get(partner.id, 0.0)
-            label = _('Period Bill %(n)s (%(f)s to %(t)s)', n=b.name,
+            label = self.env._('Period Bill %(n)s (%(f)s to %(t)s)', n=b.name,
                       f=b.date_from.strftime('%d-%m-%Y'), t=b.date_to.strftime('%d-%m-%Y'))
             voucher = self.env['pump.voucher']._create_posted([
                 {'account_id': debtors.id, 'partner_id': partner.id, 'debit': b.amount_total, 'name': label},
                 {'account_id': clearing.id, 'credit': b.amount_total, 'name': label},
             ], voucher_type='sale', date=b.date, partner_id=partner.id, ref=b.name,
-                narration=_('%s filling slips', b.slip_count), origin_model=b._name, origin_id=b.id)
+                narration=self.env._('%s filling slips', b.slip_count), origin_model=b._name, origin_id=b.id)
             b.sale_ids.write({'state': 'billed'})
             b.write({'voucher_id': voucher.id, 'state': 'posted'})
         return True
@@ -179,9 +179,12 @@ class PumpBill(models.Model):
             b.state = 'cancel'
         return True
 
-    def unlink(self):
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_posted(self):
         if any(b.state == 'posted' for b in self):
-            raise UserError(_('Posted bills cannot be deleted. Cancel them first.'))
+            raise UserError(self.env._('Posted bills cannot be deleted. Cancel them first.'))
+
+    def unlink(self):
         self.sale_ids.write({'bill_id': False})
         return super().unlink()
 

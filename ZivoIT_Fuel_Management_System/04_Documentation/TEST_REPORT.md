@@ -48,6 +48,16 @@
 - Accounting check on 75-day demo: trial balance debits = credits; card/UPI settled to bank T+1.
 - Security: customer A receives 404 for customer B's bill and slip; portal user RPC to AI/dashboard raises AccessError.
 
+## Release 19.0.2.0.1 checks
+- **App Store scanner simulation:**
+  1. Built a Git repository with branch `19.0` and the module at the root.
+  2. Cloned that branch fresh.
+  3. Installed and tested from the clone: **28 tests, 0 failed, 0 errors**.
+- **Install log:** clean install with and without demo data; **0 warnings, 0 errors**.
+- **Uninstall:** uninstalled with demo data present (845 posted vouchers, 34 posted bills); the module reached the *uninstalled* state.
+- **pylint-odoo (Odoo 19 rules):** no errors. The only remaining findings are OCA-specific rules (OCA author, LGPL licence), which do not apply to paid App Store apps, plus cosmetic style notes.
+- **Strings:** translation template re-exported; every string is English.
+
 ## Bugs found and fixed during testing
 
 - A local variable named `cr` shadowed Odoo's cursor lookup inside the translation helper, so the "voucher not balanced" message crashed instead of showing. Renamed throughout.
