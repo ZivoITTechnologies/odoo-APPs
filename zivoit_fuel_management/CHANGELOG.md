@@ -1,5 +1,8 @@
 # Changelog
 
+## 19.0.2.0.4
+- App Store page: colours set with background-color (the App Store removes the background shorthand), so the stat tiles, the "This app" comparison header and the support section now show. Added the ZivoIT logo to the support section.
+
 ## 19.0.2.0.3
 - App Store description page rebuilt: plain ASCII text (fixes garbled dashes and dots), Bootstrap grid layout instead of flexbox, all screenshots shown, consistent Odoo Online wording.
 

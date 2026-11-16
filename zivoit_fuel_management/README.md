@@ -1,6 +1,6 @@
 # ZivoIT Fuel Management System (AI enabled) — Odoo 19
 
-Technical name: `zivoit_fuel_management` · Version 19.0.2.0.3 · Price: USD 1,599 · License: OPL-1
+Technical name: `zivoit_fuel_management` · Version 19.0.2.0.4 · Price: USD 1,599 · License: OPL-1
 Publisher: ZivoIT Technologies — www.zivoit.com — info@zivoit.com
 
 This is a complete fuel-station platform for a BPCL retail outlet (it can be re-branded for any oil company). It covers:
