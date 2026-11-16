@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_assignment_list" model="ir.ui.view">
+        <field name="name">zlms.assignment.list</field>
+        <field name="model">zlms.assignment</field>
+        <field name="arch" type="xml">
+            <list string="Assignments" decoration-danger="is_overdue" decoration-success="state == 'completed'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="role_id" optional="hide"/>
+                <field name="path_id"/>
+                <field name="path_type" optional="hide"/>
+                <field name="assign_date" optional="show"/>
+                <field name="due_date"/>
+                <field name="days_left" optional="show"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="score"/>
+                <field name="state" widget="badge" decoration-success="state == 'completed'"
+                       decoration-info="state == 'in_progress'" decoration-warning="state == 'expired'"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <button name="action_send_reminder" type="object" icon="fa-bell" title="Send reminder"
+                        invisible="state not in ('assigned', 'in_progress')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_kanban" model="ir.ui.view">
+        <field name="name">zlms.assignment.kanban</field>
+        <field name="model">zlms.assignment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_mobile" group_create="false" records_draggable="false">
+                <field name="is_overdue"/>
+                <templates>
+                    <t t-name="card">
+                        <field name="learner_id" class="fw-bold"/>
+                        <field name="path_id" class="text-muted"/>
+                        <field name="progress" widget="progressbar"/>
+                        <div class="d-flex justify-content-between small">
+                            <span t-att-class="record.is_overdue.raw_value ? 'text-danger' : ''">
+                                <i title="Calendar" class="fa fa-calendar"/> <field name="due_date"/>
+                            </span>
+                            <field name="store_id"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_form" model="ir.ui.view">
+        <field name="name">zlms.assignment.form</field>
+        <field name="model">zlms.assignment</field>
+        <field name="arch" type="xml">
+            <form string="Assignment">
+                <header>
+                    <button name="action_sync" type="object" string="Sync Progress" icon="fa-refresh"
+                            invisible="state in ('completed', 'cancelled')"/>
+                    <button name="action_send_reminder" type="object" string="Send Reminder" icon="fa-bell"
+                            invisible="state not in ('assigned', 'in_progress')"/>
+                    <button name="action_reopen" type="object" string="Re-open"
+                            invisible="state not in ('completed', 'cancelled', 'expired')"
+                            groups="zivoit_retail_lms.group_zlms_manager"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('completed', 'cancelled')" groups="zivoit_retail_lms.group_zlms_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="assigned,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Overdue" bg_color="text-bg-danger" invisible="not is_overdue"/>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="learner_id"/>
+                            <field name="store_id"/>
+                            <field name="role_id"/>
+                            <field name="path_id"/>
+                        </group>
+                        <group>
+                            <field name="assign_date"/>
+                            <field name="due_date"/>
+                            <field name="completion_date"/>
+                            <field name="progress" widget="progressbar"/>
+                            <field name="score"/>
+                            <field name="passed" invisible="state != 'completed'"/>
+                            <field name="certificate_id" invisible="not certificate_id"/>
+                            <field name="is_overdue" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom" create="false" delete="false"
+                              decoration-success="state == 'done'">
+                            <field name="sequence" column_invisible="1"/>
+                            <field name="due_date" readonly="1"/>
+                            <field name="line_type" readonly="1"/>
+                            <field name="name" readonly="1"/>
+                            <field name="progress" widget="progressbar" readonly="1"/>
+                            <field name="score" readonly="1"/>
+                            <field name="manager_rating" readonly="line_type != 'ojt' or state == 'done'"/>
+                            <field name="notes" optional="show"/>
+                            <field name="state" widget="badge" readonly="1" decoration-success="state == 'done'"
+                                   decoration-info="state == 'in_progress'"/>
+                            <field name="signed_by_id" optional="show" readonly="1"/>
+                            <button name="action_sign_off" type="object" string="Sign off" icon="fa-check"
+                                    class="btn-link" invisible="line_type != 'ojt' or state == 'done'"/>
+                            <button name="action_open_target" type="object" icon="fa-external-link" title="Open"
+                                    invisible="line_type == 'ojt'"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_search" model="ir.ui.view">
+        <field name="name">zlms.assignment.search</field>
+        <field name="model">zlms.assignment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="learner_id"/>
+                <field name="path_id"/>
+                <field name="store_id"/>
+                <field name="region_id"/>
+                <filter name="my_team" string="My Team"
+                        domain="['|', ('store_manager_user_id', '=', uid), ('store_id.area_manager_user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="open" string="Open" domain="[('state', 'in', ('assigned', 'in_progress'))]"/>
+                <filter name="overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
+                <filter name="completed" string="Completed" domain="[('state', '=', 'completed')]"/>
+                <filter name="recert" string="Re-certification Due" domain="[('state', '=', 'expired')]"/>
+                <separator/>
+                <filter name="onboarding" string="Onboarding" domain="[('path_type', '=', 'onboarding')]"/>
+                <filter name="due" string="Due Date" date="due_date"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_region" string="Region" context="{'group_by': 'region_id'}"/>
+                    <filter name="group_path" string="Path" context="{'group_by': 'path_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_pivot" model="ir.ui.view">
+        <field name="name">zlms.assignment.pivot</field>
+        <field name="model">zlms.assignment</field>
+        <field name="arch" type="xml">
+            <pivot string="Learning Progress">
+                <field name="store_id" type="row"/>
+                <field name="path_type" type="col"/>
+                <field name="progress" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_graph" model="ir.ui.view">
+        <field name="name">zlms.assignment.graph</field>
+        <field name="model">zlms.assignment</field>
+        <field name="arch" type="xml">
+            <graph string="Completion by Store" type="bar">
+                <field name="store_id"/>
+                <field name="progress" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_action" model="ir.actions.act_window">
+        <field name="name">Assignments</field>
+        <field name="res_model">zlms.assignment</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <record id="zlms_assignment_analysis_action" model="ir.actions.act_window">
+        <field name="name">Learning Analysis</field>
+        <field name="res_model">zlms.assignment</field>
+        <field name="view_mode">pivot,graph,list</field>
+    </record>
+
+    <record id="zlms_assignment_line_ojt_list" model="ir.ui.view">
+        <field name="name">zlms.assignment.line.ojt.list</field>
+        <field name="model">zlms.assignment.line</field>
+        <field name="arch" type="xml">
+            <list string="On-the-Job Sign-offs" editable="bottom" create="false" delete="false">
+                <field name="learner_id" readonly="1"/>
+                <field name="assignment_id" readonly="1" optional="hide"/>
+                <field name="name" readonly="1"/>
+                <field name="instructions" readonly="1" optional="show"/>
+                <field name="due_date" readonly="1"/>
+                <field name="manager_rating" readonly="state == 'done'"/>
+                <field name="notes"/>
+                <field name="state" widget="badge" readonly="1"/>
+                <button name="action_sign_off" type="object" string="Sign off" icon="fa-check" class="btn-primary"
+                        invisible="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_assignment_line_ojt_action" model="ir.actions.act_window">
+        <field name="name">OJT Sign-offs</field>
+        <field name="res_model">zlms.assignment.line</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="zlms_assignment_line_ojt_list"/>
+        <field name="domain">[('line_type', '=', 'ojt'), ('assignment_id.state', 'in', ('assigned', 'in_progress'))]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No on-the-job tasks waiting</p>
+            <p>Observe your team on the floor and sign off tasks like "Greets every customer within 10 seconds".</p>
+        </field>
+    </record>
+</odoo>

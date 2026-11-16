@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_zlms" inherit_id="portal.portal_my_home" priority="40" name="My Learning entry">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_service_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_service_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/zivoit_retail_lms/static/description/icon.png'"/>
+                <t t-set="title">My Learning</t>
+                <t t-set="url" t-value="'/my/learning'"/>
+                <t t-set="text">Journeys, Daily Boost, role-play practice and certificates</t>
+                <t t-set="placeholder_count" t-value="'zlms_assignment_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- Shared shell -->
+    <template id="zlms_portal_shell" name="Retail LMS portal shell">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="True"/>
+            <div class="o_zlms_portal container py-3">
+                <nav class="o_zlms_nav nav nav-pills nav-fill mb-3 small">
+                    <a t-attf-class="nav-link #{'active' if zlms_tab == 'home' else ''}" href="/my/learning"><i class="fa fa-home"/><span class="d-block">Home</span></a>
+                    <a t-attf-class="nav-link #{'active' if zlms_tab == 'boost' else ''}" href="/my/learning/boost"><i class="fa fa-bolt"/><span class="d-block">Boost</span></a>
+                    <a t-attf-class="nav-link #{'active' if zlms_tab == 'roleplay' else ''}" href="/my/learning/roleplay"><i class="fa fa-comments"/><span class="d-block">Practice</span></a>
+                    <a t-attf-class="nav-link #{'active' if zlms_tab == 'ask' else ''}" href="/my/learning/ask"><i class="fa fa-lightbulb-o"/><span class="d-block">Ask</span></a>
+                    <a t-attf-class="nav-link #{'active' if zlms_tab == 'news' else ''}" href="/my/learning/news"><i class="fa fa-bullhorn"/><span class="d-block">News</span></a>
+                </nav>
+                <t t-out="0"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_zlms_no_profile" name="No learner profile">
+        <t t-call="portal.portal_layout">
+            <div class="container py-5 text-center">
+                <h3>No learning profile yet</h3>
+                <p class="text-muted">Your login is not linked to a store learner profile. Please ask your store manager or the L&amp;D team.</p>
+                <a href="/my" class="btn btn-secondary">Back</a>
+            </div>
+        </t>
+    </template>
+
+    <!-- Home -->
+    <template id="portal_zlms_home" name="My Learning">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'home'"/>
+            <div class="o_zlms_hero rounded-4 p-3 mb-3 text-white">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="small opacity-75"><t t-out="learner.store_id.name or ''"/> · <t t-out="learner.role_id.name or ''"/></div>
+                        <h3 class="mb-1">Hi <t t-out="learner.name.split(' ')[0]"/>!</h3>
+                        <div class="small">Readiness <strong><t t-out="'%.0f' % learner.readiness_score"/>%</strong></div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-3 fw-bold"><i class="fa fa-star text-warning"/> <t t-out="learner.points"/></div>
+                        <div class="small opacity-75">points</div>
+                    </div>
+                </div>
+                <div class="row g-2 mt-2 text-center">
+                    <div class="col-4"><div class="o_zlms_stat"><div class="fw-bold fs-5"><t t-out="'%.0f' % learner.completion_rate"/>%</div><div class="small">Complete</div></div></div>
+                    <div class="col-4"><div class="o_zlms_stat"><div class="fw-bold fs-5"><t t-out="'%.0f' % learner.avg_score"/>%</div><div class="small">Avg. score</div></div></div>
+                    <div class="col-4"><div class="o_zlms_stat"><div class="fw-bold fs-5"><t t-out="learner.certificate_count"/></div><div class="small">Certificates</div></div></div>
+                </div>
+            </div>
+
+            <div t-if="badges or learner.boost_streak" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span t-if="learner.boost_streak" class="badge rounded-pill text-bg-danger"><i class="fa fa-fire"/> <t t-out="learner.boost_streak"/>-day streak</span>
+                <span t-foreach="badges" t-as="b" class="o_zlms_badge" t-att-title="b.badge_id.description"
+                      t-attf-style="background: #{b.color or '#f0ad4e'}">
+                    <i t-attf-class="fa #{b.icon or 'fa-trophy'}"/> <t t-out="b.badge_id.name"/>
+                </span>
+            </div>
+
+            <a t-if="pending_news" href="/my/learning/news" class="card mb-3 text-decoration-none border-danger">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fa fa-bullhorn fa-2x text-danger me-3"/>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">Store news</div>
+                        <div class="small text-muted"><t t-out="len(pending_news)"/> update(s) to read and acknowledge</div>
+                    </div>
+                    <i class="fa fa-chevron-right text-muted"/>
+                </div>
+            </a>
+
+            <a href="/my/learning/boost" class="card o_zlms_boost_cta mb-3 text-decoration-none">
+                <div class="card-body d-flex align-items-center">
+                    <i class="fa fa-bolt fa-2x text-warning me-3"/>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">Daily Boost</div>
+                        <div class="small text-muted" t-if="boost_due">
+                            <t t-out="boost_due"/> quick question(s) waiting - 2 minutes
+                        </div>
+                        <div class="small text-muted" t-else="">All caught up for today. Come back tomorrow!</div>
+                    </div>
+                    <i class="fa fa-chevron-right text-muted"/>
+                </div>
+            </a>
+
+            <h5 class="mt-3">My journeys</h5>
+            <div t-if="not open_assignments" class="text-muted small mb-3">No open journeys. Great work!</div>
+            <div t-foreach="open_assignments" t-as="a" class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong t-out="a.path_id.name"/>
+                        <span t-if="a.is_overdue" class="badge rounded-pill text-bg-danger align-self-start flex-shrink-0 ms-2">Overdue</span>
+                        <span t-elif="a.days_left &lt;= 3" class="badge rounded-pill text-bg-warning align-self-start flex-shrink-0 ms-2">Due soon</span>
+                    </div>
+                    <div class="small text-muted mb-2">Due <t t-out="a.due_date" t-options="{'widget': 'date'}"/></div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" t-attf-style="width: #{a.progress}%"/>
+                    </div>
+                    <ul class="list-unstyled small mb-0">
+                        <li t-foreach="a.line_ids" t-as="step" class="d-flex align-items-center py-1 border-top">
+                            <i t-attf-class="fa me-2 #{'fa-check-circle text-success' if step.state == 'done' else ('fa-adjust text-primary' if step.state == 'in_progress' else 'fa-circle-o text-muted')}"/>
+                            <span class="flex-grow-1"><t t-out="step.name"/>
+                                <span class="text-muted" t-if="step.line_type == 'ojt'"> (manager sign-off)</span>
+                            </span>
+                            <t t-if="step.state != 'done'">
+                                <a t-if="step.line_type == 'course' and step.channel_id" class="btn btn-sm btn-primary"
+                                   t-att-href="step.channel_id.website_url">Start</a>
+                                <a t-if="step.line_type == 'certification' and step.survey_id" class="btn btn-sm btn-primary"
+                                   t-att-href="step.survey_id.get_start_url()">Take exam</a>
+                                <form t-if="step.line_type == 'roleplay' and step.scenario_id" method="post"
+                                      t-attf-action="/my/learning/roleplay/start/#{step.scenario_id.id}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <button class="btn btn-sm btn-primary">Practise</button>
+                                </form>
+                            </t>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <h5 class="mt-4">Classroom &amp; live training</h5>
+            <div t-foreach="my_sessions" t-as="att" class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="fw-bold" t-out="att.session_id.name"/>
+                    <div class="small text-muted"><t t-out="att.start_datetime" t-options="{'widget': 'datetime'}"/> · <t t-out="att.session_id.location or att.session_id.store_id.name or ''"/></div>
+                </div>
+            </div>
+            <a href="/my/learning/sessions" class="btn btn-outline-primary btn-sm mb-2">See sessions &amp; register</a>
+
+            <h5 class="mt-4" t-if="certificates">My certificates</h5>
+            <div t-foreach="certificates" t-as="c" class="card mb-2">
+                <div class="card-body d-flex align-items-center py-2">
+                    <i class="fa fa-certificate fa-2x text-primary me-3"/>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold" t-out="c.path_id.name"/>
+                        <div class="small text-muted"><t t-out="c.name"/>
+                            <t t-if="c.expiry_date"> · valid until <t t-out="c.expiry_date" t-options="{'widget': 'date'}"/></t>
+                        </div>
+                    </div>
+                    <a class="btn btn-sm btn-outline-primary" t-attf-href="/my/learning/certificate/#{c.id}"><i class="fa fa-download"/></a>
+                </div>
+            </div>
+
+            <h5 class="mt-4">Store leaderboard</h5>
+            <ol class="list-group list-group-numbered mb-3">
+                <li t-foreach="store_team" t-as="mate"
+                    t-attf-class="list-group-item d-flex justify-content-between #{'fw-bold' if mate == learner else ''}">
+                    <span class="ms-2 me-auto" t-out="mate.name"/>
+                    <span><i class="fa fa-star text-warning"/> <t t-out="mate.points"/></span>
+                </li>
+            </ol>
+
+            <h5 class="mt-4"><i class="fa fa-flag-checkered text-success"/> Store challenge - this month</h5>
+            <ol class="list-group list-group-numbered mb-3">
+                <li t-foreach="challenge" t-as="c"
+                    t-attf-class="list-group-item d-flex justify-content-between #{'fw-bold' if c['id'] == learner.store_id.id else ''}">
+                    <span class="ms-2 me-auto" t-out="c['name']"/>
+                    <span class="small"><t t-out="c['score']"/> pts / head</span>
+                </li>
+            </ol>
+
+            <div t-if="done_assignments" class="small text-muted">Completed journeys: <t t-out="', '.join(done_assignments.mapped('path_id.name'))"/></div>
+        </t>
+    </template>
+
+    <!-- Daily Boost -->
+    <template id="portal_zlms_boost" name="Daily Boost">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'boost'"/>
+            <h4><i class="fa fa-bolt text-warning"/> Daily Boost</h4>
+            <t t-if="not card">
+                <div class="card text-center p-4">
+                    <i class="fa fa-trophy fa-3x text-warning mb-2"/>
+                    <h5>You're all caught up!</h5>
+                    <p class="text-muted small">Questions come back at the right time so you never forget. See you tomorrow.</p>
+                    <a href="/my/learning" class="btn btn-primary">Back to My Learning</a>
+                </div>
+            </t>
+            <t t-elif="feedback">
+                <div t-attf-class="alert #{'alert-success' if feedback['correct'] else 'alert-danger'}">
+                    <strong t-if="feedback['correct']">Correct! +<t t-out="feedback['points']"/> points</strong>
+                    <strong t-else="">Not quite. The right answer is: <t t-out="feedback['correct_answer']"/></strong>
+                    <div class="small mt-1" t-if="feedback['comment']" t-out="feedback['comment']"/>
+                    <div class="small mt-1 text-muted">Next review: <t t-out="feedback['next_review_date']" t-options="{'widget': 'date'}"/> (level <t t-out="feedback['box']"/>/5)</div>
+                </div>
+                <div class="card mb-3"><div class="card-body">
+                    <div class="small text-muted" t-out="card.channel_id.name"/>
+                    <div class="fw-bold" t-out="card.question"/>
+                </div></div>
+                <a href="/my/learning/boost" class="btn btn-primary w-100 btn-lg">Next question</a>
+            </t>
+            <t t-else="">
+                <form method="post" action="/my/learning/boost/answer">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="card_id" t-att-value="card.id"/>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="small text-muted mb-1"><t t-out="card.channel_id.name"/> · level <t t-out="card.box"/>/5</div>
+                            <h5 t-out="card.question"/>
+                            <div t-foreach="answers" t-as="ans" class="form-check o_zlms_answer border rounded-3 p-3 my-2">
+                                <input class="form-check-input ms-0 me-2" type="radio" name="answer_id"
+                                       t-att-id="'ans_%s' % ans.id" t-att-value="ans.id" required="required"/>
+                                <label class="form-check-label" t-att-for="'ans_%s' % ans.id" t-out="ans.text_value"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="confident" value="1" class="btn btn-primary btn-lg flex-fill">I'm sure</button>
+                        <button type="submit" name="confident" value="0" class="btn btn-outline-primary btn-lg flex-fill">Not sure</button>
+                    </div>
+                </form>
+            </t>
+        </t>
+    </template>
+
+    <!-- Ask the Expert -->
+    <template id="portal_zlms_ask" name="Ask the Expert">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'ask'"/>
+            <h4><i class="fa fa-lightbulb-o text-warning"/> Ask the Product Expert</h4>
+            <p class="small text-muted">With a customer right now? Ask anything about our products.</p>
+            <form method="post" action="/my/learning/ask" class="mb-3">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <textarea name="question" class="form-control mb-2" rows="3" required="required"
+                          placeholder="e.g. Which model is best for a beginner? What does the warranty cover?"><t t-out="question"/></textarea>
+                <button class="btn btn-primary w-100">Ask</button>
+            </form>
+            <div t-if="result" class="card">
+                <div class="card-body">
+                    <t t-out="result['html']"/>
+                    <div class="small text-muted mt-2" t-if="result.get('cards')">
+                        Source: <t t-out="', '.join(result['cards'].mapped('name'))"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Role-play -->
+    <template id="portal_zlms_roleplay_list" name="Role-play practice">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'roleplay'"/>
+            <h4><i class="fa fa-comments text-primary"/> Practise with an AI customer</h4>
+            <p class="small text-muted">Safe practice for real conversations. You get instant coaching feedback.</p>
+            <div t-foreach="scenarios" t-as="s" class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong t-out="s.name"/>
+                        <span class="badge text-bg-light" t-out="dict(s._fields['difficulty'].selection).get(s.difficulty)"/>
+                    </div>
+                    <div class="small text-muted mb-2" t-out="s.learner_objective"/>
+                    <form method="post" t-attf-action="/my/learning/roleplay/start/#{s.id}">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <button class="btn btn-sm btn-primary">Start practice</button>
+                    </form>
+                </div>
+            </div>
+            <h5 class="mt-4" t-if="sessions">My recent sessions</h5>
+            <a t-foreach="sessions" t-as="sess" t-attf-href="/my/learning/roleplay/#{sess.id}"
+               class="d-flex justify-content-between border-bottom py-2 text-decoration-none">
+                <span t-out="sess.scenario_id.name"/>
+                <span t-if="sess.state == 'evaluated'" t-attf-class="badge #{'text-bg-success' if sess.passed else 'text-bg-warning'}"><t t-out="'%.0f' % sess.score"/>/100</span>
+                <span t-else="" class="badge text-bg-info">Continue</span>
+            </a>
+        </t>
+    </template>
+
+    <template id="portal_zlms_roleplay_session" name="Role-play session">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'roleplay'"/>
+            <h5 t-out="session.scenario_id.name"/>
+            <div class="small text-muted mb-2" t-out="session.scenario_id.learner_objective"/>
+            <div class="o_zlms_chat mb-3">
+                <div t-foreach="session.message_line_ids" t-as="m"
+                     t-attf-class="o_zlms_bubble #{'o_zlms_customer' if m.role == 'customer' else 'o_zlms_me'}">
+                    <div class="small fw-bold" t-out="'Customer' if m.role == 'customer' else 'You'"/>
+                    <div class="o_zlms_text" t-out="m.content"/>
+                </div>
+            </div>
+            <t t-if="session.state == 'ongoing'">
+                <form method="post" t-attf-action="/my/learning/roleplay/#{session.id}">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <textarea name="message" class="form-control mb-2" rows="2" placeholder="What do you say?" autofocus="autofocus"/>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-fill" name="send" value="1">Send</button>
+                        <button class="btn btn-outline-secondary" name="evaluate" value="1" formnovalidate="formnovalidate">Finish &amp; get feedback</button>
+                    </div>
+                </form>
+            </t>
+            <t t-if="session.state == 'evaluated'">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 t-attf-class="#{'text-success' if session.passed else 'text-warning'}">
+                            Score: <t t-out="'%.0f' % session.score"/>/100
+                        </h4>
+                        <t t-out="session.feedback_html"/>
+                        <table class="table table-sm small mt-2">
+                            <tr t-foreach="session.criterion_ids" t-as="crit">
+                                <td t-out="crit.name"/>
+                                <td class="text-end fw-bold"><t t-out="'%.0f' % crit.score"/>/10</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <a href="/my/learning/roleplay" class="btn btn-secondary w-100 mt-3">Practise again</a>
+            </t>
+        </t>
+    </template>
+
+    <!-- Store news -->
+    <template id="portal_zlms_news" name="Store news">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'news'"/>
+            <h4><i class="fa fa-bullhorn text-danger"/> Store news</h4>
+            <div t-if="not acks" class="text-muted">No news yet.</div>
+            <a t-foreach="acks" t-as="a" t-attf-href="/my/learning/news/#{a.id}" class="card mb-2 text-decoration-none">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between">
+                        <strong t-out="a.bulletin_id.name"/>
+                        <span t-if="a.state == 'acknowledged'" class="badge rounded-pill text-bg-success align-self-start ms-2 flex-shrink-0">Done</span>
+                        <span t-elif="a.bulletin_id.priority == 'urgent'" class="badge rounded-pill text-bg-danger align-self-start ms-2 flex-shrink-0">Urgent</span>
+                        <span t-elif="a.state == 'pending'" class="badge rounded-pill text-bg-primary align-self-start ms-2 flex-shrink-0">New</span>
+                    </div>
+                    <div class="small text-muted">
+                        <t t-out="dict(a.bulletin_id._fields['bulletin_type'].selection).get(a.bulletin_id.bulletin_type)"/>
+                        <t t-if="a.bulletin_id.due_date and a.state != 'acknowledged'"> · acknowledge by <t t-out="a.bulletin_id.due_date" t-options="{'widget': 'date'}"/></t>
+                    </div>
+                </div>
+            </a>
+        </t>
+    </template>
+
+    <template id="portal_zlms_news_item" name="Store news item">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'news'"/>
+            <t t-set="b" t-value="ack.bulletin_id"/>
+            <a href="/my/learning/news" class="small"><i class="fa fa-arrow-left"/> All news</a>
+            <h4 class="mt-2" t-out="b.name"/>
+            <div class="small text-muted mb-2"><t t-out="dict(b._fields['bulletin_type'].selection).get(b.bulletin_type)"/> · <t t-out="b.publish_date" t-options="{'widget': 'date'}"/></div>
+            <div class="card mb-3"><div class="card-body" t-out="b.body"/></div>
+            <div t-if="b.attachment_ids" class="mb-3">
+                <a t-foreach="b.attachment_ids" t-as="att" class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                   t-attf-href="/web/content/#{att.id}?download=true&amp;access_token=#{att.sudo().generate_access_token()[0]}"><i class="fa fa-paperclip"/> <t t-out="att.name"/></a>
+            </div>
+            <a t-if="b.channel_id" t-att-href="b.channel_id.website_url" class="btn btn-outline-primary w-100 mb-2">Take the linked course</a>
+            <t t-if="b.require_ack">
+                <div t-if="ack.state == 'acknowledged'" class="alert alert-success">Acknowledged on <t t-out="ack.ack_date" t-options="{'widget': 'datetime'}"/>. Thank you!</div>
+                <form t-else="" method="post" t-attf-action="/my/learning/news/#{ack.id}">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <button class="btn btn-primary btn-lg w-100" name="acknowledge" value="1">I have read and understood</button>
+                </form>
+            </t>
+        </t>
+    </template>
+
+    <!-- Sessions -->
+    <template id="portal_zlms_sessions" name="Training sessions">
+        <t t-call="zivoit_retail_lms.zlms_portal_shell">
+            <t t-set="zlms_tab" t-value="'home'"/>
+            <h4><i class="fa fa-calendar text-primary"/> Classroom &amp; live training</h4>
+            <div t-if="error" class="alert alert-warning" t-out="error"/>
+            <h5 class="mt-3">Upcoming sessions</h5>
+            <div t-if="not upcoming" class="text-muted small">No upcoming sessions for your store or region.</div>
+            <div t-foreach="upcoming" t-as="s" class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong t-out="s.name"/>
+                        <span class="badge rounded-pill text-bg-light align-self-start ms-2 flex-shrink-0" t-out="dict(s._fields['session_type'].selection).get(s.session_type)"/>
+                    </div>
+                    <div class="small text-muted"><t t-out="s.start_datetime" t-options="{'widget': 'datetime'}"/> · <t t-out="s.location or s.store_id.name or ''"/></div>
+                    <div class="small mb-2"><t t-out="s.seats_left"/> seat(s) left</div>
+                    <form method="post" action="/my/learning/sessions" class="d-inline">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="session_id" t-att-value="s.id"/>
+                        <button t-if="s in registered" class="btn btn-sm btn-outline-danger" name="action" value="cancel">Cancel my seat</button>
+                        <button t-elif="s.seats_left" class="btn btn-sm btn-primary" name="action" value="register">Register</button>
+                    </form>
+                    <a t-if="s in registered and s.meeting_url" t-att-href="s.meeting_url" class="btn btn-sm btn-success ms-1">Join link</a>
+                </div>
+            </div>
+            <h5 class="mt-4" t-if="attendances.filtered(lambda a: a.state == 'attended')">Rate your sessions</h5>
+            <div t-foreach="attendances.filtered(lambda a: a.state == 'attended')" t-as="att" class="card mb-2">
+                <div class="card-body">
+                    <strong t-out="att.session_id.name"/>
+                    <div t-if="att.feedback_rating" class="small text-success">You rated it <t t-out="att.feedback_rating"/>/5. Thanks!</div>
+                    <form t-else="" method="post" action="/my/learning/sessions" class="mt-2">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="session_id" t-att-value="att.session_id.id"/>
+                        <input type="hidden" name="action" value="feedback"/>
+                        <div class="btn-group mb-2" role="group">
+                            <t t-foreach="['1', '2', '3', '4', '5']" t-as="r">
+                                <input type="radio" class="btn-check" name="rating" t-att-id="'r%s_%s' % (att.id, r)" t-att-value="r" required="required"/>
+                                <label class="btn btn-outline-warning" t-att-for="'r%s_%s' % (att.id, r)"><t t-out="r"/> <i class="fa fa-star"/></label>
+                            </t>
+                        </div>
+                        <textarea name="comment" class="form-control mb-2" rows="2" placeholder="What was most useful?"/>
+                        <button class="btn btn-sm btn-primary">Send feedback</button>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

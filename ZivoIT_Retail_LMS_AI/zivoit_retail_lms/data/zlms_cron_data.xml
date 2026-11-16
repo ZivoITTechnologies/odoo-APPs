@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_zlms_sync_progress" model="ir.cron">
+        <field name="name">Retail LMS: Sync learning progress</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_sync_progress()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+    </record>
+    <record id="ir_cron_zlms_overdue" model="ir.cron">
+        <field name="name">Retail LMS: Overdue reminders</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_overdue_reminders()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="ir_cron_zlms_cert_expiry" model="ir.cron">
+        <field name="name">Retail LMS: Certificate expiry &amp; re-certification</field>
+        <field name="model_id" ref="model_zlms_certificate"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_expiry()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="ir_cron_zlms_boost_seed" model="ir.cron">
+        <field name="name">Retail LMS: Seed Daily Boost cards</field>
+        <field name="model_id" ref="model_zlms_boost_card"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_seed_cards()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="ir_cron_zlms_badges" model="ir.cron">
+        <field name="name">Retail LMS: Award badges</field>
+        <field name="model_id" ref="model_zlms_learner"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_badges()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="ir_cron_zlms_bulletins" model="ir.cron">
+        <field name="name">Retail LMS: Overdue bulletin acknowledgements</field>
+        <field name="model_id" ref="model_zlms_bulletin"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_overdue_bulletins()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>

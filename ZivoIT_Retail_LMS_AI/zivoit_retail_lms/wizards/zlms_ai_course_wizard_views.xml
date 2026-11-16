@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_ai_course_wizard_form" model="ir.ui.view">
+        <field name="name">zlms.ai.course.wizard.form</field>
+        <field name="model">zlms.ai.course.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AI Course Builder">
+                <div class="alert alert-info" role="alert" invisible="ai_available">
+                    No AI provider is configured: the built-in offline engine will build the lesson and quiz from your
+                    product cards (Feature-Advantage-Benefit, objections, cross-sell). Configure AI in
+                    Retail LMS &gt; Configuration &gt; Settings for richer, multilingual courses.
+                </div>
+                <field name="ai_available" invisible="1"/>
+                <group>
+                    <group>
+                        <field name="source" widget="radio"/>
+                        <field name="topic" placeholder="e.g. Festive Collection Launch - Product Training"/>
+                        <field name="retail_category"/>
+                        <field name="role_id"/>
+                    </group>
+                    <group>
+                        <field name="language"/>
+                        <field name="lesson_minutes"/>
+                        <field name="question_count"/>
+                        <field name="use_ai" invisible="not ai_available"/>
+                        <field name="add_to_boost"/>
+                        <field name="publish"/>
+                    </group>
+                </group>
+                <field name="product_card_ids" invisible="source != 'product_card'" widget="many2many_tags"
+                       placeholder="Select product knowledge cards..."/>
+                <field name="source_text" invisible="source != 'text'" nolabel="1"
+                       placeholder="Paste an SOP, launch brief, service policy or VM guideline..."/>
+                <footer>
+                    <button name="action_generate" type="object" string="Generate Course" class="btn-primary"
+                            icon="fa-magic"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_ai_course_wizard_action" model="ir.actions.act_window">
+        <field name="name">AI Course Builder</field>
+        <field name="res_model">zlms.ai.course.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

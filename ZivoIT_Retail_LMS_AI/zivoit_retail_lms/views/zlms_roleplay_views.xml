@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_roleplay_scenario_list" model="ir.ui.view">
+        <field name="name">zlms.roleplay.scenario.list</field>
+        <field name="model">zlms.roleplay.scenario</field>
+        <field name="arch" type="xml">
+            <list string="Role-play Scenarios">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="skill_area"/>
+                <field name="difficulty"/>
+                <field name="language"/>
+                <field name="session_count"/>
+                <field name="avg_score"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_roleplay_scenario_form" model="ir.ui.view">
+        <field name="name">zlms.roleplay.scenario.form</field>
+        <field name="model">zlms.roleplay.scenario</field>
+        <field name="arch" type="xml">
+            <form string="Role-play Scenario">
+                <header>
+                    <button name="action_start_session" type="object" string="Practise Now" class="btn-primary"
+                            icon="fa-comments"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Price objection on running shoes"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="skill_area"/>
+                            <field name="skill_id"/>
+                            <field name="difficulty"/>
+                            <field name="language"/>
+                        </group>
+                        <group>
+                            <field name="max_turns"/>
+                            <field name="pass_score"/>
+                            <field name="product_card_ids" widget="many2many_tags"/>
+                            <field name="session_count"/>
+                            <field name="avg_score"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="learner_objective"/>
+                        <field name="opening_line"/>
+                        <field name="customer_persona"/>
+                        <field name="hidden_goal"/>
+                    </group>
+                    <notebook>
+                        <page string="Assessment Rubric" name="rubric">
+                            <field name="rubric" placeholder="Criterion | keyword, keyword"/>
+                        </page>
+                        <page string="Offline Customer Script" name="script">
+                            <field name="customer_script" placeholder="Customer line 1&#10;Customer line 2"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_roleplay_scenario_action" model="ir.actions.act_window">
+        <field name="name">Role-play Scenarios</field>
+        <field name="res_model">zlms.roleplay.scenario</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="zlms_roleplay_session_list" model="ir.ui.view">
+        <field name="name">zlms.roleplay.session.list</field>
+        <field name="model">zlms.roleplay.session</field>
+        <field name="arch" type="xml">
+            <list string="Role-play Sessions">
+                <field name="session_date"/>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="scenario_id"/>
+                <field name="skill_area" optional="show"/>
+                <field name="engine" optional="show"/>
+                <field name="turn_count" optional="hide"/>
+                <field name="score"/>
+                <field name="passed"/>
+                <field name="state" widget="badge" decoration-success="state == 'evaluated'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_roleplay_session_form" model="ir.ui.view">
+        <field name="name">zlms.roleplay.session.form</field>
+        <field name="model">zlms.roleplay.session</field>
+        <field name="arch" type="xml">
+            <form string="Role-play">
+                <header>
+                    <button name="action_start" type="object" string="Start" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_evaluate" type="object" string="Finish &amp; Evaluate" icon="fa-check-square-o"
+                            invisible="state != 'ongoing'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="learner_id" readonly="state != 'draft'"/>
+                            <field name="scenario_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="engine"/>
+                            <field name="turn_count"/>
+                            <field name="score" invisible="state != 'evaluated'"/>
+                            <field name="passed" invisible="state != 'evaluated'"/>
+                        </group>
+                    </group>
+                    <separator string="Conversation"/>
+                    <field name="message_line_ids" readonly="1" nolabel="1">
+                        <list decoration-info="role == 'customer'" decoration-success="role == 'associate'">
+                            <field name="role"/>
+                            <field name="content"/>
+                        </list>
+                    </field>
+                    <div invisible="state != 'ongoing'" class="mt-2">
+                        <field name="reply_text" placeholder="What do you say to the customer?" nolabel="1"/>
+                        <button name="action_send_reply" type="object" string="Send" class="btn-primary mt-2"
+                                icon="fa-paper-plane"/>
+                    </div>
+                    <div invisible="state != 'evaluated'">
+                        <separator string="Coach Feedback"/>
+                        <field name="feedback_html" nolabel="1"/>
+                        <field name="criterion_ids" readonly="1" nolabel="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="score" widget="progressbar" options="{'max_value': 10}"/>
+                                <field name="comment"/>
+                            </list>
+                        </field>
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_roleplay_session_search" model="ir.ui.view">
+        <field name="name">zlms.roleplay.session.search</field>
+        <field name="model">zlms.roleplay.session</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="learner_id"/>
+                <field name="scenario_id"/>
+                <field name="store_id"/>
+                <filter name="evaluated" string="Evaluated" domain="[('state', '=', 'evaluated')]"/>
+                <filter name="failed" string="Below pass score" domain="[('state', '=', 'evaluated'), ('passed', '=', False)]"/>
+                <group>
+                    <filter name="group_skill" string="Skill" context="{'group_by': 'skill_area'}"/>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zlms_roleplay_session_action" model="ir.actions.act_window">
+        <field name="name">Role-play Sessions</field>
+        <field name="res_model">zlms.roleplay.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

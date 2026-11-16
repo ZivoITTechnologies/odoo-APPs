@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Store manager demo user -->
+    <record id="base.user_demo" model="res.users">
+        <field name="group_ids" eval="[(4, ref('zivoit_retail_lms.group_zlms_store_manager'))]"/>
+    </record>
+
+    <!-- Regions -->
+    <record id="demo_region_south" model="zlms.region"><field name="name">South Zone</field><field name="code">S</field><field name="sequence">1</field></record>
+    <record id="demo_region_west" model="zlms.region"><field name="name">West Zone</field><field name="code">W</field><field name="sequence">2</field></record>
+    <record id="demo_region_east" model="zlms.region"><field name="name">East Zone</field><field name="code">E</field><field name="sequence">3</field></record>
+    <record id="demo_region_north" model="zlms.region"><field name="name">North Zone</field><field name="code">N</field><field name="sequence">4</field></record>
+
+    <!-- Stores (fictional) -->
+    <record id="demo_store_hyd" model="zlms.store">
+        <field name="name">Central Plaza Flagship</field><field name="code">ST-001</field><field name="store_format">flagship</field>
+        <field name="region_id" ref="demo_region_south"/><field name="city">Metro City</field><field name="mall_name">Central Plaza Mall</field>
+        <field name="manager_user_id" ref="base.user_demo"/><field name="area_sqft">4200</field>
+    </record>
+    <record id="demo_store_che" model="zlms.store">
+        <field name="name">Lakeside Mall</field><field name="code">ST-002</field>
+        <field name="region_id" ref="demo_region_south"/><field name="city">Lakeside</field><field name="mall_name">Lakeside Mall</field>
+        <field name="manager_user_id" ref="base.user_demo"/><field name="area_sqft">2100</field>
+    </record>
+    <record id="demo_store_blr" model="zlms.store">
+        <field name="name">Tech Park High Street</field><field name="code">ST-003</field>
+        <field name="region_id" ref="demo_region_south"/><field name="city">Tech Park</field><field name="area_sqft">2400</field>
+    </record>
+    <record id="demo_store_pun" model="zlms.store">
+        <field name="name">Riverside Market</field><field name="code">ST-004</field>
+        <field name="region_id" ref="demo_region_west"/><field name="city">Riverside</field><field name="area_sqft">1900</field>
+    </record>
+    <record id="demo_store_kol" model="zlms.store">
+        <field name="name">Harbour Point</field><field name="code">ST-005</field>
+        <field name="region_id" ref="demo_region_east"/><field name="city">Harbour City</field><field name="area_sqft">2000</field>
+    </record>
+    <record id="demo_store_ggn" model="zlms.store">
+        <field name="name">Northgate Franchise</field><field name="code">FR-006</field><field name="store_format">franchise</field>
+        <field name="region_id" ref="demo_region_north"/><field name="city">Northgate</field><field name="area_sqft">1600</field>
+    </record>
+
+    <!-- Product features & technologies -->
+    <record id="tech_dryfit" model="zlms.tech.tag"><field name="name">Moisture Wicking</field><field name="color">4</field>
+        <field name="description">Pulls moisture away from the skin so it evaporates fast.</field></record>
+    <record id="tech_stretch" model="zlms.tech.tag"><field name="name">4-Way Stretch</field><field name="color">2</field>
+        <field name="description">Stretches in every direction and recovers its shape.</field></record>
+    <record id="tech_cushion" model="zlms.tech.tag"><field name="name">Responsive Cushioning</field><field name="color">9</field>
+        <field name="description">Foam absorbs impact and returns energy with every step.</field></record>
+    <record id="tech_anc" model="zlms.tech.tag"><field name="name">Active Noise Cancellation</field><field name="color">3</field>
+        <field name="description">Microphones cancel outside noise so you hear only your audio.</field></record>
+    <record id="tech_ipx" model="zlms.tech.tag"><field name="name">IPX5 Water Resistance</field><field name="color">10</field>
+        <field name="description">Protected against sweat and rain splashes.</field></record>
+    <record id="tech_rapidair" model="zlms.tech.tag"><field name="name">Rapid Air Circulation</field><field name="color">1</field>
+        <field name="description">Fast-moving hot air cooks food crisp with little or no oil.</field></record>
+    <record id="tech_hyaluronic" model="zlms.tech.tag"><field name="name">Hyaluronic Hydration</field><field name="color">7</field>
+        <field name="description">Draws and holds moisture in the skin for long-lasting hydration.</field></record>
+
+    <!-- Product knowledge cards (multi-category, fictional) -->
+    <record id="card_performance_tee" model="zlms.product.card">
+        <field name="name">Everyday Performance Tee</field><field name="category">apparel</field><field name="collection">Core Range</field>
+        <field name="activity">Workouts, travel and everyday wear</field><field name="fabric">Recycled polyester knit</field>
+        <field name="price_band">Mid range</field><field name="state">published</field>
+        <field name="tech_tag_ids" eval="[(6, 0, [ref('tech_dryfit'), ref('tech_stretch')])]"/>
+        <field name="target_customer">Active customers who want comfort that lasts all day.</field>
+        <field name="features">Moisture-wicking knit
+Flatlock seams
+Recycled fibres</field>
+        <field name="advantages">Sweat evaporates quickly
+No rubbing at the seams
+Lower environmental footprint</field>
+        <field name="benefits">You stay dry and fresh all day
+Comfortable during any movement
+Feel good about what you wear</field>
+        <field name="objections">Why pay more than a basic tee? :: It stays dry, keeps its shape and lasts far longer - better value per wear.
+Will it shrink after washing? :: No, the knit holds its size; wash cold and avoid high heat.</field>
+        <field name="care_instructions">Machine wash cold, no fabric softener.</field>
+        <field name="keywords">tshirt t-shirt top sweat dry clothing</field>
+    </record>
+    <record id="card_running_shoe" model="zlms.product.card">
+        <field name="name">Stride Running Shoe</field><field name="category">footwear</field><field name="collection">Run Club</field>
+        <field name="activity">Road running and brisk walking</field><field name="fabric">Knit upper, foam midsole, rubber outsole</field>
+        <field name="price_band">Mid-premium</field><field name="state">published</field>
+        <field name="tech_tag_ids" eval="[(6, 0, [ref('tech_cushion')])]"/>
+        <field name="target_customer">Beginner to intermediate runners and daily walkers.</field>
+        <field name="features">Responsive foam midsole
+Breathable knit upper
+Grip-pattern rubber outsole</field>
+        <field name="advantages">Absorbs impact and returns energy
+Air flows freely around the foot
+Holds the road in wet conditions</field>
+        <field name="benefits">Less tiredness in knees and feet
+Feet stay cool on hot days
+Confident, safe strides in the rain</field>
+        <field name="objections">Premium brands have better cushioning :: Let them feel it - the responsive foam gives the same comfort at a more accessible price.
+How long will they last? :: The outsole is built for 500+ km of running when rotated with another pair.</field>
+        <field name="keywords">shoes footwear sneakers running walking</field>
+    </record>
+    <record id="card_earbuds" model="zlms.product.card">
+        <field name="name">AirWave Pro Wireless Earbuds</field><field name="category">electronics</field><field name="collection">Audio</field>
+        <field name="activity">Commuting, workouts and calls</field><field name="fabric">Matte polycarbonate, silicone tips</field>
+        <field name="price_band">Mid range</field><field name="state">published</field>
+        <field name="tech_tag_ids" eval="[(6, 0, [ref('tech_anc'), ref('tech_ipx')])]"/>
+        <field name="target_customer">Commuters and fitness lovers who want focus and freedom from wires.</field>
+        <field name="features">Active noise cancellation
+30-hour battery with case
+IPX5 sweat resistance</field>
+        <field name="advantages">Blocks traffic and office noise
+Charges only a few times a week
+Safe to use while training</field>
+        <field name="benefits">Calm, focused listening anywhere
+No battery anxiety on long days
+One pair for gym and office</field>
+        <field name="objections">Will they fall out while running? :: Three sizes of silicone tips lock them in - let's find your fit now.
+Is the warranty good? :: One year replacement warranty, handled in any of our stores.</field>
+        <field name="care_instructions">Wipe with a dry cloth; keep the case closed when not in use.</field>
+        <field name="keywords">headphones earphones audio bluetooth music battery</field>
+    </record>
+    <record id="card_airfryer" model="zlms.product.card">
+        <field name="name">CrispChef 4L Air Fryer</field><field name="category">home</field><field name="collection">Smart Kitchen</field>
+        <field name="activity">Healthier home cooking for 2-4 people</field><field name="fabric">Non-stick ceramic basket</field>
+        <field name="price_band">Mid range</field><field name="state">published</field>
+        <field name="tech_tag_ids" eval="[(6, 0, [ref('tech_rapidair')])]"/>
+        <field name="target_customer">Busy families and health-conscious home cooks.</field>
+        <field name="features">Rapid air circulation
+8 one-touch presets
+Dishwasher-safe basket</field>
+        <field name="advantages">Crisp results with up to 85% less oil
+No guesswork on time and temperature
+Cleaning takes a minute</field>
+        <field name="benefits">Tasty food that is lighter on oil
+Dinner ready faster on weeknights
+More time with family, less scrubbing</field>
+        <field name="objections">Is it just a small oven? :: It circulates air much faster, so food crisps in less time and with far less oil.
+Will it raise my electricity bill? :: It cooks faster than a conventional oven, so it often uses less energy per meal.</field>
+        <field name="keywords">kitchen cooking fryer oven appliance healthy</field>
+    </record>
+    <record id="card_serum" model="zlms.product.card">
+        <field name="name">HydraGlow Face Serum</field><field name="category">beauty</field><field name="collection">Skincare Essentials</field>
+        <field name="activity">Daily morning and night skincare</field><field name="fabric">Water-based, fragrance-free</field>
+        <field name="price_band">Premium</field><field name="state">published</field>
+        <field name="tech_tag_ids" eval="[(6, 0, [ref('tech_hyaluronic')])]"/>
+        <field name="target_customer">Customers with dry or dull skin looking for a simple routine.</field>
+        <field name="features">Hyaluronic acid complex
+Lightweight water-based texture
+Fragrance-free formula</field>
+        <field name="advantages">Holds moisture in the skin for hours
+Absorbs fast with no sticky feel
+Gentle on sensitive skin</field>
+        <field name="benefits">Plump, glowing skin all day
+Fits easily into a busy routine
+Comfortable even for sensitive skin</field>
+        <field name="objections">Do I need a serum if I use moisturiser? :: The serum delivers hydration deeper; the moisturiser seals it in - together they work better.</field>
+        <field name="care_instructions">Store away from direct sunlight; use within 12 months of opening.</field>
+        <field name="keywords">skin skincare face serum hydration beauty</field>
+    </record>
+    <record id="card_performance_tee" model="zlms.product.card">
+        <field name="cross_sell_ids" eval="[(6, 0, [ref('card_running_shoe'), ref('card_earbuds')])]"/>
+    </record>
+    <record id="card_running_shoe" model="zlms.product.card">
+        <field name="cross_sell_ids" eval="[(6, 0, [ref('card_performance_tee'), ref('card_earbuds')])]"/>
+    </record>
+    <record id="card_earbuds" model="zlms.product.card">
+        <field name="cross_sell_ids" eval="[(6, 0, [ref('card_performance_tee')])]"/>
+    </record>
+
+    <!-- Core courses -->
+    <record id="demo_channel_welcome" model="slide.channel">
+        <field name="name">Welcome to the Brand: Our Story &amp; Store Standards</field>
+        <field name="enroll">invite</field><field name="visibility">members</field>
+        <field name="zlms_retail_category">onboarding</field><field name="is_published" eval="True"/>
+        <field name="description_short">Who we are, what we stand for and what a great store visit looks like.</field>
+    </record>
+    <record id="demo_slide_welcome_article" model="slide.slide">
+        <field name="name">Our story and promise</field><field name="channel_id" ref="demo_channel_welcome"/>
+        <field name="slide_category">article</field><field name="is_published" eval="True"/><field name="sequence">1</field>
+        <field name="completion_time">0.08</field>
+        <field name="html_content" type="html"><div>
+            <h3>Our promise</h3>
+            <p>Great products, honest advice and a store visit that feels welcoming every single time.</p>
+            <h3>The 4 store standards</h3>
+            <ul><li><strong>Greet</strong> every customer within 10 seconds.</li><li><strong>Discover</strong> the activity before showing product.</li>
+                <li><strong>Demonstrate</strong> the technology - let them touch and try.</li><li><strong>Delight</strong> at billing: loyalty, care tips, thank you.</li></ul>
+        </div></field>
+    </record>
+    <record id="demo_slide_welcome_quiz" model="slide.slide">
+        <field name="name">Quick check: store standards</field><field name="channel_id" ref="demo_channel_welcome"/>
+        <field name="slide_category">quiz</field><field name="is_published" eval="True"/><field name="sequence">2</field>
+    </record>
+    <record id="q_welcome_1" model="slide.question"><field name="slide_id" ref="demo_slide_welcome_quiz"/><field name="question">Within how many seconds should every customer be greeted?</field></record>
+    <record id="q_welcome_1_a" model="slide.answer"><field name="question_id" ref="q_welcome_1"/><field name="text_value">10 seconds</field><field name="is_correct" eval="True"/></record>
+    <record id="q_welcome_1_b" model="slide.answer"><field name="question_id" ref="q_welcome_1"/><field name="text_value">1 minute</field></record>
+    <record id="q_welcome_1_c" model="slide.answer"><field name="question_id" ref="q_welcome_1"/><field name="text_value">Only when they ask for help</field></record>
+    <record id="q_welcome_2" model="slide.question"><field name="slide_id" ref="demo_slide_welcome_quiz"/><field name="question">What should you do before showing any product?</field></record>
+    <record id="q_welcome_2_a" model="slide.answer"><field name="question_id" ref="q_welcome_2"/><field name="text_value">Discover the customer's activity and need</field><field name="is_correct" eval="True"/></record>
+    <record id="q_welcome_2_b" model="slide.answer"><field name="question_id" ref="q_welcome_2"/><field name="text_value">Tell them about the current discount</field></record>
+    <record id="q_welcome_2_c" model="slide.answer"><field name="question_id" ref="q_welcome_2"/><field name="text_value">Show the most expensive item</field></record>
+
+    <record id="demo_channel_service" model="slide.channel">
+        <field name="name">Customer Service Excellence on the Floor</field>
+        <field name="enroll">invite</field><field name="visibility">members</field>
+        <field name="zlms_retail_category">service</field><field name="is_published" eval="True"/>
+        <field name="description_short">Greeting, need discovery, handling complaints and making every customer feel valued.</field>
+    </record>
+    <record id="demo_slide_service_article" model="slide.slide">
+        <field name="name">The LEARN method for unhappy customers</field><field name="channel_id" ref="demo_channel_service"/>
+        <field name="slide_category">article</field><field name="is_published" eval="True"/><field name="sequence">1</field>
+        <field name="completion_time">0.08</field>
+        <field name="html_content" type="html"><div>
+            <h3>LEARN</h3>
+            <ul><li><strong>Listen</strong> without interrupting.</li><li><strong>Empathise</strong>: "I understand how frustrating that is."</li>
+                <li><strong>Apologise</strong> sincerely.</li><li><strong>Resolve</strong>: exchange, repair or escalate within policy.</li>
+                <li><strong>Notify</strong> your store manager and log it.</li></ul>
+            <h3>Great discovery questions</h3>
+            <p>"What will you mainly use it for?" · "How often do you train?" · "Do you prefer a relaxed or a fitted look?"</p>
+        </div></field>
+    </record>
+    <record id="demo_slide_service_quiz" model="slide.slide">
+        <field name="name">Quiz: service situations</field><field name="channel_id" ref="demo_channel_service"/>
+        <field name="slide_category">quiz</field><field name="is_published" eval="True"/><field name="sequence">2</field>
+    </record>
+    <record id="q_service_1" model="slide.question"><field name="slide_id" ref="demo_slide_service_quiz"/><field name="question">A customer is angry about a loose stitch. What is your FIRST step?</field></record>
+    <record id="q_service_1_a" model="slide.answer"><field name="question_id" ref="q_service_1"/><field name="text_value">Listen fully without interrupting</field><field name="is_correct" eval="True"/></record>
+    <record id="q_service_1_b" model="slide.answer"><field name="question_id" ref="q_service_1"/><field name="text_value">Explain that it was probably washed wrongly</field></record>
+    <record id="q_service_1_c" model="slide.answer"><field name="question_id" ref="q_service_1"/><field name="text_value">Call the manager immediately without speaking</field></record>
+    <record id="q_service_2" model="slide.question"><field name="slide_id" ref="demo_slide_service_quiz"/><field name="question">Which is the best discovery question?</field></record>
+    <record id="q_service_2_a" model="slide.answer"><field name="question_id" ref="q_service_2"/><field name="text_value">"What will you mainly use it for?"</field><field name="is_correct" eval="True"/></record>
+    <record id="q_service_2_b" model="slide.answer"><field name="question_id" ref="q_service_2"/><field name="text_value">"Do you want to buy something?"</field></record>
+    <record id="q_service_2_c" model="slide.answer"><field name="question_id" ref="q_service_2"/><field name="text_value">"Is that all?"</field></record>
+
+    <record id="demo_channel_ops" model="slide.channel">
+        <field name="name">Store Operations: Billing, Returns &amp; Loyalty</field>
+        <field name="enroll">invite</field><field name="visibility">members</field>
+        <field name="zlms_retail_category">compliance</field><field name="is_published" eval="True"/>
+        <field name="description_short">The SOPs that keep every bill, exchange and loyalty enrolment right first time.</field>
+    </record>
+    <record id="demo_slide_ops_article" model="slide.slide">
+        <field name="name">Billing and exchange SOP</field><field name="channel_id" ref="demo_channel_ops"/>
+        <field name="slide_category">article</field><field name="is_published" eval="True"/><field name="sequence">1</field>
+        <field name="completion_time">0.1</field>
+        <field name="html_content" type="html"><div>
+            <h3>Exchange policy (sample)</h3>
+            <p>Exchanges within 15 days with the receipt or the registered mobile number, product unused and in original packaging.</p>
+            <h3>Loyalty enrolment</h3>
+            <p>Offer enrolment at every bill: explain the points benefit in one sentence, capture the mobile number with consent.</p>
+        </div></field>
+    </record>
+    <record id="demo_slide_ops_quiz" model="slide.slide">
+        <field name="name">Quiz: operations</field><field name="channel_id" ref="demo_channel_ops"/>
+        <field name="slide_category">quiz</field><field name="is_published" eval="True"/><field name="sequence">2</field>
+    </record>
+    <record id="q_ops_1" model="slide.question"><field name="slide_id" ref="demo_slide_ops_quiz"/><field name="question">A customer lost the bill but wants an exchange. What can you use?</field></record>
+    <record id="q_ops_1_a" model="slide.answer"><field name="question_id" ref="q_ops_1"/><field name="text_value">The registered mobile number on the bill</field><field name="is_correct" eval="True"/></record>
+    <record id="q_ops_1_b" model="slide.answer"><field name="question_id" ref="q_ops_1"/><field name="text_value">Nothing - no exchange without bill</field></record>
+    <record id="q_ops_1_c" model="slide.answer"><field name="question_id" ref="q_ops_1"/><field name="text_value">The customer's word</field></record>
+
+    <!-- Product knowledge course built by the offline AI engine -->
+    <function model="zlms.demo" name="_build_product_course">
+        <value eval="['zivoit_retail_lms.card_performance_tee', 'zivoit_retail_lms.card_running_shoe', 'zivoit_retail_lms.card_earbuds', 'zivoit_retail_lms.card_airfryer', 'zivoit_retail_lms.card_serum']"/>
+        <value>Core Range Product Knowledge</value>
+    </function>
+
+    <!-- Role-play scenarios -->
+    <record id="scenario_greeting" model="zlms.roleplay.scenario">
+        <field name="name">First 60 seconds: greet and discover</field><field name="skill_area">discovery</field>
+        <field name="skill_id" ref="skill_discovery"/><field name="difficulty">1</field><field name="sequence">1</field>
+        <field name="customer_persona">Sam, 28, office worker, browsing casually after work, a little unsure what they need, mid-range budget.</field>
+        <field name="hidden_goal">Wants earbuds for a noisy commute; will buy if the associate asks about their daily routine.</field>
+        <field name="opening_line">Hi... I'm just looking around.</field>
+        <field name="learner_objective">Greet warmly, ask open questions about their routine, then recommend the right product.</field>
+        <field name="customer_script">I travel to work by train every day.
+It is really noisy, and I take a lot of calls.
+Hmm, what makes these different from cheaper ones?
+Okay, and what else would I need?</field>
+        <field name="product_card_ids" eval="[(6, 0, [ref('card_earbuds'), ref('card_performance_tee')])]"/>
+    </record>
+    <record id="scenario_price" model="zlms.roleplay.scenario">
+        <field name="name">"It's too expensive" - price objection</field><field name="skill_area">price_objection</field>
+        <field name="skill_id" ref="skill_objection"/><field name="difficulty">2</field><field name="sequence">2</field>
+        <field name="customer_persona">Priya, 34, training for her first 10K, compares everything with online prices, polite but firm.</field>
+        <field name="hidden_goal">Will buy if the associate explains cushioning value and offers a trial walk.</field>
+        <field name="opening_line">These look nice but they are a lot of money for running shoes.</field>
+        <field name="learner_objective">Acknowledge the concern, explain value (not discount), and invite a trial.</field>
+        <field name="customer_script">I saw some shoes online for half the price.
+Will these really make a difference to my knees?
+And how long will they last if I run 4 days a week?</field>
+        <field name="product_card_ids" eval="[(6, 0, [ref('card_running_shoe')])]"/>
+    </record>
+    <record id="scenario_cross_sell" model="zlms.roleplay.scenario">
+        <field name="name">Complete the basket: add-on selling</field><field name="skill_area">cross_sell</field>
+        <field name="skill_id" ref="skill_cross_sell"/><field name="difficulty">2</field><field name="sequence">3</field>
+        <field name="customer_persona">Alex, 40, buying an air fryer for the family, in a hurry, open to genuinely useful suggestions.</field>
+        <field name="opening_line">I'll just take this air fryer, please.</field>
+        <field name="learner_objective">Suggest a relevant add-on with a clear reason, without being pushy.</field>
+        <field name="customer_script">Do I really need anything else?
+Hmm, I hadn't thought about that.
+Okay, if it actually helps, show me.</field>
+        <field name="product_card_ids" eval="[(6, 0, [ref('card_airfryer')])]"/>
+    </record>
+    <record id="scenario_complaint" model="zlms.roleplay.scenario">
+        <field name="name">Unhappy customer: product complaint</field><field name="skill_area">complaint</field>
+        <field name="skill_id" ref="skill_complaint"/><field name="difficulty">3</field><field name="sequence">4</field>
+        <field name="customer_persona">Mrs. Taylor, 45, bought earbuds as a gift, one side stopped charging within a week, upset and in a hurry.</field>
+        <field name="opening_line">One earbud stopped charging in a week! This is really poor quality.</field>
+        <field name="learner_objective">Use LEARN: listen, empathise, apologise, resolve within policy, notify the manager.</field>
+        <field name="rubric">Listened and empathised | understand, sorry, apologise, frustrating, i hear
+Took ownership | let me, i will, right away, immediately, personally
+Offered a resolution within policy | exchange, replace, repair, new one, refund
+Explained next steps | manager, record, register, call you, update
+Closed positively | thank you, appreciate, anything else, glad</field>
+        <field name="customer_script">I paid good money for this and I don't have time to come back again.
+I don't have the receipt with me, is that going to be a problem?
+Okay, what exactly will you do now?</field>
+        <field name="product_card_ids" eval="[(6, 0, [ref('card_earbuds')])]"/>
+    </record>
+
+    <!-- Learning paths -->
+    <record id="path_onboarding_sa" model="zlms.learning.path">
+        <field name="name">30-Day Store Associate Onboarding</field><field name="code">ONB-SA</field><field name="path_type">onboarding</field>
+        <field name="role_ids" eval="[(6, 0, [ref('role_store_associate'), ref('role_cashier')])]"/>
+        <field name="skill_ids" eval="[(6, 0, [ref('skill_product'), ref('skill_greeting'), ref('skill_discovery'), ref('skill_pos')])]"/>
+        <field name="auto_assign" eval="True"/><field name="duration_days">30</field><field name="pass_score">70</field>
+        <field name="certificate_validity_months">12</field><field name="completion_points">150</field><field name="sequence">1</field>
+        <field name="description" type="html"><p>From day one to floor-ready in 30 days: brand, service, product and operations, practised with AI and signed off on the floor.</p></field>
+    </record>
+    <record id="pl_onb_1" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">1</field><field name="day_offset">1</field>
+        <field name="name">Brand story &amp; store standards</field><field name="line_type">course</field><field name="channel_id" ref="demo_channel_welcome"/></record>
+    <record id="pl_onb_2" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">2</field><field name="day_offset">3</field>
+        <field name="name">Customer service excellence</field><field name="line_type">course</field><field name="channel_id" ref="demo_channel_service"/></record>
+    <record id="pl_onb_3" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">3</field><field name="day_offset">7</field>
+        <field name="name">Core range product knowledge</field><field name="line_type">course</field><field name="channel_id" ref="demo_channel_product_knowledge"/></record>
+    <record id="pl_onb_4" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">4</field><field name="day_offset">10</field>
+        <field name="name">Billing, returns &amp; loyalty SOP</field><field name="line_type">course</field><field name="channel_id" ref="demo_channel_ops"/></record>
+    <record id="pl_onb_5" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">5</field><field name="day_offset">12</field>
+        <field name="name">AI practice: greet and discover</field><field name="line_type">roleplay</field><field name="scenario_id" ref="scenario_greeting"/><field name="min_score">60</field></record>
+    <record id="pl_onb_6" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">6</field><field name="day_offset">18</field>
+        <field name="name">OJT: greets every customer within 10 seconds</field><field name="line_type">ojt</field>
+        <field name="instructions">Observe 5 customer entries during a peak hour. All 5 greeted within 10 seconds with eye contact and a smile.</field></record>
+    <record id="pl_onb_7" model="zlms.learning.path.line"><field name="path_id" ref="path_onboarding_sa"/><field name="sequence">7</field><field name="day_offset">25</field>
+        <field name="name">OJT: completes a sale with loyalty enrolment unassisted</field><field name="line_type">ojt</field>
+        <field name="instructions">From greeting to billing and loyalty enrolment, without help, following the SOP.</field></record>
+
+    <record id="path_selling" model="zlms.learning.path">
+        <field name="name">Selling Skills Accelerator</field><field name="code">SELL-ACC</field><field name="path_type">selling</field>
+        <field name="role_ids" eval="[(6, 0, [ref('role_store_associate'), ref('role_asm')])]"/>
+        <field name="skill_ids" eval="[(6, 0, [ref('skill_objection'), ref('skill_cross_sell')])]"/>
+        <field name="auto_assign" eval="True"/><field name="duration_days">21</field><field name="pass_score">65</field>
+        <field name="certificate_validity_months">12</field><field name="completion_points">120</field><field name="sequence">2</field>
+    </record>
+    <record id="pl_sell_1" model="zlms.learning.path.line"><field name="path_id" ref="path_selling"/><field name="sequence">1</field><field name="day_offset">5</field>
+        <field name="name">AI practice: price objection</field><field name="line_type">roleplay</field><field name="scenario_id" ref="scenario_price"/><field name="min_score">60</field></record>
+    <record id="pl_sell_2" model="zlms.learning.path.line"><field name="path_id" ref="path_selling"/><field name="sequence">2</field><field name="day_offset">10</field>
+        <field name="name">AI practice: complete the look</field><field name="line_type">roleplay</field><field name="scenario_id" ref="scenario_cross_sell"/><field name="min_score">60</field></record>
+    <record id="pl_sell_3" model="zlms.learning.path.line"><field name="path_id" ref="path_selling"/><field name="sequence">3</field><field name="day_offset">20</field>
+        <field name="name">OJT: two add-on sales in one shift</field><field name="line_type">ojt</field>
+        <field name="instructions">Manager observes two successful, relevant add-on suggestions in a single shift.</field></record>
+
+    <record id="path_leadership" model="zlms.learning.path">
+        <field name="name">Store Leadership Essentials</field><field name="code">LEAD-SM</field><field name="path_type">leadership</field>
+        <field name="role_ids" eval="[(6, 0, [ref('role_store_manager'), ref('role_asm')])]"/>
+        <field name="skill_ids" eval="[(6, 0, [ref('skill_leadership'), ref('skill_complaint')])]"/>
+        <field name="auto_assign" eval="True"/><field name="duration_days">45</field><field name="completion_points">200</field><field name="sequence">3</field>
+    </record>
+    <record id="pl_lead_1" model="zlms.learning.path.line"><field name="path_id" ref="path_leadership"/><field name="sequence">1</field><field name="day_offset">7</field>
+        <field name="name">Store operations SOP</field><field name="line_type">course</field><field name="channel_id" ref="demo_channel_ops"/></record>
+    <record id="pl_lead_2" model="zlms.learning.path.line"><field name="path_id" ref="path_leadership"/><field name="sequence">2</field><field name="day_offset">14</field>
+        <field name="name">AI practice: complaint handling</field><field name="line_type">roleplay</field><field name="scenario_id" ref="scenario_complaint"/><field name="min_score">65</field></record>
+    <record id="pl_lead_3" model="zlms.learning.path.line"><field name="path_id" ref="path_leadership"/><field name="sequence">3</field><field name="day_offset">30</field>
+        <field name="name">OJT: runs a 10-minute morning huddle</field><field name="line_type">ojt</field>
+        <field name="instructions">Targets of the day, one product tip, one recognition, one service focus - in 10 minutes.</field></record>
+
+    <function model="zlms.learning.path" name="write">
+        <value eval="[ref('path_onboarding_sa'), ref('path_selling'), ref('path_leadership')]"/>
+        <value eval="{'state': 'published'}"/>
+    </function>
+
+    <!-- Learners (fictional) - auto-assigned to published paths by role -->
+    <record id="learner_01" model="zlms.learner"><field name="name">Olivia Bennett</field><field name="employee_code">E1001</field><field name="email">olivia.bennett@example.com</field>
+        <field name="store_id" ref="demo_store_hyd"/><field name="role_id" ref="role_store_manager"/><field name="joining_date" eval="(DateTime.today() - relativedelta(months=14)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_02" model="zlms.learner"><field name="name">Daniel Kim</field><field name="employee_code">E1002</field><field name="email">daniel.kim@example.com</field>
+        <field name="store_id" ref="demo_store_hyd"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=40)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_03" model="zlms.learner"><field name="name">Sofia Martins</field><field name="employee_code">E1003</field><field name="email">sofia.martins@example.com</field>
+        <field name="store_id" ref="demo_store_hyd"/><field name="role_id" ref="role_cashier"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=20)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_04" model="zlms.learner"><field name="name">Omar Haddad</field><field name="employee_code">E1004</field><field name="email">omar.haddad@example.com</field>
+        <field name="store_id" ref="demo_store_che"/><field name="role_id" ref="role_asm"/><field name="joining_date" eval="(DateTime.today() - relativedelta(months=8)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_05" model="zlms.learner"><field name="name">Emma Clarke</field><field name="employee_code">E1005</field><field name="email">emma.clarke@example.com</field>
+        <field name="store_id" ref="demo_store_che"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=15)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_06" model="zlms.learner"><field name="name">Lucas Moreau</field><field name="employee_code">E1006</field><field name="email">lucas.moreau@example.com</field>
+        <field name="store_id" ref="demo_store_blr"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=55)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_07" model="zlms.learner"><field name="name">Aisha Rahman</field><field name="employee_code">E1007</field><field name="email">aisha.rahman@example.com</field>
+        <field name="store_id" ref="demo_store_blr"/><field name="role_id" ref="role_vm"/><field name="joining_date" eval="(DateTime.today() - relativedelta(months=5)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_08" model="zlms.learner"><field name="name">Ethan Brooks</field><field name="employee_code">E1008</field><field name="email">ethan.brooks@example.com</field>
+        <field name="store_id" ref="demo_store_pun"/><field name="role_id" ref="role_store_manager"/><field name="joining_date" eval="(DateTime.today() - relativedelta(months=20)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_09" model="zlms.learner"><field name="name">Mia Novak</field><field name="employee_code">E1009</field><field name="email">mia.novak@example.com</field>
+        <field name="store_id" ref="demo_store_pun"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=28)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_10" model="zlms.learner"><field name="name">Noah Fischer</field><field name="employee_code">E1010</field><field name="email">noah.fischer@example.com</field>
+        <field name="store_id" ref="demo_store_kol"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=33)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_11" model="zlms.learner"><field name="name">Chloe Dubois</field><field name="employee_code">E1011</field><field name="email">chloe.dubois@example.com</field>
+        <field name="store_id" ref="demo_store_kol"/><field name="role_id" ref="role_cashier"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=10)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_12" model="zlms.learner"><field name="name">Arjun Mehta</field><field name="employee_code">E1012</field><field name="email">arjun.mehta@example.com</field>
+        <field name="store_id" ref="demo_store_ggn"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=48)).strftime('%Y-%m-%d')"/></record>
+    <record id="learner_13" model="zlms.learner"><field name="name">Grace Liu</field><field name="employee_code">E1013</field><field name="email">grace.liu@example.com</field>
+        <field name="store_id" ref="demo_store_ggn"/><field name="role_id" ref="role_asm"/><field name="joining_date" eval="(DateTime.today() - relativedelta(months=3)).strftime('%Y-%m-%d')"/></record>
+    <!-- Portal learner linked to the demo portal user -->
+    <record id="learner_portal" model="zlms.learner"><field name="name">Joel Willis</field><field name="employee_code">E1014</field>
+        <field name="user_id" ref="base.demo_user0"/><field name="partner_id" ref="base.partner_demo_portal"/>
+        <field name="store_id" ref="demo_store_hyd"/><field name="role_id" ref="role_store_associate"/><field name="joining_date" eval="(DateTime.today() - relativedelta(days=9)).strftime('%Y-%m-%d')"/></record>
+
+    <!-- Career ladder: journeys required for promotion -->
+    <record id="role_store_associate" model="zlms.role">
+        <field name="promotion_path_ids" eval="[(6, 0, [ref('path_onboarding_sa'), ref('path_selling')])]"/>
+    </record>
+    <record id="role_asm" model="zlms.role">
+        <field name="promotion_path_ids" eval="[(6, 0, [ref('path_selling'), ref('path_leadership')])]"/>
+    </record>
+
+    <!-- Instructor-led training -->
+    <record id="ilt_vm" model="zlms.ilt.course">
+        <field name="name">Visual Merchandising Masterclass</field><field name="duration_hours">3</field>
+        <field name="skill_ids" eval="[(6, 0, [ref('skill_vm'), ref('skill_product')])]"/>
+        <field name="description" type="html"><p>Planograms, focal points, colour blocking and window standards - hands-on in a live store.</p></field>
+    </record>
+    <record id="ilt_service" model="zlms.ilt.course">
+        <field name="name">Service Excellence Workshop</field><field name="duration_hours">2</field>
+        <field name="skill_ids" eval="[(6, 0, [ref('skill_greeting'), ref('skill_complaint')])]"/>
+        <field name="description" type="html"><p>Live practice of greeting, discovery and the LEARN method with peer feedback.</p></field>
+    </record>
+    <record id="pl_lead_4" model="zlms.learning.path.line"><field name="path_id" ref="path_leadership"/><field name="sequence">4</field><field name="day_offset">35</field>
+        <field name="name">Visual Merchandising Masterclass</field><field name="line_type">session</field><field name="ilt_course_id" ref="ilt_vm"/></record>
+    <record id="session_service_past" model="zlms.training.session">
+        <field name="name">Service Excellence - South Zone batch 1</field><field name="ilt_course_id" ref="ilt_service"/>
+        <field name="session_type">classroom</field><field name="region_id" ref="demo_region_south"/><field name="store_id" ref="demo_store_hyd"/>
+        <field name="location">Central Plaza Flagship - training room</field><field name="capacity">12</field>
+        <field name="start_datetime" eval="(DateTime.now() - relativedelta(days=12)).strftime('%Y-%m-%d 05:00:00')"/>
+        <field name="end_datetime" eval="(DateTime.now() - relativedelta(days=12)).strftime('%Y-%m-%d 07:00:00')"/>
+    </record>
+    <record id="session_vm_upcoming" model="zlms.training.session">
+        <field name="name">VM Masterclass - South Zone</field><field name="ilt_course_id" ref="ilt_vm"/>
+        <field name="session_type">on_floor</field><field name="region_id" ref="demo_region_south"/><field name="store_id" ref="demo_store_hyd"/>
+        <field name="location">Central Plaza Flagship - shop floor</field><field name="capacity">8</field>
+        <field name="start_datetime" eval="(DateTime.now() + relativedelta(days=6)).strftime('%Y-%m-%d 04:30:00')"/>
+        <field name="end_datetime" eval="(DateTime.now() + relativedelta(days=6)).strftime('%Y-%m-%d 07:30:00')"/>
+    </record>
+    <record id="session_service_virtual" model="zlms.training.session">
+        <field name="name">Service Excellence - virtual (all zones)</field><field name="ilt_course_id" ref="ilt_service"/>
+        <field name="session_type">virtual</field><field name="meeting_url">https://meet.example.com/service-excellence</field><field name="capacity">30</field>
+        <field name="start_datetime" eval="(DateTime.now() + relativedelta(days=3)).strftime('%Y-%m-%d 09:00:00')"/>
+        <field name="end_datetime" eval="(DateTime.now() + relativedelta(days=3)).strftime('%Y-%m-%d 11:00:00')"/>
+    </record>
+
+    <!-- Store bulletins -->
+    <record id="bulletin_launch" model="zlms.bulletin">
+        <field name="name">New season launch: what every associate must know</field><field name="bulletin_type">launch</field>
+        <field name="priority">urgent</field><field name="channel_id" ref="demo_channel_product_knowledge"/>
+        <field name="due_date" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d')"/>
+        <field name="body" type="html"><div><p>The new season range lands in all stores this Friday.</p>
+            <ul><li>Hero products: Everyday Performance Tee, Stride Running Shoe, AirWave Pro Earbuds.</li>
+                <li>Feature the hero products on the entrance table, eye level.</li>
+                <li>Take the 5-minute product course and answer your Daily Boost questions this week.</li></ul></div></field>
+    </record>
+    <record id="bulletin_returns" model="zlms.bulletin">
+        <field name="name">Updated returns &amp; exchange policy</field><field name="bulletin_type">policy</field>
+        <field name="due_date" eval="(DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="body" type="html"><div><p>From the 1st of next month exchanges are accepted for <strong>30 days</strong> (was 15) with the receipt or registered mobile number.</p>
+            <p>Electronics must be unopened unless faulty; faulty items follow the warranty process.</p></div></field>
+    </record>
+    <record id="bulletin_recognition" model="zlms.bulletin">
+        <field name="name">Shout-out: thank you for a record learning month</field><field name="bulletin_type">recognition</field>
+        <field name="require_ack" eval="False"/>
+        <field name="body" type="html"><p>Our stores earned more learning points last month than ever before. Check the store challenge on your home screen to see where your team ranks!</p></field>
+    </record>
+
+    <function model="zlms.demo" name="_populate_activity"/>
+    <function model="zlms.demo" name="_populate_wave2"/>
+</odoo>

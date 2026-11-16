@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_learner_list" model="ir.ui.view">
+        <field name="name">zlms.learner.list</field>
+        <field name="model">zlms.learner</field>
+        <field name="arch" type="xml">
+            <list string="Learners" multi_edit="1">
+                <field name="name"/>
+                <field name="employee_code" optional="show"/>
+                <field name="store_id"/>
+                <field name="region_id" optional="hide"/>
+                <field name="role_id"/>
+                <field name="joining_date" optional="show"/>
+                <field name="assignment_count" optional="hide"/>
+                <field name="completion_rate" widget="progressbar"/>
+                <field name="avg_score"/>
+                <field name="overdue_count" decoration-danger="overdue_count &gt; 0"/>
+                <field name="certificate_count" optional="show"/>
+                <field name="points"/>
+                <field name="readiness_score" optional="show"/>
+                <field name="risk_level" widget="badge" decoration-success="risk_level == 'low'"
+                       decoration-warning="risk_level == 'medium'" decoration-danger="risk_level == 'high'"/>
+                <field name="user_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_learner_kanban" model="ir.ui.view">
+        <field name="name">zlms.learner.kanban</field>
+        <field name="model">zlms.learner</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside class="me-2">
+                            <field name="image_128" widget="image" options="{'img_class': 'rounded-circle', 'size': [56, 56]}"/>
+                        </aside>
+                        <main>
+                            <field name="name" class="fw-bold"/>
+                            <div class="text-muted small"><field name="role_id"/> · <field name="store_id"/></div>
+                            <field name="completion_rate" widget="progressbar"/>
+                            <div class="d-flex justify-content-between small">
+                                <span><i title="Star" class="fa fa-star text-warning"/> <field name="points"/></span>
+                                <field name="risk_level" widget="badge" decoration-success="risk_level == 'low'"
+                                       decoration-warning="risk_level == 'medium'" decoration-danger="risk_level == 'high'"/>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="zlms_learner_form" model="ir.ui.view">
+        <field name="name">zlms.learner.form</field>
+        <field name="model">zlms.learner</field>
+        <field name="arch" type="xml">
+            <form string="Learner">
+                <header>
+                    <button name="action_ai_skill_gap" type="object" string="AI Skill Gap Analysis"
+                            class="btn-primary" icon="fa-magic"/>
+                    <button name="action_sync_progress" type="object" string="Sync Progress" icon="fa-refresh"/>
+                    <button name="action_grant_portal_access" type="object" string="Grant Learning Access"
+                            invisible="user_id" groups="zivoit_retail_lms.group_zlms_manager"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_assignments" type="object" class="oe_stat_button" icon="fa-road">
+                            <field name="assignment_count" widget="statinfo" string="Journeys"/>
+                        </button>
+                        <button name="action_view_certificates" type="object" class="oe_stat_button" icon="fa-certificate">
+                            <field name="certificate_count" widget="statinfo" string="Certificates"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="At Risk" bg_color="text-bg-danger" invisible="risk_level != 'high'"/>
+                    <field name="image_128" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Learner name"/></h1>
+                        <field name="risk_level" widget="badge" decoration-success="risk_level == 'low'"
+                               decoration-warning="risk_level == 'medium'" decoration-danger="risk_level == 'high'"/>
+                    </div>
+                    <group>
+                        <group string="Store &amp; Role">
+                            <field name="store_id"/>
+                            <field name="region_id"/>
+                            <field name="role_id"/>
+                            <field name="joining_date"/>
+                            <field name="tenure_days"/>
+                        </group>
+                        <group string="Contact &amp; Access">
+                            <field name="employee_code"/>
+                            <field name="employee_id" groups="hr.group_hr_user"/>
+                            <field name="email" widget="email"/>
+                            <field name="mobile" widget="phone"/>
+                            <field name="preferred_language"/>
+                            <field name="user_id"/>
+                            <field name="partner_id" invisible="1"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Performance">
+                        <group>
+                            <field name="completion_rate" widget="progressbar"/>
+                            <field name="avg_score"/>
+                            <field name="overdue_count"/>
+                            <field name="points"/>
+                        </group>
+                        <group>
+                            <field name="roleplay_avg"/>
+                            <field name="boost_mastery" widget="progressbar"/>
+                            <field name="readiness_score" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Learning Journeys" name="assignments">
+                            <field name="assignment_ids" readonly="1">
+                                <list decoration-danger="is_overdue" decoration-success="state == 'completed'">
+                                    <field name="path_id"/>
+                                    <field name="assign_date"/>
+                                    <field name="due_date"/>
+                                    <field name="progress" widget="progressbar"/>
+                                    <field name="score"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="is_overdue" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Certificates" name="certificates">
+                            <field name="certificate_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="path_id"/>
+                                    <field name="issue_date"/>
+                                    <field name="expiry_date"/>
+                                    <field name="score"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'valid'"
+                                           decoration-warning="state == 'expiring'" decoration-danger="state == 'expired'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Role-plays" name="roleplays">
+                            <field name="roleplay_session_ids" readonly="1">
+                                <list>
+                                    <field name="session_date"/>
+                                    <field name="scenario_id"/>
+                                    <field name="engine"/>
+                                    <field name="score"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_learner_search" model="ir.ui.view">
+        <field name="name">zlms.learner.search</field>
+        <field name="model">zlms.learner</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('employee_code', 'ilike', self), ('email', 'ilike', self)]"/>
+                <field name="store_id"/>
+                <field name="region_id"/>
+                <field name="role_id"/>
+                <filter name="my_team" string="My Team"
+                        domain="['|', ('store_id.manager_user_id', '=', uid), ('store_id.area_manager_user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="at_risk" string="At Risk" domain="[('risk_level', '=', 'high')]"/>
+                <filter name="attention" string="Needs Attention" domain="[('risk_level', '=', 'medium')]"/>
+                <filter name="no_login" string="No Learning Login" domain="[('user_id', '=', False)]"/>
+                <separator/>
+                <filter name="new_joiners" string="Joined in last 30 days"
+                        domain="[('joining_date', '&gt;=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_region" string="Region" context="{'group_by': 'region_id'}"/>
+                    <filter name="group_role" string="Role" context="{'group_by': 'role_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zlms_learner_action" model="ir.actions.act_window">
+        <field name="name">Learners</field>
+        <field name="res_model">zlms.learner</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your store team</p>
+            <p>Learners get role-based journeys assigned automatically the moment they join a store.</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_zlms_certificate" model="report.paperformat">
+        <field name="name">Retail LMS Certificate (A4 Landscape)</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">10</field>
+        <field name="margin_right">10</field>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_zlms_certificate" model="ir.actions.report">
+        <field name="name">Learning Certificate</field>
+        <field name="model">zlms.certificate</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_retail_lms.report_zlms_certificate</field>
+        <field name="report_file">zivoit_retail_lms.report_zlms_certificate</field>
+        <field name="print_report_name">'Certificate - %s' % (object.name or '').replace('/', '-')</field>
+        <field name="binding_model_id" ref="model_zlms_certificate"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_zlms_certificate"/>
+    </record>
+
+    <template id="report_zlms_certificate">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="cert">
+                <div class="article" t-att-data-oe-model="cert._name" t-att-data-oe-id="cert.id">
+                    <div style="border: 10px solid #0b2545; padding: 6px; height: 175mm;">
+                        <div style="border: 2px solid #3a86ff; height: 100%; padding: 30px 50px; text-align: center; font-family: Helvetica, Arial, sans-serif;">
+                            <div style="font-size: 14px; letter-spacing: 6px; color: #3a86ff; text-transform: uppercase;">
+                                <t t-out="cert.company_id.name or cert.env.company.name"/>
+                            </div>
+                            <div style="font-size: 44px; font-weight: bold; color: #0b2545; margin-top: 20px;">Certificate of Achievement</div>
+                            <div style="font-size: 16px; color: #555; margin-top: 18px;">This certifies that</div>
+                            <div style="font-size: 36px; color: #0b2545; margin-top: 10px; border-bottom: 2px solid #3a86ff; display: inline-block; padding: 0 40px 6px 40px;">
+                                <t t-out="cert.learner_id.name"/>
+                            </div>
+                            <div style="font-size: 15px; color: #555; margin-top: 10px;">
+                                <t t-out="cert.role_id.name or ''"/><t t-if="cert.store_id"> - <t t-out="cert.store_id.name"/></t>
+                            </div>
+                            <div style="font-size: 16px; color: #555; margin-top: 22px;">has successfully completed the learning journey</div>
+                            <div style="font-size: 26px; font-weight: bold; color: #3a86ff; margin-top: 8px;"><t t-out="cert.path_id.name"/></div>
+                            <div style="font-size: 15px; color: #333; margin-top: 18px;" t-if="cert.score">
+                                with a score of <strong><t t-out="'%.0f' % cert.score"/>%</strong>
+                            </div>
+                            <table style="width: 100%; margin-top: 40px; font-size: 13px; color: #333;">
+                                <tr>
+                                    <td style="width: 33%; text-align: left;">
+                                        <div>Issued: <strong t-out="cert.issue_date" t-options="{'widget': 'date'}"/></div>
+                                        <div t-if="cert.expiry_date">Valid until: <strong t-out="cert.expiry_date" t-options="{'widget': 'date'}"/></div>
+                                    </td>
+                                    <td style="width: 34%; text-align: center;">
+                                        <div style="border-top: 1px solid #0b2545; width: 70%; margin: 0 auto; padding-top: 4px;">Head of Learning &amp; Development</div>
+                                    </td>
+                                    <td style="width: 33%; text-align: right;">
+                                        <div>Certificate No.</div>
+                                        <div><strong t-out="cert.name"/></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

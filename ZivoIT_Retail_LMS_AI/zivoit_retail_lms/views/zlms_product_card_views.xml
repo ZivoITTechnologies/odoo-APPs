@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_product_card_list" model="ir.ui.view">
+        <field name="name">zlms.product.card.list</field>
+        <field name="model">zlms.product.card</field>
+        <field name="arch" type="xml">
+            <list string="Product Knowledge">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="collection" optional="show"/>
+                <field name="activity"/>
+                <field name="tech_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="price_band" optional="show"/>
+                <field name="channel_id" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'published'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_product_card_kanban" model="ir.ui.view">
+        <field name="name">zlms.product.card.kanban</field>
+        <field name="model">zlms.product.card</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="card">
+                        <field name="name" class="fw-bold fs-5"/>
+                        <div class="text-muted"><field name="category"/> · <field name="activity"/></div>
+                        <field name="tech_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        <div class="d-flex justify-content-between small mt-1">
+                            <field name="price_band"/>
+                            <field name="state" widget="badge" decoration-success="state == 'published'"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="zlms_product_card_form" model="ir.ui.view">
+        <field name="name">zlms.product.card.form</field>
+        <field name="model">zlms.product.card</field>
+        <field name="arch" type="xml">
+            <form string="Product Knowledge Card">
+                <header>
+                    <button name="action_ai_generate_course" type="object" string="AI: Build Micro-course"
+                            class="btn-primary" icon="fa-magic"/>
+                    <button name="action_publish" type="object" string="Publish" invisible="state == 'published'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_course" type="object" class="oe_stat_button" icon="fa-graduation-cap"
+                                invisible="not channel_id" string="Course"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Wireless Noise-Cancelling Earbuds"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="product_tmpl_id"/>
+                            <field name="category"/>
+                            <field name="collection"/>
+                            <field name="activity"/>
+                        </group>
+                        <group>
+                            <field name="tech_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="fabric"/>
+                            <field name="price_band"/>
+                            <field name="channel_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Feature · Advantage · Benefit" name="fab">
+                            <group>
+                                <field name="features" placeholder="One feature per line"/>
+                                <field name="advantages" placeholder="What each feature does"/>
+                                <field name="benefits" placeholder="Why the customer cares"/>
+                            </group>
+                        </page>
+                        <page string="Selling" name="selling">
+                            <group>
+                                <field name="target_customer"/>
+                                <field name="objections" placeholder="Is this too expensive? :: Compare cost per wear..."/>
+                                <field name="cross_sell_ids" widget="many2many_tags"/>
+                                <field name="care_instructions"/>
+                                <field name="keywords"/>
+                            </group>
+                        </page>
+                        <page string="Micro-lesson" name="lesson">
+                            <field name="lesson_html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_product_card_search" model="ir.ui.view">
+        <field name="name">zlms.product.card.search</field>
+        <field name="model">zlms.product.card</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="tech_tag_ids"/>
+                <field name="collection"/>
+                <filter name="published" string="Published" domain="[('state', '=', 'published')]"/>
+                <filter name="no_course" string="Without Course" domain="[('channel_id', '=', False)]"/>
+                <group>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category'}"/>
+                    <filter name="group_collection" string="Collection" context="{'group_by': 'collection'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zlms_product_card_action" model="ir.actions.act_window">
+        <field name="name">Product Knowledge</field>
+        <field name="res_model">zlms.product.card</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Capture product knowledge once</p>
+            <p>Each card feeds micro-courses, quizzes, Daily Boost questions, role-plays and the Ask the Expert assistant.</p>
+        </field>
+    </record>
+</odoo>

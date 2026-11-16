@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Retail roles -->
+    <record id="role_store_associate" model="zlms.role">
+        <field name="name">Store Associate</field><field name="code">SA</field><field name="sequence">10</field>
+    </record>
+    <record id="role_cashier" model="zlms.role">
+        <field name="name">Cashier / Customer Desk</field><field name="code">CSH</field><field name="sequence">20</field>
+    </record>
+    <record id="role_vm" model="zlms.role">
+        <field name="name">Visual Merchandiser</field><field name="code">VM</field><field name="sequence">30</field>
+    </record>
+    <record id="role_asm" model="zlms.role">
+        <field name="name">Assistant Store Manager</field><field name="code">ASM</field><field name="sequence">40</field>
+        <field name="is_manager_role" eval="True"/>
+    </record>
+    <record id="role_store_manager" model="zlms.role">
+        <field name="name">Store Manager</field><field name="code">SM</field><field name="sequence">50</field>
+        <field name="is_manager_role" eval="True"/>
+    </record>
+    <record id="role_area_manager" model="zlms.role">
+        <field name="name">Area Manager</field><field name="code">AM</field><field name="sequence">60</field>
+        <field name="is_manager_role" eval="True"/>
+    </record>
+
+    <!-- Competency framework -->
+    <record id="skill_product" model="zlms.skill"><field name="name">Product Knowledge &amp; Features</field><field name="skill_area">product</field></record>
+    <record id="skill_greeting" model="zlms.skill"><field name="name">Greeting &amp; Rapport</field><field name="skill_area">service</field></record>
+    <record id="skill_discovery" model="zlms.skill"><field name="name">Need Discovery</field><field name="skill_area">selling</field></record>
+    <record id="skill_objection" model="zlms.skill"><field name="name">Objection Handling</field><field name="skill_area">selling</field></record>
+    <record id="skill_cross_sell" model="zlms.skill"><field name="name">Cross-sell &amp; Upsell</field><field name="skill_area">selling</field></record>
+    <record id="skill_complaint" model="zlms.skill"><field name="name">Complaint Resolution</field><field name="skill_area">service</field></record>
+    <record id="skill_vm" model="zlms.skill"><field name="name">Visual Merchandising Standards</field><field name="skill_area">vm</field></record>
+    <record id="skill_pos" model="zlms.skill"><field name="name">Billing, Returns &amp; Loyalty SOP</field><field name="skill_area">operations</field></record>
+    <record id="skill_safety" model="zlms.skill"><field name="name">Store Safety &amp; Loss Prevention</field><field name="skill_area">compliance</field></record>
+    <record id="skill_leadership" model="zlms.skill"><field name="name">Team Coaching &amp; Huddles</field><field name="skill_area">leadership</field></record>
+</odoo>

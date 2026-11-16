@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_ask_expert_wizard_form" model="ir.ui.view">
+        <field name="name">zlms.ask.expert.wizard.form</field>
+        <field name="model">zlms.ask.expert.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Ask the Product Expert">
+                <group>
+                    <field name="question" placeholder="e.g. Customer asks how this compares with the premium model and what the warranty covers"/>
+                    <field name="language"/>
+                </group>
+                <div invisible="not answer_html">
+                    <separator string="Answer"/>
+                    <field name="answer_html" nolabel="1"/>
+                    <group>
+                        <field name="source_card_ids" widget="many2many_tags"/>
+                        <field name="engine"/>
+                    </group>
+                </div>
+                <footer>
+                    <button name="action_ask" type="object" string="Ask" class="btn-primary" icon="fa-comments"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_ask_expert_wizard_action" model="ir.actions.act_window">
+        <field name="name">Ask the Expert</field>
+        <field name="res_model">zlms.ask.expert.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

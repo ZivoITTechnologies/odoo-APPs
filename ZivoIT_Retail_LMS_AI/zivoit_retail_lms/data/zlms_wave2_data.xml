@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Badges -->
+    <record id="badge_first_steps" model="zlms.badge"><field name="name">First Steps</field><field name="sequence">1</field><field name="level">bronze</field>
+        <field name="criterion">points</field><field name="threshold">50</field><field name="bonus_points">10</field><field name="icon">fa-paw</field><field name="color">#cd7f32</field>
+        <field name="description">Earned your first 50 learning points.</field></record>
+    <record id="badge_rising_star" model="zlms.badge"><field name="name">Rising Star</field><field name="sequence">2</field><field name="level">silver</field>
+        <field name="criterion">points</field><field name="threshold">250</field><field name="bonus_points">25</field><field name="icon">fa-star</field><field name="color">#9aa5b1</field>
+        <field name="description">250 learning points - you are on a roll.</field></record>
+    <record id="badge_legend" model="zlms.badge"><field name="name">Learning Legend</field><field name="sequence">3</field><field name="level">gold</field>
+        <field name="criterion">points</field><field name="threshold">1000</field><field name="bonus_points">100</field><field name="icon">fa-trophy</field><field name="color">#f0b400</field>
+        <field name="description">1,000 learning points - a true role model.</field></record>
+    <record id="badge_finisher" model="zlms.badge"><field name="name">Journey Finisher</field><field name="sequence">4</field><field name="level">bronze</field>
+        <field name="criterion">paths_completed</field><field name="threshold">1</field><field name="bonus_points">20</field><field name="icon">fa-flag-checkered</field><field name="color">#2e9e5b</field>
+        <field name="description">Completed a full learning journey.</field></record>
+    <record id="badge_certified" model="zlms.badge"><field name="name">Certified Pro</field><field name="sequence">5</field><field name="level">silver</field>
+        <field name="criterion">certificates</field><field name="threshold">2</field><field name="bonus_points">30</field><field name="icon">fa-certificate</field><field name="color">#3a86ff</field>
+        <field name="description">Holds two valid certificates.</field></record>
+    <record id="badge_streak" model="zlms.badge"><field name="name">On Fire</field><field name="sequence">6</field><field name="level">bronze</field>
+        <field name="criterion">boost_streak</field><field name="threshold">5</field><field name="bonus_points">15</field><field name="icon">fa-fire</field><field name="color">#e4572e</field>
+        <field name="description">Answered Daily Boost 5 days in a row.</field></record>
+    <record id="badge_memory" model="zlms.badge"><field name="name">Memory Master</field><field name="sequence">7</field><field name="level">gold</field>
+        <field name="criterion">boost_mastered</field><field name="threshold">10</field><field name="bonus_points">40</field><field name="icon">fa-bolt</field><field name="color">#f0ad4e</field>
+        <field name="description">Mastered 10 Daily Boost questions.</field></record>
+    <record id="badge_sales_ace" model="zlms.badge"><field name="name">Sales Ace</field><field name="sequence">8</field><field name="level">silver</field>
+        <field name="criterion">roleplay_best</field><field name="threshold">80</field><field name="bonus_points">30</field><field name="icon">fa-comments</field><field name="color">#7b2cbf</field>
+        <field name="description">Scored 80+ in an AI role-play.</field></record>
+    <record id="badge_in_the_loop" model="zlms.badge"><field name="name">In the Loop</field><field name="sequence">9</field><field name="level">bronze</field>
+        <field name="criterion">bulletins_ack</field><field name="threshold">3</field><field name="bonus_points">10</field><field name="icon">fa-bullhorn</field><field name="color">#00a6a6</field>
+        <field name="description">Acknowledged 3 store bulletins.</field></record>
+    <record id="badge_floor_star" model="zlms.badge"><field name="name">Floor Star</field><field name="sequence">10</field><field name="level">gold</field>
+        <field name="criterion">observation_avg</field><field name="threshold">85</field><field name="bonus_points">50</field><field name="icon">fa-thumbs-up</field><field name="color">#1f4e8c</field>
+        <field name="description">Averages 85%+ in manager coaching observations.</field></record>
+    <record id="badge_classroom" model="zlms.badge"><field name="name">Classroom Regular</field><field name="sequence">11</field><field name="level">bronze</field>
+        <field name="criterion">sessions_attended</field><field name="threshold">2</field><field name="bonus_points">15</field><field name="icon">fa-graduation-cap</field><field name="color">#6c757d</field>
+        <field name="description">Attended two instructor-led sessions.</field></record>
+
+    <!-- Career ladder -->
+    <record id="role_store_associate" model="zlms.role"><field name="next_role_id" ref="role_asm"/><field name="min_tenure_days">180</field></record>
+    <record id="role_cashier" model="zlms.role"><field name="next_role_id" ref="role_store_associate"/><field name="min_tenure_days">90</field></record>
+    <record id="role_vm" model="zlms.role"><field name="next_role_id" ref="role_asm"/><field name="min_tenure_days">270</field></record>
+    <record id="role_asm" model="zlms.role"><field name="next_role_id" ref="role_store_manager"/><field name="min_tenure_days">365</field></record>
+    <record id="role_store_manager" model="zlms.role"><field name="next_role_id" ref="role_area_manager"/><field name="min_tenure_days">540</field></record>
+
+    <!-- Skill targets by role -->
+    <record id="rs_sa_product" model="zlms.role.skill"><field name="role_id" ref="role_store_associate"/><field name="skill_id" ref="skill_product"/><field name="target_level">3</field></record>
+    <record id="rs_sa_greet" model="zlms.role.skill"><field name="role_id" ref="role_store_associate"/><field name="skill_id" ref="skill_greeting"/><field name="target_level">3.5</field></record>
+    <record id="rs_sa_disc" model="zlms.role.skill"><field name="role_id" ref="role_store_associate"/><field name="skill_id" ref="skill_discovery"/><field name="target_level">3</field></record>
+    <record id="rs_sa_obj" model="zlms.role.skill"><field name="role_id" ref="role_store_associate"/><field name="skill_id" ref="skill_objection"/><field name="target_level">2.5</field></record>
+    <record id="rs_sa_cross" model="zlms.role.skill"><field name="role_id" ref="role_store_associate"/><field name="skill_id" ref="skill_cross_sell"/><field name="target_level">2.5</field></record>
+    <record id="rs_sa_pos" model="zlms.role.skill"><field name="role_id" ref="role_store_associate"/><field name="skill_id" ref="skill_pos"/><field name="target_level">3</field></record>
+    <record id="rs_csh_pos" model="zlms.role.skill"><field name="role_id" ref="role_cashier"/><field name="skill_id" ref="skill_pos"/><field name="target_level">3.5</field></record>
+    <record id="rs_csh_greet" model="zlms.role.skill"><field name="role_id" ref="role_cashier"/><field name="skill_id" ref="skill_greeting"/><field name="target_level">3.5</field></record>
+    <record id="rs_vm_vm" model="zlms.role.skill"><field name="role_id" ref="role_vm"/><field name="skill_id" ref="skill_vm"/><field name="target_level">4</field></record>
+    <record id="rs_vm_product" model="zlms.role.skill"><field name="role_id" ref="role_vm"/><field name="skill_id" ref="skill_product"/><field name="target_level">3</field></record>
+    <record id="rs_asm_disc" model="zlms.role.skill"><field name="role_id" ref="role_asm"/><field name="skill_id" ref="skill_discovery"/><field name="target_level">3.5</field></record>
+    <record id="rs_asm_obj" model="zlms.role.skill"><field name="role_id" ref="role_asm"/><field name="skill_id" ref="skill_objection"/><field name="target_level">3.5</field></record>
+    <record id="rs_asm_cross" model="zlms.role.skill"><field name="role_id" ref="role_asm"/><field name="skill_id" ref="skill_cross_sell"/><field name="target_level">3.5</field></record>
+    <record id="rs_asm_compl" model="zlms.role.skill"><field name="role_id" ref="role_asm"/><field name="skill_id" ref="skill_complaint"/><field name="target_level">3.5</field></record>
+    <record id="rs_asm_lead" model="zlms.role.skill"><field name="role_id" ref="role_asm"/><field name="skill_id" ref="skill_leadership"/><field name="target_level">3</field></record>
+    <record id="rs_sm_lead" model="zlms.role.skill"><field name="role_id" ref="role_store_manager"/><field name="skill_id" ref="skill_leadership"/><field name="target_level">4</field></record>
+    <record id="rs_sm_compl" model="zlms.role.skill"><field name="role_id" ref="role_store_manager"/><field name="skill_id" ref="skill_complaint"/><field name="target_level">4</field></record>
+    <record id="rs_sm_vm" model="zlms.role.skill"><field name="role_id" ref="role_store_manager"/><field name="skill_id" ref="skill_vm"/><field name="target_level">3.5</field></record>
+    <record id="rs_sm_safety" model="zlms.role.skill"><field name="role_id" ref="role_store_manager"/><field name="skill_id" ref="skill_safety"/><field name="target_level">3.5</field></record>
+    <record id="rs_sm_pos" model="zlms.role.skill"><field name="role_id" ref="role_store_manager"/><field name="skill_id" ref="skill_pos"/><field name="target_level">4</field></record>
+
+    <!-- Floor-walk checklist -->
+    <record id="obs_template_floor" model="zlms.observation.template">
+        <field name="name">Customer Journey Floor Walk</field><field name="sequence">1</field>
+        <field name="description">Observe one complete customer interaction during a busy hour.</field>
+        <field name="role_ids" eval="[(6, 0, [ref('role_store_associate'), ref('role_cashier'), ref('role_asm')])]"/>
+    </record>
+    <record id="obs_item_1" model="zlms.observation.template.item"><field name="template_id" ref="obs_template_floor"/><field name="sequence">1</field>
+        <field name="name">Greets the customer within 10 seconds, with eye contact and a smile</field><field name="skill_id" ref="skill_greeting"/>
+        <field name="guidance">Practise a 3-second scan of the entrance every minute; use an open, non-sales greeting.</field></record>
+    <record id="obs_item_2" model="zlms.observation.template.item"><field name="template_id" ref="obs_template_floor"/><field name="sequence">2</field>
+        <field name="name">Asks at least two open questions before showing products</field><field name="skill_id" ref="skill_discovery"/>
+        <field name="guidance">Role-play "What will you mainly use it for?" and "What matters most to you?" before every demo.</field></record>
+    <record id="obs_item_3" model="zlms.observation.template.item"><field name="template_id" ref="obs_template_floor"/><field name="sequence">3</field>
+        <field name="name">Explains products as benefits, not just features</field><field name="skill_id" ref="skill_product"/>
+        <field name="guidance">Use "...which means you..." after every feature. Revisit the product knowledge cards.</field></record>
+    <record id="obs_item_4" model="zlms.observation.template.item"><field name="template_id" ref="obs_template_floor"/><field name="sequence">4</field>
+        <field name="name">Handles concerns calmly and with value, not discounts</field><field name="skill_id" ref="skill_objection"/>
+        <field name="guidance">Acknowledge, ask, answer with value, confirm. Do the price-objection AI role-play twice this week.</field></record>
+    <record id="obs_item_5" model="zlms.observation.template.item"><field name="template_id" ref="obs_template_floor"/><field name="sequence">5</field>
+        <field name="name">Suggests a relevant add-on with a reason</field><field name="skill_id" ref="skill_cross_sell"/>
+        <field name="guidance">Pick one natural pairing per category and practise the line: "Most customers also take..."</field></record>
+    <record id="obs_item_6" model="zlms.observation.template.item"><field name="template_id" ref="obs_template_floor"/><field name="sequence">6</field>
+        <field name="name">Billing, loyalty enrolment and warm goodbye follow the SOP</field><field name="skill_id" ref="skill_pos"/>
+        <field name="guidance">Shadow the cashier for one hour; use the loyalty one-liner at every bill.</field></record>
+</odoo>

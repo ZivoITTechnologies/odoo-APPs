@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_store_list" model="ir.ui.view">
+        <field name="name">zlms.store.list</field>
+        <field name="model">zlms.store</field>
+        <field name="arch" type="xml">
+            <list string="Stores">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="store_format"/>
+                <field name="region_id"/>
+                <field name="city"/>
+                <field name="manager_user_id" widget="many2one_avatar_user"/>
+                <field name="headcount"/>
+                <field name="avg_completion" widget="progressbar"/>
+                <field name="overdue_count" decoration-danger="overdue_count &gt; 0"/>
+                <field name="avg_score"/>
+                            <field name="readiness_index"/>
+                <field name="readiness_index"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_store_kanban" model="ir.ui.view">
+        <field name="name">zlms.store.kanban</field>
+        <field name="model">zlms.store</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <field name="code" class="badge text-bg-light"/>
+                        </div>
+                        <div class="text-muted"><field name="city"/> <field name="region_id"/></div>
+                        <div class="mt-2"><field name="avg_completion" widget="progressbar"/></div>
+                        <div class="d-flex justify-content-between mt-2 small">
+                            <span><i title="Users" class="fa fa-users"/> <field name="headcount"/></span>
+                            <span class="text-danger"><i title="Clock O" class="fa fa-clock-o"/> <field name="overdue_count"/></span>
+                            <span><i title="Certificate" class="fa fa-certificate"/> <field name="certified_count"/></span>
+                            <span><i title="Tachometer" class="fa fa-tachometer"/> <field name="readiness_index"/></span>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="zlms_store_form" model="ir.ui.view">
+        <field name="name">zlms.store.form</field>
+        <field name="model">zlms.store</field>
+        <field name="arch" type="xml">
+            <form string="Store">
+                <header>
+                    <button name="action_ai_store_insight" type="object" string="AI Store Health Check"
+                            class="btn-primary" icon="fa-magic"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_learners" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="headcount" widget="statinfo" string="Team"/>
+                        </button>
+                        <button name="action_view_assignments" type="object" class="oe_stat_button" icon="fa-tasks">
+                            <field name="overdue_count" widget="statinfo" string="Overdue"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Hyderabad - Sarath City Mall"/></h1>
+                    </div>
+                    <group>
+                        <group string="Store">
+                            <field name="code"/>
+                            <field name="store_format"/>
+                            <field name="region_id"/>
+                            <field name="city"/>
+                            <field name="state_id"/>
+                            <field name="mall_name"/>
+                        </group>
+                        <group string="Leadership">
+                            <field name="manager_user_id" widget="many2one_avatar_user"/>
+                            <field name="area_manager_user_id" widget="many2one_avatar_user"/>
+                            <field name="opening_date"/>
+                            <field name="area_sqft"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Learning Health">
+                        <group>
+                            <field name="avg_completion" widget="progressbar"/>
+                            <field name="onboarding_completion" widget="progressbar"/>
+                            <field name="avg_score"/>
+                        </group>
+                        <group>
+                            <field name="certified_count"/>
+                            <field name="last_conversion"/>
+                            <field name="last_atv"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Team" name="team">
+                            <field name="learner_ids" context="{'default_store_id': id}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="role_id"/>
+                                    <field name="joining_date"/>
+                                    <field name="completion_rate" widget="progressbar"/>
+                                    <field name="avg_score"/>
+                                    <field name="points"/>
+                                    <field name="risk_level" widget="badge" decoration-success="risk_level == 'low'"
+                                           decoration-warning="risk_level == 'medium'" decoration-danger="risk_level == 'high'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Monthly KPIs" name="kpis">
+                            <field name="kpi_ids" context="{'default_store_id': id}">
+                                <list editable="bottom">
+                                    <field name="period_date"/>
+                                    <field name="footfall"/>
+                                    <field name="bills"/>
+                                    <field name="units_sold"/>
+                                    <field name="net_sales"/>
+                                    <field name="conversion_rate"/>
+                                    <field name="atv"/>
+                                    <field name="upt"/>
+                                    <field name="csat_score"/>
+                                    <field name="mystery_shopper_score" optional="hide"/>
+                                    <field name="training_completion"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_store_search" model="ir.ui.view">
+        <field name="name">zlms.store.search</field>
+        <field name="model">zlms.store</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
+                <field name="city"/>
+                <field name="region_id"/>
+                <field name="manager_user_id"/>
+                <filter name="my_stores" string="My Stores"
+                        domain="['|', ('manager_user_id', '=', uid), ('area_manager_user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_region" string="Region" context="{'group_by': 'region_id'}"/>
+                    <filter name="group_format" string="Format" context="{'group_by': 'store_format'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zlms_store_action" model="ir.actions.act_window">
+        <field name="name">Stores</field>
+        <field name="res_model">zlms.store</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add your first store</p>
+            <p>Every company-owned store, franchise, shop-in-shop or kiosk gets its own team, KPIs and learning health score.</p>
+        </field>
+    </record>
+
+    <!-- KPIs -->
+    <record id="zlms_store_kpi_list" model="ir.ui.view">
+        <field name="name">zlms.store.kpi.list</field>
+        <field name="model">zlms.store.kpi</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="store_id"/>
+                <field name="region_id" optional="show"/>
+                <field name="period_date"/>
+                <field name="footfall" sum="Total"/>
+                <field name="bills" sum="Total"/>
+                <field name="units_sold" optional="hide"/>
+                <field name="net_sales" sum="Total"/>
+                <field name="conversion_rate"/>
+                <field name="atv"/>
+                <field name="upt"/>
+                <field name="csat_score"/>
+                <field name="training_completion"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_store_kpi_pivot" model="ir.ui.view">
+        <field name="name">zlms.store.kpi.pivot</field>
+        <field name="model">zlms.store.kpi</field>
+        <field name="arch" type="xml">
+            <pivot string="Training vs Store Performance">
+                <field name="store_id" type="row"/>
+                <field name="period_date" interval="month" type="col"/>
+                <field name="conversion_rate" type="measure"/>
+                <field name="training_completion" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="zlms_store_kpi_graph" model="ir.ui.view">
+        <field name="name">zlms.store.kpi.graph</field>
+        <field name="model">zlms.store.kpi</field>
+        <field name="arch" type="xml">
+            <graph string="Training vs Conversion" type="line">
+                <field name="period_date" interval="month"/>
+                <field name="conversion_rate" type="measure"/>
+                <field name="training_completion" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="zlms_store_kpi_search" model="ir.ui.view">
+        <field name="name">zlms.store.kpi.search</field>
+        <field name="model">zlms.store.kpi</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="store_id"/>
+                <field name="region_id"/>
+                <filter name="period" string="Month" date="period_date"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_region" string="Region" context="{'group_by': 'region_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="zlms_store_kpi_action" model="ir.actions.act_window">
+        <field name="name">Training Impact (Store KPIs)</field>
+        <field name="res_model">zlms.store.kpi</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+</odoo>

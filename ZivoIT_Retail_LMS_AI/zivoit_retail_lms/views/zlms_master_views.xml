@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_region_list" model="ir.ui.view">
+        <field name="name">zlms.region.list</field>
+        <field name="model">zlms.region</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="manager_user_id" widget="many2one_avatar_user"/>
+                <field name="store_count"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_region_action" model="ir.actions.act_window">
+        <field name="name">Regions</field>
+        <field name="res_model">zlms.region</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="zlms_role_list" model="ir.ui.view">
+        <field name="name">zlms.role.list</field>
+        <field name="model">zlms.role</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="is_manager_role"/>
+                <field name="next_role_id"/>
+                <field name="description" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zlms_tech_tag_list" model="ir.ui.view">
+        <field name="name">zlms.tech.tag.list</field>
+        <field name="model">zlms.tech.tag</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="color" widget="color_picker"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_tech_tag_action" model="ir.actions.act_window">
+        <field name="name">Product Features &amp; Technologies</field>
+        <field name="res_model">zlms.tech.tag</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="zlms_skill_list" model="ir.ui.view">
+        <field name="name">zlms.skill.list</field>
+        <field name="model">zlms.skill</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="skill_area"/>
+                <field name="description" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_skill_action" model="ir.actions.act_window">
+        <field name="name">Competency Framework</field>
+        <field name="res_model">zlms.skill</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="zlms_slide_channel_action" model="ir.actions.act_window">
+        <field name="name">Courses</field>
+        <field name="res_model">slide.channel</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_my_courses': 0}</field>
+    </record>
+
+    <record id="slide_channel_view_form_zlms" model="ir.ui.view">
+        <field name="name">slide.channel.form.zlms</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='course']" position="inside">
+                <field name="zlms_retail_category"/>
+                <field name="zlms_boost_enabled"/>
+                <field name="zlms_ai_generated" invisible="not zlms_ai_generated"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ===================== Bulletins ===================== -->
+    <record id="zlms_bulletin_list" model="ir.ui.view">
+        <field name="name">zlms.bulletin.list</field>
+        <field name="model">zlms.bulletin</field>
+        <field name="arch" type="xml">
+            <list string="Store Bulletins" decoration-danger="priority == 'urgent' and state == 'published'">
+                <field name="publish_date"/>
+                <field name="name"/>
+                <field name="bulletin_type"/>
+                <field name="priority" widget="badge" decoration-danger="priority == 'urgent'"/>
+                <field name="due_date"/>
+                <field name="target_count" string="Recipients"/>
+                <field name="ack_rate" widget="progressbar"/>
+                <field name="state" widget="badge" decoration-success="state == 'published'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_bulletin_form" model="ir.ui.view">
+        <field name="name">zlms.bulletin.form</field>
+        <field name="model">zlms.bulletin</field>
+        <field name="arch" type="xml">
+            <form string="Store Bulletin">
+                <header>
+                    <button name="action_publish" type="object" string="Publish to Stores" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_publish" type="object" string="Add New Recipients" invisible="state != 'published'"/>
+                    <button name="action_remind_pending" type="object" string="Remind Store Managers" icon="fa-bell"
+                            invisible="state != 'published' or not require_ack"/>
+                    <button name="action_archive_bulletin" type="object" string="Archive" invisible="state != 'published'"/>
+                    <button name="action_reset_draft" type="object" string="Reset to Draft" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,published"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_acks" type="object" class="oe_stat_button" icon="fa-check-square-o">
+                            <field name="ack_count" widget="statinfo" string="Acknowledged"/>
+                        </button>
+                        <button name="action_view_acks" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="target_count" widget="statinfo" string="Recipients"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. New season launch: what every associate must know"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="bulletin_type"/>
+                            <field name="priority" widget="radio" options="{'horizontal': true}"/>
+                            <field name="require_ack"/>
+                            <field name="due_date"/>
+                            <field name="publish_date"/>
+                        </group>
+                        <group string="Audience">
+                            <field name="region_ids" widget="many2many_tags"/>
+                            <field name="store_ids" widget="many2many_tags"/>
+                            <field name="role_ids" widget="many2many_tags"/>
+                            <field name="channel_id"/>
+                            <field name="ack_rate" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Message" name="body">
+                            <field name="body" placeholder="Write the bulletin: what is changing, why it matters, what to do on the floor..."/>
+                            <field name="attachment_ids" widget="many2many_binary" string="Attachments (planograms, price lists, PDFs)"/>
+                        </page>
+                        <page string="Recipients" name="acks">
+                            <field name="ack_ids" readonly="1">
+                                <list decoration-success="state == 'acknowledged'" decoration-muted="state == 'pending'">
+                                    <field name="learner_id"/>
+                                    <field name="store_id"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="read_date"/>
+                                    <field name="ack_date"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_bulletin_search" model="ir.ui.view">
+        <field name="name">zlms.bulletin.search</field>
+        <field name="model">zlms.bulletin</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <filter name="published" string="Published" domain="[('state', '=', 'published')]"/>
+                <filter name="urgent" string="Urgent" domain="[('priority', '=', 'urgent')]"/>
+                <group>
+                    <filter name="group_type" string="Type" context="{'group_by': 'bulletin_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="zlms_bulletin_action" model="ir.actions.act_window">
+        <field name="name">Store Bulletins</field>
+        <field name="res_model">zlms.bulletin</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Send your first store bulletin</p>
+            <p>Launch briefs, promotions, policy changes and planograms - targeted by region, store and role, with read-and-acknowledge tracking.</p>
+        </field>
+    </record>
+    <record id="zlms_bulletin_ack_list" model="ir.ui.view">
+        <field name="name">zlms.bulletin.ack.list</field>
+        <field name="model">zlms.bulletin.ack</field>
+        <field name="arch" type="xml">
+            <list string="Acknowledgements" create="false" decoration-success="state == 'acknowledged'">
+                <field name="bulletin_id"/>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="state" widget="badge"/>
+                <field name="read_date" optional="show"/>
+                <field name="ack_date"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_bulletin_ack_search" model="ir.ui.view">
+        <field name="name">zlms.bulletin.ack.search</field>
+        <field name="model">zlms.bulletin.ack</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="bulletin_id"/>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <filter name="pending" string="Not acknowledged" domain="[('state', '!=', 'acknowledged')]"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_bulletin" string="Bulletin" context="{'group_by': 'bulletin_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===================== Gamification ===================== -->
+    <record id="zlms_badge_list" model="ir.ui.view">
+        <field name="name">zlms.badge.list</field>
+        <field name="model">zlms.badge</field>
+        <field name="arch" type="xml">
+            <list string="Badges" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="level"/>
+                <field name="criterion"/>
+                <field name="threshold"/>
+                <field name="bonus_points"/>
+                <field name="icon"/>
+                <field name="color" widget="color"/>
+                <field name="description" optional="show"/>
+                <field name="award_count"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_badge_action" model="ir.actions.act_window">
+        <field name="name">Badges</field>
+        <field name="res_model">zlms.badge</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="zlms_badge_award_list" model="ir.ui.view">
+        <field name="name">zlms.badge.award.list</field>
+        <field name="model">zlms.badge.award</field>
+        <field name="arch" type="xml">
+            <list string="Badges Earned" create="false">
+                <field name="award_date"/>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="badge_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_badge_award_action" model="ir.actions.act_window">
+        <field name="name">Badges Earned</field>
+        <field name="res_model">zlms.badge.award</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="zlms_points_log_list" model="ir.ui.view">
+        <field name="name">zlms.points.log.list</field>
+        <field name="model">zlms.points.log</field>
+        <field name="arch" type="xml">
+            <list string="Points Ledger" create="false">
+                <field name="log_date"/>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="reason"/>
+                <field name="points" sum="Total"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_points_log_pivot" model="ir.ui.view">
+        <field name="name">zlms.points.log.pivot</field>
+        <field name="model">zlms.points.log</field>
+        <field name="arch" type="xml">
+            <pivot string="Store Challenge">
+                <field name="store_id" type="row"/>
+                <field name="log_date" interval="month" type="col"/>
+                <field name="points" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="zlms_points_log_action" model="ir.actions.act_window">
+        <field name="name">Store Challenge (Points)</field>
+        <field name="res_model">zlms.points.log</field>
+        <field name="view_mode">pivot,list</field>
+    </record>
+
+    <!-- ===================== Roles / career ===================== -->
+    <record id="zlms_role_form" model="ir.ui.view">
+        <field name="name">zlms.role.form</field>
+        <field name="model">zlms.role</field>
+        <field name="arch" type="xml">
+            <form string="Retail Role">
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Store Associate"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="is_manager_role"/>
+                        </group>
+                        <group string="Career Ladder">
+                            <field name="next_role_id"/>
+                            <field name="promotion_path_ids" widget="many2many_tags" invisible="not next_role_id"/>
+                            <field name="min_tenure_days" invisible="not next_role_id"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="What this role is responsible for..."/>
+                    <separator string="Skill Targets"/>
+                    <field name="skill_req_ids">
+                        <list editable="bottom">
+                            <field name="skill_id"/>
+                            <field name="target_level"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_role_action" model="ir.actions.act_window">
+        <field name="name">Retail Roles &amp; Career Ladder</field>
+        <field name="res_model">zlms.role</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="zlms_learner_skill_list" model="ir.ui.view">
+        <field name="name">zlms.learner.skill.list</field>
+        <field name="model">zlms.learner.skill</field>
+        <field name="arch" type="xml">
+            <list string="Skills" editable="bottom" decoration-danger="gap &gt;= 1">
+                <field name="learner_id"/>
+                <field name="store_id" optional="show"/>
+                <field name="role_id" optional="hide"/>
+                <field name="skill_id"/>
+                <field name="skill_area" optional="hide"/>
+                <field name="level"/>
+                <field name="target_level"/>
+                <field name="gap"/>
+                <field name="source"/>
+                <field name="last_assessed"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_learner_skill_pivot" model="ir.ui.view">
+        <field name="name">zlms.learner.skill.pivot</field>
+        <field name="model">zlms.learner.skill</field>
+        <field name="arch" type="xml">
+            <pivot string="Skills Matrix">
+                <field name="learner_id" type="row"/>
+                <field name="skill_id" type="col"/>
+                <field name="level" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="zlms_learner_skill_search" model="ir.ui.view">
+        <field name="name">zlms.learner.skill.search</field>
+        <field name="model">zlms.learner.skill</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="learner_id"/>
+                <field name="skill_id"/>
+                <field name="store_id"/>
+                <filter name="gaps" string="Below target" domain="[('gap', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_skill" string="Skill" context="{'group_by': 'skill_id'}"/>
+                    <filter name="group_area" string="Skill Area" context="{'group_by': 'skill_area'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="zlms_learner_skill_action" model="ir.actions.act_window">
+        <field name="name">Skills Matrix</field>
+        <field name="res_model">zlms.learner.skill</field>
+        <field name="view_mode">pivot,list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No skill evidence yet</p>
+            <p>Skill levels build up automatically from coaching observations and AI role-plays, or managers can rate them directly.</p>
+        </field>
+    </record>
+
+    <!-- ===================== Coaching observations ===================== -->
+    <record id="zlms_observation_template_form" model="ir.ui.view">
+        <field name="name">zlms.observation.template.form</field>
+        <field name="model">zlms.observation.template</field>
+        <field name="arch" type="xml">
+            <form string="Observation Checklist">
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Customer Journey Floor Walk"/></h1></div>
+                    <group>
+                        <field name="role_ids" widget="many2many_tags"/>
+                        <field name="description"/>
+                    </group>
+                    <field name="item_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="skill_id"/>
+                            <field name="guidance"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_observation_template_list" model="ir.ui.view">
+        <field name="name">zlms.observation.template.list</field>
+        <field name="model">zlms.observation.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="role_ids" widget="many2many_tags"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_observation_template_action" model="ir.actions.act_window">
+        <field name="name">Observation Checklists</field>
+        <field name="res_model">zlms.observation.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="zlms_observation_list" model="ir.ui.view">
+        <field name="name">zlms.observation.list</field>
+        <field name="model">zlms.observation</field>
+        <field name="arch" type="xml">
+            <list string="Coaching Observations">
+                <field name="observation_date"/>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="template_id"/>
+                <field name="observer_id" widget="many2one_avatar_user"/>
+                <field name="score" widget="progressbar"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_observation_form" model="ir.ui.view">
+        <field name="name">zlms.observation.form</field>
+        <field name="model">zlms.observation</field>
+        <field name="arch" type="xml">
+            <form string="Coaching Observation">
+                <header>
+                    <button name="action_done" type="object" string="Complete Observation" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_ai_coaching_plan" type="object" string="AI Coaching Plan" icon="fa-magic"/>
+                    <button name="action_reset" type="object" string="Re-open" invisible="state != 'done'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="learner_id" readonly="state == 'done'"/>
+                            <field name="store_id"/>
+                            <field name="template_id" readonly="state == 'done'"/>
+                        </group>
+                        <group>
+                            <field name="observer_id" widget="many2one_avatar_user"/>
+                            <field name="observation_date"/>
+                            <field name="score" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" readonly="state == 'done'">
+                        <list editable="bottom" create="false">
+                            <field name="name"/>
+                            <field name="skill_id" optional="show"/>
+                            <field name="rating"/>
+                            <field name="comment"/>
+                            <field name="guidance" optional="hide"/>
+                        </list>
+                    </field>
+                    <group>
+                        <field name="strengths"/>
+                        <field name="next_steps"/>
+                    </group>
+                    <separator string="Coaching Plan" invisible="not coaching_html"/>
+                    <field name="coaching_html" invisible="not coaching_html"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_observation_search" model="ir.ui.view">
+        <field name="name">zlms.observation.search</field>
+        <field name="model">zlms.observation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="learner_id"/>
+                <field name="store_id"/>
+                <field name="template_id"/>
+                <filter name="mine" string="My Observations" domain="[('observer_id', '=', uid)]"/>
+                <filter name="draft" string="In Progress" domain="[('state', '=', 'draft')]"/>
+                <group>
+                    <filter name="group_store" string="Store" context="{'group_by': 'store_id'}"/>
+                    <filter name="group_learner" string="Learner" context="{'group_by': 'learner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="zlms_observation_action" model="ir.actions.act_window">
+        <field name="name">Coaching Observations</field>
+        <field name="res_model">zlms.observation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Start a floor walk</p>
+            <p>Observe a team member with a checklist, rate each behaviour and get a coaching plan. Ratings update the skills matrix.</p>
+        </field>
+    </record>
+
+    <!-- ===================== Instructor-led training ===================== -->
+    <record id="zlms_ilt_course_list" model="ir.ui.view">
+        <field name="name">zlms.ilt.course.list</field>
+        <field name="model">zlms.ilt.course</field>
+        <field name="arch" type="xml">
+            <list string="Classroom Courses">
+                <field name="name"/>
+                <field name="duration_hours" widget="float_time"/>
+                <field name="skill_ids" widget="many2many_tags"/>
+                <field name="session_count"/>
+                <field name="avg_rating"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_ilt_course_form" model="ir.ui.view">
+        <field name="name">zlms.ilt.course.form</field>
+        <field name="model">zlms.ilt.course</field>
+        <field name="arch" type="xml">
+            <form string="Classroom Course">
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. Visual Merchandising Masterclass"/></h1></div>
+                    <group>
+                        <field name="duration_hours" widget="float_time"/>
+                        <field name="skill_ids" widget="many2many_tags"/>
+                        <field name="avg_rating"/>
+                    </group>
+                    <field name="description"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_ilt_course_action" model="ir.actions.act_window">
+        <field name="name">Classroom Courses</field>
+        <field name="res_model">zlms.ilt.course</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="zlms_training_session_list" model="ir.ui.view">
+        <field name="name">zlms.training.session.list</field>
+        <field name="model">zlms.training.session</field>
+        <field name="arch" type="xml">
+            <list string="Training Sessions" decoration-muted="state == 'cancelled'">
+                <field name="start_datetime"/>
+                <field name="name"/>
+                <field name="ilt_course_id"/>
+                <field name="session_type"/>
+                <field name="trainer_user_id" widget="many2one_avatar_user"/>
+                <field name="store_id" optional="show"/>
+                <field name="region_id" optional="show"/>
+                <field name="seats_taken"/>
+                <field name="capacity"/>
+                <field name="attended_count" optional="show"/>
+                <field name="avg_rating" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_training_session_calendar" model="ir.ui.view">
+        <field name="name">zlms.training.session.calendar</field>
+        <field name="model">zlms.training.session</field>
+        <field name="arch" type="xml">
+            <calendar string="Training Calendar" date_start="start_datetime" date_stop="end_datetime" color="ilt_course_id" mode="month">
+                <field name="ilt_course_id"/>
+                <field name="session_type"/>
+                <field name="seats_taken"/>
+            </calendar>
+        </field>
+    </record>
+    <record id="zlms_training_session_form" model="ir.ui.view">
+        <field name="name">zlms.training.session.form</field>
+        <field name="model">zlms.training.session</field>
+        <field name="arch" type="xml">
+            <form string="Training Session">
+                <header>
+                    <button name="action_invite_due_learners" type="object" string="Register Learners Who Need It"
+                            icon="fa-user-plus" invisible="state != 'planned'"/>
+                    <button name="action_mark_all_attended" type="object" string="Mark All Attended" invisible="state != 'planned'"/>
+                    <button name="action_done" type="object" string="Close Session" class="btn-primary" invisible="state != 'planned'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state != 'planned'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="e.g. VM Masterclass - South Zone batch 1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="ilt_course_id"/>
+                            <field name="session_type"/>
+                            <field name="trainer_user_id" widget="many2one_avatar_user"/>
+                            <field name="start_datetime"/>
+                            <field name="end_datetime"/>
+                        </group>
+                        <group>
+                            <field name="region_id"/>
+                            <field name="store_id"/>
+                            <field name="location" invisible="session_type == 'virtual'"/>
+                            <field name="meeting_url" widget="url" invisible="session_type != 'virtual'"/>
+                            <field name="capacity"/>
+                            <field name="seats_left"/>
+                            <field name="avg_rating"/>
+                        </group>
+                    </group>
+                    <field name="attendee_ids">
+                        <list editable="bottom" decoration-success="state == 'attended'" decoration-danger="state == 'absent'">
+                            <field name="learner_id"/>
+                            <field name="store_id"/>
+                            <field name="state"/>
+                            <field name="feedback_rating"/>
+                            <field name="feedback_comment" optional="show"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_training_session_action" model="ir.actions.act_window">
+        <field name="name">Training Sessions</field>
+        <field name="res_model">zlms.training.session</field>
+        <field name="view_mode">calendar,list,form</field>
+    </record>
+
+    <!-- ===================== AI path builder ===================== -->
+    <record id="zlms_ai_path_wizard_form" model="ir.ui.view">
+        <field name="name">zlms.ai.path.wizard.form</field>
+        <field name="model">zlms.ai.path.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AI Learning Path Builder">
+                <field name="ai_available" invisible="1"/>
+                <div class="alert alert-info" role="alert" invisible="ai_available">
+                    Offline engine: the journey is assembled from your published courses, role-plays and classroom courses
+                    using retail blueprints. Configure AI in Settings for goal-driven designs.
+                </div>
+                <group>
+                    <group>
+                        <field name="name" placeholder="e.g. Festive Peak Readiness"/>
+                        <field name="path_type"/>
+                        <field name="role_ids" widget="many2many_tags"/>
+                        <field name="duration_days"/>
+                    </group>
+                    <group>
+                        <field name="include_roleplay"/>
+                        <field name="include_ojt"/>
+                        <field name="include_sessions"/>
+                        <field name="auto_assign"/>
+                        <field name="use_ai" invisible="not ai_available"/>
+                    </group>
+                </group>
+                <field name="goal" placeholder="Business goal, e.g. new associates should sell confidently during the peak season"/>
+                <footer>
+                    <button name="action_build" type="object" string="Design Journey" class="btn-primary" icon="fa-magic"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="zlms_ai_path_wizard_action" model="ir.actions.act_window">
+        <field name="name">AI Learning Path Builder</field>
+        <field name="res_model">zlms.ai.path.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ===================== Learner form additions ===================== -->
+    <record id="zlms_learner_form_wave2" model="ir.ui.view">
+        <field name="name">zlms.learner.form.wave2</field>
+        <field name="model">zlms.learner</field>
+        <field name="inherit_id" ref="zivoit_retail_lms.zlms_learner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='points']" position="after">
+                <field name="badge_count"/>
+                <field name="boost_streak"/>
+            </xpath>
+            <xpath expr="//field[@name='readiness_score']" position="after">
+                <field name="role_fit" widget="progressbar"/>
+                <field name="next_role_id" invisible="not next_role_id"/>
+                <field name="promotion_readiness" widget="progressbar" invisible="not next_role_id"/>
+            </xpath>
+            <xpath expr="//page[@name='roleplays']" position="after">
+                <page string="Skills" name="skills">
+                    <field name="skill_ids">
+                        <list editable="bottom" decoration-danger="gap &gt;= 1">
+                            <field name="skill_id"/>
+                            <field name="level"/>
+                            <field name="target_level"/>
+                            <field name="gap"/>
+                            <field name="source"/>
+                            <field name="last_assessed"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Coaching" name="coaching">
+                    <field name="observation_ids" readonly="1">
+                        <list>
+                            <field name="observation_date"/>
+                            <field name="template_id"/>
+                            <field name="observer_id"/>
+                            <field name="score" widget="progressbar"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Badges" name="badges">
+                    <field name="badge_award_ids" readonly="1">
+                        <list>
+                            <field name="award_date"/>
+                            <field name="badge_id"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    <record id="zlms_learner_search_wave2" model="ir.ui.view">
+        <field name="name">zlms.learner.search.wave2</field>
+        <field name="model">zlms.learner</field>
+        <field name="inherit_id" ref="zivoit_retail_lms.zlms_learner_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='attention']" position="after">
+                <filter name="promotion" string="Ready for Promotion" domain="[('promotion_ready', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="zlms_learning_path_form_wave2" model="ir.ui.view">
+        <field name="name">zlms.learning.path.form.wave2</field>
+        <field name="model">zlms.learning.path</field>
+        <field name="inherit_id" ref="zivoit_retail_lms.zlms_learning_path_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='scenario_id']" position="after">
+                <field name="ilt_course_id" required="line_type == 'session'" readonly="line_type != 'session'" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

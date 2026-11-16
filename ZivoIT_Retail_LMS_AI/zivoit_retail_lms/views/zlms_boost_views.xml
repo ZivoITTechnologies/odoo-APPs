@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_boost_card_list" model="ir.ui.view">
+        <field name="name">zlms.boost.card.list</field>
+        <field name="model">zlms.boost.card</field>
+        <field name="arch" type="xml">
+            <list string="Daily Boost Cards" create="false">
+                <field name="learner_id"/>
+                <field name="store_id" optional="show"/>
+                <field name="channel_id"/>
+                <field name="question"/>
+                <field name="box"/>
+                <field name="next_review_date"/>
+                <field name="correct_count"/>
+                <field name="wrong_count"/>
+                <field name="mastered"/>
+            </list>
+        </field>
+    </record>
+    <record id="zlms_boost_card_pivot" model="ir.ui.view">
+        <field name="name">zlms.boost.card.pivot</field>
+        <field name="model">zlms.boost.card</field>
+        <field name="arch" type="xml">
+            <pivot string="Knowledge Retention">
+                <field name="channel_id" type="row"/>
+                <field name="box" type="col"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="zlms_boost_card_search" model="ir.ui.view">
+        <field name="name">zlms.boost.card.search</field>
+        <field name="model">zlms.boost.card</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="learner_id"/>
+                <field name="channel_id"/>
+                <field name="store_id"/>
+                <filter name="due" string="Due today" domain="[('next_review_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="mastered" string="Mastered" domain="[('mastered', '=', True)]"/>
+                <filter name="struggling" string="Struggling" domain="[('box', '=', 1), ('wrong_count', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_course" string="Course" context="{'group_by': 'channel_id'}"/>
+                    <filter name="group_learner" string="Learner" context="{'group_by': 'learner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="zlms_boost_card_action" model="ir.actions.act_window">
+        <field name="name">Knowledge Retention</field>
+        <field name="res_model">zlms.boost.card</field>
+        <field name="view_mode">pivot,list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No Daily Boost cards yet</p>
+            <p>Cards are created from the quiz questions of the courses each learner is enrolled in. Learners answer
+                5 questions a day in "My Learning"; correct answers move cards to longer review intervals (1, 2, 4, 8, 16 days).</p>
+        </field>
+    </record>
+</odoo>

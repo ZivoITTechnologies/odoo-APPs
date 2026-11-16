@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_employee_view_form_zlms" model="ir.ui.view">
+        <field name="name">hr.employee.form.zlms</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_zlms_create_learner" type="object" string="Retail Learner Profile"
+                        groups="zivoit_retail_lms.group_zlms_manager"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_hr_employee_zlms_create_learner" model="ir.actions.server">
+        <field name="name">Create Retail Learner Profiles</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="group_ids" eval="[(4, ref('zivoit_retail_lms.group_zlms_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_zlms_create_learner()</field>
+    </record>
+</odoo>

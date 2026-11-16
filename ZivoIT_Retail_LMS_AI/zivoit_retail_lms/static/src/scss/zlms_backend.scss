@@ -1,0 +1,47 @@
+.o_zlms_dashboard {
+    background: $o-webclient-background-color;
+
+    .o_zlms_tile {
+        background: $o-view-background-color;
+        border-radius: 12px;
+        border-left: 5px solid #1f4e8c;
+        padding: 14px 16px;
+        height: 100%;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        transition: transform 0.1s ease-in-out;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+        &.o_zlms_tile_danger {
+            border-left-color: #d9534f;
+        }
+        &.o_zlms_tile_success {
+            border-left-color: #2e9e5b;
+        }
+        &.o_zlms_tile_warning {
+            border-left-color: #f0ad4e;
+        }
+    }
+    .o_zlms_tile_value {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #0b2545;
+    }
+    .o_zlms_tile_label {
+        font-size: 0.8rem;
+        color: $text-muted;
+    }
+    .o_zlms_trend {
+        height: 170px;
+    }
+    .o_zlms_trend_bar {
+        width: 70%;
+        background: linear-gradient(180deg, #3a86ff, #1f4e8c);
+        border-radius: 6px 6px 0 0;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+}

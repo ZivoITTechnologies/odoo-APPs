@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_assignment_new" model="mail.template">
+        <field name="name">Retail LMS: New learning path assigned</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="subject">New training for you: {{ object.path_id.name }}</field>
+        <field name="email_to">{{ object.learner_id.email }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="font-family: Arial, sans-serif; font-size: 14px;">
+    <p>Hi <t t-out="object.learner_id.name or ''"/>,</p>
+    <p>You have a new learning journey: <strong t-out="object.path_id.name or ''"/>.</p>
+    <p>Please complete it by <strong t-out="format_date(object.due_date) or ''"/>. Short lessons, quick quizzes and practice - you can do it on your phone between customers.</p>
+    <p><a t-att-href="'%s/my/learning' % object.get_base_url()" style="background:#1f4e8c;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;">Open My Learning</a></p>
+    <p>Happy learning!</p>
+</div>
+        </field>
+    </record>
+
+    <record id="mail_template_assignment_reminder" model="mail.template">
+        <field name="name">Retail LMS: Training reminder</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="subject">Reminder: {{ object.path_id.name }} is waiting for you</field>
+        <field name="email_to">{{ object.learner_id.email }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="font-family: Arial, sans-serif; font-size: 14px;">
+    <p>Hi <t t-out="object.learner_id.name or ''"/>,</p>
+    <p>Your journey <strong t-out="object.path_id.name or ''"/> is <strong t-out="object.progress"/>% complete and was due on <t t-out="format_date(object.due_date) or ''"/>.</p>
+    <p>Take 5 minutes today to finish the next step.</p>
+    <p><a t-att-href="'%s/my/learning' % object.get_base_url()" style="background:#1f4e8c;color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;">Continue learning</a></p>
+</div>
+        </field>
+    </record>
+
+    <record id="mail_template_assignment_done" model="mail.template">
+        <field name="name">Retail LMS: Journey completed</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="subject">Well done! You completed {{ object.path_id.name }}</field>
+        <field name="email_to">{{ object.learner_id.email }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="font-family: Arial, sans-serif; font-size: 14px;">
+    <p>Congratulations <t t-out="object.learner_id.name or ''"/>!</p>
+    <p>You completed <strong t-out="object.path_id.name or ''"/> with a score of <strong t-out="object.score"/>%.</p>
+    <p t-if="object.certificate_id">Your certificate <strong t-out="object.certificate_id.name"/> is available in My Learning.</p>
+</div>
+        </field>
+    </record>
+</odoo>

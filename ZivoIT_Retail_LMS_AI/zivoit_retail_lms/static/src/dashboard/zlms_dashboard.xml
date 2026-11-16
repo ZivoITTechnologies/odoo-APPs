@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="zivoit_retail_lms.Dashboard">
+        <div class="o_zlms_dashboard o_action h-100 overflow-auto p-3">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <h2 class="me-auto mb-0">Retail Learning Dashboard</h2>
+                <t t-if="state.data">
+                    <select class="form-select w-auto" t-on-change="onRegionChange">
+                        <option value="">All regions</option>
+                        <option t-foreach="state.data.filters.regions" t-as="r" t-key="r.id" t-att-value="r.id"
+                                t-att-selected="r.id === state.region" t-esc="r.name"/>
+                    </select>
+                    <select class="form-select w-auto" t-on-change="onStoreChange">
+                        <option value="">All stores</option>
+                        <option t-foreach="state.data.filters.stores" t-as="s" t-key="s.id" t-att-value="s.id"
+                                t-att-selected="s.id === state.store" t-esc="s.name"/>
+                    </select>
+                    <button class="btn btn-primary" t-on-click="networkInsight" t-att-disabled="state.thinking">
+                        <i t-attf-class="fa #{state.thinking ? 'fa-spinner fa-spin' : 'fa-magic'}"/> AI L&amp;D Advisor
+                    </button>
+                </t>
+            </div>
+            <div t-if="state.loading and !state.data" class="text-center p-5"><i class="fa fa-spinner fa-spin fa-2x"/></div>
+            <t t-if="state.data">
+                <t t-set="k" t-value="state.data.kpis"/>
+                <div t-if="!k.ai_enabled" class="alert alert-info py-2 small">
+                    AI features are running on the built-in offline engine. Connect OpenAI, Claude or Gemini in Retail LMS › Configuration › Settings for generative courses, live role-play customers and narrative insights.
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openLearners">
+                        <div class="o_zlms_tile_value" t-esc="k.learners"/><div class="o_zlms_tile_label">Learners in <t t-esc="k.stores"/> stores</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openOpen">
+                        <div class="o_zlms_tile_value"><t t-esc="k.completion_rate"/>%</div><div class="o_zlms_tile_label">Journeys completed</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile">
+                        <div class="o_zlms_tile_value"><t t-esc="k.onboarding_completion"/>%</div><div class="o_zlms_tile_label">Onboarding progress</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile o_zlms_tile_danger" t-on-click="openOverdue">
+                        <div class="o_zlms_tile_value" t-esc="k.overdue"/><div class="o_zlms_tile_label">Overdue assignments</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile">
+                        <div class="o_zlms_tile_value"><t t-esc="k.avg_score"/>%</div><div class="o_zlms_tile_label">Avg. assessment score</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openCerts">
+                        <div class="o_zlms_tile_value" t-esc="k.certified"/><div class="o_zlms_tile_label">Valid certificates</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile o_zlms_tile_warning" t-on-click="openExpiring">
+                        <div class="o_zlms_tile_value" t-esc="k.certs_expiring"/><div class="o_zlms_tile_label">Certificates expiring (30d)</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile">
+                        <div class="o_zlms_tile_value" t-esc="k.boost_answers_7d"/><div class="o_zlms_tile_label">Daily Boost answers (7d) · <t t-esc="k.boost_accuracy_7d"/>% right</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile">
+                        <div class="o_zlms_tile_value" t-esc="k.boost_active_learners_7d"/><div class="o_zlms_tile_label">Active Boost learners (7d)</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openSessions">
+                        <div class="o_zlms_tile_value" t-esc="k.roleplay_sessions"/><div class="o_zlms_tile_label">Role-plays · avg <t t-esc="k.roleplay_avg"/></div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile o_zlms_tile_danger" t-on-click="openAtRisk">
+                        <div class="o_zlms_tile_value" t-esc="k.at_risk"/><div class="o_zlms_tile_label">At-risk learners</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile">
+                        <div class="o_zlms_tile_value" t-esc="k.assignments_open"/><div class="o_zlms_tile_label">Open assignments</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openBulletins">
+                        <div class="o_zlms_tile_value"><t t-esc="k.bulletin_ack_rate"/>%</div><div class="o_zlms_tile_label">Bulletins acknowledged · <t t-esc="k.bulletin_pending"/> pending</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openSkills">
+                        <div class="o_zlms_tile_value"><t t-esc="k.skill_fit"/>%</div><div class="o_zlms_tile_label">Role skill fit</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile o_zlms_tile_success" t-on-click="openPromotion">
+                        <div class="o_zlms_tile_value" t-esc="k.promotion_ready"/><div class="o_zlms_tile_label">Ready for promotion</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openObservations">
+                        <div class="o_zlms_tile_value" t-esc="k.observations_30d"/><div class="o_zlms_tile_label">Coaching observations (30d) · avg <t t-esc="k.observation_avg"/>%</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile">
+                        <div class="o_zlms_tile_value" t-esc="k.badges_30d"/><div class="o_zlms_tile_label">Badges earned (30d)</div></div></div>
+                    <div class="col-6 col-md-4 col-xl-2"><div class="o_zlms_tile" t-on-click="openSessions2">
+                        <div class="o_zlms_tile_value" t-esc="k.upcoming_sessions"/><div class="o_zlms_tile_label">Upcoming training sessions</div></div></div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-8">
+                        <div class="card mb-3">
+                            <div class="card-header fw-bold">Store league table</div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 align-middle">
+                                    <thead><tr><th>Store</th><th>Region</th><th class="text-end">Team</th><th style="width: 22%">Completion</th>
+                                        <th class="text-end">Score</th><th class="text-end">Overdue</th><th class="text-end">Readiness</th><th class="text-end">Conv. %</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="state.data.stores" t-as="s" t-key="s.id" class="cursor-pointer" t-on-click="() => this.openRecord('zlms.store', s.id)">
+                                            <td><strong t-esc="s.name"/> <span class="text-muted small" t-esc="s.city"/></td>
+                                            <td t-esc="s.region"/>
+                                            <td class="text-end" t-esc="s.headcount"/>
+                                            <td><div class="progress" style="height: 10px;"><div t-attf-class="progress-bar #{barClass(s.completion)}" t-attf-style="width: #{s.completion}%"/></div>
+                                                <span class="small" t-esc="s.completion"/>%</td>
+                                            <td class="text-end" t-esc="s.score"/>
+                                            <td t-attf-class="text-end #{s.overdue ? 'text-danger fw-bold' : ''}" t-esc="s.overdue"/>
+                                            <td class="text-end fw-bold" t-esc="s.readiness"/>
+                                            <td class="text-end" t-esc="s.conversion"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header fw-bold">Learning paths</div>
+                            <table class="table table-sm table-hover mb-0 align-middle">
+                                <thead><tr><th>Path</th><th>Type</th><th class="text-end">Assigned</th><th class="text-end">Completed</th><th style="width: 25%">Avg. progress</th><th class="text-end">Overdue</th></tr></thead>
+                                <tbody>
+                                    <tr t-foreach="state.data.paths" t-as="p" t-key="p.id" class="cursor-pointer" t-on-click="() => this.openPath(p.id)">
+                                        <td t-esc="p.name"/><td class="small" t-esc="p.type"/>
+                                        <td class="text-end" t-esc="p.assigned"/><td class="text-end" t-esc="p.completed"/>
+                                        <td><div class="progress" style="height: 10px;"><div t-attf-class="progress-bar #{barClass(p.progress)}" t-attf-style="width: #{p.progress}%"/></div></td>
+                                        <td t-attf-class="text-end #{p.overdue ? 'text-danger' : ''}" t-esc="p.overdue"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card mb-3">
+                            <div class="card-header fw-bold">Journeys completed per month</div>
+                            <div class="card-body">
+                                <div class="o_zlms_trend d-flex align-items-end gap-2">
+                                    <div t-foreach="state.data.trend" t-as="t" t-key="t.label" class="flex-fill text-center">
+                                        <div class="small fw-bold" t-esc="t.value"/>
+                                        <div class="o_zlms_trend_bar mx-auto" t-attf-style="height: #{Math.max(t.pct, 3)}px; max-height: 120px;"/>
+                                        <div class="small text-muted" t-esc="t.label"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header fw-bold"><i class="fa fa-flag-checkered text-success"/> Store challenge - this month</div>
+                            <ol class="list-group list-group-flush list-group-numbered">
+                                <li t-foreach="state.data.challenge" t-as="c" t-key="c.id" class="list-group-item d-flex cursor-pointer" t-on-click="() => this.openRecord('zlms.store', c.id)">
+                                    <div class="ms-2 me-auto"><div t-esc="c.name"/><div class="small text-muted"><t t-esc="c.points"/> pts · <t t-esc="c.headcount"/> staff</div></div>
+                                    <span class="badge text-bg-success align-self-center"><t t-esc="c.score"/> / head</span>
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="card mb-3" t-if="state.data.sessions.length">
+                            <div class="card-header fw-bold"><i class="fa fa-calendar text-primary"/> Upcoming sessions</div>
+                            <ul class="list-group list-group-flush">
+                                <li t-foreach="state.data.sessions" t-as="s" t-key="s.id" class="list-group-item cursor-pointer" t-on-click="() => this.openRecord('zlms.training.session', s.id)">
+                                    <div class="d-flex justify-content-between"><span t-esc="s.name"/><span class="small" t-esc="s.seats"/></div>
+                                    <div class="small text-muted"><t t-esc="s.start"/> · <t t-esc="s.type"/></div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header fw-bold">Regions</div>
+                            <ul class="list-group list-group-flush">
+                                <li t-foreach="state.data.regions" t-as="r" t-key="r.name" class="list-group-item">
+                                    <div class="d-flex justify-content-between"><span t-esc="r.name"/><span class="small text-muted"><t t-esc="r.stores"/> stores · <t t-esc="r.headcount"/> staff</span></div>
+                                    <div class="progress mt-1" style="height: 8px;"><div t-attf-class="progress-bar #{barClass(r.completion)}" t-attf-style="width: #{r.completion}%"/></div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header fw-bold"><i class="fa fa-trophy text-warning"/> Top learners</div>
+                            <ol class="list-group list-group-flush list-group-numbered">
+                                <li t-foreach="state.data.leaderboard" t-as="l" t-key="l.id" class="list-group-item d-flex cursor-pointer" t-on-click="() => this.openRecord('zlms.learner', l.id)">
+                                    <div class="ms-2 me-auto"><div t-esc="l.name"/><div class="small text-muted"><t t-esc="l.store"/> · <t t-esc="l.role"/></div></div>
+                                    <span class="badge text-bg-primary align-self-center"><t t-esc="l.points"/> pts</span>
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="card mb-3" t-if="state.data.at_risk.length">
+                            <div class="card-header fw-bold text-danger"><i class="fa fa-exclamation-triangle"/> Learners at risk</div>
+                            <ul class="list-group list-group-flush">
+                                <li t-foreach="state.data.at_risk" t-as="l" t-key="l.id" class="list-group-item cursor-pointer" t-on-click="() => this.openRecord('zlms.learner', l.id)">
+                                    <div class="d-flex justify-content-between"><span t-esc="l.name"/><span class="small text-muted" t-esc="l.store"/></div>
+                                    <div class="small">Completion <t t-esc="l.completion"/>% · <span class="text-danger"><t t-esc="l.overdue"/> overdue</span> · score <t t-esc="l.score"/></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

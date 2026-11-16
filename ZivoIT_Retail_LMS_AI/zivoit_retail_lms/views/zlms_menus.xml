@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_dashboard_action" model="ir.actions.client">
+        <field name="name">Learning Dashboard</field>
+        <field name="tag">zlms_dashboard</field>
+    </record>
+
+    <menuitem id="menu_zlms_root" name="Retail LMS" sequence="45"
+              web_icon="zivoit_retail_lms,static/description/icon.png"
+              groups="group_zlms_store_manager"/>
+
+    <menuitem id="menu_zlms_dashboard" name="Dashboard" parent="menu_zlms_root" action="zlms_dashboard_action" sequence="1"/>
+
+    <menuitem id="menu_zlms_network" name="Network" parent="menu_zlms_root" sequence="10"/>
+    <menuitem id="menu_zlms_stores" name="Stores" parent="menu_zlms_network" action="zlms_store_action" sequence="1"/>
+    <menuitem id="menu_zlms_learners" name="Learners" parent="menu_zlms_network" action="zlms_learner_action" sequence="2"/>
+    <menuitem id="menu_zlms_kpi" name="Store KPIs" parent="menu_zlms_network" action="zlms_store_kpi_action" sequence="3"/>
+    <menuitem id="menu_zlms_bulletins" name="Store Bulletins" parent="menu_zlms_network" action="zlms_bulletin_action" sequence="4"/>
+
+    <menuitem id="menu_zlms_learning" name="Learning" parent="menu_zlms_root" sequence="20"/>
+    <menuitem id="menu_zlms_assignments" name="Assignments" parent="menu_zlms_learning" action="zlms_assignment_action" sequence="1"/>
+    <menuitem id="menu_zlms_ojt" name="OJT Sign-offs" parent="menu_zlms_learning" action="zlms_assignment_line_ojt_action" sequence="2"/>
+    <menuitem id="menu_zlms_observations" name="Coaching Observations" parent="menu_zlms_learning" action="zlms_observation_action" sequence="2"/>
+    <menuitem id="menu_zlms_sessions_ilt" name="Training Sessions" parent="menu_zlms_learning" action="zlms_training_session_action" sequence="3"/>
+    <menuitem id="menu_zlms_certificates" name="Certificates" parent="menu_zlms_learning" action="zlms_certificate_action" sequence="3"/>
+    <menuitem id="menu_zlms_sessions" name="Role-play Sessions" parent="menu_zlms_learning" action="zlms_roleplay_session_action" sequence="4"/>
+    <menuitem id="menu_zlms_boost" name="Knowledge Retention" parent="menu_zlms_learning" action="zlms_boost_card_action" sequence="5"/>
+
+    <menuitem id="menu_zlms_content" name="Content" parent="menu_zlms_root" sequence="30"/>
+    <menuitem id="menu_zlms_paths" name="Learning Paths" parent="menu_zlms_content" action="zlms_learning_path_action" sequence="1"/>
+    <menuitem id="menu_zlms_courses" name="Courses" parent="menu_zlms_content" action="zlms_slide_channel_action" sequence="2"
+              groups="group_zlms_manager"/>
+    <menuitem id="menu_zlms_cards" name="Product Knowledge" parent="menu_zlms_content" action="zlms_product_card_action" sequence="3"/>
+    <menuitem id="menu_zlms_scenarios" name="Role-play Scenarios" parent="menu_zlms_content" action="zlms_roleplay_scenario_action" sequence="4"/>
+    <menuitem id="menu_zlms_ilt_courses" name="Classroom Courses" parent="menu_zlms_content" action="zlms_ilt_course_action" sequence="5"/>
+    <menuitem id="menu_zlms_obs_templates" name="Observation Checklists" parent="menu_zlms_content" action="zlms_observation_template_action" sequence="6"/>
+
+    <menuitem id="menu_zlms_ai" name="AI Studio" parent="menu_zlms_root" sequence="40"/>
+    <menuitem id="menu_zlms_ai_course" name="AI Course Builder" parent="menu_zlms_ai" action="zlms_ai_course_wizard_action" sequence="1"
+              groups="group_zlms_manager"/>
+    <menuitem id="menu_zlms_ai_path" name="AI Learning Path Builder" parent="menu_zlms_ai" action="zlms_ai_path_wizard_action" sequence="1"
+              groups="group_zlms_manager"/>
+    <menuitem id="menu_zlms_ai_expert" name="Ask the Expert" parent="menu_zlms_ai" action="zlms_ask_expert_wizard_action" sequence="2"/>
+    <menuitem id="menu_zlms_ai_network" name="AI L&amp;D Advisor" parent="menu_zlms_ai" action="zlms_ai_network_insight_action" sequence="3"
+              groups="group_zlms_manager"/>
+    <menuitem id="menu_zlms_ai_insights" name="Insights History" parent="menu_zlms_ai" action="zlms_ai_insight_action" sequence="4"/>
+
+    <menuitem id="menu_zlms_reporting" name="Reporting" parent="menu_zlms_root" sequence="50"/>
+    <menuitem id="menu_zlms_analysis" name="Learning Analysis" parent="menu_zlms_reporting" action="zlms_assignment_analysis_action" sequence="1"/>
+    <menuitem id="menu_zlms_impact" name="Training Impact" parent="menu_zlms_reporting" action="zlms_store_kpi_action" sequence="2"/>
+    <menuitem id="menu_zlms_skills_matrix" name="Skills Matrix" parent="menu_zlms_reporting" action="zlms_learner_skill_action" sequence="3"/>
+    <menuitem id="menu_zlms_challenge" name="Store Challenge" parent="menu_zlms_reporting" action="zlms_points_log_action" sequence="4"/>
+    <menuitem id="menu_zlms_badges_earned" name="Badges Earned" parent="menu_zlms_reporting" action="zlms_badge_award_action" sequence="5"/>
+
+    <menuitem id="menu_zlms_config" name="Configuration" parent="menu_zlms_root" sequence="90" groups="group_zlms_manager"/>
+    <menuitem id="menu_zlms_settings" name="Settings" parent="menu_zlms_config" action="zlms_config_settings_action" sequence="1"/>
+    <menuitem id="menu_zlms_regions" name="Regions" parent="menu_zlms_config" action="zlms_region_action" sequence="2"/>
+    <menuitem id="menu_zlms_roles" name="Roles &amp; Career Ladder" parent="menu_zlms_config" action="zlms_role_action" sequence="3"/>
+    <menuitem id="menu_zlms_skills" name="Competency Framework" parent="menu_zlms_config" action="zlms_skill_action" sequence="4"/>
+    <menuitem id="menu_zlms_tech" name="Product Features" parent="menu_zlms_config" action="zlms_tech_tag_action" sequence="5"/>
+    <menuitem id="menu_zlms_badges" name="Badges" parent="menu_zlms_config" action="zlms_badge_action" sequence="5"/>
+    <menuitem id="menu_zlms_ai_log" name="AI Usage Log" parent="menu_zlms_config" action="zlms_ai_log_action" sequence="6"/>
+</odoo>

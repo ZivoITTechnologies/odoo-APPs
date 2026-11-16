@@ -1,0 +1,61 @@
+.o_zlms_portal {
+    max-width: 720px;
+
+    .o_zlms_nav .nav-link {
+        border-radius: 12px;
+        padding: 6px 4px;
+        .fa {
+            font-size: 1.2rem;
+        }
+    }
+    .o_zlms_hero {
+        background: linear-gradient(135deg, #0b2545 0%, #1f4e8c 60%, #3a86ff 100%);
+    }
+    .o_zlms_stat {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        padding: 6px;
+    }
+    .o_zlms_badge {
+        color: #fff;
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .o_zlms_boost_cta {
+        border: 2px solid #f0ad4e;
+        border-radius: 14px;
+    }
+    .o_zlms_answer {
+        cursor: pointer;
+        &:has(input:checked) {
+            border-color: #1f4e8c !important;
+            background: rgba(58, 134, 255, 0.08);
+        }
+    }
+    .o_zlms_chat {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .o_zlms_bubble {
+        max-width: 85%;
+        padding: 8px 12px;
+        border-radius: 14px;
+        .o_zlms_text {
+            white-space: pre-line;
+        }
+    }
+    .o_zlms_customer {
+        align-self: flex-start;
+        background: #eef2f7;
+        border-bottom-left-radius: 4px;
+    }
+    .o_zlms_me {
+        align-self: flex-end;
+        background: #1f4e8c;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+}

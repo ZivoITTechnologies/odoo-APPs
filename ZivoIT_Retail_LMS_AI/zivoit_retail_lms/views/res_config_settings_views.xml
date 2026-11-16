@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_zlms" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.zlms</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Retail LMS" string="Retail LMS" name="zivoit_retail_lms"
+                     groups="zivoit_retail_lms.group_zlms_manager">
+                    <block title="Brand Context" name="zlms_brand_block">
+                        <setting id="zlms_brand" string="Your Retail Business"
+                                 help="Tells the AI who you are, so lessons, role-play customers and insights fit your sector and market.">
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="zlms_brand_name" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_brand_name" placeholder="Company name"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="zlms_retail_sector" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_retail_sector"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="zlms_market" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_market" placeholder="e.g. India"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Artificial Intelligence" name="zlms_ai_block">
+                        <setting id="zlms_ai_provider" string="AI Provider"
+                                 help="Powers the course builder, role-play coach, skill-gap analysis and Ask the Expert. The offline engine keeps every feature working without a key.">
+                            <div class="content-group">
+                                <div class="row mt8">
+                                    <label for="zlms_ai_provider" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_ai_provider"/>
+                                </div>
+                                <div class="row mt8" invisible="zlms_ai_provider == 'none'">
+                                    <label for="zlms_ai_api_key" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_ai_api_key" password="True"/>
+                                </div>
+                                <div class="row mt8" invisible="zlms_ai_provider == 'none'">
+                                    <label for="zlms_ai_model" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_ai_model" placeholder="Provider default"/>
+                                </div>
+                                <div class="row mt8" invisible="zlms_ai_provider == 'none'">
+                                    <label for="zlms_ai_base_url" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_ai_base_url" placeholder="Optional"/>
+                                </div>
+                                <div class="row mt8" invisible="zlms_ai_provider == 'none'">
+                                    <label for="zlms_ai_temperature" class="col-lg-4 o_light_label"/>
+                                    <field name="zlms_ai_temperature"/>
+                                </div>
+                                <button name="action_zlms_test_ai" type="object" string="Test Connection"
+                                        icon="oi-arrow-right" class="btn-link" invisible="zlms_ai_provider == 'none'"/>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Learning Experience" name="zlms_learning_block">
+                        <setting id="zlms_boost_questions" string="Daily Boost"
+                                 help="Spaced-repetition questions served to each learner per day.">
+                            <field name="zlms_boost_daily_questions"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="zlms_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'module': 'zivoit_retail_lms', 'bin_size': False}</field>
+    </record>
+</odoo>

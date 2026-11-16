@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_zlms" model="ir.module.category">
+        <field name="name">Retail LMS</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="res_groups_privilege_zlms" model="res.groups.privilege">
+        <field name="name">Retail LMS</field>
+        <field name="sequence">10</field>
+        <field name="category_id" ref="module_category_zlms"/>
+    </record>
+
+    <record id="group_zlms_store_manager" model="res.groups">
+        <field name="name">Store Manager</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_zlms"/>
+        <field name="comment">Sees and coaches the team of the stores they manage, signs off on-the-job tasks.</field>
+    </record>
+
+    <record id="group_zlms_manager" model="res.groups">
+        <field name="name">L&amp;D Administrator</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_zlms"/>
+        <field name="implied_ids" eval="[(4, ref('group_zlms_store_manager')), (4, ref('website_slides.group_website_slides_officer'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Full control of the retail learning network.</field>
+    </record>
+
+    <!-- Store managers / area managers: own stores only -->
+    <record id="rule_zlms_store_manager_store" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own stores</field>
+        <field name="model_id" ref="model_zlms_store"/>
+        <field name="domain_force">['|', ('manager_user_id', '=', user.id), ('area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_learner" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team</field>
+        <field name="model_id" ref="model_zlms_learner"/>
+        <field name="domain_force">['|', '|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id), ('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_assignment" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team assignments</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="domain_force">['|', '|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id), ('learner_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_assignment_line" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team steps</field>
+        <field name="model_id" ref="model_zlms_assignment_line"/>
+        <field name="domain_force">['|', ('assignment_id.store_id.manager_user_id', '=', user.id), ('assignment_id.store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_certificate" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team certificates</field>
+        <field name="model_id" ref="model_zlms_certificate"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_session" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team role-plays</field>
+        <field name="model_id" ref="model_zlms_roleplay_session"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_kpi" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own KPIs</field>
+        <field name="model_id" ref="model_zlms_store_kpi"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_boost" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team boost cards</field>
+        <field name="model_id" ref="model_zlms_boost_card"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_boost_answer" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own team boost answers</field>
+        <field name="model_id" ref="model_zlms_boost_answer"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_store_manager_insight" model="ir.rule">
+        <field name="name">Retail LMS: store manager sees own insights</field>
+        <field name="model_id" ref="model_zlms_ai_insight"/>
+        <field name="domain_force">['|', '|', ('create_uid', '=', user.id), ('store_id.manager_user_id', '=', user.id), ('learner_id.store_id.manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+
+    <!-- L&D administrators: everything -->
+    <record id="rule_zlms_manager_store" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all stores</field>
+        <field name="model_id" ref="model_zlms_store"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_learner" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all learners</field>
+        <field name="model_id" ref="model_zlms_learner"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_assignment" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all assignments</field>
+        <field name="model_id" ref="model_zlms_assignment"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_assignment_line" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all steps</field>
+        <field name="model_id" ref="model_zlms_assignment_line"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_certificate" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all certificates</field>
+        <field name="model_id" ref="model_zlms_certificate"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_session" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all role-plays</field>
+        <field name="model_id" ref="model_zlms_roleplay_session"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_kpi" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all KPIs</field>
+        <field name="model_id" ref="model_zlms_store_kpi"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_boost" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all boost cards</field>
+        <field name="model_id" ref="model_zlms_boost_card"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_boost_answer" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all boost answers</field>
+        <field name="model_id" ref="model_zlms_boost_answer"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_manager_insight" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all insights</field>
+        <field name="model_id" ref="model_zlms_ai_insight"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_bulletin_ack_sm" model="ir.rule">
+        <field name="name">Retail LMS: store manager bulletin acknowledgements</field>
+        <field name="model_id" ref="model_zlms_bulletin_ack"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_bulletin_ack_mgr" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all bulletin acknowledgements</field>
+        <field name="model_id" ref="model_zlms_bulletin_ack"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_badge_award_sm" model="ir.rule">
+        <field name="name">Retail LMS: store manager badges</field>
+        <field name="model_id" ref="model_zlms_badge_award"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_badge_award_mgr" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all badges</field>
+        <field name="model_id" ref="model_zlms_badge_award"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_points_log_sm" model="ir.rule">
+        <field name="name">Retail LMS: store manager points</field>
+        <field name="model_id" ref="model_zlms_points_log"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_points_log_mgr" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all points</field>
+        <field name="model_id" ref="model_zlms_points_log"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_learner_skill_sm" model="ir.rule">
+        <field name="name">Retail LMS: store manager skills</field>
+        <field name="model_id" ref="model_zlms_learner_skill"/>
+        <field name="domain_force">['|', ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_learner_skill_mgr" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all skills</field>
+        <field name="model_id" ref="model_zlms_learner_skill"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_observation_sm" model="ir.rule">
+        <field name="name">Retail LMS: store manager observations</field>
+        <field name="model_id" ref="model_zlms_observation"/>
+        <field name="domain_force">['|', '|', ('observer_id', '=', user.id), ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_observation_mgr" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all observations</field>
+        <field name="model_id" ref="model_zlms_observation"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+    <record id="rule_zlms_training_attendee_sm" model="ir.rule">
+        <field name="name">Retail LMS: store manager attendees</field>
+        <field name="model_id" ref="model_zlms_training_attendee"/>
+        <field name="domain_force">['|', '|', ('session_id.trainer_user_id', '=', user.id), ('store_id.manager_user_id', '=', user.id), ('store_id.area_manager_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_store_manager'))]"/>
+    </record>
+    <record id="rule_zlms_training_attendee_mgr" model="ir.rule">
+        <field name="name">Retail LMS: L&amp;D all attendees</field>
+        <field name="model_id" ref="model_zlms_training_attendee"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_zlms_manager'))]"/>
+    </record>
+</odoo>

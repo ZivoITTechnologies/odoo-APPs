@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zlms_assign_path_wizard_form" model="ir.ui.view">
+        <field name="name">zlms.assign.path.wizard.form</field>
+        <field name="model">zlms.assign.path.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Assign Learning Path">
+                <group>
+                    <group>
+                        <field name="path_id"/>
+                        <field name="target" widget="radio"/>
+                        <field name="due_date"/>
+                    </group>
+                    <group>
+                        <field name="learner_ids" widget="many2many_tags" invisible="target != 'learners'"/>
+                        <field name="store_ids" widget="many2many_tags" invisible="target != 'stores'"/>
+                        <field name="region_ids" widget="many2many_tags" invisible="target != 'regions'"/>
+                        <field name="role_ids" widget="many2many_tags"
+                               string="Roles" help="For stores and regions, optionally limit to these roles."/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_assign" type="object" string="Assign" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="zlms_assign_path_wizard_action" model="ir.actions.act_window">
+        <field name="name">Assign Learning Path</field>
+        <field name="res_model">zlms.assign.path.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
