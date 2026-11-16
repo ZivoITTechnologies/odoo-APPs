@@ -1,5 +1,8 @@
 # Changelog
 
+## 19.0.2.0.3
+- App Store description page rebuilt: plain ASCII text (fixes garbled dashes and dots), Bootstrap grid layout instead of flexbox, all screenshots shown, consistent Odoo Online wording.
+
 ## 19.0.2.0.2
 - Packaging release for Odoo Apps registration: version bump to force a clean rescan, plus a publish kit (checker, scripts, error guide). No functional changes.
 
