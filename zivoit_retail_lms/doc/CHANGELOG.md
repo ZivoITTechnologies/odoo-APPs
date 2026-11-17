@@ -1,5 +1,8 @@
 # Changelog — ZivoIT Retail LMS AI
 
+## 19.0.1.1.1
+- App Store listing rebuilt for apps.odoo.com: only CSS properties allowed by Odoo's HTML sanitizer are used (background-color instead of background, Bootstrap grid instead of flex gap), so every dark panel, white heading, tile, table and contact block displays correctly after upload.
+
 ## 19.0.1.1.0
 **New**
 - Store Bulletins: launches, promotions, policies, planograms and recognition, sent to chosen regions, stores and roles; read & acknowledge tracking; overdue reminders to store managers; News tab in the learner portal.

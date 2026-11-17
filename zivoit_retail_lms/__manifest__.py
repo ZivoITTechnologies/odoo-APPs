@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Retail LMS AI',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.1.1',
     'category': 'Human Resources/eLearning',
     'summary': 'AI-enabled retail LMS for multi-store brands: onboarding journeys, AI role-play sales coach, '
                'AI course builder, certifications, Daily Boost, coaching, skills matrix and store dashboards.',

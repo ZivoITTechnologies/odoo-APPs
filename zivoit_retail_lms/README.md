@@ -3,7 +3,7 @@
 AI-enabled Learning Management System for multi-store retailers in any sector (fashion, footwear,
 electronics, beauty, grocery, home, jewellery, pharmacy and more).
 
-**Module:** `zivoit_retail_lms` · **Version:** 19.0.1.1.0 · **Odoo:** 19.0 Community & Enterprise · **License:** OPL-1 · **Price:** USD 659
+**Module:** `zivoit_retail_lms` · **Version:** 19.0.1.1.1 · **Odoo:** 19.0 Community & Enterprise · **License:** OPL-1 · **Price:** USD 659
 **Publisher:** Zivo IT Technologies (Shrisampadha Private Limited) · www.zivoit.com · info@zivoit.com
 
 ---
