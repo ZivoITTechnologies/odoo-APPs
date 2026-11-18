@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Logistics Hub - One App for All Couriers (AI)',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.2.0',
     'summary': 'Single connector platform for Shiprocket, Delhivery, DTDC, Blue Dart, FedEx, Xpressbees, '
                'Shree Maruti & any courier: AI rate shopping, RTO risk, NDR assistant, live tracking',
     'description': """
