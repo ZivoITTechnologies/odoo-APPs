@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Cargo Pilot TMS - Transport, Dispatch & Courier Management',
-    'version': '19.0.3.1.0',
+    'version': '19.0.3.2.0',
     'summary': 'One app for shippers, 3PLs and transporters: dispatch planning, regular partners first, '
                'live 3PL bidding, gate and detention, tracking, ePOD, POD-gated freight bills, courier networks, '
                'e-way bill / ULIP / WhatsApp, Zoho and EasyEcom. For Odoo 19.',
