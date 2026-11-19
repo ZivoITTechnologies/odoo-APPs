@@ -22,7 +22,29 @@
                             <field name="zivo_min_address_score"/>
                         </group>
                     </group>
+                    <group>
+                        <group string="Cost-effective shipping">
+                            <field name="zivo_deliver_within_days"/>
+                            <field name="zivo_preferred_account_ids" widget="many2many_tags" invisible="zivo_strategy == 'fixed'"/>
+                            <label for="zivo_preference_margin" string="Preference margin" invisible="not zivo_preferred_account_ids"/>
+                            <div class="o_row" invisible="not zivo_preferred_account_ids">
+                                <field name="zivo_preference_margin"/> or <field name="zivo_preference_margin_pct"/> %
+                            </div>
+                            <field name="zivo_excluded_services" placeholder="e.g. 14, PRIORITY_MAIL_EXPRESS"/>
+                            <field name="zivo_auto_box"/>
+                        </group>
+                        <group string="Shipping insurance">
+                            <field name="zivo_insurance_mode"/>
+                            <field name="zivo_insurance_threshold" invisible="zivo_insurance_mode != 'above'"/>
+                            <field name="zivo_insurance_rate" invisible="zivo_insurance_mode == 'none'"/>
+                            <field name="zivo_insurance_min" invisible="zivo_insurance_mode == 'none'"/>
+                            <field name="zivo_insurance_carrier" invisible="zivo_insurance_mode == 'none'"/>
+                        </group>
+                    </group>
                     <div class="text-muted">
+                        <b>Cheapest that arrives on time</b> books the lowest price among the services that meet the delivery
+                        promise (or the sales order delivery date). <b>Preferred carriers</b> win whenever they cost at most the
+                        margin more than the best option.<br/>
                         <b>AI Best</b> ranks every serviceable courier by price, promised transit time and the delivered / RTO
                         rate each courier achieved on the same destination in the last 180 days. COD orders weigh reliability higher.
                     </div>

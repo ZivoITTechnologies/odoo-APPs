@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="returns_styles" name="Logistics Hub: returns styles">
+        <style>
+            table.rl { width:100%; border-collapse:collapse; font-size:14px; }
+            table.rl th { text-align:left; color:var(--muted); font-weight:600; padding:6px 4px; border-bottom:1px solid var(--line); }
+            table.rl td { padding:8px 4px; border-bottom:1px solid var(--line); vertical-align:middle; }
+            table.rl input { width:80px; margin:0; }
+            select, textarea { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--bg);
+                               color:var(--ink); margin:6px 0 12px; font-size:15px; font-family:inherit; }
+            .pill { display:inline-block; padding:3px 10px; border-radius:999px; background:var(--line); font-size:13px; }
+            .pill.ok { background:#dcfce7; color:#14532d; } .pill.warn { background:#fef3c7; color:#78350f; }
+            .pill.bad { background:#fee2e2; color:#7f1d1d; }
+            a.btn { display:inline-block; background:var(--brand); color:#fff; text-decoration:none; border-radius:8px; padding:10px 18px; }
+            a { color:var(--brand); }
+        </style>
+    </template>
+
+    <template id="returns_lookup" name="Logistics Hub: returns lookup">
+        <t t-call="zivoit_logistics_hub.tracking_layout">
+            <t t-set="title" t-value="'Return an item'"/>
+            <div class="card">
+                <h1>Return or exchange an item</h1>
+                <p class="muted">Enter your order number and the email address or phone number used for the order.</p>
+                <p class="alert" t-if="error" t-esc="error"/>
+                <form method="post" action="/logistics/returns">
+                    <label for="order">Order number</label>
+                    <input id="order" name="order" t-att-value="order_ref or ''" required="required" autocomplete="off" placeholder="e.g. S00042"/>
+                    <label for="contact">Email or phone number</label>
+                    <input id="contact" name="contact" required="required" autocomplete="off"/>
+                    <button type="submit">Find my order</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <template id="returns_select" name="Logistics Hub: returns selection">
+        <t t-call="zivoit_logistics_hub.tracking_layout">
+            <t t-set="title" t-value="'Return items from %s' % order.name"/>
+            <t t-call="zivoit_logistics_hub.returns_styles"/>
+            <div class="card">
+                <div class="muted" t-esc="company.name"/>
+                <h1>Order <t t-esc="order.name"/></h1>
+                <p class="muted" t-if="window">Items can be returned within <t t-esc="window"/> days of delivery.</p>
+                <p class="alert" t-if="error" t-esc="error"/>
+                <t t-if="lines">
+                    <form method="post" action="/logistics/returns/submit">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="order_id" t-att-value="order.id"/>
+                        <input type="hidden" name="access" t-att-value="access"/>
+                        <table class="rl">
+                            <thead><tr><th>Product</th><th>Returnable</th><th>Quantity to return</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="lines" t-as="item">
+                                    <td t-esc="item['line'].product_id.display_name"/>
+                                    <td t-esc="'%g' % item['max']"/>
+                                    <td><input type="number" min="0" step="1" t-att-max="item['max']" value="0"
+                                               t-att-name="'qty_%s' % item['line'].id"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <label for="reason" style="display:block;margin-top:14px;">Reason</label>
+                        <select id="reason" name="reason">
+                            <option t-foreach="reasons" t-as="r" t-att-value="r[0]" t-esc="r[1]"/>
+                        </select>
+                        <label for="resolution">What would you like?</label>
+                        <select id="resolution" name="resolution">
+                            <option t-foreach="resolutions" t-as="r" t-att-value="r[0]" t-esc="r[1]"/>
+                        </select>
+                        <label for="comment">Comments (optional)</label>
+                        <textarea id="comment" name="comment" rows="3" maxlength="2000"/>
+                        <button type="submit">Request return</button>
+                    </form>
+                </t>
+                <p t-else="">There is nothing left to return on this order (not delivered yet, outside the return window, or
+                    already requested).</p>
+            </div>
+            <div class="card" t-if="existing">
+                <h2>Your return requests</h2>
+                <table class="rl">
+                    <tr t-foreach="existing" t-as="r">
+                        <td><a t-att-href="'/logistics/returns/status/%s' % r.access_token" t-esc="r.name"/></td>
+                        <td t-esc="state_labels.get(r.state)"/>
+                    </tr>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <template id="returns_status" name="Logistics Hub: return status">
+        <t t-call="zivoit_logistics_hub.tracking_layout">
+            <t t-set="title" t-value="'Return %s' % ret.name"/>
+            <t t-call="zivoit_logistics_hub.returns_styles"/>
+            <div class="card">
+                <div class="muted" t-esc="company.name"/>
+                <h1>Return <t t-esc="ret.name"/></h1>
+                <p>
+                    <span t-attf-class="pill #{'ok' if ret.state in ('approved', 'pickup', 'received') else 'bad' if ret.state in ('rejected', 'cancelled') else 'warn'}"
+                          t-esc="state_label"/>
+                </p>
+                <p class="muted" t-if="ret.state == 'requested'">We received your request and will review it shortly.</p>
+                <p class="muted" t-if="ret.state == 'approved'">Your return is approved. A courier pickup will be arranged.</p>
+                <p class="muted" t-if="ret.state == 'pickup'">A courier will collect the parcel from your address. Keep it packed and ready.</p>
+                <p class="muted" t-if="ret.state == 'received'">We received the returned items. Thank you!</p>
+                <div class="grid">
+                    <div><div class="muted">Order</div><t t-esc="ret.sale_id.name"/></div>
+                    <div><div class="muted">Reason</div><t t-esc="reason_label"/></div>
+                    <div><div class="muted">You asked for</div><t t-esc="resolution_label"/></div>
+                    <div t-if="ret.tracking_number"><div class="muted">Pickup AWB</div><t t-esc="ret.tracking_number"/></div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Items</h2>
+                <table class="rl">
+                    <tr t-foreach="ret.line_ids" t-as="l">
+                        <td t-esc="l.product_id.display_name"/>
+                        <td t-esc="'x %g' % l.quantity"/>
+                    </tr>
+                </table>
+            </div>
+            <div class="card" t-if="ret.shipment_id">
+                <h2>Reverse pickup</h2>
+                <p><a t-att-href="ret.shipment_id.public_tracking_url">Track the pickup</a></p>
+                <p t-if="has_label"><a class="btn" t-att-href="'/logistics/returns/label/%s' % ret.access_token">Download return label</a></p>
+            </div>
+        </t>
+    </template>
+</odoo>

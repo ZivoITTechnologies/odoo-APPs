@@ -2,3 +2,4 @@
 from . import base
 from .base import PROVIDERS, get_provider_class
 from . import demo, shiprocket, delhivery, dtdc, bluedart, fedex, xpressbees, generic
+from . import ups, usps, dhl_express, aramex, ekart

@@ -7,4 +7,18 @@
         <field name="padding">5</field>
         <field name="company_id" eval="False"/>
     </record>
+    <record id="seq_zivo_manifest" model="ir.sequence">
+        <field name="name">Logistics Hub Manifest</field>
+        <field name="code">zivo.logistics.manifest</field>
+        <field name="prefix">MAN/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    <record id="seq_zivo_return" model="ir.sequence">
+        <field name="name">Logistics Hub Return (RMA)</field>
+        <field name="code">zivo.logistics.return</field>
+        <field name="prefix">RMA/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
 </odoo>

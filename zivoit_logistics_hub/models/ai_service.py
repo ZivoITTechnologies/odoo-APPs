@@ -182,7 +182,8 @@ class LogisticsAI(models.AbstractModel):
         return perf
 
     @api.model
-    def _recommend(self, quotes, request, strategy='ai_best', dest_state=None):
+    def _recommend(self, quotes, request, strategy='ai_best', dest_state=None, deliver_within_days=0,
+                   preferred_ids=(), margin_amount=0.0, margin_pct=0.0):
         """quotes: list of (account, RateOption). Returns ranked list of dicts."""
         if not quotes:
             return []
@@ -194,9 +195,11 @@ class LogisticsAI(models.AbstractModel):
             currency = self.env['res.currency'].search([('name', '=', quote.currency)], limit=1) or account.rate_currency_id
             price = currency._convert(quote.price, company_currency, account.company_id, fields.Date.today()) \
                 if currency and currency != company_currency else quote.price
-            options.append({'key': (account.id, quote.service_code), 'account': account, 'quote': quote,
-                            'price': price, 'tat_days': quote.tat_days, 'perf': perf.get(account.id)})
-        return engine.score_rates(options, strategy=strategy, is_cod=request.is_cod)
+            options.append({'key': (account.id, quote.service_code), 'account': account, 'account_id': account.id,
+                            'quote': quote, 'price': price, 'tat_days': quote.tat_days, 'perf': perf.get(account.id)})
+        ranked = engine.score_rates(options, strategy=strategy, is_cod=request.is_cod,
+                                    deliver_within_days=deliver_within_days or 0)
+        return engine.apply_preference(ranked, set(preferred_ids or ()), margin_amount, margin_pct)
 
     # ------------------------------------------------------------------ EDD
     @api.model

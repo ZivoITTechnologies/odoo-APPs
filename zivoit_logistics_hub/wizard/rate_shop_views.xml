@@ -10,7 +10,9 @@
                         <field name="picking_id" readonly="1"/>
                         <field name="carrier_id" options="{'no_create': True}"/>
                         <field name="strategy" widget="radio" options="{'horizontal': true}"/>
+                        <field name="deliver_within_days"/>
                         <field name="weight_text"/>
+                        <field name="box_text" invisible="not box_text"/>
                         <field name="force_ship" invisible="rto_risk_level != 'high' and address_score &gt;= 60"/>
                     </group>
                     <group>
@@ -24,19 +26,24 @@
                     <div invisible="not rto_risk_reasons"><b>RTO risk drivers</b><field name="rto_risk_reasons" nolabel="1"/></div>
                     <div invisible="not address_issues"><b>Address issues</b><field name="address_issues" nolabel="1"/></div>
                 </div>
+                <div class="alert alert-success py-2" role="status" invisible="not savings_text">
+                    <field name="savings_text" nolabel="1"/>
+                </div>
                 <field name="line_ids" nolabel="1">
-                    <list create="0" delete="0" decoration-success="recommended" decoration-bf="recommended">
+                    <list create="0" delete="0" decoration-success="recommended" decoration-bf="recommended" decoration-muted="not on_time">
                         <field name="rank" string="#"/>
                         <field name="account_id" string="Courier Account" width="185px"/>
                         <field name="service_name" width="125px"/>
                         <field name="courier_name" optional="hide"/>
                         <field name="price" string="Price"/>
+                        <field name="savings" optional="show"/>
                         <field name="tat_days"/>
                         <field name="reliability" string="Reliability"/>
                         <field name="ai_score" widget="progressbar"/>
                         <field name="reasons" optional="show"/>
                         <field name="rate_source" optional="hide"/>
                         <field name="recommended" column_invisible="1"/>
+                        <field name="on_time" column_invisible="1"/>
                         <button name="action_select" type="object" string="Select" class="btn-link"/>
                         <button name="action_ship" type="object" string="Ship" class="btn-primary"/>
                     </list>

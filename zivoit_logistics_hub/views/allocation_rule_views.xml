@@ -40,6 +40,9 @@
                         <group string="Then">
                             <field name="strategy"/>
                             <field name="account_ids" widget="many2many_tags"/>
+                            <field name="service_code"/>
+                            <field name="deliver_within_days"/>
+                            <field name="insure"/>
                             <field name="sequence"/>
                             <field name="active"/>
                             <field name="company_id" groups="base.group_multi_company"/>

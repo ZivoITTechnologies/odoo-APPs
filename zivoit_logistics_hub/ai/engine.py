@@ -161,6 +161,7 @@ STRATEGY_WEIGHTS = {
     'reliable': (0.0, 0.0, 1.0),
     'ai_best': (0.45, 0.25, 0.30),
     'ai_best_cod': (0.30, 0.20, 0.50),
+    'cheapest_on_time': (1.0, 0.0, 0.0),
 }
 
 
@@ -178,9 +179,12 @@ def reliability(perf):
     return max(0.0, min(1.0, value))
 
 
-def score_rates(options, strategy='ai_best', is_cod=False):
+def score_rates(options, strategy='ai_best', is_cod=False, deliver_within_days=0):
     """options: list of dicts with key, price, tat_days, perf. Returns the same dicts enriched with
-    ``ai_score`` (0-100), ``rank`` and ``reasons``; sorted best first."""
+    ``ai_score`` (0-100), ``rank`` and ``reasons``; sorted best first.
+
+    ``deliver_within_days``: delivery promise. Options that arrive in time always rank above late ones
+    (whatever the strategy); with ``cheapest_on_time`` the cheapest on-time option wins."""
     if not options:
         return []
     if strategy == 'ai_best' and is_cod:
@@ -211,10 +215,90 @@ def score_rates(options, strategy='ai_best', is_cod=False):
         else:
             reasons.append('no history on this lane yet')
         o['reasons'] = reasons
-    ranked = sorted(options, key=lambda x: (-x['ai_score'], x['price'], x.get('tat_days') or default_tat))
+    for o, tat in zip(options, tats):
+        o['on_time'] = True
+        if deliver_within_days:
+            o['on_time'] = tat <= deliver_within_days
+            o['reasons'].insert(0, 'arrives within %g day%s' % (deliver_within_days, '' if deliver_within_days == 1 else 's')
+                                if o['on_time'] else 'misses the delivery date by %g day%s' % (
+                                    tat - deliver_within_days, '' if tat - deliver_within_days == 1 else 's'))
+    ranked = sorted(options, key=lambda x: (not x['on_time'], -x['ai_score'], x['price'], x.get('tat_days') or default_tat))
     for i, o in enumerate(ranked, 1):
         o['rank'] = i
     return ranked
+
+
+def apply_preference(ranked, preferred_ids, margin_amount=0.0, margin_pct=0.0):
+    """ShipStation style service preference: promote the best option of a preferred carrier account when it costs
+    at most ``margin_amount`` (or ``margin_pct`` %) more than the winner and is not later than the delivery promise.
+    ``ranked`` items carry ``account_id`` (or ``key[0]``). Returns a new ranked list."""
+    if not ranked or not preferred_ids:
+        return ranked
+    best = ranked[0]
+
+    def acc(o):
+        return o.get('account_id') or (o.get('key') or (None,))[0]
+    if acc(best) in preferred_ids:
+        return ranked
+    allowed = max(float(margin_amount or 0.0), best['price'] * float(margin_pct or 0.0) / 100.0)
+    for o in ranked[1:]:
+        if acc(o) in preferred_ids and o['price'] <= best['price'] + allowed + 1e-6 and (o.get('on_time', True) or not best.get('on_time', True)):
+            extra = o['price'] - best['price']
+            o.setdefault('reasons', []).insert(0, 'preferred carrier (%s)' % (
+                'same price' if abs(extra) < 0.005 else '%.2f more than the best option' % extra if extra > 0
+                else '%.2f cheaper' % -extra))
+            ranked = [o] + [x for x in ranked if x is not o]
+            for i, x in enumerate(ranked, 1):
+                x['rank'] = i
+            return ranked
+    return ranked
+
+
+def savings(ranked, chosen=None):
+    """Money saved by the chosen option against the alternatives quoted at the same time."""
+    prices = [o['price'] for o in ranked or [] if o.get('price')]
+    if not prices:
+        return {'max_price': 0.0, 'avg_price': 0.0, 'min_price': 0.0, 'saved_vs_max': 0.0, 'saved_vs_avg': 0.0,
+                'saved_pct': 0.0, 'options': 0}
+    chosen_price = (chosen or ranked[0]).get('price') or 0.0
+    max_price, avg_price = max(prices), sum(prices) / len(prices)
+    saved = max(max_price - chosen_price, 0.0)
+    return {'max_price': round(max_price, 2), 'avg_price': round(avg_price, 2), 'min_price': round(min(prices), 2),
+            'saved_vs_max': round(saved, 2), 'saved_vs_avg': round(max(avg_price - chosen_price, 0.0), 2),
+            'saved_pct': round(100.0 * saved / max_price, 1) if max_price else 0.0, 'options': len(prices)}
+
+
+# ------------------------------------------------------------------ packaging & insurance
+
+def suggest_box(volume_cm3, longest_cm, weight_kg, boxes, fill_factor=1.15, divisor=5000.0):
+    """Pick the box that fits the goods with the lowest chargeable weight.
+
+    boxes: list of dicts {id, name, length, width, height, max_weight, base_weight} (cm / kg).
+    Returns dict {box, chargeable_kg, fill_pct} or None when nothing fits."""
+    candidates = []
+    for box in boxes or []:
+        dims = sorted([box.get('length') or 0.0, box.get('width') or 0.0, box.get('height') or 0.0])
+        if not all(dims):
+            continue
+        box_volume = dims[0] * dims[1] * dims[2]
+        if box_volume < (volume_cm3 or 0.0) * fill_factor or dims[-1] < (longest_cm or 0.0):
+            continue
+        gross = (weight_kg or 0.0) + (box.get('base_weight') or 0.0)
+        if box.get('max_weight') and gross > box['max_weight']:
+            continue
+        chargeable = max(gross, box_volume / (divisor or 5000.0))
+        candidates.append((round(chargeable, 3), box_volume, box))
+    if not candidates:
+        return None
+    chargeable, box_volume, box = min(candidates, key=lambda c: (c[0], c[1]))
+    return {'box': box, 'chargeable_kg': chargeable,
+            'fill_pct': round(100.0 * (volume_cm3 or 0.0) / box_volume, 1) if box_volume else 0.0}
+
+
+def insurance_premium(value, rate_pct=0.0, minimum=0.0):
+    if not value or value <= 0:
+        return 0.0
+    return round(max(value * (rate_pct or 0.0) / 100.0, minimum or 0.0), 2)
 
 
 # ------------------------------------------------------------------ status classification

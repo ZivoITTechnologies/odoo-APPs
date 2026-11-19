@@ -124,6 +124,7 @@ class Item:
     unit_price: float = 0.0
     hsn: str = ''
     weight_kg: float = 0.0
+    origin_country: str = ''
 
 
 @dataclass
@@ -345,7 +346,7 @@ DATE_FORMATS = (
     '%Y-%m-%dT%H:%M:%S.%f%z', '%Y-%m-%dT%H:%M:%S%z', '%Y-%m-%dT%H:%M:%S.%f', '%Y-%m-%dT%H:%M:%S',
     '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%d-%m-%Y %H:%M:%S', '%d-%m-%Y %H:%M',
     '%d-%m-%Y', '%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y', '%d %b %Y %H:%M', '%d %b %Y',
-    '%d%m%Y%H%M', '%d%m%Y',
+    '%d%m%Y%H%M', '%d%m%Y', '%Y%m%d%H%M%S', '%Y%m%d',
 )
 
 
@@ -358,6 +359,9 @@ def parse_datetime(value):
     if isinstance(value, (int, float)):
         ts = value / 1000.0 if value > 1e11 else value
         return datetime.fromtimestamp(ts, timezone.utc).replace(tzinfo=None)
+    ms_date = re.match(r'^/Date\((-?\d+)([+-]\d{4})?\)/$', str(value).strip())  # WCF / Aramex style
+    if ms_date:
+        return datetime.fromtimestamp(int(ms_date.group(1)) / 1000.0, timezone.utc).replace(tzinfo=None)
     text = str(value).strip().replace('Z', '+0000')
     # Python < 3.11 cannot parse "+05:30" with %z, normalise it.
     text = re.sub(r'([+-]\d\d):(\d\d)$', r'\1\2', text)
@@ -521,6 +525,7 @@ class BaseProvider:
     tracking_url = ''  # use {awb}
     capabilities = set()
     credential_fields = ()  # used by the UI to show only relevant credentials
+    setup_help = ''  # shown on the account form
     token_lifetime = timedelta(hours=23)
     STATUS_MAP = {}
 
@@ -538,6 +543,11 @@ class BaseProvider:
 
     def url(self, path):
         return path if path.startswith('http') else '%s/%s' % (self.base_url, path.lstrip('/'))
+
+    def path(self, operation, default):
+        """Endpoint path, overridable per account with Extra Settings {"paths": {"track": "/v4/..."}}
+        so a carrier API version bump never needs a code change."""
+        return ((self.config.extra or {}).get('paths') or {}).get(operation) or default
 
     def supports(self, operation):
         return operation in self.capabilities
@@ -627,6 +637,30 @@ class BaseProvider:
             delivered_at = delivered[-1] if delivered else None
         return TrackingResult(tracking_number=awb, raw_status=raw_status or '', normalized=normalized,
                               description=description or '', events=events, delivered_at=delivered_at, **kwargs)
+
+
+def image_to_pdf(data):
+    """Wrap GIF/PNG/JPEG label(s) (UPS returns GIF) into a PDF, one page per label; PDFs pass through."""
+    images = [d for d in (data if isinstance(data, (list, tuple)) else [data]) if d]
+    if not images:
+        return None
+    if len(images) == 1 and images[0][:4] == b'%PDF':
+        return images[0]
+    try:
+        import io
+        from PIL import Image
+        pages = []
+        for raw in images:
+            img = Image.open(io.BytesIO(raw))
+            if img.width > img.height * 1.2:  # UPS GIF labels are landscape: rotate to a 4x6 portrait page
+                img = img.rotate(90, expand=True)
+            pages.append(img.convert('RGB'))
+        out = io.BytesIO()
+        pages[0].save(out, format='PDF', resolution=203.0, save_all=True, append_images=pages[1:])
+        return out.getvalue()
+    except Exception:  # noqa: BLE001 - never lose a label because of a conversion problem
+        _logger.warning('ZivoIT Logistics Hub: label image could not be converted to PDF')
+        return images[0]
 
 
 def b64_to_bytes(value):

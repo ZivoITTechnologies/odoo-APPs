@@ -9,9 +9,21 @@
     <menuitem id="menu_zivo_ndr" name="NDR Queue" parent="menu_zivo_operations" action="action_zivo_ndr" sequence="20"/>
     <menuitem id="menu_zivo_ai_query" name="Ask Logistics AI" parent="menu_zivo_operations" action="action_zivo_ai_query" sequence="30"/>
     <menuitem id="menu_zivo_deliveries" name="Delivery Orders" parent="menu_zivo_operations" action="stock.action_picking_tree_outgoing" sequence="40"/>
+    <menuitem id="menu_zivo_scan_ship" name="Scan to Ship" parent="menu_zivo_operations" action="action_zivo_scan_ship" sequence="42"/>
+    <menuitem id="menu_zivo_rate_calculator" name="Rate Calculator" parent="menu_zivo_operations" action="action_zivo_rate_calculator" sequence="44"/>
+    <menuitem id="menu_zivo_manifests" name="Manifests" parent="menu_zivo_operations" action="action_zivo_manifest" sequence="50"/>
+    <menuitem id="menu_zivo_eod" name="Create End-of-Day Manifests" parent="menu_zivo_operations" action="action_server_create_eod_manifest" sequence="51"/>
+    <menuitem id="menu_zivo_returns" name="Returns" parent="menu_zivo_operations" action="action_zivo_return" sequence="60"/>
+
+    <menuitem id="menu_zivo_finance" name="Billing" parent="menu_zivo_root" sequence="15"/>
+    <menuitem id="menu_zivo_freight_audit" name="Freight Audit" parent="menu_zivo_finance" action="action_zivo_freight_audit" sequence="10"/>
+    <menuitem id="menu_zivo_cod" name="COD Remittance" parent="menu_zivo_finance" action="action_zivo_cod_remittance" sequence="20"/>
+    <menuitem id="menu_zivo_reconcile" name="Import Carrier Invoice / COD File" parent="menu_zivo_finance" action="action_zivo_reconcile"
+              sequence="30" groups="zivoit_logistics_hub.group_logistics_manager"/>
 
     <menuitem id="menu_zivo_reporting" name="Reporting" parent="menu_zivo_root" sequence="20"/>
     <menuitem id="menu_zivo_analysis" name="Carrier Performance" parent="menu_zivo_reporting" action="action_zivo_analysis" sequence="10"/>
+    <menuitem id="menu_zivo_savings" name="Shipping Savings" parent="menu_zivo_reporting" action="action_zivo_savings" sequence="15"/>
     <menuitem id="menu_zivo_weight" name="Weight Disputes" parent="menu_zivo_reporting" action="action_zivo_weight_dispute" sequence="20"/>
 
     <menuitem id="menu_zivo_config" name="Configuration" parent="menu_zivo_root" sequence="90" groups="zivoit_logistics_hub.group_logistics_manager"/>

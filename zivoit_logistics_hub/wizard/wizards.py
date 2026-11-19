@@ -4,7 +4,11 @@ from markupsafe import Markup
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+from ..ai import engine
 from ..providers.base import NotSupported, ProviderError
+
+STRATEGY_CHOICES = [('ai_best', 'AI Best'), ('cheapest', 'Cheapest'), ('fastest', 'Fastest'),
+                    ('reliable', 'Most reliable'), ('cheapest_on_time', 'Cheapest on time')]
 
 
 class RateShop(models.TransientModel):
@@ -14,8 +18,10 @@ class RateShop(models.TransientModel):
     picking_id = fields.Many2one('stock.picking', required=True)
     carrier_id = fields.Many2one('delivery.carrier', string='Delivery Method',
                                  domain=[('delivery_type', '=', 'zivo_hub')])
-    strategy = fields.Selection([('ai_best', 'AI Best'), ('cheapest', 'Cheapest'), ('fastest', 'Fastest'),
-                                 ('reliable', 'Most reliable')], default='ai_best', required=True)
+    strategy = fields.Selection(STRATEGY_CHOICES, default='ai_best', required=True)
+    deliver_within_days = fields.Integer(string='Deliver Within (days)', help='0 = no delivery promise')
+    savings_text = fields.Char(string='Savings', readonly=True)
+    box_text = fields.Char(string='Suggested Box', readonly=True)
     line_ids = fields.One2many('zivo.logistics.rate.shop.line', 'wizard_id')
     errors = fields.Text(readonly=True)
     summary = fields.Html(readonly=True)
@@ -51,8 +57,18 @@ class RateShop(models.TransientModel):
         request = carrier._zivo_request_from_picking(picking)
         ctx = carrier._zivo_ctx(picking.partner_id, picking.company_id, 'stock.picking', picking.id, request.declared_value)
         ctx['strategy'] = self.strategy
+        if self.deliver_within_days:
+            ctx['deliver_within_days'] = self.deliver_within_days
         request.service_code = ''  # show every service of every courier
         ranked, errors = carrier.with_context(zivo_all_services=True)._zivo_ranked_options(request, ctx)
+        saving = engine.savings(ranked)
+        box_text = False
+        if carrier.zivo_auto_box and not carrier.zivo_default_package_type_id and not picking.move_line_ids.result_package_id:
+            moves = picking.move_ids.filtered(lambda m: m.product_id.type == 'consu' and m.state != 'cancel')
+            box, info = carrier._zivo_suggest_box([(m.product_id, m.quantity or m.product_uom_qty) for m in moves])
+            if box:
+                box_text = _('%(box)s (%(fill)s%% full, %(kg).2f kg chargeable)', box=box.name, fill=info['fill_pct'],
+                             kg=info['chargeable_kg'])
         risk = self.env['zivo.logistics.ai']._risk_values(picking.partner_id, request.cod_amount or request.declared_value,
                                                          request.is_cod, picking.sale_id.date_order if picking.sale_id else None,
                                                          request.delivery.zip)
@@ -61,7 +77,10 @@ class RateShop(models.TransientModel):
             'errors': '\n'.join(errors) or False,
             'rto_risk': risk.get('rto_risk', 0), 'rto_risk_level': risk.get('rto_risk_level'),
             'rto_risk_reasons': risk.get('rto_risk_reasons'), 'address_score': risk.get('address_score', 0),
-            'address_issues': risk.get('address_issues'),
+            'address_issues': risk.get('address_issues'), 'box_text': box_text,
+            'savings_text': _('Recommended option saves %(saved).2f (%(pct)s%%) vs the highest of %(n)s quotes; '
+                              'average quote %(avg).2f', saved=saving['saved_vs_max'], pct=saving['saved_pct'],
+                              n=saving['options'], avg=saving['avg_price']) if saving['options'] > 1 else False,
             'weight_text': _('%(actual).3f kg actual, %(vol).3f kg volumetric, %(pcs)s package(s), %(mode)s%(cod)s',
                              actual=request.total_weight, vol=request.volumetric_weight, pcs=len(request.parcels),
                              mode='COD' if request.is_cod else 'Prepaid',
@@ -72,7 +91,8 @@ class RateShop(models.TransientModel):
                 'courier_name': o['quote'].courier_name, 'price': o['price'], 'tat_days': o['quote'].tat_days,
                 'ai_score': o['ai_score'], 'reliability': o.get('reliability', 0.0), 'rank': o['rank'],
                 'recommended': o['rank'] == 1, 'reasons': ', '.join(o.get('reasons') or []),
-                'rate_source': o['quote'].source,
+                'rate_source': o['quote'].source, 'on_time': o.get('on_time', True),
+                'savings': max(saving['max_price'] - o['price'], 0.0),
             }) for o in ranked],
         })
         return True
@@ -125,6 +145,8 @@ class RateShopLine(models.TransientModel):
     recommended = fields.Boolean()
     reasons = fields.Char(string='Why')
     rate_source = fields.Char(string='Source')
+    on_time = fields.Boolean(string='On Time', default=True)
+    savings = fields.Float(string='Saves', digits='Product Price', help='Saving against the highest quote.')
 
     def _select(self, ship_now, force=False):
         self.ensure_one()

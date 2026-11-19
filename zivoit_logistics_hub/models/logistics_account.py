@@ -36,6 +36,7 @@ class LogisticsAccount(models.Model):
     is_aggregator = fields.Boolean(compute='_compute_provider_meta')
     credential_fields = fields.Char(compute='_compute_provider_meta')
     capability_text = fields.Char(string='Supported Operations', compute='_compute_provider_meta')
+    provider_help = fields.Text(compute='_compute_provider_meta')
     environment = fields.Selection([('sandbox', 'Sandbox / Test'), ('production', 'Production')],
                                    default='sandbox', required=True, tracking=True)
     base_url = fields.Char(string='Base URL Override', help='Leave empty to use the official endpoint of the carrier.')
@@ -105,7 +106,8 @@ class LogisticsAccount(models.Model):
     # ------------------------------------------------------------------ meta
     @api.model
     def _selection_provider(self):
-        order = ['shiprocket', 'delhivery', 'dtdc', 'bluedart', 'fedex', 'xpressbees', 'shree_maruti', 'generic', 'demo']
+        order = ['shiprocket', 'delhivery', 'dtdc', 'bluedart', 'ekart', 'xpressbees', 'shree_maruti', 'fedex', 'ups',
+                 'dhl_express', 'usps', 'aramex', 'generic', 'demo']
         codes = sorted(PROVIDERS, key=lambda c: order.index(c) if c in order else 99)
         return [(code, PROVIDERS[code].name) for code in codes]
 
@@ -116,6 +118,7 @@ class LogisticsAccount(models.Model):
             acc.provider_label = cls.name if cls else ''
             acc.is_aggregator = bool(cls and cls.aggregator)
             acc.credential_fields = ','.join(cls.credential_fields) if cls else ''
+            acc.provider_help = cls.setup_help if cls else ''
             caps = sorted(cls.capabilities) if cls else []
             if acc.provider in ('generic', 'shree_maruti'):
                 caps = sorted(acc.endpoint_ids.mapped('operation')) or ['configure endpoints']

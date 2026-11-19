@@ -9,6 +9,7 @@ from markupsafe import Markup
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.modules import module as odoo_module
+from odoo.tools.misc import format_datetime
 
 from ..ai import engine
 from ..providers.base import FINAL_STATUSES, NORMALIZED_STATUSES, STATUS_RANK, NotSupported, ProviderError
@@ -66,11 +67,11 @@ class LogisticsShipment(models.Model):
     pickup_reference = fields.Char()
 
     payment_mode = fields.Selection([('prepaid', 'Prepaid'), ('cod', 'COD')], default='prepaid', required=True)
-    cod_amount = fields.Monetary()
+    cod_amount = fields.Monetary(string='COD Amount')
     declared_value = fields.Monetary()
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     quoted_price = fields.Monetary(string='Quoted Charge')
-    actual_price = fields.Monetary(string='Billed Charge')
+    actual_price = fields.Monetary(string='Booking Charge')
     rate_source = fields.Char()
     weight_kg = fields.Float(string='Actual Weight (kg)', digits=(10, 3))
     volumetric_weight = fields.Float(string='Volumetric Weight (kg)', digits=(10, 3))
@@ -107,6 +108,32 @@ class LogisticsShipment(models.Model):
     address_score = fields.Integer(string='Address Score')
     address_issues = fields.Text(string='Address Issues')
     ai_recommendation = fields.Text(string='AI Carrier Reasoning')
+
+    # cost-effective shipping
+    quote_count = fields.Integer(string='Quotes Compared')
+    compare_max_price = fields.Monetary(string='Highest Quote')
+    compare_avg_price = fields.Monetary(string='Average Quote')
+    savings_amount = fields.Monetary(string='Saved vs Highest Quote', aggregator='sum')
+    on_time_promise = fields.Boolean(string='Meets Delivery Promise', default=True)
+    insured = fields.Boolean()
+    insured_value = fields.Monetary()
+    insurance_cost = fields.Monetary(string='Insurance Premium', aggregator='sum')
+    delay_alerted = fields.Boolean(copy=False)
+
+    # freight & COD reconciliation
+    billed_amount = fields.Monetary(string='Carrier Invoice Amount', copy=False, tracking=True)
+    billing_variance = fields.Monetary(compute='_compute_reconciliation', store=True, aggregator='sum',
+                                       help='Carrier invoice minus the quote used for booking.')
+    reconcile_state = fields.Selection([('pending', 'Not Invoiced'), ('matched', 'Matched'), ('overcharged', 'Overcharged'),
+                                        ('undercharged', 'Undercharged')], compute='_compute_reconciliation', store=True,
+                                       string='Freight Audit', index=True)
+    cod_remitted_amount = fields.Monetary(string='COD Remitted', copy=False, tracking=True)
+    cod_remittance_ref = fields.Char(string='Remittance Ref / UTR', copy=False)
+    cod_remitted_date = fields.Date(string='Remitted On', copy=False)
+    cod_state = fields.Selection([('na', 'Not COD'), ('pending', 'Awaiting Remittance'), ('remitted', 'Remitted'),
+                                  ('short', 'Short Remitted')], compute='_compute_cod_state', store=True, string='COD Status')
+    manifest_id = fields.Many2one('zivo.logistics.manifest', copy=False, index=True, ondelete='set null')
+    return_request_id = fields.Many2one('zivo.logistics.return', string='Return Request', copy=False, index=True)
 
     _tracking_account_uniq = models.Constraint('UNIQUE(account_id, tracking_number)', 'Tracking number already exists for this carrier account.')
 
@@ -149,6 +176,31 @@ class LogisticsShipment(models.Model):
         positive = (operator == '=') == value
         return delayed if positive else ['!'] + delayed
 
+    @api.depends('billed_amount', 'quoted_price', 'actual_price', 'currency_id')
+    def _compute_reconciliation(self):
+        tolerance = float(self.env['ir.config_parameter'].sudo().get_param('zivoit_logistics_hub.audit_tolerance_pct', 2.0))
+        for shp in self:
+            reference = shp.quoted_price or shp.actual_price
+            if not shp.billed_amount:
+                shp.billing_variance, shp.reconcile_state = 0.0, 'pending'
+                continue
+            variance = shp.billed_amount - reference
+            shp.billing_variance = variance
+            limit = max(abs(reference) * tolerance / 100.0, 1.0)
+            shp.reconcile_state = 'matched' if abs(variance) <= limit else 'overcharged' if variance > 0 else 'undercharged'
+
+    @api.depends('payment_mode', 'state', 'cod_amount', 'cod_remitted_amount')
+    def _compute_cod_state(self):
+        for shp in self:
+            if shp.payment_mode != 'cod' or shp.state != 'delivered':
+                shp.cod_state = 'na'  # nothing collected yet
+            elif not shp.cod_remitted_amount:
+                shp.cod_state = 'pending'
+            elif shp.cod_remitted_amount + 0.5 < shp.cod_amount:
+                shp.cod_state = 'short'
+            else:
+                shp.cod_state = 'remitted'
+
     @api.depends('chargeable_weight', 'weight_kg', 'charged_weight')
     def _compute_weight_dispute(self):
         for shp in self:
@@ -183,7 +235,8 @@ class LogisticsShipment(models.Model):
         except ProviderError as exc:
             raise UserError(_('%(carrier)s could not book the shipment: %(err)s', carrier=account.name, err=exc.message))
         ai = self.env['zivo.logistics.ai']
-        currency = account.rate_currency_id or self.env.company.currency_id
+        currency = (self.env['res.currency'].with_context(active_test=False).search([('name', '=', result.currency)], limit=1)
+                    if result.currency else False) or account.rate_currency_id or self.env.company.currency_id
         company_currency = (picking.company_id if picking else self.env.company).currency_id
         price = currency._convert(result.price or 0.0, company_currency, account.company_id, fields.Date.today()) \
             if result.price else 0.0
@@ -284,7 +337,26 @@ class LogisticsShipment(models.Model):
         shipments = self.search(domain, limit=limit, order='last_tracked_at asc nulls first')
         for company, recs in shipments.grouped('company_id').items():
             recs.with_company(company).action_track()
+        self._alert_delays()
         return len(shipments)
+
+    @api.model
+    def _alert_delays(self, limit=200):
+        """Proactive delay alerts: one activity per shipment that has passed its promised date."""
+        late = self.search([('is_delayed', '=', True), ('delay_alerted', '=', False)], limit=limit)
+        activity = self.env.ref('mail.mail_activity_data_todo', raise_if_not_found=False)
+        for shp in late:
+            promise = shp.edd or shp.ai_edd
+            if activity:
+                shp.activity_schedule(
+                    activity_type_id=activity.id, user_id=shp.user_id.id or self.env.user.id,
+                    summary=_('Shipment running late'),
+                    note=_('%(awb)s was expected by %(date)s and is still "%(state)s". Contact %(carrier)s or the customer.',
+                           awb=shp.tracking_number or shp.name,
+                           date=format_datetime(self.env, promise, tz=shp.user_id.tz or self.env.user.tz, dt_format='medium'),
+                           state=dict(NORMALIZED_STATUSES).get(shp.state), carrier=shp.account_id.name))
+            shp.delay_alerted = True
+        return len(late)
 
     def _normalize(self, provider_code, raw_status, description='', provided=None):
         if provided:
@@ -410,13 +482,17 @@ class LogisticsShipment(models.Model):
         for shp in self:
             if shp.state in FINAL_STATUSES:
                 raise UserError(_('Shipment %s is already %s.', shp.name, dict(NORMALIZED_STATUSES)[shp.state]))
+            note = _('Shipment cancelled with the carrier.')
             if shp.tracking_number:
                 try:
                     shp.account_id._get_provider(self._name, shp.id).cancel(shp.tracking_number, shp.carrier_reference)
+                except NotSupported:
+                    note = _('%s has no cancellation API: the shipment is voided in Odoo. Do not hand the parcel '
+                             'over, or ask the carrier to void the AWB.', shp.account_id.name)
                 except ProviderError as exc:
                     raise UserError(_('%(carrier)s refused the cancellation: %(err)s', carrier=shp.account_id.name, err=exc.message))
             shp.write({'state': 'cancelled'})
-            shp.message_post(body=_('Shipment cancelled with the carrier.'))
+            shp.message_post(body=note)
             if shp.picking_id and shp.picking_id.carrier_tracking_ref:
                 refs = [r for r in shp.picking_id.carrier_tracking_ref.split(',') if r.strip() != shp.tracking_number]
                 shp.picking_id.carrier_tracking_ref = ','.join(refs) or False

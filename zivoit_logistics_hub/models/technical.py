@@ -41,7 +41,10 @@ class LogisticsApiLog(models.Model):
         even when the business transaction rolls back."""
         allowed = set(self._fields)
         values = {k: v for k, v in values.items() if k in allowed}
-        if odoo_module.current_test or not self.env.registry.ready:
+        account = self.env['zivo.logistics.account'].browse(values.get('account_id') or [])
+        fresh = account and account.sudo().create_date and account.sudo().create_date >= self.env.cr.now()
+        if odoo_module.current_test or not self.env.registry.ready or fresh:
+            # an account created in this very transaction is invisible to a second cursor
             self.sudo().create(values)
             return
         try:

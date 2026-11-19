@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================ shipment extensions -->
+    <record id="view_zivo_shipment_form_costs" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.form.costs</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="inherit_id" ref="view_zivo_shipment_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='destination']" position="before">
+                <page string="Costs &amp; Audit" name="costs">
+                    <group>
+                        <group string="Savings">
+                            <field name="quote_count"/>
+                            <field name="quoted_price" string="Booked Quote"/>
+                            <field name="compare_avg_price"/>
+                            <field name="compare_max_price"/>
+                            <field name="savings_amount" decoration-success="savings_amount &gt; 0"/>
+                            <field name="on_time_promise"/>
+                        </group>
+                        <group string="Insurance">
+                            <field name="insured"/>
+                            <field name="insured_value" invisible="not insured"/>
+                            <field name="insurance_cost" invisible="not insured"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Freight audit">
+                            <field name="billed_amount"/>
+                            <field name="billing_variance" decoration-danger="billing_variance &gt; 0" decoration-success="billing_variance &lt; 0"/>
+                            <field name="reconcile_state" widget="badge" decoration-success="reconcile_state == 'matched'"
+                                   decoration-danger="reconcile_state == 'overcharged'" decoration-info="reconcile_state == 'undercharged'"/>
+                            <field name="charged_weight"/>
+                            <field name="weight_dispute"/>
+                        </group>
+                        <group string="COD remittance" invisible="payment_mode != 'cod'">
+                            <field name="cod_amount"/>
+                            <field name="cod_remitted_amount"/>
+                            <field name="cod_remittance_ref"/>
+                            <field name="cod_remitted_date"/>
+                            <field name="cod_state" widget="badge" decoration-success="cod_state == 'remitted'"
+                                   decoration-danger="cod_state == 'short'" decoration-warning="cod_state == 'pending'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Hand-over">
+                            <field name="manifest_id"/>
+                            <field name="return_request_id" invisible="not return_request_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_list_costs" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.list.costs</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="inherit_id" ref="view_zivo_shipment_list"/>
+        <field name="arch" type="xml">
+            <field name="actual_price" position="after">
+                <field name="savings_amount" optional="show" sum="Total Saved"/>
+                <field name="insurance_cost" optional="hide" sum="Insurance"/>
+                <field name="billed_amount" optional="hide" sum="Invoiced"/>
+                <field name="billing_variance" optional="hide" sum="Variance"/>
+                <field name="reconcile_state" optional="hide" widget="badge" decoration-success="reconcile_state == 'matched'"
+                       decoration-danger="reconcile_state == 'overcharged'"/>
+                <field name="cod_state" optional="hide" widget="badge" decoration-success="cod_state == 'remitted'"
+                       decoration-danger="cod_state == 'short'" decoration-warning="cod_state == 'pending'"/>
+                <field name="manifest_id" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_search_costs" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.search.costs</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="inherit_id" ref="view_zivo_shipment_search"/>
+        <field name="arch" type="xml">
+            <filter name="filter_weight" position="after">
+                <separator/>
+                <filter name="filter_overcharged" string="Overcharged" domain="[('reconcile_state', '=', 'overcharged')]"/>
+                <filter name="filter_audit_issue" string="Freight audit issues" domain="['|', ('reconcile_state', 'in', ('overcharged', 'undercharged')), ('weight_dispute', '=', True)]"/>
+                <filter name="filter_not_invoiced" string="Not invoiced by carrier" domain="[('reconcile_state', '=', 'pending'), ('state', 'not in', ('draft', 'cancelled'))]"/>
+                <filter name="filter_cod_pending" string="COD awaiting remittance" domain="[('cod_state', '=', 'pending')]"/>
+                <filter name="filter_cod_short" string="COD short remitted" domain="[('cod_state', '=', 'short')]"/>
+                <filter name="filter_insured" string="Insured" domain="[('insured', '=', True)]"/>
+                <filter name="filter_no_manifest" string="Not manifested" domain="[('manifest_id', '=', False), ('state', 'in', ('booked', 'pickup_scheduled')), ('is_return', '=', False)]"/>
+                <filter name="filter_returns" string="Reverse pickups" domain="[('is_return', '=', True)]"/>
+            </filter>
+            <filter name="group_day" position="after">
+                <filter name="group_manifest" string="Manifest" context="{'group_by': 'manifest_id'}"/>
+                <filter name="group_audit" string="Freight Audit" context="{'group_by': 'reconcile_state'}"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_savings_pivot" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.savings.pivot</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <pivot sample="1">
+                <field name="account_id" type="row"/>
+                <field name="booked_at" interval="month" type="col"/>
+                <field name="actual_price" type="measure"/>
+                <field name="savings_amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_savings_graph" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.savings.graph</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="priority">30</field>
+        <field name="arch" type="xml">
+            <graph type="bar" sample="1">
+                <field name="account_id"/>
+                <field name="savings_amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_zivo_savings" model="ir.actions.act_window">
+        <field name="name">Shipping Savings</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'graph', 'view_id': ref('view_zivo_shipment_savings_graph')}),
+                                      (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_zivo_shipment_savings_pivot')})]"/>
+        <field name="domain">[('state', '!=', 'cancelled')]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No savings recorded yet</p>
+            <p>Every automatic booking compares all carriers and stores how much cheaper the chosen option was than the highest quote.</p>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_audit_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.audit.list</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="priority">40</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="reconcile_state == 'overcharged' or cod_state == 'short'" sample="1">
+                <field name="tracking_number"/>
+                <field name="account_id"/>
+                <field name="partner_id" optional="show"/>
+                <field name="delivered_at" optional="hide"/>
+                <field name="quoted_price" string="Booked Quote" sum="Quoted"/>
+                <field name="billed_amount" sum="Invoiced"/>
+                <field name="billing_variance" sum="Variance" decoration-danger="billing_variance &gt; 0"/>
+                <field name="reconcile_state" widget="badge" decoration-success="reconcile_state == 'matched'"
+                       decoration-danger="reconcile_state == 'overcharged'" decoration-info="reconcile_state == 'undercharged'"/>
+                <field name="chargeable_weight" string="Shipped kg" optional="show"/>
+                <field name="charged_weight" string="Billed kg" optional="show"/>
+                <field name="weight_dispute" optional="show"/>
+                <field name="payment_mode" optional="hide"/>
+                <field name="cod_state" widget="badge" optional="hide" decoration-success="cod_state == 'remitted'"
+                       decoration-danger="cod_state == 'short'" decoration-warning="cod_state == 'pending'"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivo_shipment_cod_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.shipment.cod.list</field>
+        <field name="model">zivo.logistics.shipment</field>
+        <field name="priority">40</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="cod_state == 'short'" decoration-warning="cod_state == 'pending'" sample="1">
+                <field name="tracking_number"/>
+                <field name="account_id"/>
+                <field name="partner_id"/>
+                <field name="sale_id" optional="show"/>
+                <field name="delivered_at"/>
+                <field name="cod_amount" sum="COD collected"/>
+                <field name="cod_remitted_amount" sum="Remitted"/>
+                <field name="cod_remittance_ref"/>
+                <field name="cod_remitted_date"/>
+                <field name="cod_state" widget="badge" decoration-success="cod_state == 'remitted'"
+                       decoration-danger="cod_state == 'short'" decoration-warning="cod_state == 'pending'"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_zivo_freight_audit" model="ir.actions.act_window">
+        <field name="name">Freight Audit</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="view_id" ref="view_zivo_shipment_audit_list"/>
+        <field name="context">{'search_default_filter_audit_issue': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No freight audit issue</p>
+            <p>Import the carrier invoice with <b>Import Carrier Invoice / COD File</b>: every AWB is compared with the quote used
+               at booking and with the weight you shipped.</p>
+        </field>
+    </record>
+
+    <record id="action_zivo_cod_remittance" model="ir.actions.act_window">
+        <field name="name">COD Remittance</field>
+        <field name="res_model">zivo.logistics.shipment</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="view_id" ref="view_zivo_shipment_cod_list"/>
+        <field name="domain">[('payment_mode', '=', 'cod'), ('state', '=', 'delivered')]</field>
+        <field name="context">{'search_default_filter_cod_pending': 1}</field>
+    </record>
+
+    <record id="action_server_add_to_manifest" model="ir.actions.server">
+        <field name="name">Add to end-of-day manifest</field>
+        <field name="model_id" ref="model_zivo_logistics_shipment"/>
+        <field name="binding_model_id" ref="model_zivo_logistics_shipment"/>
+        <field name="state">code</field>
+        <field name="code">action = env['zivo.logistics.manifest.tools'].action_create_end_of_day(records.ids)</field>
+    </record>
+
+    <record id="action_server_create_eod_manifest" model="ir.actions.server">
+        <field name="name">Create End-of-Day Manifests</field>
+        <field name="model_id" ref="model_zivo_logistics_manifest"/>
+        <field name="state">code</field>
+        <field name="code">action = env['zivo.logistics.manifest.tools'].action_create_end_of_day()</field>
+    </record>
+
+    <!-- ================================================================ manifests -->
+    <record id="view_zivo_manifest_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.manifest.list</field>
+        <field name="model">zivo.logistics.manifest</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'closed'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="account_id"/>
+                <field name="shipment_count" string="Shipments"/>
+                <field name="package_count" string="Packages"/>
+                <field name="total_weight"/>
+                <field name="cod_total" sum="COD"/>
+                <field name="pickup_reference" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'closed'" decoration-info="state == 'draft'"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivo_manifest_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.manifest.form</field>
+        <field name="model">zivo.logistics.manifest</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_close" type="object" string="Hand Over &amp; Request Pickup" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_print" type="object" string="Print Manifest"/>
+                    <button name="action_reopen" type="object" string="Reopen" invisible="state != 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_shipments" type="object" class="oe_stat_button" icon="fa-truck">
+                            <field name="shipment_count" widget="statinfo" string="Shipments"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="account_id" readonly="state == 'closed'"/>
+                            <field name="date" readonly="state == 'closed'"/>
+                            <field name="pickup_reference"/>
+                            <field name="closed_at" invisible="not closed_at"/>
+                        </group>
+                        <group>
+                            <field name="package_count"/>
+                            <field name="total_weight"/>
+                            <field name="cod_total"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="shipment_ids" readonly="state == 'closed'" domain="[('account_id', '=', account_id), ('state', 'in', ('booked', 'pickup_scheduled'))]">
+                        <list>
+                            <field name="tracking_number"/>
+                            <field name="sale_id"/>
+                            <field name="partner_id"/>
+                            <field name="dest_city"/>
+                            <field name="package_count" string="Pkgs"/>
+                            <field name="chargeable_weight"/>
+                            <field name="payment_mode"/>
+                            <field name="cod_amount"/>
+                            <field name="state" widget="badge"/>
+                            <field name="currency_id" column_invisible="True"/>
+                        </list>
+                    </field>
+                    <field name="note" placeholder="Driver name, vehicle number, seal number..."/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_manifest" model="ir.actions.act_window">
+        <field name="name">Manifests</field>
+        <field name="res_model">zivo.logistics.manifest</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No manifest yet</p>
+            <p>At the end of the day use <b>Create End-of-Day Manifests</b>: booked shipments are grouped per carrier, the
+               printable manifest is signed by the courier and the pickup is requested automatically.</p>
+        </field>
+    </record>
+
+    <!-- ================================================================ returns -->
+    <record id="view_zivo_return_list" model="ir.ui.view">
+        <field name="name">zivo.logistics.return.list</field>
+        <field name="model">zivo.logistics.return</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('rejected', 'cancelled')" decoration-info="state == 'requested'">
+                <field name="name"/>
+                <field name="create_date" string="Requested On"/>
+                <field name="sale_id"/>
+                <field name="partner_id"/>
+                <field name="reason"/>
+                <field name="resolution"/>
+                <field name="amount" sum="Total"/>
+                <field name="source" optional="show"/>
+                <field name="tracking_number" optional="show"/>
+                <field name="shipment_state" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'received'" decoration-info="state in ('approved', 'pickup')"
+                       decoration-warning="state == 'requested'" decoration-danger="state == 'rejected'"/>
+                <field name="currency_id" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivo_return_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.return.form</field>
+        <field name="model">zivo.logistics.return</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary" invisible="state != 'requested'"/>
+                    <button name="action_book_pickup" type="object" string="Book Reverse Pickup" class="btn-primary" invisible="state != 'approved'"/>
+                    <button name="action_mark_received" type="object" string="Mark Received" invisible="state not in ('approved', 'pickup')"/>
+                    <button name="action_reject" type="object" string="Reject" invisible="state not in ('requested', 'approved')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('received', 'rejected', 'cancelled')"/>
+                    <button name="action_open_portal" type="object" string="Customer Page"/>
+                    <field name="state" widget="statusbar" statusbar_visible="requested,approved,pickup,received"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="sale_id" readonly="state != 'requested'"/>
+                            <field name="partner_id" readonly="state != 'requested'"/>
+                            <field name="picking_id" readonly="state != 'requested'"/>
+                            <field name="reason" readonly="state not in ('requested',)"/>
+                            <field name="resolution" readonly="state not in ('requested',)"/>
+                            <field name="source"/>
+                        </group>
+                        <group>
+                            <field name="return_picking_id"/>
+                            <field name="exchange_picking_id" invisible="not exchange_picking_id"/>
+                            <field name="shipment_id"/>
+                            <field name="tracking_number"/>
+                            <field name="shipment_state"/>
+                            <field name="amount"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" readonly="state != 'requested'">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="sale_line_id" optional="hide" domain="[('order_id', '=', parent.sale_id)]"/>
+                            <field name="quantity"/>
+                            <field name="price_unit"/>
+                        </list>
+                    </field>
+                    <group>
+                        <field name="reason_detail"/>
+                        <field name="decision_note"/>
+                        <field name="portal_url" widget="url"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_zivo_return_search" model="ir.ui.view">
+        <field name="name">zivo.logistics.return.search</field>
+        <field name="model">zivo.logistics.return</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="sale_id"/>
+                <field name="partner_id"/>
+                <filter name="filter_todo" string="To review" domain="[('state', '=', 'requested')]"/>
+                <filter name="filter_open" string="Open" domain="[('state', 'in', ('requested', 'approved', 'pickup'))]"/>
+                <separator/>
+                <filter name="filter_portal" string="From portal" domain="[('source', '=', 'portal')]"/>
+                <group>
+                    <filter name="group_reason" string="Reason" context="{'group_by': 'reason'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_zivo_return_graph" model="ir.ui.view">
+        <field name="name">zivo.logistics.return.graph</field>
+        <field name="model">zivo.logistics.return</field>
+        <field name="arch" type="xml">
+            <graph type="pie" sample="1">
+                <field name="reason"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_zivo_return" model="ir.actions.act_window">
+        <field name="name">Returns</field>
+        <field name="res_model">zivo.logistics.return</field>
+        <field name="view_mode">list,form,graph</field>
+        <field name="context">{'search_default_filter_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No return request</p>
+            <p>Customers request returns on <b>/logistics/returns</b> with their order number and email or phone. Approved
+               returns create the return transfer and book a reverse pickup automatically.</p>
+        </field>
+    </record>
+
+    <!-- ================================================================ product -->
+    <record id="view_product_template_form_zivo_returns" model="ir.ui.view">
+        <field name="name">product.template.form.zivo.returns</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="stock_delivery.product_template_hs_code"/>
+        <field name="arch" type="xml">
+            <field name="country_of_origin" position="after">
+                <field name="zivo_non_returnable"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- ================================================================ wizards -->
+    <record id="view_zivo_rate_calculator_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.rate.calculator.form</field>
+        <field name="model">zivo.logistics.rate.calculator</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group string="From">
+                        <field name="origin_zip"/>
+                        <field name="origin_city"/>
+                        <field name="origin_country_id" options="{'no_create': True}"/>
+                    </group>
+                    <group string="To">
+                        <field name="dest_zip"/>
+                        <field name="dest_city"/>
+                        <field name="dest_country_id" options="{'no_create': True}"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Parcel">
+                        <field name="package_type_id" options="{'no_create': True}"/>
+                        <field name="weight"/>
+                        <label for="length" string="Size (cm)"/>
+                        <div class="o_row"><field name="length"/> x <field name="width"/> x <field name="height"/></div>
+                        <field name="chargeable_weight" invisible="not chargeable_weight"/>
+                    </group>
+                    <group string="Shipment">
+                        <field name="carrier_id" options="{'no_create': True}"/>
+                        <field name="payment_mode" widget="radio" options="{'horizontal': true}"/>
+                        <field name="declared_value"/>
+                        <field name="strategy"/>
+                        <field name="deliver_within_days"/>
+                    </group>
+                </group>
+                <div invisible="not summary" class="alert alert-success" role="status">
+                    <field name="summary" nolabel="1"/>
+                </div>
+                <field name="line_ids" nolabel="1" invisible="not line_ids">
+                    <list create="0" delete="0" decoration-success="recommended" decoration-bf="recommended" decoration-muted="not on_time">
+                        <field name="rank" string="#"/>
+                        <field name="account_id" string="Carrier Account" width="190px"/>
+                        <field name="service_name" width="150px"/>
+                        <field name="price"/>
+                        <field name="savings"/>
+                        <field name="tat_days"/>
+                        <field name="edd"/>
+                        <field name="on_time" optional="hide"/>
+                        <field name="ai_score" widget="progressbar"/>
+                        <field name="badges" width="190px"/>
+                        <field name="reasons" optional="show"/>
+                        <field name="rate_source" optional="hide"/>
+                        <field name="recommended" column_invisible="1"/>
+                    </list>
+                </field>
+                <div invisible="not errors" class="text-muted">
+                    <b>Unavailable carriers</b>
+                    <field name="errors" nolabel="1"/>
+                </div>
+                <footer>
+                    <button name="action_compute" type="object" string="Compare Rates" class="btn-primary"/>
+                    <button string="Close" special="cancel" class="btn-link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_rate_calculator" model="ir.actions.act_window">
+        <field name="name">Shipping Rate Calculator</field>
+        <field name="res_model">zivo.logistics.rate.calculator</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'dialog_size': 'extra-large'}</field>
+    </record>
+
+    <record id="view_zivo_reconcile_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.reconcile.form</field>
+        <field name="model">zivo.logistics.reconcile</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="text-muted mb-2" invisible="state == 'done'">
+                    Upload the CSV from your carrier or aggregator panel. Columns are detected automatically:
+                    <b>AWB</b> (awb, tracking_number, waybill), <b>charged amount</b> (freight, total_charge, billed_amount),
+                    <b>charged weight</b> and <b>COD remitted</b> with <b>UTR</b> and date. Comma, semicolon, tab or pipe separated.
+                </div>
+                <group invisible="state == 'done'">
+                    <field name="file" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="account_id" options="{'no_create': True}"/>
+                </group>
+                <field name="state" invisible="1"/>
+                <div invisible="state != 'done'">
+                    <field name="result" nolabel="1"/>
+                </div>
+                <footer>
+                    <button name="action_import" type="object" string="Import &amp; Audit" class="btn-primary" invisible="state == 'done'"/>
+                    <button name="action_view_issues" type="object" string="View Issues" class="btn-primary" invisible="state != 'done'"/>
+                    <button string="Close" special="cancel" class="btn-link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_reconcile" model="ir.actions.act_window">
+        <field name="name">Import Carrier Invoice / COD File</field>
+        <field name="res_model">zivo.logistics.reconcile</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_zivo_scan_ship_form" model="ir.ui.view">
+        <field name="name">zivo.logistics.scan.ship.form</field>
+        <field name="model">zivo.logistics.scan.ship</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="text-muted mb-2">Scan a delivery order (WH/OUT/...), a sales order number or an AWB. The transfer is
+                    validated, the AI selected courier is booked and the label is ready to print.</div>
+                <group>
+                    <field name="barcode" placeholder="Scan here..." default_focus="1"/>
+                    <field name="carrier_id" options="{'no_create': True}"/>
+                    <field name="validate"/>
+                </group>
+                <field name="log_html" nolabel="1" invisible="not log_html"/>
+                <footer>
+                    <button name="action_scan" type="object" string="Ship" class="btn-primary"/>
+                    <button string="Close" special="cancel" class="btn-link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_scan_ship" model="ir.actions.act_window">
+        <field name="name">Scan to Ship</field>
+        <field name="res_model">zivo.logistics.scan.ship</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

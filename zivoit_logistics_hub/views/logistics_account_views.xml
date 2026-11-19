@@ -105,6 +105,9 @@
                             <field name="last_test_message" invisible="not last_test_message"/>
                         </group>
                     </group>
+                    <div class="alert alert-info" role="alert" invisible="not provider_help">
+                        <field name="provider_help" readonly="1" nolabel="1"/>
+                    </div>
                     <div class="alert alert-info" role="alert" invisible="provider != 'demo'">
                         The <b>ZivoIT Sandbox Courier</b> works offline: rates follow the Indian zone model, labels are
                         generated locally and tracking moves one milestone every <code>step_minutes</code> (Extra Settings).

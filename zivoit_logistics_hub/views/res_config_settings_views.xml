@@ -24,6 +24,18 @@
                             </div>
                         </setting>
                     </block>
+                    <block title="Returns &amp; Freight Audit" name="zivo_returns">
+                        <setting id="zivo_return_window" string="Return window" help="Days after delivery during which customers can request a return from the returns portal (/logistics/returns). 0 = no limit.">
+                            <field name="zivo_return_window_days"/>
+                        </setting>
+                        <setting id="zivo_return_auto" help="Approve portal return requests automatically (reason 'Other' always waits for review). An approved return books the reverse pickup with the AI selected courier unless pickups are booked manually.">
+                            <field name="zivo_return_auto_approve"/>
+                            <div class="mt-2"><field name="zivo_return_manual_pickup"/> <label for="zivo_return_manual_pickup" class="o_light_label"/></div>
+                        </setting>
+                        <setting id="zivo_audit_tolerance" string="Freight audit tolerance" help="Carrier invoices within this % of the booked quote are treated as matched.">
+                            <field name="zivo_audit_tolerance_pct"/>
+                        </setting>
+                    </block>
                     <block title="Tracking &amp; Notifications" name="zivo_tracking">
                         <setting id="zivo_track_interval" string="Tracking refresh" help="Minimum hours between two tracking calls for the same open shipment.">
                             <field name="zivo_track_interval_hours"/>

@@ -7,6 +7,7 @@ import pytz
 from markupsafe import Markup
 
 from odoo import http
+from odoo.exceptions import UserError, ValidationError
 from odoo.http import request
 
 from ..providers.base import NORMALIZED_STATUSES, NotSupported, ProviderError
@@ -105,3 +106,99 @@ class LogisticsHubController(http.Controller):
             'delivered_on': local(shipment.delivered_at, '%a, %d %b %Y'),
             'alert': state in ('ndr', 'exception') or state.startswith('rto') or state in ('cancelled', 'lost'),
         }
+
+
+class LogisticsReturnsController(http.Controller):
+    """Branded customer returns portal: lookup order -> choose products & reason -> RMA with reverse pickup."""
+
+    @staticmethod
+    def _contact_ok(order, contact):
+        contact = (contact or '').strip().lower()
+        if not contact:
+            return False
+        partners = order.partner_id | order.partner_shipping_id | order.partner_invoice_id
+        if '@' in contact:
+            return any((p.email or '').strip().lower() == contact for p in partners)
+        digits = ''.join(ch for ch in contact if ch.isdigit())
+        if len(digits) < 4:
+            return False
+        phones = [''.join(ch for ch in (p.phone or '') if ch.isdigit()) for p in partners]
+        return any(ph and ph.endswith(digits[-4:]) for ph in phones)
+
+    @staticmethod
+    def _order_from_token(order_id, access):
+        order = request.env['sale.order'].sudo().browse(int(order_id or 0)).exists()
+        if not order or not access or not order.access_token or not hmac.compare_digest(order.access_token, access):
+            return None
+        return order
+
+    def _render_lookup(self, error=False, order_ref=''):
+        return request.render('zivoit_logistics_hub.returns_lookup', {'doctype': DOCTYPE, 'error': error, 'order_ref': order_ref})
+
+    def _render_select(self, order, error=False):
+        Return = request.env['zivo.logistics.return'].sudo()
+        returnable = Return._returnable_lines(order)
+        from ..models.operations import RESOLUTIONS, RETURN_REASONS
+        return request.render('zivoit_logistics_hub.returns_select', {
+            'doctype': DOCTYPE, 'order': order, 'company': order.company_id, 'error': error,
+            'lines': [{'line': line, 'max': qty} for line, qty in returnable.items()], 'reasons': RETURN_REASONS,
+            'resolutions': RESOLUTIONS, 'access': order._portal_ensure_token(),
+            'window': Return._policy()['window'],
+            'existing': Return.search([('sale_id', '=', order.id)], order='id desc'),
+            'state_labels': dict(Return._fields['state'].selection),
+        })
+
+    @http.route('/logistics/returns', type='http', auth='public', methods=['GET', 'POST'], csrf=False, sitemap=False)
+    def returns_lookup(self, order=None, contact=None, **kwargs):
+        if request.httprequest.method == 'GET' or not order:
+            return self._render_lookup()
+        ref = order.strip()
+        so = request.env['sale.order'].sudo().search([('name', '=ilike', ref), ('state', '=', 'sale')], limit=1)
+        if not so or not self._contact_ok(so, contact):
+            return self._render_lookup('We could not find an order with this number and email / phone.', ref)
+        return self._render_select(so)
+
+    @http.route('/logistics/returns/submit', type='http', auth='public', methods=['POST'], csrf=True, sitemap=False)
+    def returns_submit(self, order_id=None, access=None, reason=None, comment=None, resolution=None, **kwargs):
+        so = self._order_from_token(order_id, access)
+        if not so:
+            return self._render_lookup('Your session expired, please look up the order again.')
+        quantities = {}
+        for key, value in kwargs.items():
+            if key.startswith('qty_') and key[4:].isdigit():
+                try:
+                    quantities[int(key[4:])] = float(value or 0)
+                except ValueError:
+                    continue
+        try:
+            ret = request.env['zivo.logistics.return'].sudo()._portal_submit(so, quantities, reason, (comment or '')[:2000],
+                                                                           resolution)
+        except Exception as exc:  # noqa: BLE001 - shown to the customer
+            if not isinstance(exc, (UserError, ValidationError)):
+                _logger.exception('ZivoIT return portal error')
+                exc = 'The request could not be created. Please contact us.'
+            return self._render_select(so, str(exc))
+        return request.redirect('/logistics/returns/status/%s' % ret.access_token)
+
+    @http.route('/logistics/returns/status/<string:token>', type='http', auth='public', sitemap=False)
+    def returns_status(self, token, **kwargs):
+        ret = request.env['zivo.logistics.return'].sudo().search([('access_token', '=', token)], limit=1)
+        if not ret or len(token) < 16:
+            return self._render_lookup('Return request not found.')
+        labels = dict(ret._fields['state'].selection)
+        return request.render('zivoit_logistics_hub.returns_status', {
+            'doctype': DOCTYPE, 'ret': ret, 'company': ret.company_id, 'state_label': labels.get(ret.state),
+            'reason_label': dict(ret._fields['reason'].selection).get(ret.reason),
+            'resolution_label': dict(ret._fields['resolution'].selection).get(ret.resolution),
+            'has_label': bool(ret.shipment_id.label_attachment_id),
+        })
+
+    @http.route('/logistics/returns/label/<string:token>', type='http', auth='public', sitemap=False)
+    def returns_label(self, token, **kwargs):
+        ret = request.env['zivo.logistics.return'].sudo().search([('access_token', '=', token)], limit=1)
+        attachment = ret.shipment_id.label_attachment_id if ret and len(token) >= 16 else None
+        if not attachment:
+            raise request.not_found()
+        return request.make_response(attachment.raw, headers=[
+            ('Content-Type', 'application/pdf'),
+            ('Content-Disposition', 'inline; filename="Return-%s.pdf"' % (ret.name or 'label').replace('/', '-'))])

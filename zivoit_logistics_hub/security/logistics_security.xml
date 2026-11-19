@@ -43,4 +43,14 @@
         <field name="model_id" ref="model_zivo_logistics_allocation_rule"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
+    <record id="rule_manifest_company" model="ir.rule">
+        <field name="name">Manifests: multi-company</field>
+        <field name="model_id" ref="model_zivo_logistics_manifest"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_return_company" model="ir.rule">
+        <field name="name">Return requests: multi-company</field>
+        <field name="model_id" ref="model_zivo_logistics_return"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
 </odoo>

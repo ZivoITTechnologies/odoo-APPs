@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_manifest" model="ir.actions.report">
+        <field name="name">Shipping Manifest</field>
+        <field name="model">zivo.logistics.manifest</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_logistics_hub.report_manifest</field>
+        <field name="report_file">zivoit_logistics_hub.report_manifest</field>
+        <field name="print_report_name">'Manifest-%s' % object.name.replace('/', '-')</field>
+        <field name="binding_model_id" ref="model_zivo_logistics_manifest"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_manifest_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.company_id.partner_id.lang)"/>
+            <div class="page" style="font-family: Arial, Helvetica, sans-serif; color: #111827;">
+                <h2 style="color: #0b1f4d;">Shipping Manifest <span t-field="o.name"/></h2>
+                <table class="table table-sm" style="width: 100%; margin-bottom: 16px;">
+                    <tr>
+                        <td><b>Carrier</b><br/><span t-field="o.account_id.name"/></td>
+                        <td><b>Date</b><br/><span t-field="o.date"/></td>
+                        <td><b>Shipments</b><br/><span t-field="o.shipment_count"/></td>
+                        <td><b>Packages</b><br/><span t-field="o.package_count"/></td>
+                        <td><b>Total weight</b><br/><span t-esc="'%.2f kg' % o.total_weight"/></td>
+                        <td><b>COD to collect</b><br/><span t-field="o.cod_total"/></td>
+                    </tr>
+                </table>
+                <table class="table table-sm table-bordered" style="width: 100%; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #e3f2f8; color: #0b1f4d;">
+                            <th>#</th>
+                            <th>AWB</th>
+                            <th>Order</th>
+                            <th>Consignee</th>
+                            <th>Destination</th>
+                            <th class="text-end">Pkgs</th>
+                            <th class="text-end">Weight (kg)</th>
+                            <th>Payment</th>
+                            <th class="text-end">COD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.shipment_ids" t-as="s">
+                            <td t-esc="s_index + 1"/>
+                            <td><b t-esc="s.tracking_number"/></td>
+                            <td t-esc="s.sale_id.name or (s.picking_id.name or '')"/>
+                            <td t-esc="s.partner_id.name"/>
+                            <td><span t-esc="s.dest_city"/> <span t-esc="s.dest_zip"/></td>
+                            <td class="text-end" t-esc="s.package_count"/>
+                            <td class="text-end" t-esc="'%.3f' % s.chargeable_weight"/>
+                            <td t-esc="'COD' if s.payment_mode == 'cod' else 'Prepaid'"/>
+                            <td class="text-end"><span t-if="s.payment_mode == 'cod'" t-field="s.cod_amount"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table style="width: 100%; margin-top: 40px;">
+                    <tr>
+                        <td style="width: 50%;">Handed over by (shipper)<br/><br/>_____________________________<br/>Name / signature / time</td>
+                        <td style="width: 50%;">Received by (courier)<br/><br/>_____________________________<br/>Name / signature / time</td>
+                    </tr>
+                </table>
+                <p t-if="o.pickup_reference" style="margin-top: 16px;">Pickup reference: <b t-field="o.pickup_reference"/></p>
+                <p t-if="o.note" t-field="o.note"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_manifest">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="zivoit_logistics_hub.report_manifest_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

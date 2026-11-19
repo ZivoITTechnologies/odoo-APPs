@@ -174,3 +174,11 @@ class ResConfigSettings(models.TransientModel):
                                              config_parameter='zivoit_logistics_hub.track_interval_hours')
     zivo_log_retention_days = fields.Integer(string='Keep API logs (days)', default=30,
                                              config_parameter='zivoit_logistics_hub.log_retention_days')
+    zivo_return_window_days = fields.Integer(string='Return window (days)', default=30,
+                                             config_parameter='zivoit_logistics_hub.return_window_days')
+    zivo_return_auto_approve = fields.Boolean(string='Auto-approve returns',
+                                              config_parameter='zivoit_logistics_hub.return_auto_approve')
+    zivo_return_manual_pickup = fields.Boolean(string='Book reverse pickups manually',
+                                               config_parameter='zivoit_logistics_hub.return_manual_pickup')
+    zivo_audit_tolerance_pct = fields.Float(string='Freight audit tolerance %', default=2.0,
+                                            config_parameter='zivoit_logistics_hub.audit_tolerance_pct')

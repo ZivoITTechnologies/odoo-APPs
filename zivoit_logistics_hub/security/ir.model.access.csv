@@ -24,3 +24,14 @@ access_rate_shop_line,rate shop line,model_zivo_logistics_rate_shop_line,group_l
 access_ndr_action,ndr action,model_zivo_logistics_ndr_action,group_logistics_user,1,1,1,1
 access_ai_query,ai query,model_zivo_logistics_ai_query,group_logistics_user,1,1,1,1
 access_bulk_ship,bulk ship,model_zivo_logistics_bulk_ship,group_logistics_user,1,1,1,1
+access_manifest_user,manifest user,model_zivo_logistics_manifest,group_logistics_user,1,1,1,0
+access_manifest_manager,manifest manager,model_zivo_logistics_manifest,group_logistics_manager,1,1,1,1
+access_return_user,return user,model_zivo_logistics_return,group_logistics_user,1,1,1,0
+access_return_manager,return manager,model_zivo_logistics_return,group_logistics_manager,1,1,1,1
+access_return_line_user,return line user,model_zivo_logistics_return_line,group_logistics_user,1,1,1,1
+access_return_salesman,return salesman,model_zivo_logistics_return,sales_team.group_sale_salesman,1,1,1,0
+access_return_line_salesman,return line salesman,model_zivo_logistics_return_line,sales_team.group_sale_salesman,1,1,1,1
+access_rate_calculator,rate calculator,model_zivo_logistics_rate_calculator,group_logistics_user,1,1,1,1
+access_rate_calculator_line,rate calculator line,model_zivo_logistics_rate_calculator_line,group_logistics_user,1,1,1,1
+access_reconcile,reconcile,model_zivo_logistics_reconcile,group_logistics_manager,1,1,1,1
+access_scan_ship,scan ship,model_zivo_logistics_scan_ship,group_logistics_user,1,1,1,1

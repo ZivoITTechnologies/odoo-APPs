@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ZivoIT Logistics Hub - One App for All Couriers (AI)',
-    'version': '19.0.1.2.0',
-    'summary': 'Single connector platform for Shiprocket, Delhivery, DTDC, Blue Dart, FedEx, Xpressbees, '
-               'Shree Maruti & any courier: AI rate shopping, RTO risk, NDR assistant, live tracking',
+    'version': '19.0.2.0.0',
+    'summary': 'One app for UPS, FedEx, DHL Express, USPS, Aramex, Shiprocket, Delhivery, Ekart, DTDC, Blue Dart, '
+               'Xpressbees, Shree Maruti & any courier: AI rate shopping with savings, returns portal, manifests, freight audit',
     'description': """
 ZivoIT Logistics Hub
 ====================
 One Odoo app to connect every courier and aggregator from a single screen.
 
-* Common connector engine: carrier accounts, encrypted-at-rest style credential handling, API logs,
-  async job queue with retries, token caching, webhooks, status normalisation.
-* Ready connectors: Shiprocket, Delhivery, DTDC, Blue Dart, FedEx, Xpressbees, Shree Maruti
-  (template), any REST courier (no-code template engine) and an offline sandbox courier.
-* AI: carrier recommendation, RTO risk scoring, address intelligence, NDR assistant with customer
-  messages, EDD prediction, weight-dispute detection, natural-language shipment search.
+* Common connector engine: carrier accounts, API logs with masked secrets, async job queue with retries, token caching,
+  webhooks, status normalisation, per-account endpoint overrides.
+* Ready connectors: UPS, FedEx, DHL Express, USPS, Aramex, Shiprocket, Delhivery, Ekart, DTDC, Blue Dart, Xpressbees,
+  Shree Maruti (template), any REST courier (no-code template engine) and an offline sandbox courier.
+* Cost-effective shipping: rate calculator, cheapest courier that arrives on time, preferred carriers within a margin,
+  savings on every shipment, AI box suggestion, shipping insurance.
+* Operations: scan to ship, bulk labels, end-of-day manifests with pickup request, branded returns portal with reverse
+  pickup, freight invoice audit and COD remittance reconciliation, proactive delay alerts.
+* AI: carrier recommendation, RTO risk scoring, address intelligence, NDR assistant with customer messages, EDD
+  prediction, weight-dispute detection, natural-language shipment search.
     """,
     'category': 'Inventory/Delivery',
     'author': 'ZivoIT Technologies',
@@ -42,6 +46,9 @@ One Odoo app to connect every courier and aggregator from a single screen.
         'views/sale_order_views.xml',
         'views/res_config_settings_views.xml',
         'views/tracking_templates.xml',
+        'views/returns_templates.xml',
+        'views/operations_views.xml',
+        'report/manifest_report.xml',
         'wizard/rate_shop_views.xml',
         'wizard/ndr_action_views.xml',
         'wizard/ai_query_views.xml',
@@ -54,9 +61,10 @@ One Odoo app to connect every courier and aggregator from a single screen.
     'images': [
         'static/description/zivoit_logistics_hub_cover.png',
         'static/description/screenshot_02_compare_rates_ai.png',
+        'static/description/screenshot_03_rate_calculator.png',
         'static/description/screenshot_01_carrier_accounts.png',
-        'static/description/screenshot_08_ndr_queue.png',
-        'static/description/screenshot_19_tracking_page.png',
+        'static/description/screenshot_15_returns_portal.png',
+        'static/description/screenshot_13_manifest.png',
     ],
     'installable': True,
     'application': True,
