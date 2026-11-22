@@ -41,7 +41,7 @@ class TenderSource(models.Model):
         ('andhra', 'AP e-Procurement'),
         ('nhai', 'NHAI / MoRTH'),
         ('cpwd', 'CPWD'),
-        ('state_pwd', 'State PWD / R&B'),
+        ('state_pwd', 'State e-Procurement / PWD'),
         ('aggregator', 'Tender Aggregator'),
         ('other', 'Other'),
     ], default='other', required=True)

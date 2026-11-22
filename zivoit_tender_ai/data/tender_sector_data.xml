@@ -4,6 +4,7 @@
         <record id="sector_roads" model="zivoit.tender.sector">
             <field name="name">Roads &amp; Highways</field>
             <field name="code">roads</field>
+            <field name="industry_group">works</field>
             <field name="sequence">10</field>
             <field name="color">1</field>
             <field name="keywords">road, roads, highway, highways, nh-, national highway, state highway, widening, carriageway, bt road, cc road, pavement, resurfacing, four lane, two lane, 4-lane, 2-lane, r&amp;b, nhai, morth, pmgsy, black topping, bituminous</field>
@@ -11,13 +12,15 @@
         <record id="sector_buildings" model="zivoit.tender.sector">
             <field name="name">Buildings</field>
             <field name="code">buildings</field>
+            <field name="industry_group">works</field>
             <field name="sequence">20</field>
             <field name="color">2</field>
-            <field name="keywords">building, buildings, construction of quarters, quarters, hostel, school building, hospital building, office building, auditorium, residential, complex, g+, staff quarters, housing, dwelling, civil works building, cpwd</field>
+            <field name="keywords">building, buildings, construction of quarters, quarters, hostel building, school building, hospital building, office building, auditorium, residential building, shopping complex, sports complex, g+, staff quarters, housing, dwelling, civil works building, cpwd</field>
         </record>
         <record id="sector_bridges" model="zivoit.tender.sector">
             <field name="name">Bridges, ROB/RUB &amp; Flyovers</field>
             <field name="code">bridges</field>
+            <field name="industry_group">works</field>
             <field name="sequence">30</field>
             <field name="color">3</field>
             <field name="keywords">bridge, bridges, rob, rub, flyover, fly over, viaduct, culvert, road over bridge, road under bridge, limited height subway, lhs</field>
@@ -25,34 +28,39 @@
         <record id="sector_railways" model="zivoit.tender.sector">
             <field name="name">Railways (Civil &amp; Track)</field>
             <field name="code">railways</field>
+            <field name="industry_group">works</field>
             <field name="sequence">40</field>
             <field name="color">4</field>
-            <field name="keywords">railway, railways, rail, track, doubling, third line, new line, gauge conversion, station building, platform, foot over bridge, fob, ballast, sleeper, yard remodelling, ireps, earthwork in formation</field>
+            <field name="keywords">railway, railways, rail track, track renewal, track work, doubling, third line, new line, gauge conversion, station building, raising of platform, platform shelter, platform surface, foot over bridge, fob, ballast, sleeper, yard remodelling, ireps, earthwork in formation</field>
         </record>
         <record id="sector_water" model="zivoit.tender.sector">
             <field name="name">Water Supply &amp; Sewerage</field>
             <field name="code">water</field>
+            <field name="industry_group">works</field>
             <field name="sequence">50</field>
             <field name="color">5</field>
-            <field name="keywords">water supply, sewerage, sewer, drainage, storm water, pipeline, stp, wtp, reservoir, overhead tank, jal jeevan, amrut</field>
+            <field name="keywords">water supply, sewerage, sewer, drainage, storm water, water pipeline, stp, wtp, reservoir, overhead tank, jal jeevan, amrut</field>
         </record>
         <record id="sector_irrigation" model="zivoit.tender.sector">
             <field name="name">Irrigation &amp; Dams</field>
             <field name="code">irrigation</field>
+            <field name="industry_group">works</field>
             <field name="sequence">60</field>
             <field name="color">6</field>
             <field name="keywords">irrigation, canal, dam, barrage, lift irrigation, check dam, tank bund</field>
         </record>
         <record id="sector_electrical" model="zivoit.tender.sector">
-            <field name="name">Electrical &amp; Electrification</field>
+            <field name="name">Electrical &amp; Power</field>
             <field name="code">electrical</field>
+            <field name="industry_group">works</field>
             <field name="sequence">70</field>
             <field name="color">7</field>
-            <field name="keywords">electrical, electrification, ohe, substation, transmission line, lighting, solar, traction</field>
+            <field name="keywords">electrical, electrification, ohe, substation, transmission line, street light, lighting, solar, traction, transformer, power plant, dg set</field>
         </record>
         <record id="sector_metro" model="zivoit.tender.sector">
             <field name="name">Metro &amp; Urban Transit</field>
             <field name="code">metro</field>
+            <field name="industry_group">works</field>
             <field name="sequence">80</field>
             <field name="color">8</field>
             <field name="keywords">metro, mrts, rapid transit</field>
@@ -60,16 +68,107 @@
         <record id="sector_real_estate" model="zivoit.tender.sector">
             <field name="name">Real Estate &amp; Township</field>
             <field name="code">real_estate</field>
+            <field name="industry_group">works</field>
             <field name="sequence">90</field>
             <field name="color">9</field>
             <field name="keywords">real estate, township, apartment, villas, commercial complex, mall, land development, layout development, plotted development</field>
         </record>
         <record id="sector_maintenance" model="zivoit.tender.sector">
-            <field name="name">Repairs &amp; Maintenance</field>
+            <field name="name">Repairs, Maintenance &amp; AMC</field>
             <field name="code">maintenance</field>
+            <field name="industry_group">services</field>
             <field name="sequence">100</field>
             <field name="color">10</field>
-            <field name="keywords">maintenance, repairs, special repairs, annual maintenance, amc, renovation, painting, patch work</field>
+            <field name="keywords">maintenance, repairs, special repairs, annual maintenance, amc, camc, renovation, painting, patch work</field>
+        </record>
+        <record id="sector_it_software" model="zivoit.tender.sector">
+            <field name="name">IT, ERP &amp; Software</field>
+            <field name="code">it_software</field>
+            <field name="industry_group">it</field>
+            <field name="sequence">110</field>
+            <field name="color">11</field>
+            <field name="keywords">erp, software, software development, application development, web application, web-based application, web portal, website, mobile app, mobile application, e-governance, egovernance, it services, it system, information technology, digitization, digitisation, database, data centre, data center, cloud, saas, crm, hrms, sap, oracle, odoo, cyber security, cybersecurity, system integrator, system integration, mis, gis, computer, computers, laptop, server, servers, networking, lan, wan, it infrastructure, artificial intelligence, analytics, dashboard, custom software, implementation of erp</field>
+        </record>
+        <record id="sector_telecom" model="zivoit.tender.sector">
+            <field name="name">Telecom &amp; Networking</field>
+            <field name="code">telecom</field>
+            <field name="industry_group">it</field>
+            <field name="sequence">120</field>
+            <field name="color">1</field>
+            <field name="keywords">telecom, telecommunication, optical fibre, optical fiber, ofc, bsnl, bharatnet, mobile tower, telecom tower, 4g, 5g, gpon, microwave link, vsat, broadband, mtnl, tower maintenance, fibre laying, fiber laying, rcom, telecom infrastructure</field>
+        </record>
+        <record id="sector_manpower" model="zivoit.tender.sector">
+            <field name="name">Manpower &amp; Staffing</field>
+            <field name="code">manpower</field>
+            <field name="industry_group">services</field>
+            <field name="sequence">130</field>
+            <field name="color">2</field>
+            <field name="keywords">manpower, man power, man-power, outsourcing of staff, outsourced staff, outsourcing of manpower, deployment of personnel, staffing, skilled, semi-skilled, unskilled, contract staff, data entry operator, data entry operators, hiring of manpower, manpower supply, supply of manpower, technicians, helpers, drivers, multi tasking staff, mts, personnel</field>
+        </record>
+        <record id="sector_security_services" model="zivoit.tender.sector">
+            <field name="name">Security Services</field>
+            <field name="code">security_services</field>
+            <field name="industry_group">services</field>
+            <field name="sequence">140</field>
+            <field name="color">3</field>
+            <field name="keywords">security services, security guard, security guards, security personnel, watch and ward, gunman, bouncers, cctv, surveillance, access control</field>
+        </record>
+        <record id="sector_facility_mgmt" model="zivoit.tender.sector">
+            <field name="name">Housekeeping &amp; Facility Management</field>
+            <field name="code">facility_mgmt</field>
+            <field name="industry_group">services</field>
+            <field name="sequence">150</field>
+            <field name="color">4</field>
+            <field name="keywords">housekeeping, cleaning, sanitation, facility management, facility services, catering, canteen, pest control, gardening, horticulture, laundry, mechanised cleaning</field>
+        </record>
+        <record id="sector_healthcare" model="zivoit.tender.sector">
+            <field name="name">Healthcare &amp; Medical</field>
+            <field name="code">healthcare</field>
+            <field name="industry_group">goods</field>
+            <field name="sequence">160</field>
+            <field name="color">5</field>
+            <field name="keywords">medical, medicines, drugs, pharmaceutical, hospital equipment, medical equipment, diagnostic, surgical, laboratory, reagents, ambulance, healthcare, health services</field>
+        </record>
+        <record id="sector_consultancy" model="zivoit.tender.sector">
+            <field name="name">Consultancy &amp; Advisory</field>
+            <field name="code">consultancy</field>
+            <field name="industry_group">consulting</field>
+            <field name="sequence">170</field>
+            <field name="color">6</field>
+            <field name="keywords">consultancy, consultant, consulting, dpr, detailed project report, pmc, project management consultancy, advisory, third party inspection, feasibility study, survey and investigation, audit services, transaction advisor</field>
+        </record>
+        <record id="sector_goods_supply" model="zivoit.tender.sector">
+            <field name="name">Supply of Goods &amp; Equipment</field>
+            <field name="code">goods_supply</field>
+            <field name="exclude_keywords">supply of manpower, manpower supply, supply of personnel</field>
+            <field name="industry_group">goods</field>
+            <field name="sequence">180</field>
+            <field name="color">7</field>
+            <field name="keywords">supply of, supply and installation, procurement of, purchase of, furniture, stationery, equipment, uniforms, printing paper, consumables, spare parts, rate contract</field>
+        </record>
+        <record id="sector_transport" model="zivoit.tender.sector">
+            <field name="name">Vehicle Hiring &amp; Logistics</field>
+            <field name="code">transport</field>
+            <field name="industry_group">services</field>
+            <field name="sequence">190</field>
+            <field name="color">8</field>
+            <field name="keywords">hiring of vehicles, hiring of vehicle, vehicle hire, vehicles on hire, taxi, cab services, bus services, transportation services, transport services, transport contract, logistics services, courier, freight, carriage of goods, goods transport</field>
+        </record>
+        <record id="sector_education_training" model="zivoit.tender.sector">
+            <field name="name">Training &amp; Skill Development</field>
+            <field name="code">education_training</field>
+            <field name="industry_group">services</field>
+            <field name="sequence">200</field>
+            <field name="color">9</field>
+            <field name="keywords">training, skill development, capacity building, e-learning, elearning, coaching, workshop, teacher training</field>
+        </record>
+        <record id="sector_media_events" model="zivoit.tender.sector">
+            <field name="name">Printing, Media &amp; Events</field>
+            <field name="code">media_events</field>
+            <field name="industry_group">services</field>
+            <field name="sequence">210</field>
+            <field name="color">10</field>
+            <field name="keywords">printing, advertisement, advertising, publicity, event management, exhibition, media campaign, social media, media plan, branding, video production</field>
         </record>
     </data>
     <data noupdate="1">

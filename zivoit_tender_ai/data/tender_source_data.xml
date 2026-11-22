@@ -41,8 +41,13 @@
             <field name="name">GeM - Government e-Marketplace (AI)</field>
             <field name="sequence">6</field><field name="source_type">ai_web</field><field name="portal">gem</field>
             <field name="domains">gem.gov.in, bidplus.gem.gov.in</field>
-            <field name="search_hint">GeM bid civil works construction</field>
-            <field name="active" eval="False"/>
+            <field name="search_hint">GeM bids services manpower IT goods</field>
+        </record>
+        <record id="source_ai_state_portals" model="zivoit.tender.source">
+            <field name="name">All State e-Procurement Portals (AI)</field>
+            <field name="sequence">7</field><field name="source_type">ai_web</field><field name="portal">state_pwd</field>
+            <field name="domains">gov.in, nic.in</field>
+            <field name="search_hint">state e-procurement tenders etenders</field>
         </record>
         <record id="source_ai_open_web" model="zivoit.tender.source">
             <field name="name">Open Web Tender Search (AI)</field>

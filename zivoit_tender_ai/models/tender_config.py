@@ -43,6 +43,14 @@ class TenderSector(models.Model):
 
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, help='Technical code used by the classifier and the AI agent')
+    industry_group = fields.Selection([
+        ('works', 'Works & Construction'),
+        ('it', 'IT, Software & Telecom'),
+        ('services', 'Services & Manpower'),
+        ('goods', 'Goods & Supplies'),
+        ('consulting', 'Consultancy'),
+        ('other', 'Other'),
+    ], default='other', required=True)
     sequence = fields.Integer(default=10)
     color = fields.Integer()
     keywords = fields.Text(

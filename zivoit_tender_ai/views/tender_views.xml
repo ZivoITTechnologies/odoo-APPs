@@ -12,10 +12,10 @@
                   decoration-bf="priority in ('2', '3')">
                 <field name="priority" widget="priority" optional="show" nolabel="1"/>
                 <field name="code" optional="hide"/>
-                <field name="name" string="Name of Work"/>
-                <field name="reference" optional="show"/>
+                <field name="name" string="Title"/>
+                <field name="reference" optional="hide"/>
                 <field name="organisation" optional="show"/>
-                <field name="zone_id" optional="show" options="{'no_create': True}"/>
+                <field name="zone_id" optional="hide" options="{'no_create': True}"/>
                 <field name="state_id" optional="show"/>
                 <field name="location" optional="hide"/>
                 <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
@@ -25,10 +25,9 @@
                 <field name="value_band" optional="hide"/>
                 <field name="emd_label" string="EMD" optional="show"/>
                 <field name="emd_amount" optional="hide"/>
-                <field name="completion_months" string="Months" optional="show"/>
+                <field name="completion_months" string="Months" optional="hide"/>
                 <field name="date_published" optional="hide"/>
-                <field name="date_closing" widget="remaining_days" optional="show"/>
-                <field name="date_closing" string="Closes On" optional="show"/>
+                <field name="date_closing" string="Bid Closes" widget="remaining_days" optional="show"/>
                 <field name="deadline_bucket" optional="hide" widget="badge"
                        decoration-danger="deadline_bucket in ('today', '3d')" decoration-warning="deadline_bucket == '7d'"/>
                 <field name="relevance_score" widget="progressbar" optional="show"/>
@@ -172,9 +171,9 @@
                         <div class="d-flex gap-2 align-items-center">
                             <field name="priority" widget="priority"/>
                             <field name="code" readonly="1" class="text-muted"/>
-                            <field name="days_left_label" class="badge text-bg-danger" invisible="not is_open or not date_closing"/>
+                            <field name="days_left_label" class="badge text-bg-danger w-auto flex-grow-0" invisible="not is_open or not date_closing"/>
                         </div>
-                        <h1><field name="name" placeholder="Name of work" widget="text" class="text-break"/></h1>
+                        <h1><field name="name" placeholder="Title / name of work" widget="text" class="text-break"/></h1>
                         <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"
                                placeholder="Tags"/>
                     </div>
@@ -450,6 +449,12 @@
                 <filter name="filter_short_duration" string="Up to 12 Months" domain="[('duration_band', 'in', ('upto_6m', '6_12m'))]"/>
                 <filter name="filter_long_duration" string="Over 12 Months" domain="[('duration_band', 'in', ('12_24m', '24_36m', 'above_36m'))]"/>
                 <separator/>
+                <filter name="filter_grp_works" string="Works &amp; Construction" domain="[('sector_ids.industry_group', '=', 'works')]"/>
+                <filter name="filter_grp_it" string="IT, Software &amp; Telecom" domain="[('sector_ids.industry_group', '=', 'it')]"/>
+                <filter name="filter_grp_services" string="Services &amp; Manpower" domain="[('sector_ids.industry_group', '=', 'services')]"/>
+                <filter name="filter_grp_goods" string="Goods &amp; Supplies" domain="[('sector_ids.industry_group', '=', 'goods')]"/>
+                <filter name="filter_grp_consulting" string="Consultancy" domain="[('sector_ids.industry_group', '=', 'consulting')]"/>
+                <separator/>
                 <filter name="filter_railways" string="Railways" domain="[('sector_ids.code', '=', 'railways')]"/>
                 <filter name="filter_roads" string="Roads" domain="[('sector_ids.code', '=', 'roads')]"/>
                 <filter name="filter_buildings" string="Buildings" domain="[('sector_ids.code', '=', 'buildings')]"/>
@@ -546,7 +551,7 @@
         <field name="context">{'search_default_filter_open': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">No tenders found yet</p>
-            <p>Create a <b>Tender Agent</b> (e.g. "open tenders in railways construction in SCR") and run it,
+            <p>Create a <b>Tender Agent</b> (e.g. "ERP tenders in Kerala" or "open tenders in railways construction in SCR") and run it,
                configure portal sources, forward tender-alert e-mails, or import an Excel sheet.</p>
         </field>
     </record>

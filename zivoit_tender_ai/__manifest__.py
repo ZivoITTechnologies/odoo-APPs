@@ -1,29 +1,33 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'ZivoIT Tender AI - Construction Tender Finder & Bid Management',
+    'name': 'ZivoIT Tender AI - Government Tender Finder & Bid Management (All Industries)',
     'version': '19.0.1.0.0',
-    'category': 'Sales/Construction',
-    'summary': 'AI agent that finds hot, new & open construction tenders (Roads, Buildings, '
-               'Railways, Bridges) from CPPP, IREPS, GeM and state e-procurement portals, '
-               'with filtering, alerts, shortlisting, bid/no-bid, BOQ costing, EMD, '
-               'results and project handover.',
+    'category': 'Sales/Sales',
+    'summary': 'AI agent that finds hot, new & open government tenders in every industry - '
+               'construction, IT / ERP / software, manpower, telecom, security, facility management, '
+               'healthcare, supplies and consultancy - from CPPP, GeM, IREPS and all state e-procurement '
+               'portals, with filtering, alerts, shortlisting, bid/no-bid, pricing, EMD, results and handover.',
     'description': """
 ZivoIT Tender AI
 ================
-End-to-end tender intelligence and bid management for construction & real estate companies.
+End-to-end tender intelligence and bid management for companies in every industry:
+construction, IT / ERP / software, telecom, manpower & staffing, security, facility management,
+healthcare, supply of goods, transport, training, media and consultancy.
 
-* Tender discovery from configurable sources: CPPP, IREPS (Indian Railways), GeM,
-  Telangana / AP / state e-procurement, NHAI / MoRTH, RSS, HTML tables, JSON APIs,
-  tender-alert e-mails, Excel/CSV import and an AI web-search agent.
-* Natural-language "Tender Agents": e.g. "open tenders in railways construction in SCR"
-  or "road construction tenders in Telangana above 5 crore".
+* Tender discovery from configurable sources: CPPP, GeM, IREPS (Indian Railways), all state
+  e-procurement portals (Kerala, Himachal Pradesh, Arunachal Pradesh, Telangana ...), NHAI / MoRTH,
+  RSS, HTML tables, JSON APIs, tender-alert e-mails, Excel/CSV import and an AI web-search agent.
+* Natural-language "Tender Agents": e.g. "ERP tenders in Kerala", "custom software development
+  projects in Himachal Pradesh", "manpower supply for telecom in Arunachal Pradesh" or
+  "open tenders in railways construction in SCR".
 * Indian amount parsing (Lakh / Crore), duplicate detection, auto-classification
-  by sector, state, railway zone and work type.
+  into 21 sectors across 5 industry groups, all 36 states & UTs, railway zones and contract types.
 * Segregation by value band, deadline bucket, completion period and EMD.
 * Relevance scoring, AI summaries and Go / No-Go recommendations.
 * Notifications: instant match alerts, daily digest e-mails, deadline reminders.
 * Bid pipeline: review, shortlisting, bid preparation, submission, evaluation, result.
-* Bid/No-Bid qualification checklist, BOQ costing with overheads & margin,
+* Bid/No-Bid checklists for civil works, railways, IT / software and manpower services,
+  BOQ / price-schedule costing with overheads & margin,
   EMD / tender fee tracking, corrigenda, competitor & L1/L2 analysis.
 * Handover of won tenders to CRM and Projects with BOQ-based tasks and
   Running Account (RA) bills for construction execution.

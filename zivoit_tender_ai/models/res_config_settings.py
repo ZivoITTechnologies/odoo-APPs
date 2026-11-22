@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models, _
+import pytz
+
+from odoo import api, fields, models, _
 
 
 class ResConfigSettings(models.TransientModel):
@@ -18,12 +20,19 @@ class ResConfigSettings(models.TransientModel):
                                      help='Advanced. Claude default: web_search_20250305. OpenAI default: web_search.')
     zivoit_ai_max_searches = fields.Integer('Max Web Searches per Run', config_parameter='zivoit_tender_ai.ai_max_searches',
                                             default=5)
+    zivoit_portal_tz = fields.Selection(
+        '_tz_selection', string='Portal Time Zone', config_parameter='zivoit_tender_ai.portal_tz', default='Asia/Kolkata',
+        help='Time zone in which the tender portals publish dates (Indian portals use IST).')
     zivoit_reminder_days = fields.Char('Deadline Reminders (days before)', config_parameter='zivoit_tender_ai.reminder_days',
                                        default='7,3,1')
     zivoit_auto_lead = fields.Boolean('Create CRM Opportunity on Shortlist',
                                       config_parameter='zivoit_tender_ai.auto_lead_on_shortlist')
     zivoit_auto_project = fields.Boolean('Create Project when Won', config_parameter='zivoit_tender_ai.auto_project_on_win',
                                          default=True)
+
+    @api.model
+    def _tz_selection(self):
+        return [(tz, tz) for tz in pytz.common_timezones]
 
     def action_zivoit_test_ai(self):
         self.execute()

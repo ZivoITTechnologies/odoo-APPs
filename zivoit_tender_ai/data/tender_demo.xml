@@ -304,4 +304,100 @@
         <field name="auto_shortlist_score">90</field>
         <field name="tender_ids" eval="[(6, 0, [ref('t_ts_rnb_road'), ref('t_ghmc_market'), ref('t_nhai_nh65'), ref('t_pmgsy_cc')])]"/>
     </record>
+    <record id="t_kl_erp" model="zivoit.tender">
+        <field name="name">Supply, implementation and maintenance of ERP solution for Kerala State Co-operative Federation</field>
+        <field name="reference">KL/KSCF/IT/2026/31</field>
+        <field name="organisation">Kerala State Co-operative Federation</field>
+        <field name="department">IT Cell, Thiruvananthapuram</field>
+        <field name="location">Thiruvananthapuram</field>
+        <field name="state_id" ref="base.state_in_kl"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_it_software')])]"/>
+        <field name="estimated_value" eval="34000000.0"/>
+        <field name="emd_amount" eval="680000.0"/>
+        <field name="completion_period">18 Months</field>
+        <field name="completion_months" eval="18"/>
+        <field name="work_type">qcbs</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-12)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=13)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="url">https://etenders.kerala.gov.in</field>
+        <field name="portal">Kerala e-Procurement</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="70"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_hp_soft" model="zivoit.tender">
+        <field name="name">Design, development and maintenance of custom web-based application for HP Tourism Development Corporation</field>
+        <field name="reference">HPTDC/IT/2026/07</field>
+        <field name="organisation">HP Tourism Development Corporation</field>
+        <field name="department">Shimla</field>
+        <field name="location">Shimla</field>
+        <field name="state_id" ref="base.state_in_hp"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_it_software')])]"/>
+        <field name="estimated_value" eval="12500000.0"/>
+        <field name="emd_amount" eval="250000.0"/>
+        <field name="completion_period">12 Months</field>
+        <field name="completion_months" eval="12"/>
+        <field name="work_type">qcbs</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-11)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=16)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="url">https://hptenders.gov.in</field>
+        <field name="portal">HP e-Procurement</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="70"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_ar_manpower" model="zivoit.tender">
+        <field name="name">Hiring of skilled and unskilled manpower for OFC and telecom tower maintenance in Arunachal Pradesh</field>
+        <field name="reference">BSNL/AR/CM/2026/112</field>
+        <field name="organisation">BSNL Arunachal Pradesh Circle</field>
+        <field name="department">Itanagar</field>
+        <field name="location">Itanagar</field>
+        <field name="state_id" ref="base.state_in_ar"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_manpower'),ref('sector_telecom')])]"/>
+        <field name="estimated_value" eval="21000000.0"/>
+        <field name="emd_amount" eval="420000.0"/>
+        <field name="completion_period">24 Months</field>
+        <field name="completion_months" eval="24"/>
+        <field name="work_type">service</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-13)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=9)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="url">https://www.tenders.gov.in</field>
+        <field name="portal">CPPP</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="70"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_dl_housekeeping" model="zivoit.tender">
+        <field name="name">Providing mechanised housekeeping and security services at Government hospital, New Delhi</field>
+        <field name="reference">DL/HFW/2026/55</field>
+        <field name="organisation">Department of Health &amp; Family Welfare, Delhi</field>
+        <field name="department">Directorate of Health Services</field>
+        <field name="location">New Delhi</field>
+        <field name="state_id" ref="base.state_in_dl"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_facility_mgmt'),ref('sector_security_services')])]"/>
+        <field name="estimated_value" eval="48000000.0"/>
+        <field name="emd_amount" eval="960000.0"/>
+        <field name="completion_period">24 Months</field>
+        <field name="completion_months" eval="24"/>
+        <field name="work_type">service</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-12)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=18)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="url">https://gem.gov.in</field>
+        <field name="portal">GeM</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="70"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="profile_it" model="zivoit.tender.profile">
+        <field name="name">IT, ERP &amp; Software - All India</field>
+        <field name="nl_query">ERP and custom software development tenders</field>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_it_software')])]"/>
+        <field name="frequency">daily</field>
+        <field name="live_search" eval="False"/>
+        <field name="tender_ids" eval="[(6, 0, [ref('t_kl_erp'), ref('t_hp_soft')])]"/>
+    </record>
 </odoo>

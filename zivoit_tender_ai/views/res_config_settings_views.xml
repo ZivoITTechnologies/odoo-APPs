@@ -32,6 +32,9 @@
                         </setting>
                     </block>
                     <block title="Bid Process" name="zivoit_process_block">
+                        <setting string="Portal Time Zone" help="Dates read from portals, feeds and e-mails are interpreted in this time zone (IST for Indian portals).">
+                            <field name="zivoit_portal_tz"/>
+                        </setting>
                         <setting string="Deadline Reminders" help="Days before bid submission end to remind the bid team, e.g. 7,3,1">
                             <field name="zivoit_reminder_days"/>
                         </setting>

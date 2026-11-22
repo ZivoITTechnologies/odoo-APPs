@@ -33,6 +33,19 @@ class TestTenderUtils(BaseCase):
                      'Bid submission end date: 15-Dec-2026 15:00 IST', '2026-12-15T15:00:00+05:30']:
             self.assertEqual(tu.parse_date(text), expected, text)
         self.assertEqual(tu.parse_date('15th December 2026'), datetime(2026, 12, 15))
+        # formats seen on real portals / aggregators (Nov 2026 real-data test)
+        real = {
+            '18-08-2026': datetime(2026, 8, 18),
+            '29-Nov-2025, 4:00 pm': datetime(2025, 11, 29, 16, 0),
+            '01-08-2026 11:00 AM': datetime(2026, 8, 1, 11, 0),
+            '19 June 2026 17:00': datetime(2026, 6, 19, 17, 0),
+            '19 June. 2026 17:00': datetime(2026, 6, 19, 17, 0),
+            '13/07/2026 16.00 Hrs': datetime(2026, 7, 13, 16, 0),
+            'Aug 03, 2026': datetime(2026, 8, 3),
+            '13.05.2026 14:30': datetime(2026, 5, 13, 14, 30),
+        }
+        for text, expected in real.items():
+            self.assertEqual(tu.parse_date(text), expected, text)
         self.assertIsNone(tu.parse_date('not a date'))
         self.assertIsNone(tu.parse_date(None))
 
@@ -47,6 +60,10 @@ class TestTenderUtils(BaseCase):
         self.assertEqual(tu.detect_zone('Dy CE/Con, SCR, Guntakal'), 'SCR')
         self.assertEqual(tu.detect_zone('Southern Railway Chennai'), 'SR')
         self.assertFalse(tu.detect_zone('Roads and Buildings department'))
+        # aliases must match whole words only
+        self.assertFalse(tu.detect_state('Mandatory documents and medium voltage podium works'))
+        self.assertEqual(tu.detect_state('Kannur International Airport'), 'Kerala')
+        self.assertEqual(tu.detect_state('Works at Una town'), 'Himachal Pradesh')
         self.assertEqual(tu.detect_state('EE R&B Division Warangal'), 'Telangana')
         self.assertEqual(tu.detect_state('Works at Vijayawada'), 'Andhra Pradesh')
         self.assertIn('roads', tu.detect_sectors('Widening of NH-44 to four lane'))

@@ -23,7 +23,7 @@
             <td><t t-out="t.code"/> - <t t-out="t.name"/></td>
             <td><t t-out="t.organisation or '-'"/></td>
             <td align="right"><t t-out="t._format_inr(t.estimated_value) if t.estimated_value else '-'"/></td>
-            <td><t t-out="t.date_closing or '-'"/></td>
+            <td><t t-out="t.date_closing_local or '-'"/></td>
             <td align="right"><t t-out="t.relevance_score"/></td>
         </tr>
     </table>
@@ -35,7 +35,7 @@
         <tr t-foreach="digest['closing']" t-as="t" style="border-bottom:1px solid #dde3ee;">
             <td><t t-out="t.code"/> - <t t-out="t.name"/></td>
             <td><t t-out="t.stage_id.name"/></td>
-            <td><t t-out="t.date_closing"/></td>
+            <td><t t-out="t.date_closing_local"/></td>
         </tr>
     </table>
     <p style="color:#6b7690; margin-top:18px;">Sent by ZivoIT Tender AI.</p>
@@ -55,7 +55,7 @@
         <li>Buyer: <t t-out="object.organisation or '-'"/></li>
         <li>Estimated value: <t t-out="object._format_inr(object.estimated_value) if object.estimated_value else 'not published'"/></li>
         <li>EMD: <t t-out="object._format_inr(object.emd_amount) if object.emd_amount else '-'"/></li>
-        <li>Bid submission end: <t t-out="object.date_closing or '-'"/></li>
+        <li>Bid submission end: <t t-out="object.date_closing_local or '-'"/></li>
         <li>Bid manager: <t t-out="object.user_id.name or '-'"/></li>
     </ul>
     <p>Please complete the Bid / No-Bid checklist and BOQ costing.</p>

@@ -23,7 +23,7 @@ class TenderAgentSearch(models.TransientModel):
         result = self.env['zivoit.tender'].agent_search(self.query, live=self.live, limit=200)
         filters = result['filters']
         lines = []
-        for key, label in (('keywords', _('Keywords')), ('exclude_keywords', _('Excluding')), ('sectors', _('Sectors')),
+        for key, label in (('keywords', _('Keywords')), ('exclude_keywords', _('Excluding')), ('sector_labels', _('Sectors')),
                            ('states', _('States')), ('zones', _('Zones')), ('organisations', _('Buyers'))):
             if filters.get(key):
                 lines.append('%s: %s' % (label, ', '.join(filters[key])))

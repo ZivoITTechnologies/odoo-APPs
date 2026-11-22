@@ -16,7 +16,7 @@ ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 OPENAI_URL = 'https://api.openai.com/v1/responses'
 
 TENDER_JSON_SPEC = """Return ONLY a JSON array (no prose, no markdown). Each element is an object with keys:
-"title" (name of work), "reference" (tender / NIT / tender ID number), "organisation" (buyer, e.g. South Central Railway),
+"title" (name of work / item / service), "reference" (tender / NIT / tender ID number), "organisation" (buyer, e.g. South Central Railway),
 "department" (division / circle / unit), "location" (city or district), "state" (Indian state name),
 "estimated_value" (number in INR, convert Lakh / Crore), "emd" (number in INR), "tender_fee" (number in INR),
 "published_date" (ISO 8601), "closing_date" (bid submission end, ISO 8601), "opening_date" (ISO 8601),
@@ -26,14 +26,16 @@ only include tenders you actually found in the search results."""
 
 QUERY_JSON_SPEC = """Convert the user's tender search request into JSON with keys:
 "keywords" (list of important lowercase words or phrases that must appear in the tender, excluding generic words
-like tender, construction, works), "exclude_keywords" (list), "states" (list of Indian state names),
+like tender, construction, works, services, supply), "exclude_keywords" (list), "states" (list of Indian state names),
 "zones" (list of Indian Railway zone codes like SCR, SR, CR, WR, NR, ECOR, SWR or PSU codes RVNL, IRCON),
 "sectors" (list from: roads, buildings, bridges, railways, water, irrigation, electrical, metro, real_estate,
-maintenance), "organisations" (list of buyer abbreviations, e.g. NHAI, CPWD, GHMC), "min_value" (INR number or 0),
+maintenance, it_software, telecom, manpower, security_services, facility_mgmt, healthcare, consultancy, goods_supply,
+transport, education_training, media_events), "organisations" (list of buyer abbreviations, e.g. NHAI, CPWD, GHMC), "min_value" (INR number or 0),
 "max_value" (INR number or 0), "open_only" (boolean), "deadline_days" (int, 0 if none),
 "published_days" (int, 0 if none). Return ONLY the JSON object."""
 
-ANALYSIS_JSON_SPEC = """Analyse this Indian construction tender for a civil contractor and return ONLY a JSON object
+ANALYSIS_JSON_SPEC = """Analyse this Indian public tender for a bidder in that industry (works, goods, IT, manpower or other
+services) and return ONLY a JSON object
 with keys: "summary" (3-5 short bullet points as one string separated by newlines), "scope" (one sentence),
 "eligibility" (key pre-qualification requirements you can infer), "risks" (main risks separated by newlines),
 "recommendation" ("go", "review" or "no_go"), "score" (0-100 integer for attractiveness),
@@ -209,11 +211,12 @@ class TenderAI(models.AbstractModel):
         today = fields.Date.context_today(self)
         prompt = (
             'Today is %s. Find currently OPEN (bid submission date in the future) Indian public '
-            'construction tenders for this request: "%s".\n%s\nPrefer official portals such as '
-            'eprocure.gov.in (CPPP), ireps.gov.in, gem.gov.in, tender.telangana.gov.in, '
-            'tender.apeprocurement.gov.in, nhai.gov.in and state PWD / R&B sites.\n%s'
+            'tenders of any category (works, goods, IT / software, manpower, telecom, services, consultancy) '
+            'for this request: "%s".\n%s\nPrefer official portals such as eprocure.gov.in (CPPP), gem.gov.in, '
+            'ireps.gov.in, the state e-procurement portals (*.gov.in / *.nic.in, e.g. etenders.kerala.gov.in, '
+            'hptenders.gov.in, arunachaltenders.gov.in, tender.telangana.gov.in) and PSU sites.\n%s'
         ) % (today, query, '\n'.join(hints), TENDER_JSON_SPEC)
-        system = ('You are a tender research agent for an Indian civil construction company. '
+        system = ('You are a tender research agent working for an Indian company that bids for public tenders. '
                   'You search the web carefully and report only real, verifiable tenders.')
         answer = self._call_llm(system, prompt, web_search=True, allowed_domains=allowed_domains,
                                 max_tokens=6000)
@@ -254,8 +257,7 @@ class TenderAI(models.AbstractModel):
         if tender.completion_months:
             lines.append('• Completion period: %s months' % tender.completion_months)
         if tender.date_closing:
-            lines.append('• Bid closes: %s (%s days left)' % (fields.Datetime.to_string(tender.date_closing),
-                                                              round(tender.days_left, 1)))
+            lines.append('• Bid closes: %s (%s days left)' % (tender.date_closing_local, round(tender.days_left, 1)))
         risks = []
         if tender.days_left is not False and 0 <= tender.days_left < 5:
             risks.append('Very little time left to prepare the bid.')
@@ -313,7 +315,9 @@ class TenderAI(models.AbstractModel):
         r'closing date', r'due date', r'bid opening date', r'technical bid opening', r'opening date',
         r'published date', r'publish(?:ing)? date', r'date of issue', r'completion period',
         r'period of completion', r'contract period', r'time allowed', r'pre[- ]?bid meeting', r'category',
-        r'product category', r'tender type', r'form of contract',
+        r'product category', r'tender type', r'form of contract', r'bid number', r'bid no\.?', r'item category',
+        r'items?', r'estimated bid value', r'bid end date', r'bid opening date/time', r'ministry', r'office name',
+        r'quantity', r'contract period',
     ]
 
     @api.model
@@ -331,22 +335,22 @@ class TenderAI(models.AbstractModel):
 
         url = re.search(r'https?://[^\s<>"\']+', text or '')
         title = grab([r'name of (?:the )?work', r'description of (?:the )?work', r'work description',
-                      r'tender title', r'title']) or tu.clean_text(subject)
+                      r'tender title', r'title', r'item category', r'items?']) or tu.clean_text(subject)
         return {
             'title': title,
-            'reference': grab([r'tender (?:id|no\.?|number|reference)', r'nit no\.?', r'e-?tender no\.?',
-                               r'ref(?:erence)? no\.?'], 80),
+            'reference': grab([r'tender (?:id|no\.?|number|reference)', r'bid number', r'bid no\.?', r'nit no\.?',
+                               r'e-?tender no\.?', r'ref(?:erence)? no\.?'], 80),
             'organisation': grab([r'organi[sz]ation(?: name)?', r'tender inviting authority', r'department',
                                   r'buyer'], 160),
             'location': grab([r'location', r'place of work', r'district'], 100),
-            'estimated_value': tu.parse_indian_amount(grab([r'estimated (?:contract )?(?:cost|value)',
+            'estimated_value': tu.parse_indian_amount(grab([r'estimated bid value', r'estimated (?:contract )?(?:cost|value)',
                                                             r'tender value', r'value of (?:the )?work',
                                                             r'ecv', r'approximate cost'], 60)),
             'emd': tu.parse_indian_amount(grab([r'emd(?: amount)?', r'earnest money(?: deposit)?',
                                                 r'bid security'], 60)),
             'tender_fee': tu.parse_indian_amount(grab([r'tender fee', r'document fee',
                                                        r'cost of (?:tender|bid) document'], 60)),
-            'closing_date': grab([r'bid submission end date',
+            'closing_date': grab([r'bid submission end date', r'bid end date',
                                   r'last date(?: and time)?(?: of| for)?(?: submission| bid)?',
                                   r'closing date', r'due date'], 40),
             'opening_date': grab([r'bid opening date', r'technical bid opening', r'opening date'], 40),

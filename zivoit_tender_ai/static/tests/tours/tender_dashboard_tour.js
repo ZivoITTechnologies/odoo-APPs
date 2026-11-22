@@ -32,3 +32,29 @@ registry.category("web_tour.tours").add("zivoit_tender_dashboard_tour", {
         },
     ],
 });
+
+registry.category("web_tour.tours").add("zivoit_tender_any_industry_tour", {
+    steps: () => [
+        {
+            content: "Click the 'ERP tenders in Kerala' example",
+            trigger: ".o_zv_example:contains('ERP tenders in Kerala')",
+            run: "click",
+        },
+        {
+            content: "Agent understood state and IT sector",
+            trigger: ".o_zv_card .badge:contains('State: Kerala')",
+        },
+        {
+            content: "Sector chip shown",
+            trigger: ".o_zv_card .badge:contains('Sector: IT, ERP & Software')",
+        },
+        {
+            content: "Kerala ERP tender listed",
+            trigger: ".o_zv_table td:contains('ERP tour test')",
+        },
+        {
+            content: "Tamil Nadu decoy is not listed",
+            trigger: ".o_zv_table:not(:has(td:contains('decoy for Tamil Nadu')))",
+        },
+    ],
+});

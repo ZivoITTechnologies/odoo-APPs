@@ -315,7 +315,7 @@ class TenderProfile(models.Model):
                    '| %(value)s | closes %(closing)s | score %(score)s</li>') % {
                 'id': t.id, 'name': t.name[:140], 'org': t.organisation or '-',
                 'value': ('₹ ' + Tender._format_inr(t.estimated_value)) if t.estimated_value else _('value n/a'),
-                'closing': t.date_closing or '-', 'score': t.relevance_score,
+                'closing': t.date_closing_local or '-', 'score': t.relevance_score,
             } for t in tenders.sorted(lambda t: -t.relevance_score)[:25])
         more = len(tenders) - 25
         body = Markup('<p><b>%s</b></p><ul>%s</ul>') % (

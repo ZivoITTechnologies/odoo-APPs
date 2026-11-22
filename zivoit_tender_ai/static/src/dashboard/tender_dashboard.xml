@@ -5,11 +5,11 @@
             <div class="o_zv_hero">
                 <div class="o_zv_hero_title">
                     <i class="fa fa-gavel me-2"/>Tender AI
-                    <span class="o_zv_sub">Find, filter and win construction tenders</span>
+                    <span class="o_zv_sub">Find, filter and win government tenders in every industry</span>
                 </div>
                 <div class="o_zv_search">
                     <input type="text" class="form-control form-control-lg" t-model="state.query" t-on-keydown="onKeydown"
-                           placeholder="Ask the agent: open tenders in railways construction in SCR above 2 crore..."/>
+                           placeholder="Ask the agent: ERP tenders in Kerala, manpower for telecom in Arunachal, railway works in SCR..."/>
                     <button class="btn btn-warning btn-lg" t-on-click="() => this.search()" t-att-disabled="state.searching">
                         <i t-attf-class="fa #{state.searching ? 'fa-spinner fa-spin' : 'fa-search'}"/><span>Find</span>
                     </button>
@@ -29,7 +29,7 @@
                 <!-- Agent results -->
                 <div t-if="state.result" class="card mb-3 o_zv_card">
                     <div class="card-header d-flex align-items-center flex-wrap gap-2">
-                        <b><t t-esc="state.result.total"/> matching tenders</b>
+                        <b><t t-esc="state.result.total"/> matching <t t-esc="state.result.total === 1 ? 'tender' : 'tenders'"/></b>
                         <span class="badge text-bg-light" t-esc="state.result.filters.engine === 'ai' ? 'AI understood' : 'Rule engine'"/>
                         <t t-foreach="filterChips()" t-as="chip" t-key="chip_index">
                             <span class="badge rounded-pill text-bg-primary" t-esc="chip"/>
@@ -44,7 +44,7 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover table-sm mb-0 o_zv_table">
-                            <thead><tr><th>Score</th><th>Name of Work</th><th>Buyer</th><th>Zone/State</th><th class="text-end">Value</th>
+                            <thead><tr><th>Score</th><th>Tender</th><th>Buyer</th><th>Zone/State</th><th class="text-end">Value</th>
                                 <th class="text-end">EMD</th><th>Months</th><th>Closes</th><th>Stage</th></tr></thead>
                             <tbody>
                                 <tr t-if="!state.result.results.length"><td colspan="9" class="text-muted text-center py-3">
@@ -90,7 +90,7 @@
                     <div class="row g-3">
                         <div class="col-lg-6">
                             <div class="card o_zv_card h-100">
-                                <div class="card-header fw-bold"><i class="fa fa-fire text-danger me-1"/> Hot New Tenders</div>
+                                <div class="card-header fw-bold"><i class="fa fa-fire text-danger me-1"/> Hot Tenders to Review</div>
                                 <ul class="list-group list-group-flush">
                                     <li t-if="!state.data.hot.length" class="list-group-item text-muted">No new tenders. Run an agent.</li>
                                     <li t-foreach="state.data.hot" t-as="t" t-key="t.id" class="list-group-item list-group-item-action cursor-pointer"

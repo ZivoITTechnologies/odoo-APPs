@@ -4,6 +4,7 @@
         <record id="checklist_civil_standard" model="zivoit.tender.checklist.template">
             <field name="name">Standard Civil Works Bid / No-Bid</field>
             <field name="is_default" eval="True"/>
+            <field name="sector_ids" eval="[(6, 0, [ref('sector_roads'), ref('sector_buildings'), ref('sector_bridges'), ref('sector_water'), ref('sector_irrigation'), ref('sector_electrical'), ref('sector_metro'), ref('sector_real_estate')])]"/>
             <field name="line_ids" eval="[
                 (0, 0, {'sequence': 1, 'name': 'Registered / enlisted contractor class meets requirement', 'category': 'eligibility', 'weight': 10, 'mandatory': True}),
                 (0, 0, {'sequence': 2, 'name': 'Average annual turnover (last 3 FY) meets requirement', 'category': 'financial', 'weight': 15, 'mandatory': True}),
@@ -31,6 +32,52 @@
                 (0, 0, {'sequence': 6, 'name': 'EMD as per Rly norms available (2% up to 1 Cr + 0.5% above, max 5 Cr)', 'category': 'financial', 'weight': 10}),
                 (0, 0, {'sequence': 7, 'name': 'Division / zone within operating region', 'category': 'strategic', 'weight': 10}),
                 (0, 0, {'sequence': 8, 'name': 'Rates workable against Rly USSOR / DSR', 'category': 'commercial', 'weight': 20}),
+            ]"/>
+        </record>
+        <record id="checklist_it_software" model="zivoit.tender.checklist.template">
+            <field name="name">IT / ERP / Software &amp; Telecom Projects</field>
+            <field name="sequence">5</field>
+            <field name="is_default" eval="True"/>
+            <field name="sector_ids" eval="[(6, 0, [ref('sector_it_software'), ref('sector_telecom')])]"/>
+            <field name="line_ids" eval="[
+                (0, 0, {'sequence': 1, 'name': 'Average turnover (last 3 FY) from IT / software services meets requirement', 'category': 'financial', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 2, 'name': 'Similar projects (number and value) with completion / work-order certificates', 'category': 'eligibility', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 3, 'name': 'Certifications required (ISO 9001 / ISO 27001 / CMMI / OEM partnership)', 'category': 'eligibility', 'weight': 10, 'mandatory': True}),
+                (0, 0, {'sequence': 4, 'name': 'Technical solution fits scope (product, customisation, integrations, hosting)', 'category': 'technical', 'weight': 15}),
+                (0, 0, {'sequence': 5, 'name': 'Key resumes available (project manager, solution architect, developers)', 'category': 'technical', 'weight': 10}),
+                (0, 0, {'sequence': 6, 'name': 'Local presence / support office in the state if required', 'category': 'strategic', 'weight': 5}),
+                (0, 0, {'sequence': 7, 'name': 'Payment milestones, SLA penalties and O&amp;M period acceptable', 'category': 'commercial', 'weight': 10}),
+                (0, 0, {'sequence': 8, 'name': 'QCBS technical-score potential is competitive', 'category': 'commercial', 'weight': 10}),
+                (0, 0, {'sequence': 9, 'name': 'Documents ready: incorporation, GST, PAN, MSME / Startup India, non-blacklisting, DSC', 'category': 'document', 'weight': 10}),
+            ]"/>
+        </record>
+        <record id="checklist_services" model="zivoit.tender.checklist.template">
+            <field name="name">Manpower, Security &amp; Facility Services</field>
+            <field name="sequence">6</field>
+            <field name="is_default" eval="True"/>
+            <field name="sector_ids" eval="[(6, 0, [ref('sector_manpower'), ref('sector_security_services'), ref('sector_facility_mgmt'), ref('sector_transport'), ref('sector_maintenance')])]"/>
+            <field name="line_ids" eval="[
+                (0, 0, {'sequence': 1, 'name': 'Turnover and similar-service experience meet requirement', 'category': 'eligibility', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 2, 'name': 'Statutory registrations valid: EPF, ESIC, GST, Labour Licence (CLRA), PSARA for security', 'category': 'document', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 3, 'name': 'Manpower can be mobilised at the locations within the start date', 'category': 'technical', 'weight': 15}),
+                (0, 0, {'sequence': 4, 'name': 'Quoted service charge covers minimum wages, statutory costs and margin', 'category': 'commercial', 'weight': 20, 'mandatory': True}),
+                (0, 0, {'sequence': 5, 'name': 'Payment cycle and penalty clauses acceptable for working capital', 'category': 'financial', 'weight': 10}),
+                (0, 0, {'sequence': 6, 'name': 'Supervision / local office arrangement possible', 'category': 'strategic', 'weight': 10}),
+                (0, 0, {'sequence': 7, 'name': 'EMD / performance security limit available', 'category': 'financial', 'weight': 15}),
+            ]"/>
+        </record>
+        <record id="checklist_general" model="zivoit.tender.checklist.template">
+            <field name="name">General Bid / No-Bid (all other tenders)</field>
+            <field name="sequence">50</field>
+            <field name="is_default" eval="True"/>
+            <field name="line_ids" eval="[
+                (0, 0, {'sequence': 1, 'name': 'Turnover / financial criteria met', 'category': 'financial', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 2, 'name': 'Past experience of similar supply / service / work', 'category': 'eligibility', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 3, 'name': 'Technical specifications / scope can be met', 'category': 'technical', 'weight': 20}),
+                (0, 0, {'sequence': 4, 'name': 'Price competitive with expected margin', 'category': 'commercial', 'weight': 20}),
+                (0, 0, {'sequence': 5, 'name': 'Delivery / execution timeline achievable', 'category': 'technical', 'weight': 10}),
+                (0, 0, {'sequence': 6, 'name': 'Strategic fit (client, region, repeat business)', 'category': 'strategic', 'weight': 10}),
+                (0, 0, {'sequence': 7, 'name': 'Mandatory documents and EMD ready', 'category': 'document', 'weight': 10}),
             ]"/>
         </record>
     </data>

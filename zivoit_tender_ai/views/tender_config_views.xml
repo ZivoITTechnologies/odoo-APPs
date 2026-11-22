@@ -27,6 +27,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="code"/>
+                <field name="industry_group"/>
                 <field name="keywords"/>
                 <field name="tender_count"/>
             </list>
@@ -39,7 +40,7 @@
             <form>
                 <sheet>
                     <group>
-                        <group><field name="name"/><field name="code"/><field name="color" widget="color_picker"/></group>
+                        <group><field name="name"/><field name="code"/><field name="industry_group"/><field name="color" widget="color_picker"/></group>
                         <group><field name="active"/><field name="tender_count"/></group>
                     </group>
                     <group string="Classifier">

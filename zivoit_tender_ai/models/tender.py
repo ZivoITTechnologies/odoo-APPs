@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
-from datetime import datetime, timedelta
+import re
+from datetime import datetime, time, timedelta
+
+import pytz
 
 from markupsafe import Markup
 
@@ -47,6 +50,9 @@ WORK_TYPES = [
     ('ham', 'Hybrid Annuity (HAM)'),
     ('bot', 'BOT / PPP'),
     ('supply', 'Supply'),
+    ('rate_contract', 'Rate Contract'),
+    ('service', 'Service Contract'),
+    ('qcbs', 'QCBS / Technical + Financial'),
     ('consultancy', 'Consultancy / DPR'),
     ('other', 'Other'),
 ]
@@ -62,7 +68,7 @@ class Tender(models.Model):
     # ------------------------------------------------------------------
     # identification
     # ------------------------------------------------------------------
-    name = fields.Char('Name of Work', required=True, tracking=True)
+    name = fields.Char('Title / Name of Work', required=True, tracking=True)
     code = fields.Char('Internal Ref.', readonly=True, copy=False, default='/', index=True)
     reference = fields.Char('Tender / NIT No.', tracking=True, index='trigram')
     organisation = fields.Char('Organisation / Buyer', tracking=True, index='trigram')
@@ -116,6 +122,7 @@ class Tender(models.Model):
     completion_months = fields.Float('Completion (Months)')
     days_left = fields.Float(compute='_compute_days_left', digits=(16, 1))
     days_left_label = fields.Char(compute='_compute_days_left')
+    date_closing_local = fields.Char('Closes (local time)', compute='_compute_date_closing_local')
 
     # segregation (stored so they can be grouped / filtered)
     value_band = fields.Selection(VALUE_BANDS, compute='_compute_value_band', store=True)
@@ -254,6 +261,23 @@ class Tender(models.Model):
             else:
                 tender.days_left = False
                 tender.days_left_label = False
+
+    @api.depends('date_closing')
+    def _compute_date_closing_local(self):
+        for tender in self:
+            tender.date_closing_local = tender._fmt_local(tender.date_closing)
+
+    def _fmt_local(self, value):
+        """UTC datetime -> '26-Nov-2026 11:59 PM' in the user's time zone (portal time zone for crons)."""
+        if not value:
+            return False
+        tz_name = self.env.user.tz or self.env['ir.config_parameter'].sudo().get_param(
+            'zivoit_tender_ai.portal_tz') or 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(tz_name)
+        except pytz.UnknownTimeZoneError:
+            tz = pytz.timezone('Asia/Kolkata')
+        return pytz.utc.localize(value).astimezone(tz).strftime('%d-%b-%Y %I:%M %p')
 
     @api.depends('estimated_value', 'emd_amount')
     def _compute_inr_labels(self):
@@ -509,12 +533,14 @@ class Tender(models.Model):
         description = get('description', 'summary')
         if description:
             vals['description'] = Markup('<p>%s</p>') % tu.clean_text(description)[:5000]
+        portal_tz = self._portal_tz()
         for field, keys in (('date_published', ('published_date', 'publish_date', 'date_published')),
                             ('date_closing', ('closing_date', 'bid_end_date', 'last_date', 'date_closing', 'due_date')),
                             ('date_opening', ('opening_date', 'date_opening'))):
-            value = tu.parse_date(get(*keys))
+            raw = get(*keys)
+            value = tu.parse_date(raw)
             if value:
-                vals[field] = value
+                vals[field] = self._portal_to_utc(value, raw, portal_tz, end_of_day=(field == 'date_closing'))
         if vals.get('date_published') and vals.get('date_closing') and vals['date_closing'] < vals['date_published']:
             vals.pop('date_published')
         state_name = get('state')
@@ -534,6 +560,23 @@ class Tender(models.Model):
                 vals['sector_ids'] = [(6, 0, source.default_sector_ids.ids)]
         vals['fingerprint'] = tu.fingerprint(vals.get('reference'), vals['name'], vals.get('organisation'))
         return vals
+
+    @api.model
+    def _portal_tz(self):
+        """Time zone in which portals publish their dates (Indian portals: IST)."""
+        name = self.env['ir.config_parameter'].sudo().get_param('zivoit_tender_ai.portal_tz') or 'Asia/Kolkata'
+        try:
+            return pytz.timezone(name)
+        except pytz.UnknownTimeZoneError:
+            return pytz.timezone('Asia/Kolkata')
+
+    @api.model
+    def _portal_to_utc(self, value, raw, tz, end_of_day=False):
+        """Portal local time -> naive UTC (Odoo storage). A closing date without a time means 'by end of that day'."""
+        has_time = bool(re.search(r'\d{1,2}[:.]\d{2}|\b\d{1,2}\s*[ap]\.?m\b', str(raw or ''), re.I))
+        if not has_time and end_of_day:
+            value = datetime.combine(value.date(), time(23, 59))
+        return tz.localize(value).astimezone(pytz.utc).replace(tzinfo=None)
 
     @api.model
     def _ingest_rows(self, rows, source=False):
@@ -558,7 +601,8 @@ class Tender(models.Model):
                 if vals.get('date_closing') and existing.date_closing and vals['date_closing'] > existing.date_closing:
                     update['date_closing'] = vals['date_closing']
                     existing.message_post(body=_('Bid submission end date extended from %(old)s to %(new)s (source: %(src)s).',
-                                                 old=existing.date_closing, new=vals['date_closing'],
+                                                 old=existing._fmt_local(existing.date_closing),
+                                                 new=existing._fmt_local(vals['date_closing']),
                                                  src=source.name if source else _('import')))
                 elif vals.get('date_closing') and not existing.date_closing:
                     update['date_closing'] = vals['date_closing']
@@ -567,6 +611,8 @@ class Tender(models.Model):
                 updated += 1
             else:
                 vals.pop('seen_count', None)
+                # tenders found by connectors / crons have no bid manager until a person or an agent assigns one
+                vals.setdefault('user_id', False)
                 tenders |= self.create(vals)
                 created += 1
         return tenders, created, updated
@@ -594,7 +640,8 @@ class Tender(models.Model):
         if sectors:
             matched = set(self.sector_ids.mapped('code')) & set(sectors)
             if matched:
-                score += 20
+                # a tender covering every requested sector (e.g. manpower AND telecom) ranks highest
+                score += int(round(20.0 * len(matched) / len(set(sectors))))
                 reasons.append(_('Sector: %s', ', '.join(self.sector_ids.filtered(lambda s: s.code in matched).mapped('name'))))
         else:
             score += 10
@@ -689,9 +736,11 @@ class Tender(models.Model):
 
     def action_review(self):
         self.write({'stage_id': self._stage('review').id})
+        return True
 
     def action_shortlist(self):
         self.write({'stage_id': self._stage('shortlist').id})
+        return True
 
     def action_prepare_bid(self):
         for tender in self:
@@ -699,18 +748,22 @@ class Tender(models.Model):
                 raise UserError(_('"%s" fails a mandatory qualification criterion. Fix the checklist or drop the tender.',
                                   tender.name))
         self.write({'stage_id': self._stage('prepare').id})
+        return True
 
     def action_submit_bid(self):
         for tender in self:
             if not tender.bid_amount:
                 raise UserError(_('Enter the BOQ or the final quoted amount of "%s" before submitting.', tender.name))
         self.write({'stage_id': self._stage('submitted').id})
+        return True
 
     def action_evaluation(self):
         self.write({'stage_id': self._stage('evaluation').id})
+        return True
 
     def action_reopen(self):
         self.write({'stage_id': self._stage('review').id, 'lost_reason_id': False})
+        return True
 
     def action_open_result_wizard(self):
         self.ensure_one()
@@ -937,7 +990,7 @@ class Tender(models.Model):
             tender.message_post(
                 body=Markup(_('<b>Deadline reminder:</b> bid submission for <b>%(name)s</b> closes on %(date)s '
                               '(%(days)s days left). Stage: %(stage)s.')) % {
-                    'name': tender.name, 'date': tender.date_closing, 'days': int(days), 'stage': tender.stage_id.name},
+                    'name': tender.name, 'date': tender.date_closing_local, 'days': int(days), 'stage': tender.stage_id.name},
                 partner_ids=partners.ids, subtype_xmlid='mail.mt_comment', message_type='notification')
             if tender.user_id:
                 tender.activity_schedule('mail.mail_activity_data_todo', user_id=tender.user_id.id,
@@ -1030,7 +1083,7 @@ class Tender(models.Model):
             'sectors': ', '.join(self.sector_ids.mapped('name')),
             'value': self._format_inr(self.estimated_value) if self.estimated_value else '-',
             'emd': self._format_inr(self.emd_amount) if self.emd_amount else '-',
-            'closing': fields.Datetime.to_string(self.date_closing) if self.date_closing else '',
+            'closing': self.date_closing_local or '',
             'days_left': self.days_left_label or '',
             'stage': self.stage_id.name,
             'score': self.relevance_score,
@@ -1043,6 +1096,8 @@ class Tender(models.Model):
         """The salesperson's AI agent: natural-language query -> parsed filters -> live fetch -> ranked results."""
         Profile = self.env['zivoit.tender.profile']
         filters = self.env['zivoit.tender.ai'].parse_query(query)
+        sector_names = dict(self.env['zivoit.tender.sector'].search([]).mapped(lambda s: (s.code, s.name)))
+        filters['sector_labels'] = [sector_names.get(code, code) for code in filters.get('sectors') or []]
         live_info = {'ran': False, 'found': 0, 'errors': []}
         if live:
             sources = self.env['zivoit.tender.source'].search([('source_type', 'not in', ('email', 'manual'))])

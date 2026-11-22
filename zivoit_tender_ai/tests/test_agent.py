@@ -151,6 +151,7 @@ class TestTenderAgent(TenderCommon):
         ids = [r['id'] for r in result['results']]
         self.assertEqual(set(ids), {self.t_rob.id, self.t_doubling.id})
         self.assertEqual(result['filters']['zones'], ['SCR'])
+        self.assertEqual(result['filters']['sector_labels'], ['Railways (Civil & Track)'])
         self.assertTrue(all(r['score'] > 0 for r in result['results']))
         self.assertFalse(result['live']['ran'])
         result = self.Tender.agent_search('road tenders in Telangana above 10 crore')
@@ -163,6 +164,7 @@ class TestTenderAgent(TenderCommon):
         self.assertEqual(wizard.state, 'done')
         self.assertEqual(set(wizard.tender_ids.ids), {self.t_rob.id, self.t_doubling.id})
         self.assertIn('Zones: SCR', wizard.parsed)
+        self.assertIn('Sectors: Railways (Civil & Track)', wizard.parsed)
         action = wizard.action_open_results()
         self.assertEqual(action['domain'], [('id', 'in', wizard.tender_ids.ids)])
         action = wizard.action_save_agent()

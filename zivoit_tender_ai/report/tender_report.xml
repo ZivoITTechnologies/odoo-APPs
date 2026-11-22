@@ -23,7 +23,7 @@
                                 <th>Zone / State</th><td><span t-out="o.zone_id.code"/> <span t-out="o.state_id.name"/> <span t-out="o.location"/></td></tr>
                             <tr><th>Estimated Value</th><td><span t-out="o.estimated_value" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
                                 <th>EMD</th><td><span t-out="o.emd_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
-                            <tr><th>Bid Closes</th><td t-out="o.date_closing"/>
+                            <tr><th>Bid Closes</th><td t-out="o.date_closing_local"/>
                                 <th>Completion</th><td><span t-out="o.completion_months"/> months</td></tr>
                             <tr><th>Sectors</th><td t-out="', '.join(o.sector_ids.mapped('name'))"/>
                                 <th>Contract Type</th><td><span t-field="o.work_type"/></td></tr>

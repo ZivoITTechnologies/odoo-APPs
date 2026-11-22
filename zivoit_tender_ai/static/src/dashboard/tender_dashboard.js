@@ -5,11 +5,12 @@ import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
 const EXAMPLES = [
+    "ERP tenders in Kerala",
+    "custom software development projects in Himachal Pradesh",
+    "manpower supply for telecom in Arunachal Pradesh",
     "open tenders in railways in construction in SCR",
-    "construction tenders in Telangana",
     "road tenders in Telangana above 5 crore closing in 15 days",
-    "new building tenders GHMC between 2 and 10 crore",
-    "ROB bridge works South Central Railway",
+    "housekeeping and security services in Delhi",
 ];
 
 export class TenderDashboard extends Component {
@@ -73,7 +74,7 @@ export class TenderDashboard extends Component {
         }
         const chips = [];
         for (const z of f.zones || []) chips.push(_t("Zone: ") + z);
-        for (const s of f.sectors || []) chips.push(_t("Sector: ") + s);
+        for (const s of f.sector_labels || f.sectors || []) chips.push(_t("Sector: ") + s);
         for (const s of f.states || []) chips.push(_t("State: ") + s);
         for (const o of f.organisations || []) chips.push(_t("Buyer: ") + o);
         for (const k of f.keywords || []) chips.push(_t("Keyword: ") + k);

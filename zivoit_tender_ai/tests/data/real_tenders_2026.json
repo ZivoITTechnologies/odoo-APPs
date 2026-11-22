@@ -1,0 +1,302 @@
+[
+ {
+  "title": "Tender for ERP software system design and implementation, implementation of integrated digital performance, inventory and governance management system at OPIL",
+  "organisation": "Oil Palm India Ltd",
+  "location": "Kottayam, Kerala",
+  "portal": "GeM",
+  "url": "https://tender18.com/tenders-details/15910197",
+  "expect": {
+   "state": "Kerala",
+   "sector": "it_software"
+  }
+ },
+ {
+  "title": "Supply, Design, Installation, Customization, and Maintenance of ERP Software and E-Commerce Website with Application in Android and iOS on a Free and Open-Source Software (FOSS) Platform",
+  "reference": "SILK-SFU/RVSF/TN/10",
+  "organisation": "Steel Industrials Kerala Limited",
+  "location": "Thrissur, Kerala",
+  "tender_fee": "₹ 2950.00",
+  "completion_period": "45 Days",
+  "closing_date": "23-Feb-2026 05:00 PM",
+  "published_date": "10-Feb-2026 04:00 PM",
+  "url": "https://www.tendersontime.com/india/details/corrigendum-supply-design-installation-customization-and-maintenance-erp-software-and-e-commerc-81f5c57/",
+  "expect": {
+   "state": "Kerala",
+   "sector": "it_software",
+   "fee": 2950,
+   "months": 1.5
+  }
+ },
+ {
+  "title": "Request for Proposal for Selection of IT Consultant for Evaluation of ERP System at Kannur International Airport",
+  "reference": "KIAL/IT/2026-27/1",
+  "organisation": "Kannur International Airport Ltd",
+  "location": "Kannur",
+  "closing_date": "19 June 2026 17:00",
+  "url": "https://www.kannurairport.aero/kial/public/uploads/tender/6a22ad2f7265a.pdf",
+  "expect": {
+   "state": "Kerala",
+   "sector": "it_software"
+  }
+ },
+ {
+  "title": "Development, Customization and Implementation of Odoo ERP",
+  "organisation": "Kerala Automobiles Limited",
+  "location": "Thiruvananthapuram, Kerala",
+  "emd": "₹1,000",
+  "published_date": "22-Nov-2025, 4:00 pm",
+  "closing_date": "29-Nov-2025, 4:00 pm",
+  "url": "https://tenderdekho.com/tender-detail/td-1nFCuLMtQP",
+  "expect": {
+   "state": "Kerala",
+   "sector": "it_software",
+   "emd": 1000
+  }
+ },
+ {
+  "title": "Supply, Installation, Commissioning & Maintenance of Laptop",
+  "reference": "KSEDC/ITBG/IIS/0018/26-27",
+  "organisation": "KELTRON - IT Business Group",
+  "location": "Vellayambalam, Thiruvananthapuram",
+  "closing_date": "13/07/2026 16:00",
+  "url": "https://arogyakeralam.gov.in/wp-content/uploads/2026/07/tenderdoc0018.pdf",
+  "expect": {
+   "state": "Kerala",
+   "sector": "it_software",
+   "not_in": "ERP tenders in Kerala"
+  }
+ },
+ {
+  "title": "Tender to Establish & Implement a Secure Web Portal to Operate and Run HPTSB Data Processing Centre - designing, development, testing, deployment and maintenance of a role-based secure web-based application",
+  "organisation": "H.P. Takniki Shiksha Board",
+  "location": "Dharamshala, Himachal Pradesh",
+  "opening_date": "13.05.2026 14:30",
+  "url": "https://www.hptechboard.com/assets/ckfinder/userfiles/files/2026/_Tender%20documens%20(Computerization)_Final_.pdf",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "it_software"
+  }
+ },
+ {
+  "title": "Design, Development, Implementation and Support of a Blockchain-Enabled Digital Agriculture Platform - web portal, mobile app, dashboards and API integrations",
+  "organisation": "Department of Agriculture, Government of Himachal Pradesh",
+  "location": "Shimla",
+  "estimated_value": "8 Crore",
+  "emd": "4 Lakhs",
+  "tender_fee": "11800",
+  "published_date": "27 Oct 2026",
+  "closing_date": "26 Nov 2026",
+  "url": "https://www.tenderdetail.com/Indian-Tenders/TenderNotice/58218755/666a6feae94a4b379b8bd48337b03569",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "it_software",
+   "value": 80000000,
+   "emd": 400000
+  }
+ },
+ {
+  "title": "Request for proposal - selection of Technical Support Agency (TSA) for development, operation and maintenance of HPMC website, e-commerce platform and digital marketing",
+  "reference": "2026_HPMC_138923_1",
+  "organisation": "Himachal Pradesh Horticultural Produce Marketing and Processing Corporation Ltd (HPMC)",
+  "location": "Shimla, Himachal Pradesh",
+  "emd": "200000",
+  "tender_fee": "1180",
+  "published_date": "Jul 13, 2026",
+  "closing_date": "Aug 03, 2026",
+  "url": "https://www.tender18.com/tenders-details/16232573",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "it_software",
+   "emd": 200000
+  }
+ },
+ {
+  "title": "Corrigendum - Empanelment of IT agencies for software / website development",
+  "organisation": "Himachal Pradesh State Electronics Development Corporation Ltd (HPSEDC)",
+  "location": "Shimla, Himachal Pradesh",
+  "url": "https://tender18.com/tenders-details/17904049",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "it_software"
+  }
+ },
+ {
+  "title": "Selection of System Integrator for operation and maintenance of Himachal Pradesh State Wide Area Network (HIMSWAN) for 5 years",
+  "organisation": "Department of Information Technology, Himachal Pradesh",
+  "location": "Shimla, Himachal Pradesh",
+  "estimated_value": "₹62.50 Cr",
+  "closing_date": "26 Jun 2026",
+  "url": "https://tenders.infralens.in/org/department-of-information-technology",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "it_software",
+   "value": 625000000,
+   "not_in": "custom software development projects in Himachal Pradesh"
+  }
+ },
+ {
+  "title": "Annual Maintenance Contract (AMC) for Website: Online Enlistments of Contractors",
+  "organisation": "Housing, Urban and Rural Development Department, Himachal Pradesh",
+  "location": "Shimla, Himachal Pradesh",
+  "emd": "15000",
+  "tender_fee": "350",
+  "published_date": "25 Jun 2026",
+  "closing_date": "02 Jul 2026",
+  "url": "https://www.tenderdetail.com/Indian-Tenders/TenderNotice/56165520/946f0a44074adfab65845808a19bc920",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "it_software"
+  }
+ },
+ {
+  "title": "Purchase of energy meters, licensed software and other indicating devices",
+  "reference": "GEM/2026/B/7698782",
+  "organisation": "NHPC Limited",
+  "location": "Kullu, Himachal Pradesh",
+  "emd": "24000",
+  "published_date": "03-07-2026 11:03 AM",
+  "closing_date": "01-08-2026 11:00 AM",
+  "url": "https://www.tendersontime.com/india/details/corrigendum-software-technical-specification-item-sl-no-15-specification-document-bid-qty-1-nos-8b844a8/",
+  "expect": {
+   "state": "Himachal Pradesh",
+   "sector": "goods_supply",
+   "not_in": "custom software development projects in Himachal Pradesh"
+  }
+ },
+ {
+  "title": "Manpower Outsourcing Services - Minimum Wage - Unskilled; Not Required; Others",
+  "reference": "GEM/2026/B/7842655",
+  "organisation": "Indian Army",
+  "location": "Lohit, Arunachal Pradesh",
+  "estimated_value": "8.60 Lakhs",
+  "closing_date": "18-08-2026",
+  "portal": "GeM",
+  "url": "https://www.tenderdetail.com/Indian-Tenders/TenderNotice/56791879/ef1510f029750913217736a25ffa3c1f",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "manpower",
+   "value": 860000
+  }
+ },
+ {
+  "title": "Manpower Outsourcing Services - Minimum Wage - Skilled / Unskilled at 251 Transit Camp, Dirang",
+  "organisation": "Indian Army (Department of Military Affairs)",
+  "location": "West Kameng, Arunachal Pradesh",
+  "estimated_value": "₹35,93,581",
+  "emd": "₹5,000",
+  "published_date": "01-Jun-2026, 5:35 pm",
+  "closing_date": "11-Jun-2026, 6:00 pm",
+  "portal": "GeM",
+  "url": "https://tenderdekho.com/tender-detail/td-2HrUJErzvR",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "manpower",
+   "value": 3593581,
+   "emd": 5000
+  }
+ },
+ {
+  "title": "Manpower Outsourcing - Admin, Stenographer, IT-Technical, Finance",
+  "organisation": "NIELIT Itanagar",
+  "location": "Naharlagun, Arunachal Pradesh",
+  "estimated_value": "₹28,43,808",
+  "published_date": "21-Oct-2025, 5:08 pm",
+  "closing_date": "05-Nov-2025, 5:00 pm",
+  "portal": "GeM",
+  "url": "https://tenderdekho.com/tender-detail/td-36Po3pbcpy",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "manpower",
+   "value": 2843808
+  }
+ },
+ {
+  "title": "Manpower Outsourcing Services - Minimum Wage - Skilled; Graduate; Finance/Accounts",
+  "organisation": "Nehru Yuva Kendra Sangathan (NYKS)",
+  "location": "Papum Pare, Arunachal Pradesh",
+  "published_date": "Aug 01, 2026",
+  "closing_date": "Aug 10, 2026",
+  "portal": "GeM",
+  "url": "https://tender18.com/tenders-details/16551048",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "manpower"
+  }
+ },
+ {
+  "title": "Annual Service Contract for providing Security Guards at Bank's Office Premises at Itanagar, Arunachal Pradesh",
+  "reference": "2026_RBI_290766_1",
+  "organisation": "Reserve Bank of India",
+  "location": "Itanagar",
+  "url": "https://www.rbi.org.in/scripts/BS_ViewTenders.aspx?Id=25817",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "security_services"
+  }
+ },
+ {
+  "title": "EOI for ICT, Network Infrastructures and Connectivity for Treasury Net / IFMS Implementation in Arunachal Pradesh (LAN, OFC laying, media converters, radio links)",
+  "reference": "EB-298/2022-23/20",
+  "organisation": "BSNL Arunachal Pradesh BA, Itanagar",
+  "location": "Itanagar",
+  "url": "https://ne2.bsnl.co.in/Tender/ARP/corrigendum to EOI treasury net.pdf",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "telecom"
+  }
+ },
+ {
+  "title": "Repairing and Rewinding of 200KVA, 11KV, 415V Outdoor Transformer including replacement of oil and transportation at Satellite Station, Itanagar (Arunachal Pradesh)",
+  "reference": "16/EEE/BSNL/DMP/2026-27",
+  "organisation": "Bharat Sanchar Nigam Limited (BSNL)",
+  "location": "Papum Pare, Arunachal Pradesh",
+  "estimated_value": "₹3,82,468",
+  "emd": "₹7,649",
+  "tender_fee": "₹590",
+  "published_date": "1 Jun 2026",
+  "closing_date": "11 Jun 2026",
+  "url": "https://tenders.infralens.in/tender/repairing-and-rewinding-of-200kva-11kv-415v-outdoor-transformer-2026-bsnl-279314-1",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "electrical",
+   "value": 382468,
+   "emd": 7649,
+   "fee": 590
+  }
+ },
+ {
+  "title": "Outsourcing of allied OFC works for in-house FRT (fault repairing team) of Cluster-1 in Cuttack BA",
+  "reference": "OD-CTK-23/11(11)/7/2023",
+  "organisation": "BSNL Odisha Circle",
+  "location": "Cuttack",
+  "published_date": "28.02.2023",
+  "url": "https://odisha.bsnl.co.in/newtender/27536_FRTDOCMENT.pdf",
+  "expect": {
+   "state": "Odisha",
+   "sector": "telecom"
+  }
+ },
+ {
+  "title": "Outsourcing of Maintenance of BSNL BTSs and Copper Network in Adilabad Cluster (Nizamabad BA)",
+  "reference": "PGMBA-NZB (A&P) / Mtce of CM &CFA /ADB-Cluster/ 2023-24/ 9",
+  "organisation": "BSNL Telangana Telecom Circle",
+  "location": "Adilabad, Telangana",
+  "tender_fee": "590",
+  "published_date": "12.07.2023",
+  "url": "https://telangana.bsnl.co.in/tenderproject/tenders/ADBClustertenderdocuploaded190723_compressed.pdf",
+  "expect": {
+   "state": "Telangana",
+   "sector": "telecom"
+  }
+ },
+ {
+  "title": "Hiring of manpower outsourcing agency for supply of manpower at CIHCS, Dahung",
+  "organisation": "Central Institute of Himalayan Culture Studies (Ministry of Culture)",
+  "location": "Dahung, West Kameng District, Arunachal Pradesh",
+  "url": "https://cihcs.edu.in/Advertisement/ATC_4_8_2026.pdf",
+  "expect": {
+   "state": "Arunachal Pradesh",
+   "sector": "manpower"
+  }
+ }
+]

@@ -81,13 +81,13 @@
                     </div>
                     <div class="alert alert-info mb-3" role="alert">
                         <field name="nl_query" class="w-100 fs-5"
-                               placeholder='Ask in plain words: "open tenders in railways construction in SCR above 2 crore"'/>
+                               placeholder='Ask in plain words: "ERP tenders in Kerala", "manpower supply for telecom in Arunachal Pradesh"'/>
                         <div class="small text-muted">Typing a request fills the filters below automatically. Use
                             "Understand Query (AI)" to refine with the AI model.</div>
                     </div>
                     <group>
                         <group string="What to Find">
-                            <field name="keywords" placeholder="ROB, doubling, staff quarters"/>
+                            <field name="keywords" placeholder="ERP, ROB, housekeeping, OFC"/>
                             <field name="exclude_keywords" placeholder="painting, AMC, supply of"/>
                             <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                             <field name="zone_ids" widget="many2many_tags" options="{'no_create': True}"/>
@@ -193,8 +193,8 @@
         <field name="view_mode">kanban,list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Create your first Tender Agent</p>
-            <p>Describe what you bid for in plain words, e.g. <i>"open tenders in railways construction in SCR"</i> or
-               <i>"construction tenders in Telangana above 5 crore"</i>. The agent searches portals on schedule,
+            <p>Describe what you bid for in plain words, e.g. <i>"ERP tenders in Kerala"</i>,
+               <i>"manpower supply for telecom in Arunachal Pradesh"</i> or <i>"open tenders in railways construction in SCR"</i>. The agent searches portals on schedule,
                filters, scores and alerts you.</p>
         </field>
     </record>

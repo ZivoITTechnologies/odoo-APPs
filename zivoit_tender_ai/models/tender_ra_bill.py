@@ -88,18 +88,22 @@ class TenderRaBill(models.Model):
             if not bill.line_ids.filtered('current_qty'):
                 raise UserError(_('Enter the measured quantities for this bill period first.'))
         self.write({'state': 'submitted'})
+        return True
 
     def action_certify(self):
         for bill in self:
             bill.write({'state': 'certified', 'certified_amount': bill.certified_amount or bill.net_payable})
+        return True
 
     def action_mark_paid(self):
         for bill in self:
             bill.write({'state': 'paid', 'paid_amount': bill.paid_amount or bill.certified_amount or bill.net_payable,
                         'payment_date': bill.payment_date or fields.Date.context_today(bill)})
+        return True
 
     def action_cancel(self):
         self.write({'state': 'cancel'})
+        return True
 
     def write(self, vals):
         res = super().write(vals)
@@ -109,6 +113,7 @@ class TenderRaBill(models.Model):
 
     def action_draft(self):
         self.write({'state': 'draft'})
+        return True
 
 
 class TenderRaBillLine(models.Model):
