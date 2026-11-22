@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_zivoit_tender" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.zivoit.tender</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="60"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Tender AI" string="Tender AI" name="zivoit_tender_ai"
+                     groups="zivoit_tender_ai.group_tender_manager">
+                    <block title="AI Agent" name="zivoit_ai_block">
+                        <setting string="AI Provider" help="Model used to understand queries, search portals live, extract tender e-mails and analyse tenders. Without it the built-in rule engine is used.">
+                            <field name="zivoit_ai_provider"/>
+                            <div class="mt-2" invisible="zivoit_ai_provider == 'none'">
+                                <div class="row"><label for="zivoit_ai_api_key" class="col-lg-4 o_light_label"/>
+                                    <field name="zivoit_ai_api_key" password="True" class="col-lg-8"/></div>
+                                <div class="row"><label for="zivoit_ai_model" class="col-lg-4 o_light_label"/>
+                                    <field name="zivoit_ai_model" class="col-lg-8" placeholder="default"/></div>
+                                <button name="action_zivoit_test_ai" type="object" string="Test Connection"
+                                        icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                        <setting string="Live Web Search" help="Let the AI agent search tender portals (CPPP, IREPS, state e-procurement) live.">
+                            <field name="zivoit_ai_web_search"/>
+                            <div class="mt-2" invisible="not zivoit_ai_web_search">
+                                <div class="row"><label for="zivoit_ai_max_searches" class="col-lg-6 o_light_label"/>
+                                    <field name="zivoit_ai_max_searches" class="col-lg-6"/></div>
+                                <div class="row"><label for="zivoit_ai_web_tool" class="col-lg-6 o_light_label"/>
+                                    <field name="zivoit_ai_web_tool" class="col-lg-6" placeholder="default"/></div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Bid Process" name="zivoit_process_block">
+                        <setting string="Deadline Reminders" help="Days before bid submission end to remind the bid team, e.g. 7,3,1">
+                            <field name="zivoit_reminder_days"/>
+                        </setting>
+                        <setting help="Create a CRM opportunity automatically when a tender is shortlisted.">
+                            <field name="zivoit_auto_lead"/>
+                        </setting>
+                        <setting help="Create an execution project with BOQ tasks when a tender is won.">
+                            <field name="zivoit_auto_project"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_zivoit_tender_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module': 'zivoit_tender_ai', 'bin_size': False}</field>
+    </record>
+</odoo>

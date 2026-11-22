@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="stage_new" model="zivoit.tender.stage">
+            <field name="name">New / Found</field><field name="sequence">1</field><field name="stage_type">new</field>
+            <field name="description">Tenders discovered by agents, feeds, e-mails or imports.</field>
+        </record>
+        <record id="stage_review" model="zivoit.tender.stage">
+            <field name="name">Under Review</field><field name="sequence">2</field><field name="stage_type">review</field>
+            <field name="description">Download NIT, read eligibility and scope.</field>
+        </record>
+        <record id="stage_shortlist" model="zivoit.tender.stage">
+            <field name="name">Shortlisted</field><field name="sequence">3</field><field name="stage_type">shortlist</field>
+            <field name="description">Bid/No-Bid checklist in progress.</field>
+        </record>
+        <record id="stage_prepare" model="zivoit.tender.stage">
+            <field name="name">Bid Preparation</field><field name="sequence">4</field><field name="stage_type">prepare</field>
+            <field name="description">BOQ costing, documents, EMD and DSC ready.</field>
+        </record>
+        <record id="stage_submitted" model="zivoit.tender.stage">
+            <field name="name">Submitted</field><field name="sequence">5</field><field name="stage_type">submitted</field>
+        </record>
+        <record id="stage_evaluation" model="zivoit.tender.stage">
+            <field name="name">Technical / Financial Evaluation</field><field name="sequence">6</field><field name="stage_type">evaluation</field>
+        </record>
+        <record id="stage_won" model="zivoit.tender.stage">
+            <field name="name">Won / LoA Received</field><field name="sequence">7</field><field name="stage_type">won</field>
+        </record>
+        <record id="stage_lost" model="zivoit.tender.stage">
+            <field name="name">Lost</field><field name="sequence">8</field><field name="stage_type">lost</field><field name="fold" eval="True"/>
+        </record>
+        <record id="stage_dropped" model="zivoit.tender.stage">
+            <field name="name">No-Bid / Dropped</field><field name="sequence">9</field><field name="stage_type">dropped</field><field name="fold" eval="True"/>
+        </record>
+        <record id="stage_expired" model="zivoit.tender.stage">
+            <field name="name">Expired / Missed</field><field name="sequence">10</field><field name="stage_type">expired</field><field name="fold" eval="True"/>
+        </record>
+
+        <record id="lost_reason_price" model="zivoit.tender.lost.reason"><field name="name">Price - not L1</field><field name="reason_type">lost</field></record>
+        <record id="lost_reason_technical" model="zivoit.tender.lost.reason"><field name="name">Technically disqualified</field><field name="reason_type">lost</field></record>
+        <record id="lost_reason_cancelled" model="zivoit.tender.lost.reason"><field name="name">Tender cancelled / retendered</field></record>
+        <record id="lost_reason_eligibility" model="zivoit.tender.lost.reason"><field name="name">Not eligible (turnover / similar work)</field><field name="reason_type">dropped</field></record>
+        <record id="lost_reason_capacity" model="zivoit.tender.lost.reason"><field name="name">Insufficient bid capacity / resources</field><field name="reason_type">dropped</field></record>
+        <record id="lost_reason_location" model="zivoit.tender.lost.reason"><field name="name">Location not viable</field><field name="reason_type">dropped</field></record>
+        <record id="lost_reason_margin" model="zivoit.tender.lost.reason"><field name="name">Low margin / unworkable estimate</field><field name="reason_type">dropped</field></record>
+        <record id="lost_reason_time" model="zivoit.tender.lost.reason"><field name="name">Not enough time to prepare</field><field name="reason_type">dropped</field></record>
+
+        <record id="tag_hot" model="zivoit.tender.tag"><field name="name">Hot</field><field name="color">1</field></record>
+        <record id="tag_strategic" model="zivoit.tender.tag"><field name="name">Strategic Client</field><field name="color">4</field></record>
+        <record id="tag_jv" model="zivoit.tender.tag"><field name="name">JV Required</field><field name="color">3</field></record>
+        <record id="tag_mse" model="zivoit.tender.tag"><field name="name">MSE Exemption</field><field name="color">10</field></record>
+    </data>
+</odoo>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_project_form_zivoit_tender" model="ir.ui.view">
+        <field name="name">project.project.form.zivoit.tender</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_tender" type="object" class="oe_stat_button" icon="fa-gavel"
+                        invisible="not tender_id" groups="zivoit_tender_ai.group_tender_user">
+                    <div class="o_stat_info"><span class="o_stat_text">Tender</span></div>
+                </button>
+                <button name="action_view_ra_bills" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                        invisible="not tender_id" groups="zivoit_tender_ai.group_tender_user">
+                    <field name="ra_bill_count" widget="statinfo" string="RA Bills"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="tender_id" invisible="not tender_id" groups="zivoit_tender_ai.group_tender_user"/>
+                <field name="contract_value" invisible="not tender_id"/>
+                <field name="ra_billed_amount" invisible="not tender_id"/>
+                <field name="physical_progress" widget="progressbar" invisible="not tender_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="crm_lead_form_zivoit_tender" model="ir.ui.view">
+        <field name="name">crm.lead.form.zivoit.tender</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_tender" type="object" class="oe_stat_button" icon="fa-gavel"
+                        invisible="not tender_id" groups="zivoit_tender_ai.group_tender_user">
+                    <div class="o_stat_info"><span class="o_stat_text">Tender</span></div>
+                </button>
+                <field name="tender_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

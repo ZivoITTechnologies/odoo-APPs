@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- DEMO DATA: fictitious sample tenders for evaluation only -->
+    <record id="t_scr_rob" model="zivoit.tender">
+        <field name="name">Construction of Road Over Bridge (ROB) in lieu of LC No. 45 at Kazipet - Warangal section</field>
+        <field name="reference">SCR-SC-ENG-2026-145</field>
+        <field name="organisation">South Central Railway</field>
+        <field name="department">Sr. DEN/Co-ord, Secunderabad Division</field>
+        <field name="location">Warangal</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="zone_id" ref="zone_scr"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_bridges'),ref('sector_railways')])]"/>
+        <field name="estimated_value" eval="185000000.0"/>
+        <field name="emd_amount" eval="1075000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">18 Months</field>
+        <field name="completion_months" eval="18"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-13)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=12)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=13)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="priority">2</field>
+        <field name="url">https://www.ireps.gov.in</field>
+        <field name="portal">IREPS</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="80"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_scr_doubling" model="zivoit.tender">
+        <field name="name">Doubling of track between Kazipet and Vijayawada - earthwork in formation, minor bridges and allied works</field>
+        <field name="reference">SCR-BZA-ENG-2026-77</field>
+        <field name="organisation">South Central Railway</field>
+        <field name="department">Dy. CE/Con, Vijayawada</field>
+        <field name="location">Vijayawada</field>
+        <field name="state_id" ref="base.state_in_ap"/>
+        <field name="zone_id" ref="zone_scr"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_railways')])]"/>
+        <field name="estimated_value" eval="423000000.0"/>
+        <field name="emd_amount" eval="2600000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">24 Months</field>
+        <field name="completion_months" eval="24"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-16)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=5)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=6)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_review"/>
+        <field name="priority">3</field>
+        <field name="url">https://www.ireps.gov.in</field>
+        <field name="portal">IREPS</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="90"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_scr_quarters" model="zivoit.tender">
+        <field name="name">Construction of Type-II staff quarters (G+3) at Lallaguda, Secunderabad</field>
+        <field name="reference">SCR-SC-WKS-2026-301</field>
+        <field name="organisation">South Central Railway</field>
+        <field name="department">Sr. DEN/North, Secunderabad</field>
+        <field name="location">Secunderabad</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="zone_id" ref="zone_scr"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_buildings'),ref('sector_railways')])]"/>
+        <field name="estimated_value" eval="68000000.0"/>
+        <field name="emd_amount" eval="490000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">12 Months</field>
+        <field name="completion_months" eval="12"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-11)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=20)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=21)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="priority">1</field>
+        <field name="url">https://www.ireps.gov.in</field>
+        <field name="portal">IREPS</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="70"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_ts_rnb_road" model="zivoit.tender">
+        <field name="name">Widening of Hyderabad - Karimnagar road to four lane from km 12/0 to km 28/4 including CD works</field>
+        <field name="reference">R&amp;B/TS/SE/HYD/2026-27/18</field>
+        <field name="organisation">Roads &amp; Buildings Department, Telangana</field>
+        <field name="department">Superintending Engineer, R&amp;B Circle Hyderabad</field>
+        <field name="location">Medchal</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_roads')])]"/>
+        <field name="estimated_value" eval="640000000.0"/>
+        <field name="emd_amount" eval="6400000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">24 Months</field>
+        <field name="completion_months" eval="24"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-12)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=9)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=10)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_shortlist"/>
+        <field name="priority">2</field>
+        <field name="url">https://tender.telangana.gov.in</field>
+        <field name="portal">Telangana e-Procurement</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="80"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_ghmc_market" model="zivoit.tender">
+        <field name="name">Construction of Integrated Model Market building at Kukatpally</field>
+        <field name="reference">GHMC/EE/KKP/2026/412</field>
+        <field name="organisation">Greater Hyderabad Municipal Corporation</field>
+        <field name="department">Executive Engineer, Kukatpally Zone</field>
+        <field name="location">Hyderabad</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_buildings')])]"/>
+        <field name="estimated_value" eval="92000000.0"/>
+        <field name="emd_amount" eval="1840000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">12 Months</field>
+        <field name="completion_months" eval="12"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-18)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=3)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_prepare"/>
+        <field name="priority">1</field>
+        <field name="url">https://tender.telangana.gov.in</field>
+        <field name="portal">Telangana e-Procurement</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="70"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_nhai_nh65" model="zivoit.tender">
+        <field name="name">Rehabilitation and upgradation of NH-65 Hyderabad - Vijayawada section to six lane on EPC mode</field>
+        <field name="reference">NHAI/HYD/NH65/EPC/2026/03</field>
+        <field name="organisation">National Highways Authority of India</field>
+        <field name="department">PIU Hyderabad</field>
+        <field name="location">Suryapet</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_roads')])]"/>
+        <field name="estimated_value" eval="3150000000.0"/>
+        <field name="emd_amount" eval="31500000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">30 Months</field>
+        <field name="completion_months" eval="30"/>
+        <field name="work_type">epc</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-10)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=25)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=26)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="priority">2</field>
+        <field name="url">https://eprocure.gov.in</field>
+        <field name="portal">CPPP</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="80"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_pmgsy_cc" model="zivoit.tender">
+        <field name="name">Construction of CC roads and side drains in Siddipet district under PMGSY Phase-III</field>
+        <field name="reference">PR/TS/SDP/PMGSY/2026/09</field>
+        <field name="organisation">Panchayat Raj Engineering Department, Telangana</field>
+        <field name="department">EE PR Division Siddipet</field>
+        <field name="location">Siddipet</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_roads')])]"/>
+        <field name="estimated_value" eval="18000000.0"/>
+        <field name="emd_amount" eval="360000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">6 Months</field>
+        <field name="completion_months" eval="6"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-11)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=14)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=15)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="priority">0</field>
+        <field name="url">https://tender.telangana.gov.in</field>
+        <field name="portal">Telangana e-Procurement</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="60"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_hmwssb_pipe" model="zivoit.tender">
+        <field name="name">Laying of 600 mm DI water supply pipeline from Godavari Phase-II to Shamshabad reservoir</field>
+        <field name="reference">HMWSSB/CGM/P-II/2026/55</field>
+        <field name="organisation">HMWSSB</field>
+        <field name="department">CGM Project Circle-II</field>
+        <field name="location">Rangareddy</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_water')])]"/>
+        <field name="estimated_value" eval="120000000.0"/>
+        <field name="emd_amount" eval="1200000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">15 Months</field>
+        <field name="completion_months" eval="15"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-14)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=7)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=8)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="priority">0</field>
+        <field name="url">https://tender.telangana.gov.in</field>
+        <field name="portal">Telangana e-Procurement</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="60"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_sr_fob" model="zivoit.tender">
+        <field name="name">Construction of Foot Over Bridge at Chennai Egmore station platforms 4 to 11</field>
+        <field name="reference">SR-MAS-ENG-2026-88</field>
+        <field name="organisation">Southern Railway</field>
+        <field name="department">Sr. DEN/Coord, Chennai</field>
+        <field name="location">Chennai</field>
+        <field name="state_id" ref="base.state_in_tn"/>
+        <field name="zone_id" ref="zone_sr"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_railways'),ref('sector_bridges')])]"/>
+        <field name="estimated_value" eval="42000000.0"/>
+        <field name="emd_amount" eval="360000.0"/>
+        <field name="tender_fee" eval="5900.0"/>
+        <field name="completion_period">9 Months</field>
+        <field name="completion_months" eval="9"/>
+        <field name="work_type">item_rate</field>
+        <field name="date_published" eval="(DateTime.today() + relativedelta(days=-12)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() + relativedelta(days=11)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="date_opening" eval="(DateTime.today() + relativedelta(days=12)).strftime('%Y-%m-%d 15:30:00')"/>
+        <field name="stage_id" ref="stage_new"/>
+        <field name="priority">0</field>
+        <field name="url">https://www.ireps.gov.in</field>
+        <field name="portal">IREPS</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="relevance_score" eval="60"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="t_won_college" model="zivoit.tender">
+        <field name="name">Construction of Government Junior College building (G+2) at Medak</field>
+        <field name="reference">TSEWIDC/MDK/2026/07</field>
+        <field name="organisation">TS Education &amp; Welfare Infrastructure Development Corporation</field>
+        <field name="location">Medak</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_buildings')])]"/>
+        <field name="estimated_value" eval="38500000.0"/>
+        <field name="emd_amount" eval="385000.0"/>
+        <field name="completion_period">12 Months</field>
+        <field name="completion_months" eval="12"/>
+        <field name="work_type">percentage</field>
+        <field name="date_published" eval="(DateTime.today() - relativedelta(days=60)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() - relativedelta(days=35)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="stage_id" ref="stage_won"/>
+        <field name="our_rank" eval="1"/>
+        <field name="awarded_value" eval="36850000.0"/>
+        <field name="final_quoted_amount" eval="36850000.0"/>
+        <field name="l1_amount" eval="36850000.0"/>
+        <field name="emd_status">adjusted</field>
+        <field name="source_id" ref="source_manual"/>
+        <field name="user_id" ref="base.user_admin"/>
+    </record>
+    <record id="boq_college_1" model="zivoit.tender.boq.line"><field name="tender_id" ref="t_won_college"/><field name="sequence">1</field><field name="item_code">TS-SSR 2.1</field><field name="name">Earthwork excavation in foundations in all soils</field><field name="uom">Cum</field><field name="quantity">1850</field><field name="estimate_rate">385</field><field name="cost_rate">330</field></record>
+    <record id="boq_college_2" model="zivoit.tender.boq.line"><field name="tender_id" ref="t_won_college"/><field name="sequence">2</field><field name="item_code">TS-SSR 5.4</field><field name="name">RCC M25 for columns, beams and slabs including centering</field><field name="uom">Cum</field><field name="quantity">1420</field><field name="estimate_rate">9850</field><field name="cost_rate">8900</field></record>
+    <record id="boq_college_3" model="zivoit.tender.boq.line"><field name="tender_id" ref="t_won_college"/><field name="sequence">3</field><field name="item_code">TS-SSR 5.9</field><field name="name">TMT Fe500D reinforcement steel cutting, bending and placing</field><field name="uom">MT</field><field name="quantity">170</field><field name="estimate_rate">78500</field><field name="cost_rate">72000</field></record>
+    <record id="boq_college_4" model="zivoit.tender.boq.line"><field name="tender_id" ref="t_won_college"/><field name="sequence">4</field><field name="item_code">TS-SSR 7.2</field><field name="name">Brick / AAC block masonry in CM 1:6</field><field name="uom">Cum</field><field name="quantity">980</field><field name="estimate_rate">6200</field><field name="cost_rate">5600</field></record>
+    <record id="boq_college_5" model="zivoit.tender.boq.line"><field name="tender_id" ref="t_won_college"/><field name="sequence">5</field><field name="item_code">TS-SSR 11.3</field><field name="name">Vitrified tile flooring 600x600 mm</field><field name="uom">Sqm</field><field name="quantity">3200</field><field name="estimate_rate">1350</field><field name="cost_rate">1180</field></record>
+
+    <record id="t_lost_rub" model="zivoit.tender">
+        <field name="name">Construction of Road Under Bridge (RUB) at LC No. 12 near Bhongir</field>
+        <field name="reference">SCR-SC-ENG-2026-061</field>
+        <field name="organisation">South Central Railway</field>
+        <field name="department">Sr. DEN/Co-ord, Secunderabad</field>
+        <field name="state_id" ref="base.state_in_ts"/>
+        <field name="zone_id" ref="zone_scr"/>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_bridges'), ref('sector_railways')])]"/>
+        <field name="estimated_value" eval="72000000.0"/>
+        <field name="emd_amount" eval="510000.0"/>
+        <field name="final_quoted_amount" eval="69800000.0"/>
+        <field name="date_published" eval="(DateTime.today() - relativedelta(days=70)).strftime('%Y-%m-%d 10:00:00')"/>
+        <field name="date_closing" eval="(DateTime.today() - relativedelta(days=40)).strftime('%Y-%m-%d 15:00:00')"/>
+        <field name="stage_id" ref="stage_lost"/>
+        <field name="lost_reason_id" ref="lost_reason_price"/>
+        <field name="our_rank" eval="3"/>
+        <field name="l1_amount" eval="66250000.0"/>
+        <field name="l1_bidder">Sri Venkateswara Infra Projects (demo)</field>
+        <field name="emd_status">refund_due</field>
+        <field name="source_id" ref="source_manual"/>
+    </record>
+    <record id="comp_rub_1" model="zivoit.tender.competitor"><field name="tender_id" ref="t_lost_rub"/><field name="name">Sri Venkateswara Infra Projects (demo)</field><field name="quoted_amount" eval="66250000.0"/></record>
+    <record id="comp_rub_2" model="zivoit.tender.competitor"><field name="tender_id" ref="t_lost_rub"/><field name="name">Deccan Constructions (demo)</field><field name="quoted_amount" eval="68100000.0"/></record>
+    <record id="comp_rub_3" model="zivoit.tender.competitor"><field name="tender_id" ref="t_lost_rub"/><field name="name">Our Company</field><field name="is_us" eval="True"/><field name="quoted_amount" eval="69800000.0"/></record>
+
+    <record id="profile_scr" model="zivoit.tender.profile">
+        <field name="name">SCR Railway Construction</field>
+        <field name="nl_query">open tenders in railways in construction in SCR</field>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_railways')])]"/>
+        <field name="zone_ids" eval="[(6, 0, [ref('zone_scr')])]"/>
+        <field name="frequency">daily</field>
+        <field name="live_search" eval="False"/>
+        <field name="tender_ids" eval="[(6, 0, [ref('t_scr_rob'), ref('t_scr_doubling'), ref('t_scr_quarters')])]"/>
+    </record>
+    <record id="profile_ts" model="zivoit.tender.profile">
+        <field name="name">Telangana Roads &amp; Buildings</field>
+        <field name="nl_query">construction tenders in Telangana roads and buildings above 1 crore</field>
+        <field name="sector_ids" eval="[(6, 0, [ref('sector_roads'), ref('sector_buildings')])]"/>
+        <field name="state_ids" eval="[(6, 0, [ref('base.state_in_ts')])]"/>
+        <field name="min_value" eval="10000000.0"/>
+        <field name="frequency">daily</field>
+        <field name="live_search" eval="False"/>
+        <field name="auto_shortlist_score">90</field>
+        <field name="tender_ids" eval="[(6, 0, [ref('t_ts_rnb_road'), ref('t_ghmc_market'), ref('t_nhai_nh65'), ref('t_pmgsy_cc')])]"/>
+    </record>
+</odoo>

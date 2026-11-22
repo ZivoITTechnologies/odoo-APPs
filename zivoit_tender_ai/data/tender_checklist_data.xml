@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="checklist_civil_standard" model="zivoit.tender.checklist.template">
+            <field name="name">Standard Civil Works Bid / No-Bid</field>
+            <field name="is_default" eval="True"/>
+            <field name="line_ids" eval="[
+                (0, 0, {'sequence': 1, 'name': 'Registered / enlisted contractor class meets requirement', 'category': 'eligibility', 'weight': 10, 'mandatory': True}),
+                (0, 0, {'sequence': 2, 'name': 'Average annual turnover (last 3 FY) meets requirement', 'category': 'financial', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 3, 'name': 'Similar work experience (single / two / three works) meets requirement', 'category': 'eligibility', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 4, 'name': 'Bid capacity (2AN - B) sufficient', 'category': 'financial', 'weight': 10, 'mandatory': True}),
+                (0, 0, {'sequence': 5, 'name': 'Key plant &amp; machinery available or arrangeable', 'category': 'technical', 'weight': 8}),
+                (0, 0, {'sequence': 6, 'name': 'Key technical personnel available', 'category': 'technical', 'weight': 7}),
+                (0, 0, {'sequence': 7, 'name': 'EMD / bank guarantee limit available', 'category': 'financial', 'weight': 8}),
+                (0, 0, {'sequence': 8, 'name': 'Site location within operating region', 'category': 'strategic', 'weight': 7}),
+                (0, 0, {'sequence': 9, 'name': 'Estimate rates workable (SSR / DSR current)', 'category': 'commercial', 'weight': 10}),
+                (0, 0, {'sequence': 10, 'name': 'Payment terms, price variation and LD clauses acceptable', 'category': 'commercial', 'weight': 5}),
+                (0, 0, {'sequence': 11, 'name': 'Documents ready: GST, PAN, EPF, ESI, solvency, audited balance sheets, DSC', 'category': 'document', 'weight': 5}),
+            ]"/>
+        </record>
+        <record id="checklist_railway" model="zivoit.tender.checklist.template">
+            <field name="name">Indian Railways Works (IREPS)</field>
+            <field name="is_default" eval="True"/>
+            <field name="sector_ids" eval="[(6, 0, [ref('sector_railways')])]"/>
+            <field name="line_ids" eval="[
+                (0, 0, {'sequence': 1, 'name': 'Single similar work 35% of tender value in last 7 years (Rly GCC)', 'category': 'eligibility', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 2, 'name': 'Total contract amount received 150% of tender value in last 3 FY + current', 'category': 'financial', 'weight': 15, 'mandatory': True}),
+                (0, 0, {'sequence': 3, 'name': 'IREPS registration with valid Class III DSC', 'category': 'document', 'weight': 10, 'mandatory': True}),
+                (0, 0, {'sequence': 4, 'name': 'Block / traffic &amp; power block dependency manageable', 'category': 'technical', 'weight': 10}),
+                (0, 0, {'sequence': 5, 'name': 'Railway safety / track machine experience', 'category': 'technical', 'weight': 10}),
+                (0, 0, {'sequence': 6, 'name': 'EMD as per Rly norms available (2% up to 1 Cr + 0.5% above, max 5 Cr)', 'category': 'financial', 'weight': 10}),
+                (0, 0, {'sequence': 7, 'name': 'Division / zone within operating region', 'category': 'strategic', 'weight': 10}),
+                (0, 0, {'sequence': 8, 'name': 'Rates workable against Rly USSOR / DSR', 'category': 'commercial', 'weight': 20}),
+            ]"/>
+        </record>
+    </data>
+</odoo>

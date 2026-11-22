@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Preset connectors. The AI web-search agents need an AI provider in Settings.
+         Feeds / APIs / HTML sources can be added for any portal or paid aggregator. -->
+    <data noupdate="1">
+        <record id="source_ai_cppp" model="zivoit.tender.source">
+            <field name="name">CPPP - Central Public Procurement Portal (AI)</field>
+            <field name="sequence">1</field><field name="source_type">ai_web</field><field name="portal">cppp</field>
+            <field name="domains">eprocure.gov.in</field>
+            <field name="search_hint">CPPP eprocure active tenders</field>
+        </record>
+        <record id="source_ai_ireps" model="zivoit.tender.source">
+            <field name="name">IREPS - Indian Railways e-Procurement (AI)</field>
+            <field name="sequence">2</field><field name="source_type">ai_web</field><field name="portal">ireps</field>
+            <field name="domains">ireps.gov.in, scr.indianrailways.gov.in, indianrailways.gov.in</field>
+            <field name="search_hint">IREPS open works tenders railway</field>
+            <field name="default_sector_ids" eval="[(6, 0, [ref('sector_railways')])]"/>
+        </record>
+        <record id="source_ai_telangana" model="zivoit.tender.source">
+            <field name="name">Telangana e-Procurement (AI)</field>
+            <field name="sequence">3</field><field name="source_type">ai_web</field><field name="portal">telangana</field>
+            <field name="domains">tender.telangana.gov.in, telangana.gov.in</field>
+            <field name="search_hint">Telangana eprocurement tenders R&amp;B GHMC</field>
+            <field name="default_state_id" ref="base.state_in_ts"/>
+        </record>
+        <record id="source_ai_ap" model="zivoit.tender.source">
+            <field name="name">Andhra Pradesh e-Procurement (AI)</field>
+            <field name="sequence">4</field><field name="source_type">ai_web</field><field name="portal">andhra</field>
+            <field name="domains">tender.apeprocurement.gov.in, apeprocurement.gov.in</field>
+            <field name="search_hint">AP eprocurement tenders works</field>
+            <field name="default_state_id" ref="base.state_in_ap"/>
+        </record>
+        <record id="source_ai_nhai" model="zivoit.tender.source">
+            <field name="name">NHAI / MoRTH Highways (AI)</field>
+            <field name="sequence">5</field><field name="source_type">ai_web</field><field name="portal">nhai</field>
+            <field name="domains">nhai.gov.in, morth.nic.in, eprocure.gov.in</field>
+            <field name="search_hint">NHAI tenders highway construction</field>
+            <field name="default_sector_ids" eval="[(6, 0, [ref('sector_roads')])]"/>
+        </record>
+        <record id="source_ai_gem" model="zivoit.tender.source">
+            <field name="name">GeM - Government e-Marketplace (AI)</field>
+            <field name="sequence">6</field><field name="source_type">ai_web</field><field name="portal">gem</field>
+            <field name="domains">gem.gov.in, bidplus.gem.gov.in</field>
+            <field name="search_hint">GeM bid civil works construction</field>
+            <field name="active" eval="False"/>
+        </record>
+        <record id="source_ai_open_web" model="zivoit.tender.source">
+            <field name="name">Open Web Tender Search (AI)</field>
+            <field name="sequence">9</field><field name="source_type">ai_web</field><field name="portal">aggregator</field>
+            <field name="search_hint">government construction tender notice India</field>
+            <field name="active" eval="False"/>
+        </record>
+        <record id="source_email" model="zivoit.tender.source">
+            <field name="name">Tender Alert E-mails</field>
+            <field name="sequence">20</field><field name="source_type">email</field><field name="portal">other</field>
+        </record>
+        <record id="source_manual" model="zivoit.tender.source">
+            <field name="name">Manual Entry / Excel Import</field>
+            <field name="sequence">30</field><field name="source_type">manual</field><field name="portal">other</field>
+        </record>
+    </data>
+</odoo>

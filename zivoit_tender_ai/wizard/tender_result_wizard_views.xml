@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivoit_tender_result_wizard_form" model="ir.ui.view">
+        <field name="name">zivoit.tender.result.wizard.form</field>
+        <field name="model">zivoit.tender.result.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="tender_id" readonly="1"/>
+                        <field name="outcome" widget="radio"/>
+                        <field name="lost_reason_id" invisible="outcome == 'won'" required="outcome != 'won'"
+                               domain="[('reason_type', 'in', ('both', 'lost' if outcome == 'lost' else 'dropped'))]"/>
+                        <field name="result_date"/>
+                    </group>
+                    <group invisible="outcome == 'dropped'">
+                        <field name="currency_id" invisible="1"/>
+                        <field name="our_rank"/>
+                        <field name="l1_bidder"/>
+                        <field name="l1_amount"/>
+                        <field name="awarded_value" invisible="outcome != 'won'"/>
+                        <field name="create_project" invisible="outcome != 'won'"/>
+                    </group>
+                </group>
+                <field name="notes" placeholder="Notes / lessons learned"/>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

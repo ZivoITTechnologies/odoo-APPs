@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="zivoit_tender_ai.TenderDashboard">
+        <div class="o_action o_zivoit_dashboard h-100 overflow-auto">
+            <div class="o_zv_hero">
+                <div class="o_zv_hero_title">
+                    <i class="fa fa-gavel me-2"/>Tender AI
+                    <span class="o_zv_sub">Find, filter and win construction tenders</span>
+                </div>
+                <div class="o_zv_search">
+                    <input type="text" class="form-control form-control-lg" t-model="state.query" t-on-keydown="onKeydown"
+                           placeholder="Ask the agent: open tenders in railways construction in SCR above 2 crore..."/>
+                    <button class="btn btn-warning btn-lg" t-on-click="() => this.search()" t-att-disabled="state.searching">
+                        <i t-attf-class="fa #{state.searching ? 'fa-spinner fa-spin' : 'fa-search'}"/><span>Find</span>
+                    </button>
+                </div>
+                <div class="o_zv_options">
+                    <label class="me-3"><input type="checkbox" t-model="state.live"/> Search portals live
+                        <t t-if="state.data and !state.data.ai_enabled"><small class="opacity-75">(configure AI in Settings for live web search)</small></t>
+                    </label>
+                    <span class="me-1 opacity-75">Try:</span>
+                    <t t-foreach="examples" t-as="ex" t-key="ex">
+                        <a href="#" class="o_zv_example" t-on-click.prevent="() => this.search(ex)" t-esc="ex"/>
+                    </t>
+                </div>
+            </div>
+
+            <div class="container-fluid py-3">
+                <!-- Agent results -->
+                <div t-if="state.result" class="card mb-3 o_zv_card">
+                    <div class="card-header d-flex align-items-center flex-wrap gap-2">
+                        <b><t t-esc="state.result.total"/> matching tenders</b>
+                        <span class="badge text-bg-light" t-esc="state.result.filters.engine === 'ai' ? 'AI understood' : 'Rule engine'"/>
+                        <t t-foreach="filterChips()" t-as="chip" t-key="chip_index">
+                            <span class="badge rounded-pill text-bg-primary" t-esc="chip"/>
+                        </t>
+                        <div class="ms-auto d-flex gap-2">
+                            <button class="btn btn-sm btn-secondary" t-on-click="openResults" t-if="state.result.total">Open as list</button>
+                            <button class="btn btn-sm btn-primary" t-on-click="saveAgent"><i class="fa fa-bell"/> Save as agent &amp; alert me</button>
+                        </div>
+                    </div>
+                    <div t-if="state.result.live.errors and state.result.live.errors.length" class="alert alert-warning m-2 mb-0 small">
+                        <t t-foreach="state.result.live.errors" t-as="err" t-key="err_index"><div t-esc="err"/></t>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0 o_zv_table">
+                            <thead><tr><th>Score</th><th>Name of Work</th><th>Buyer</th><th>Zone/State</th><th class="text-end">Value</th>
+                                <th class="text-end">EMD</th><th>Months</th><th>Closes</th><th>Stage</th></tr></thead>
+                            <tbody>
+                                <tr t-if="!state.result.results.length"><td colspan="9" class="text-muted text-center py-3">
+                                    No tender matches yet. Tick "Search portals live", add sources, or save this as an agent to be alerted.</td></tr>
+                                <tr t-foreach="state.result.results" t-as="r" t-key="r.id" t-on-click="() => this.openTender(r.id)" class="cursor-pointer">
+                                    <td><span t-attf-class="badge #{r.score >= 70 ? 'text-bg-success' : (r.score >= 45 ? 'text-bg-warning' : 'text-bg-secondary')}" t-esc="r.score"/></td>
+                                    <td><div class="fw-semibold" t-esc="r.name"/><small class="text-muted" t-esc="r.reasons"/></td>
+                                    <td t-esc="r.organisation"/>
+                                    <td><t t-esc="r.zone"/> <t t-esc="r.state"/></td>
+                                    <td class="text-end" t-esc="r.value"/>
+                                    <td class="text-end" t-esc="r.emd"/>
+                                    <td t-esc="r.completion or '-'"/>
+                                    <td class="text-nowrap"><span t-esc="r.days_left"/></td>
+                                    <td><span class="badge text-bg-light" t-esc="r.stage"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <t t-if="state.data">
+                    <t t-set="k" t-value="state.data.kpi"/>
+                    <div class="row g-3 mb-3">
+                        <t t-foreach="[
+                            ['open', 'Open Tenders', k.open, 'fa-folder-open', '₹ ' + k.open_value],
+                            ['new_week', 'New This Week', k.new_week, 'fa-bolt', k.new_today + ' today'],
+                            ['closing_week', 'Closing in 7 Days', k.closing_week, 'fa-clock-o', 'act now'],
+                            ['shortlisted', 'Shortlisted', k.shortlisted, 'fa-star', k.in_preparation + ' in preparation'],
+                            ['submitted', 'Submitted', k.submitted, 'fa-paper-plane', '₹ ' + k.pipeline_value + ' pipeline'],
+                            ['won', 'Won', k.won, 'fa-trophy', k.win_rate + '% win rate · ₹ ' + k.won_value],
+                        ]" t-as="kpi" t-key="kpi[0]">
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="o_zv_kpi" t-on-click="() => this.openKpi(kpi[0])">
+                                    <i t-attf-class="fa #{kpi[3]} o_zv_kpi_icon"/>
+                                    <div class="o_zv_kpi_value" t-esc="kpi[2]"/>
+                                    <div class="o_zv_kpi_label" t-esc="kpi[1]"/>
+                                    <div class="o_zv_kpi_sub" t-esc="kpi[4]"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="card o_zv_card h-100">
+                                <div class="card-header fw-bold"><i class="fa fa-fire text-danger me-1"/> Hot New Tenders</div>
+                                <ul class="list-group list-group-flush">
+                                    <li t-if="!state.data.hot.length" class="list-group-item text-muted">No new tenders. Run an agent.</li>
+                                    <li t-foreach="state.data.hot" t-as="t" t-key="t.id" class="list-group-item list-group-item-action cursor-pointer"
+                                        t-on-click="() => this.openTender(t.id)">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="fw-semibold text-truncate me-2" t-esc="t.name"/>
+                                            <span class="badge text-bg-success" t-esc="t.score"/>
+                                        </div>
+                                        <small class="text-muted"><t t-esc="t.organisation"/> · <t t-esc="t.state"/> · ₹ <t t-esc="t.value"/> · <t t-esc="t.days_left"/></small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card o_zv_card h-100">
+                                <div class="card-header fw-bold"><i class="fa fa-hourglass-half text-warning me-1"/> Closing This Week</div>
+                                <ul class="list-group list-group-flush">
+                                    <li t-if="!state.data.closing.length" class="list-group-item text-muted">Nothing closing in the next 7 days.</li>
+                                    <li t-foreach="state.data.closing" t-as="t" t-key="t.id" class="list-group-item list-group-item-action cursor-pointer"
+                                        t-on-click="() => this.openTender(t.id)">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="fw-semibold text-truncate me-2" t-esc="t.name"/>
+                                            <span class="badge text-bg-danger" t-esc="t.days_left"/>
+                                        </div>
+                                        <small class="text-muted"><t t-esc="t.organisation"/> · ₹ <t t-esc="t.value"/> · <t t-esc="t.stage"/></small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <t t-foreach="[
+                            ['By Sector', state.data.by_sector, 'sector_ids', 'id'],
+                            ['By State', state.data.by_state, 'state_id', 'id'],
+                            ['By Value Band', state.data.by_value, 'value_band', 'key'],
+                            ['By Deadline', state.data.by_deadline, 'deadline_bucket', 'key'],
+                        ]" t-as="box" t-key="box[0]">
+                            <div class="col-md-6 col-xl-3">
+                                <div class="card o_zv_card h-100">
+                                    <div class="card-header fw-bold" t-esc="box[0]"/>
+                                    <div class="card-body py-2">
+                                        <div t-if="!box[1].length" class="text-muted small">No open tenders.</div>
+                                        <t t-set="mx" t-value="maxCount(box[1])"/>
+                                        <div t-foreach="box[1]" t-as="row" t-key="row_index" class="o_zv_bar_row cursor-pointer"
+                                             t-on-click="() => this.openGroup(box[2], row[box[3]], row.name)">
+                                            <div class="d-flex justify-content-between small">
+                                                <span class="text-truncate" t-esc="row.name"/><b t-esc="row.count"/>
+                                            </div>
+                                            <div class="o_zv_bar"><div class="o_zv_bar_fill" t-attf-style="width: #{Math.round(row.count * 100 / mx)}%"/></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <div class="col-12">
+                            <div class="card o_zv_card">
+                                <div class="card-header fw-bold d-flex">Bid Pipeline
+                                    <a href="#" class="ms-auto small" t-on-click.prevent="openAgents"><t t-esc="k.agents"/> tender agents running →</a></div>
+                                <div class="card-body d-flex flex-wrap gap-2">
+                                    <t t-foreach="state.data.by_stage" t-as="s" t-key="s.id">
+                                        <div class="o_zv_stage cursor-pointer" t-on-click="() => this.openList(s.name, [['stage_id', '=', s.id]])">
+                                            <div class="o_zv_stage_count" t-esc="s.count"/>
+                                            <div class="small" t-esc="s.name"/>
+                                            <div class="small text-muted">₹ <t t-esc="s.value"/></div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivoit_tender_agent_search_form" model="ir.ui.view">
+        <field name="name">zivoit.tender.agent.search.form</field>
+        <field name="model">zivoit.tender.agent.search</field>
+        <field name="arch" type="xml">
+            <form string="Ask the Tender Agent">
+                <field name="state" invisible="1"/>
+                <div class="mb-2">
+                    <field name="query" class="w-100 fs-4"
+                           placeholder='e.g. "open tenders in railways construction in SCR" or "road tenders in Telangana above 5 crore closing in 15 days"'/>
+                </div>
+                <group>
+                    <field name="live"/>
+                </group>
+                <div invisible="state != 'done'">
+                    <div class="alert alert-success" role="alert">
+                        <b><field name="result_count" class="d-inline"/> matching tenders</b> -
+                        understood by <field name="engine" class="d-inline"/>
+                        <pre class="mb-0 mt-2 bg-transparent border-0 p-0"><field name="parsed"/></pre>
+                        <div invisible="not live_message"><field name="live_message"/></div>
+                    </div>
+                    <field name="tender_ids">
+                        <list>
+                            <field name="name"/>
+                            <field name="organisation"/>
+                            <field name="state_id"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <field name="estimated_value"/>
+                            <field name="emd_amount"/>
+                            <field name="completion_months" string="Months"/>
+                            <field name="date_closing"/>
+                            <field name="stage_id"/>
+                        </list>
+                    </field>
+                </div>
+                <footer>
+                    <button name="action_search" type="object" string="Search" class="btn-primary" icon="fa-search"/>
+                    <button name="action_open_results" type="object" string="Open Results" invisible="state != 'done'"/>
+                    <button name="action_shortlist_selected" type="object" string="Shortlist All" invisible="state != 'done'"/>
+                    <button name="action_save_agent" type="object" string="Save as Agent &amp; Alert Me" invisible="state != 'done'"/>
+                    <button special="cancel" string="Close"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_zivoit_tender_agent_search" model="ir.actions.act_window">
+        <field name="name">Ask the Tender Agent</field>
+        <field name="res_model">zivoit.tender.agent.search</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="cron_run_agents" model="ir.cron">
+            <field name="name">Tender AI: Run Tender Agents</field>
+            <field name="model_id" ref="model_zivoit_tender_profile"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_run_agents()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+        </record>
+        <record id="cron_fetch_feeds" model="ir.cron">
+            <field name="name">Tender AI: Fetch Feeds &amp; APIs</field>
+            <field name="model_id" ref="model_zivoit_tender_source"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_fetch_all()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">3</field>
+            <field name="interval_type">hours</field>
+        </record>
+        <record id="cron_refresh_flags" model="ir.cron">
+            <field name="name">Tender AI: Refresh Deadlines &amp; Expire Missed Tenders</field>
+            <field name="model_id" ref="model_zivoit_tender"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_refresh_time_flags()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+        </record>
+        <record id="cron_deadline_reminders" model="ir.cron">
+            <field name="name">Tender AI: Bid Deadline Reminders</field>
+            <field name="model_id" ref="model_zivoit_tender"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_deadline_reminders()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+        <record id="cron_daily_digest" model="ir.cron">
+            <field name="name">Tender AI: Daily Tender Digest E-mail</field>
+            <field name="model_id" ref="model_zivoit_tender_profile"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_send_digests()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+        </record>
+        <record id="cron_emd_followup" model="ir.cron">
+            <field name="name">Tender AI: EMD Refund &amp; BG Expiry Follow-up</field>
+            <field name="model_id" ref="model_zivoit_tender"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_emd_followup()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">7</field>
+            <field name="interval_type">days</field>
+        </record>
+    </data>
+</odoo>

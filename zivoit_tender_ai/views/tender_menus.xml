@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_zivoit_tender_root" name="Tender AI" sequence="35"
+              web_icon="zivoit_tender_ai,static/description/icon.png"
+              groups="zivoit_tender_ai.group_tender_user"/>
+
+    <menuitem id="menu_zivoit_tender_dashboard" name="Dashboard" parent="menu_zivoit_tender_root"
+              action="action_zivoit_tender_dashboard" sequence="1"/>
+
+    <menuitem id="menu_zivoit_tender_find" name="Find Tenders" parent="menu_zivoit_tender_root" sequence="10"/>
+    <menuitem id="menu_zivoit_tender_agent_search" name="Ask the Agent" parent="menu_zivoit_tender_find"
+              action="action_zivoit_tender_agent_search" sequence="1"/>
+    <menuitem id="menu_zivoit_tender_profiles" name="Tender Agents" parent="menu_zivoit_tender_find"
+              action="action_zivoit_tender_profile" sequence="2"/>
+    <menuitem id="menu_zivoit_tender_all" name="All Tenders" parent="menu_zivoit_tender_find"
+              action="action_zivoit_tender" sequence="3"/>
+    <menuitem id="menu_zivoit_tender_closing" name="Closing Soon" parent="menu_zivoit_tender_find"
+              action="action_zivoit_tender_closing" sequence="4"/>
+
+    <menuitem id="menu_zivoit_tender_bids" name="Bids" parent="menu_zivoit_tender_root" sequence="20"/>
+    <menuitem id="menu_zivoit_tender_pipeline" name="Bid Pipeline" parent="menu_zivoit_tender_bids"
+              action="action_zivoit_tender_pipeline" sequence="1"/>
+
+    <menuitem id="menu_zivoit_tender_execution" name="Execution" parent="menu_zivoit_tender_root" sequence="30"/>
+    <menuitem id="menu_zivoit_tender_ra_bills" name="RA Bills" parent="menu_zivoit_tender_execution"
+              action="action_zivoit_ra_bill" sequence="1"/>
+
+    <menuitem id="menu_zivoit_tender_reporting" name="Reporting" parent="menu_zivoit_tender_root" sequence="40"/>
+    <menuitem id="menu_zivoit_tender_analysis" name="Tender Analysis" parent="menu_zivoit_tender_reporting"
+              action="action_zivoit_tender_analysis" sequence="1"/>
+    <menuitem id="menu_zivoit_tender_logs" name="Fetch Logs" parent="menu_zivoit_tender_reporting"
+              action="action_zivoit_tender_fetch_log" sequence="5"/>
+
+    <menuitem id="menu_zivoit_tender_config" name="Configuration" parent="menu_zivoit_tender_root" sequence="90"
+              groups="zivoit_tender_ai.group_tender_manager"/>
+    <menuitem id="menu_zivoit_tender_settings" name="Settings" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_settings" sequence="1"/>
+    <menuitem id="menu_zivoit_tender_sources" name="Sources &amp; Portals" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_source" sequence="2"/>
+    <menuitem id="menu_zivoit_tender_sectors" name="Sectors &amp; Keywords" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_sector" sequence="3"/>
+    <menuitem id="menu_zivoit_tender_zones" name="Railway Zones &amp; PSUs" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_zone" sequence="4"/>
+    <menuitem id="menu_zivoit_tender_stages" name="Pipeline Stages" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_stage" sequence="5"/>
+    <menuitem id="menu_zivoit_tender_checklists" name="Bid / No-Bid Checklists" parent="menu_zivoit_tender_config"
+              action="action_zivoit_checklist_template" sequence="6"/>
+    <menuitem id="menu_zivoit_tender_tags" name="Tags" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_tag" sequence="7"/>
+    <menuitem id="menu_zivoit_tender_reasons" name="Lost / No-Bid Reasons" parent="menu_zivoit_tender_config"
+              action="action_zivoit_tender_lost_reason" sequence="8"/>
+</odoo>

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivoit_tender_profile_list" model="ir.ui.view">
+        <field name="name">zivoit.tender.profile.list</field>
+        <field name="model">zivoit.tender.profile</field>
+        <field name="arch" type="xml">
+            <list string="Tender Agents">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="nl_query"/>
+                <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="state_ids" widget="many2many_tags"/>
+                <field name="zone_ids" widget="many2many_tags"/>
+                <field name="frequency"/>
+                <field name="last_run"/>
+                <field name="last_new_count"/>
+                <field name="open_count" string="Open Matches"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <button name="action_run" type="object" string="Run" icon="fa-play"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivoit_tender_profile_kanban" model="ir.ui.view">
+        <field name="name">zivoit.tender.profile.kanban</field>
+        <field name="model">zivoit.tender.profile</field>
+        <field name="arch" type="xml">
+            <kanban class="o_zivoit_agent_kanban" highlight_color="color">
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex justify-content-between">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <field name="frequency" class="badge text-bg-light"/>
+                        </div>
+                        <field name="nl_query" class="text-muted fst-italic"/>
+                        <div class="d-flex flex-wrap gap-1 my-1">
+                            <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="zone_ids" widget="many2many_tags"/>
+                            <field name="state_ids" widget="many2many_tags"/>
+                        </div>
+                        <footer>
+                            <button name="action_view_tenders" type="object" class="btn btn-primary btn-sm">
+                                <field name="open_count"/> open matches
+                            </button>
+                            <button name="action_run" type="object" class="btn btn-secondary btn-sm ms-1">
+                                <i class="fa fa-play"/> Run now
+                            </button>
+                            <div class="ms-auto"><field name="user_id" widget="many2one_avatar_user"/></div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_zivoit_tender_profile_form" model="ir.ui.view">
+        <field name="name">zivoit.tender.profile.form</field>
+        <field name="model">zivoit.tender.profile</field>
+        <field name="arch" type="xml">
+            <form string="Tender Agent">
+                <header>
+                    <button name="action_run" type="object" string="Run Agent Now" class="btn-primary" icon="fa-play"/>
+                    <button name="action_parse_query" type="object" string="Understand Query (AI)" icon="fa-magic"
+                            invisible="not nl_query"/>
+                    <button name="action_send_digest" type="object" string="Send Digest Now" icon="fa-envelope"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_tenders" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="open_count" widget="statinfo" string="Open Matches"/>
+                        </button>
+                        <button name="action_view_tenders" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="tender_count" widget="statinfo" string="All Matches"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. SCR Railway Construction"/></h1>
+                    </div>
+                    <div class="alert alert-info mb-3" role="alert">
+                        <field name="nl_query" class="w-100 fs-5"
+                               placeholder='Ask in plain words: "open tenders in railways construction in SCR above 2 crore"'/>
+                        <div class="small text-muted">Typing a request fills the filters below automatically. Use
+                            "Understand Query (AI)" to refine with the AI model.</div>
+                    </div>
+                    <group>
+                        <group string="What to Find">
+                            <field name="keywords" placeholder="ROB, doubling, staff quarters"/>
+                            <field name="exclude_keywords" placeholder="painting, AMC, supply of"/>
+                            <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="zone_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="state_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="organisation_keywords" placeholder="NHAI, R&amp;B, GHMC"/>
+                            <field name="work_types" placeholder="item_rate, epc"/>
+                        </group>
+                        <group string="Price &amp; Timeline">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="min_value"/>
+                            <field name="max_value"/>
+                            <field name="include_unknown_value"/>
+                            <field name="max_emd"/>
+                            <field name="max_completion_months"/>
+                            <field name="min_days_left"/>
+                            <field name="deadline_days"/>
+                            <field name="published_days"/>
+                            <field name="open_only"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Automation &amp; Alerts" name="automation">
+                            <group>
+                                <group string="Schedule">
+                                    <field name="frequency"/>
+                                    <field name="last_run"/>
+                                    <field name="next_run"/>
+                                    <field name="last_new_count"/>
+                                    <field name="live_search"/>
+                                    <field name="source_ids" widget="many2many_tags" invisible="not live_search"
+                                           placeholder="All active sources"/>
+                                </group>
+                                <group string="Actions on New Matches">
+                                    <field name="notify_mode"/>
+                                    <field name="notify_user_ids" widget="many2many_avatar_user"/>
+                                    <field name="auto_assign_user_id"/>
+                                    <field name="auto_tag_ids" widget="many2many_tags"/>
+                                    <field name="auto_shortlist_score"/>
+                                </group>
+                                <group string="Access">
+                                    <field name="user_id"/>
+                                    <field name="shared"/>
+                                    <field name="company_id" groups="base.group_multi_company"/>
+                                </group>
+                                <group string="Current Filters">
+                                    <field name="filter_summary" nolabel="1" colspan="2"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Matches" name="matches">
+                            <field name="tender_ids" readonly="1">
+                                <list decoration-muted="not is_open">
+                                    <field name="name"/>
+                                    <field name="organisation"/>
+                                    <field name="state_id"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="estimated_value"/>
+                                    <field name="date_closing"/>
+                                    <field name="relevance_score" widget="progressbar"/>
+                                    <field name="stage_id"/>
+                                    <field name="is_open" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Run Log" name="log">
+                            <field name="log_ids">
+                                <list decoration-danger="status == 'error'">
+                                    <field name="date"/>
+                                    <field name="source_id"/>
+                                    <field name="status"/>
+                                    <field name="found"/>
+                                    <field name="created"/>
+                                    <field name="updated"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_zivoit_tender_profile_search" model="ir.ui.view">
+        <field name="name">zivoit.tender.profile.search</field>
+        <field name="model">zivoit.tender.profile</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="nl_query"/>
+                <field name="user_id"/>
+                <filter name="mine" string="My Agents" domain="[('user_id', '=', uid)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivoit_tender_profile" model="ir.actions.act_window">
+        <field name="name">Tender Agents</field>
+        <field name="res_model">zivoit.tender.profile</field>
+        <field name="path">tender-agents</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first Tender Agent</p>
+            <p>Describe what you bid for in plain words, e.g. <i>"open tenders in railways construction in SCR"</i> or
+               <i>"construction tenders in Telangana above 5 crore"</i>. The agent searches portals on schedule,
+               filters, scores and alerts you.</p>
+        </field>
+    </record>
+</odoo>

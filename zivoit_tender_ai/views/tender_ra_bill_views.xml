@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivoit_ra_bill_list" model="ir.ui.view">
+        <field name="name">zivoit.tender.ra.bill.list</field>
+        <field name="model">zivoit.tender.ra.bill</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancel'" decoration-success="state == 'paid'">
+                <field name="name"/>
+                <field name="tender_id"/>
+                <field name="project_id" optional="show"/>
+                <field name="date"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="gross_amount" sum="Total"/>
+                <field name="net_payable" sum="Total"/>
+                <field name="certified_amount" sum="Total" optional="show"/>
+                <field name="paid_amount" sum="Total" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'submitted'" decoration-success="state in ('certified', 'paid')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivoit_ra_bill_form" model="ir.ui.view">
+        <field name="name">zivoit.tender.ra.bill.form</field>
+        <field name="model">zivoit.tender.ra.bill</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_load_boq" type="object" string="Load BOQ Items" invisible="state != 'draft'"/>
+                    <button name="action_submit" type="object" string="Submit to Client" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_certify" type="object" string="Certified" class="btn-primary" invisible="state != 'submitted'"/>
+                    <button name="action_mark_paid" type="object" string="Mark Paid" class="btn-primary" invisible="state != 'certified'"/>
+                    <button name="action_draft" type="object" string="Reset to Draft" invisible="state not in ('submitted', 'cancel')"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state in ('paid', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,certified,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="tender_id" readonly="state != 'draft'"/>
+                            <field name="project_id"/>
+                            <field name="partner_id"/>
+                            <field name="bill_no"/>
+                            <field name="is_final"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="period_from"/>
+                            <field name="period_to"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Measurements" name="lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom" decoration-danger="excess_qty">
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="boq_line_id" column_invisible="1"/>
+                                    <field name="item_code"/>
+                                    <field name="name"/>
+                                    <field name="uom"/>
+                                    <field name="contract_qty"/>
+                                    <field name="rate"/>
+                                    <field name="previous_qty"/>
+                                    <field name="current_qty"/>
+                                    <field name="cumulative_qty"/>
+                                    <field name="current_amount" sum="This Bill"/>
+                                    <field name="cumulative_amount" sum="Up to Date"/>
+                                    <field name="measurement_ref" optional="show"/>
+                                    <field name="excess_qty" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes"><field name="notes"/></page>
+                    </notebook>
+                    <group>
+                        <group string="Deductions &amp; Taxes">
+                            <field name="retention_pct"/>
+                            <field name="gst_pct"/>
+                            <field name="tds_pct"/>
+                            <field name="gst_tds_pct"/>
+                            <field name="labour_cess_pct"/>
+                            <field name="mobilisation_recovery"/>
+                            <field name="material_advance_recovery"/>
+                            <field name="other_deductions"/>
+                        </group>
+                        <group string="Bill Summary">
+                            <field name="cumulative_amount"/>
+                            <field name="gross_amount"/>
+                            <field name="gst_amount"/>
+                            <field name="retention_amount"/>
+                            <field name="tds_amount"/>
+                            <field name="gst_tds_amount"/>
+                            <field name="labour_cess_amount"/>
+                            <field name="net_payable" class="fw-bold"/>
+                            <field name="certified_amount"/>
+                            <field name="paid_amount"/>
+                            <field name="payment_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_zivoit_ra_bill_search" model="ir.ui.view">
+        <field name="name">zivoit.tender.ra.bill.search</field>
+        <field name="model">zivoit.tender.ra.bill</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="tender_id"/>
+                <field name="project_id"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="pending" string="Awaiting Payment" domain="[('state', 'in', ('submitted', 'certified'))]"/>
+                <filter name="paid" string="Paid" domain="[('state', '=', 'paid')]"/>
+                <group>
+                    <filter name="group_tender" string="Tender" context="{'group_by': 'tender_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivoit_ra_bill" model="ir.actions.act_window">
+        <field name="name">RA Bills</field>
+        <field name="res_model">zivoit.tender.ra.bill</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_tender_brief" model="ir.actions.report">
+        <field name="name">Tender Brief (Bid / No-Bid)</field>
+        <field name="model">zivoit.tender</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_tender_ai.report_tender_brief</field>
+        <field name="report_file">zivoit_tender_ai.report_tender_brief</field>
+        <field name="print_report_name">'Tender Brief - %s' % (object.code)</field>
+        <field name="binding_model_id" ref="model_zivoit_tender"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_tender_brief">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h3 t-out="o.name"/>
+                        <p class="text-muted"><span t-out="o.code"/> | <span t-out="o.reference"/> | <span t-out="o.stage_id.name"/></p>
+                        <table class="table table-sm">
+                            <tr><th>Buyer</th><td><span t-out="o.organisation"/> <span t-out="o.department"/></td>
+                                <th>Zone / State</th><td><span t-out="o.zone_id.code"/> <span t-out="o.state_id.name"/> <span t-out="o.location"/></td></tr>
+                            <tr><th>Estimated Value</th><td><span t-out="o.estimated_value" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                <th>EMD</th><td><span t-out="o.emd_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr><th>Bid Closes</th><td t-out="o.date_closing"/>
+                                <th>Completion</th><td><span t-out="o.completion_months"/> months</td></tr>
+                            <tr><th>Sectors</th><td t-out="', '.join(o.sector_ids.mapped('name'))"/>
+                                <th>Contract Type</th><td><span t-field="o.work_type"/></td></tr>
+                            <tr><th>Bid Manager</th><td t-out="o.user_id.name"/>
+                                <th>Relevance</th><td><span t-out="o.relevance_score"/> / 100</td></tr>
+                        </table>
+                        <h5>Bid / No-Bid: <span t-field="o.go_decision"/> (score <span t-out="o.go_score"/>)</h5>
+                        <table class="table table-sm table-bordered" t-if="o.checklist_line_ids">
+                            <thead><tr><th>Criterion</th><th>Category</th><th>Weight</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.checklist_line_ids" t-as="l">
+                                    <td><span t-out="l.name"/><span t-if="l.mandatory"> *</span></td>
+                                    <td><span t-field="l.category"/></td><td t-out="l.weight"/><td><span t-field="l.status"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div t-if="o.ai_summary">
+                            <h5>AI Summary (<span t-field="o.ai_recommendation"/>)</h5>
+                            <p style="white-space: pre-line;" t-out="o.ai_summary"/>
+                            <p style="white-space: pre-line;"><b>Risks:</b> <span t-out="o.ai_risks"/></p>
+                        </div>
+                        <h5>Pricing</h5>
+                        <table class="table table-sm">
+                            <tr><th>BOQ Direct Cost</th><td><span t-out="o.boq_cost" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr><th>Overheads / Contingency / Margin</th><td><span t-out="o.overhead_pct"/>% / <span t-out="o.contingency_pct"/>% / <span t-out="o.margin_pct"/>%</td></tr>
+                            <tr><th>Bid Amount</th><td><span t-out="o.bid_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td></tr>
+                            <tr><th>Above(+)/Below(-) Estimate</th><td><span t-out="'%.2f' % o.quote_vs_estimate_pct"/> %</td></tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

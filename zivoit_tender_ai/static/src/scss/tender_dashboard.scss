@@ -1,0 +1,36 @@
+.o_zivoit_dashboard {
+    background: #f3f6fb;
+    .cursor-pointer { cursor: pointer; }
+    .o_zv_hero {
+        background: linear-gradient(120deg, #0b2a5b 0%, #1d4f91 60%, #2f6fc2 100%);
+        color: #fff;
+        padding: 22px 28px 16px;
+    }
+    .o_zv_hero_title { font-size: 1.6rem; font-weight: 700; }
+    .o_zv_sub { font-size: .95rem; font-weight: 400; opacity: .8; margin-left: 10px; }
+    .o_zv_search { display: flex; gap: 10px; margin-top: 14px; max-width: 1100px; align-items: stretch;
+        input { border: 0; background: #ffffff; color: #1f2a44; font-size: 1.1rem; padding: 10px 16px; border-radius: 8px;
+            &::placeholder { color: #8a94a8; } }
+        button { white-space: nowrap; border-radius: 8px; padding: 0 22px; display: flex; align-items: center; gap: 6px; } }
+    .list-group-item .badge { flex-shrink: 0; }
+    .o_zv_table td.text-end, .o_zv_table td:nth-child(8) { white-space: nowrap; }
+    .o_zv_options { margin-top: 10px; font-size: .85rem; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .o_zv_example { color: #ffd56a; background: rgba(255, 255, 255, .1); border-radius: 12px; padding: 1px 9px; text-decoration: none;
+        &:hover { background: rgba(255, 255, 255, .25); } }
+    .o_zv_card { border: 0; box-shadow: 0 1px 3px rgba(11, 42, 91, .12); border-radius: 10px;
+        .card-header { background: #fff; border-bottom: 1px solid #e6ebf3; border-radius: 10px 10px 0 0; } }
+    .o_zv_kpi { position: relative; background: #fff; border-radius: 10px; padding: 14px 16px; cursor: pointer;
+        box-shadow: 0 1px 3px rgba(11, 42, 91, .12); border-left: 4px solid #1d4f91; height: 100%;
+        &:hover { box-shadow: 0 4px 12px rgba(11, 42, 91, .2); } }
+    .o_zv_kpi_icon { position: absolute; right: 14px; top: 14px; font-size: 1.4rem; color: #c8d4e8; }
+    .o_zv_kpi_value { font-size: 1.8rem; font-weight: 700; color: #0b2a5b; }
+    .o_zv_kpi_label { font-weight: 600; color: #33415c; }
+    .o_zv_kpi_sub { font-size: .78rem; color: #6b7690; }
+    .o_zv_bar_row { margin-bottom: 8px; }
+    .o_zv_bar { height: 6px; background: #e6ebf3; border-radius: 3px; }
+    .o_zv_bar_fill { height: 6px; background: #1d4f91; border-radius: 3px; }
+    .o_zv_stage { background: #f3f6fb; border-radius: 8px; padding: 8px 14px; min-width: 130px; text-align: center;
+        &:hover { background: #e3ebf7; } }
+    .o_zv_stage_count { font-size: 1.4rem; font-weight: 700; color: #1d4f91; }
+    .o_zv_table td { vertical-align: middle; }
+}

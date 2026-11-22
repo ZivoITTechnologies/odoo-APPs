@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================= LIST ================= -->
+    <record id="view_zivoit_tender_list" model="ir.ui.view">
+        <field name="name">zivoit.tender.list</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <list string="Tenders" multi_edit="1" sample="1"
+                  decoration-danger="deadline_bucket in ('today', '3d') and is_open"
+                  decoration-warning="deadline_bucket == '7d' and is_open"
+                  decoration-muted="not is_open"
+                  decoration-bf="priority in ('2', '3')">
+                <field name="priority" widget="priority" optional="show" nolabel="1"/>
+                <field name="code" optional="hide"/>
+                <field name="name" string="Name of Work"/>
+                <field name="reference" optional="show"/>
+                <field name="organisation" optional="show"/>
+                <field name="zone_id" optional="show" options="{'no_create': True}"/>
+                <field name="state_id" optional="show"/>
+                <field name="location" optional="hide"/>
+                <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="value_label" string="Value" optional="show"/>
+                <field name="estimated_value" sum="Total" optional="hide"/>
+                <field name="value_band" optional="hide"/>
+                <field name="emd_label" string="EMD" optional="show"/>
+                <field name="emd_amount" optional="hide"/>
+                <field name="completion_months" string="Months" optional="show"/>
+                <field name="date_published" optional="hide"/>
+                <field name="date_closing" widget="remaining_days" optional="show"/>
+                <field name="date_closing" string="Closes On" optional="show"/>
+                <field name="deadline_bucket" optional="hide" widget="badge"
+                       decoration-danger="deadline_bucket in ('today', '3d')" decoration-warning="deadline_bucket == '7d'"/>
+                <field name="relevance_score" widget="progressbar" optional="show"/>
+                <field name="ai_recommendation" widget="badge" optional="hide"
+                       decoration-success="ai_recommendation == 'go'" decoration-warning="ai_recommendation == 'review'"
+                       decoration-danger="ai_recommendation == 'no_go'"/>
+                <field name="go_decision" widget="badge" optional="hide"
+                       decoration-success="go_decision == 'go'" decoration-danger="go_decision == 'no_go'"/>
+                <field name="stage_id" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="source_id" optional="hide"/>
+                <field name="is_open" column_invisible="1"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
+                <field name="activity_ids" widget="list_activity" optional="hide"/>
+                <button name="action_open_url" type="object" icon="fa-external-link" title="Open on portal" invisible="not url"/>
+                <button name="action_shortlist" type="object" icon="fa-star" title="Shortlist"
+                        invisible="stage_type not in ('new', 'review')"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ================= KANBAN ================= -->
+    <record id="view_zivoit_tender_kanban" model="ir.ui.view">
+        <field name="name">zivoit.tender.kanban</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column o_zivoit_tender_kanban" sample="1"
+                    quick_create="false" highlight_color="color">
+                <field name="stage_id"/>
+                <field name="currency_id"/>
+                <field name="stage_type"/>
+                <field name="deadline_bucket"/>
+                <field name="is_open"/>
+                <progressbar field="deadline_bucket"
+                             colors='{"today": "danger", "3d": "danger", "7d": "warning", "15d": "info", "30d": "success", "later": "success"}'
+                             sum_field="estimated_value"/>
+                <templates>
+                    <t t-name="menu">
+                        <a role="menuitem" type="open" class="dropdown-item">Open</a>
+                        <a role="menuitem" type="object" name="action_analyse" class="dropdown-item">AI Analyse</a>
+                        <a role="menuitem" type="object" name="action_open_url" class="dropdown-item">Open on Portal</a>
+                        <div role="separator" class="dropdown-divider"/>
+                        <field name="color" widget="kanban_color_picker"/>
+                    </t>
+                    <t t-name="card">
+                        <widget name="web_ribbon" title="Closing" bg_color="text-bg-danger"
+                                invisible="deadline_bucket not in ('today', '3d') or not is_open"/>
+                        <widget name="web_ribbon" title="Won" bg_color="text-bg-success" invisible="stage_type != 'won'"/>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <field name="code" class="text-muted small text-nowrap"/>
+                            <field name="zone_code" class="badge text-bg-primary" invisible="not zone_code"/>
+                        </div>
+                        <field name="name" class="fw-bold o_text_overflow_2"/>
+                        <field name="organisation" class="text-muted small"/>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="state_id" class="small"/>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <field name="value_label" class="fw-bold" invisible="not estimated_value"/>
+                            <field name="estimated_value" invisible="1"/>
+                            <field name="days_left_label" class="small text-danger" invisible="not date_closing"/>
+                        </div>
+                        <field name="date_closing" invisible="1"/>
+                        <footer class="pt-1">
+                            <div class="d-flex align-items-center">
+                                <field name="priority" widget="priority" class="me-2"/>
+                                <field name="activity_ids" widget="kanban_activity"/>
+                                <field name="relevance_score" class="badge text-bg-light ms-1" invisible="not relevance_score"/>
+                            </div>
+                            <div class="ms-auto">
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ================= FORM ================= -->
+    <record id="view_zivoit_tender_form" model="ir.ui.view">
+        <field name="name">zivoit.tender.form</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <form string="Tender">
+                <header>
+                    <button name="action_review" type="object" string="Start Review" class="btn-primary"
+                            invisible="stage_type != 'new'"/>
+                    <button name="action_shortlist" type="object" string="Shortlist" class="btn-primary"
+                            invisible="stage_type not in ('new', 'review')"/>
+                    <button name="action_prepare_bid" type="object" string="Go - Prepare Bid" class="btn-primary"
+                            invisible="stage_type != 'shortlist'"/>
+                    <button name="action_submit_bid" type="object" string="Mark Submitted" class="btn-primary"
+                            invisible="stage_type != 'prepare'"/>
+                    <button name="action_evaluation" type="object" string="Under Evaluation"
+                            invisible="stage_type != 'submitted'"/>
+                    <button name="action_open_result_wizard" type="object" string="Record Result" class="btn-primary"
+                            invisible="stage_type not in ('submitted', 'evaluation')"/>
+                    <button name="action_drop" type="object" string="No-Bid / Drop"
+                            invisible="stage_type in ('won', 'lost', 'dropped', 'expired')"/>
+                    <button name="action_analyse" type="object" string="AI Analyse" icon="fa-magic"/>
+                    <button name="action_create_opportunity" type="object" string="Create Opportunity"
+                            invisible="lead_id or stage_type in ('new', 'lost', 'dropped', 'expired')"/>
+                    <button name="action_create_project" type="object" string="Create Project" class="btn-primary"
+                            invisible="project_id or stage_type != 'won'"/>
+                    <button name="action_reopen" type="object" string="Reopen"
+                            invisible="stage_type not in ('lost', 'dropped', 'expired')"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_url" type="object" class="oe_stat_button" icon="fa-external-link"
+                                invisible="not url">
+                            <div class="o_stat_info"><span class="o_stat_text">Portal</span></div>
+                        </button>
+                        <button name="action_view_attachments" type="object" class="oe_stat_button" icon="fa-file-pdf-o">
+                            <field name="attachment_count" widget="statinfo" string="Documents"/>
+                        </button>
+                        <button name="action_view_corrigenda" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="corrigendum_count" widget="statinfo" string="Corrigenda"/>
+                        </button>
+                        <button name="action_create_opportunity" type="object" class="oe_stat_button" icon="fa-handshake-o"
+                                invisible="not lead_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Opportunity</span></div>
+                        </button>
+                        <button name="action_view_project" type="object" class="oe_stat_button" icon="fa-puzzle-piece"
+                                invisible="not project_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Project</span></div>
+                        </button>
+                        <button name="action_view_ra_bills" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="stage_type != 'won'">
+                            <field name="ra_bill_count" widget="statinfo" string="RA Bills"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Won" bg_color="text-bg-success" invisible="stage_type != 'won'"/>
+                    <widget name="web_ribbon" title="Lost" bg_color="text-bg-danger" invisible="stage_type != 'lost'"/>
+                    <widget name="web_ribbon" title="No-Bid" bg_color="text-bg-secondary" invisible="stage_type != 'dropped'"/>
+                    <widget name="web_ribbon" title="Expired" bg_color="text-bg-warning" invisible="stage_type != 'expired'"/>
+                    <div class="oe_title">
+                        <div class="d-flex gap-2 align-items-center">
+                            <field name="priority" widget="priority"/>
+                            <field name="code" readonly="1" class="text-muted"/>
+                            <field name="days_left_label" class="badge text-bg-danger" invisible="not is_open or not date_closing"/>
+                        </div>
+                        <h1><field name="name" placeholder="Name of work" widget="text" class="text-break"/></h1>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"
+                               placeholder="Tags"/>
+                    </div>
+                    <group>
+                        <group string="Buyer">
+                            <field name="reference"/>
+                            <field name="organisation"/>
+                            <field name="department"/>
+                            <field name="zone_id" options="{'no_create': True}"/>
+                            <field name="partner_id"/>
+                            <field name="country_id" invisible="1"/>
+                            <field name="state_id" options="{'no_create': True}"/>
+                            <field name="location"/>
+                        </group>
+                        <group string="Key Facts">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="estimated_value"/>
+                            <field name="value_label" string="Value in Cr / L" class="fw-bold" invisible="not estimated_value"/>
+                            <field name="value_band"/>
+                            <field name="emd_amount"/>
+                            <field name="emd_label" string="EMD in Cr / L" invisible="not emd_amount"/>
+                            <field name="tender_fee"/>
+                            <field name="completion_period"/>
+                            <field name="completion_months"/>
+                            <field name="sector_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="work_type"/>
+                            <field name="tender_type"/>
+                            <field name="cover_system"/>
+                        </group>
+                        <group string="Critical Dates">
+                            <field name="date_published"/>
+                            <field name="date_prebid"/>
+                            <field name="date_closing" decoration-danger="deadline_bucket in ('today', '3d')"/>
+                            <field name="date_opening"/>
+                            <field name="deadline_bucket"/>
+                            <field name="is_open"/>
+                        </group>
+                        <group string="Ownership">
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="team_member_ids" widget="many2many_avatar_user"/>
+                            <field name="relevance_score" widget="progressbar"/>
+                            <field name="profile_ids" widget="many2many_tags"/>
+                            <field name="source_id"/>
+                            <field name="portal"/>
+                            <field name="url" widget="url"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Scope &amp; Notes" name="description">
+                            <field name="description" placeholder="Scope of work, eligibility notes, pasted NIT text..."/>
+                        </page>
+                        <page string="AI Insights" name="ai">
+                            <group>
+                                <group>
+                                    <field name="ai_recommendation" widget="badge"
+                                           decoration-success="ai_recommendation == 'go'"
+                                           decoration-warning="ai_recommendation == 'review'"
+                                           decoration-danger="ai_recommendation == 'no_go'"/>
+                                    <field name="ai_score" widget="progressbar"/>
+                                    <field name="ai_reason"/>
+                                </group>
+                                <group>
+                                    <field name="ai_engine"/>
+                                    <field name="ai_analysed_date"/>
+                                    <field name="match_reason"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="ai_summary" nolabel="1" colspan="2" placeholder="Click 'AI Analyse' to generate a summary."/>
+                            </group>
+                            <group>
+                                <group string="Scope"><field name="ai_scope" nolabel="1" colspan="2"/></group>
+                                <group string="Eligibility"><field name="ai_eligibility" nolabel="1" colspan="2"/></group>
+                            </group>
+                            <group string="Risks"><field name="ai_risks" nolabel="1" colspan="2"/></group>
+                        </page>
+                        <page string="Bid / No-Bid" name="checklist">
+                            <div class="d-flex gap-3 mb-2 align-items-center">
+                                <span>Score: <field name="go_score" class="fw-bold"/> / 100</span>
+                                <field name="go_decision" widget="badge" decoration-success="go_decision == 'go'"
+                                       decoration-danger="go_decision == 'no_go'" decoration-warning="go_decision == 'review'"/>
+                                <span class="text-danger fw-bold" invisible="not mandatory_failed">A mandatory criterion is not met</span>
+                                <field name="mandatory_failed" invisible="1"/>
+                                <button name="action_apply_checklist" type="object" string="Load Checklist Template"
+                                        class="btn-secondary btn-sm"/>
+                            </div>
+                            <field name="checklist_line_ids">
+                                <list editable="bottom" decoration-danger="mandatory and status == 'no'"
+                                      decoration-success="status == 'yes'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="category"/>
+                                    <field name="name"/>
+                                    <field name="requirement" optional="show"/>
+                                    <field name="our_position" optional="show"/>
+                                    <field name="weight"/>
+                                    <field name="mandatory"/>
+                                    <field name="status" widget="badge" decoration-success="status == 'yes'"
+                                           decoration-warning="status == 'partial'" decoration-danger="status == 'no'"/>
+                                    <field name="responsible_id" widget="many2one_avatar_user" optional="show"/>
+                                    <field name="attachment_ids" widget="many2many_binary" optional="hide"/>
+                                    <field name="notes" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="BOQ &amp; Costing" name="boq">
+                            <field name="boq_line_ids">
+                                <list editable="bottom" decoration-bf="display_type == 'line_section'"
+                                      decoration-it="display_type == 'line_note'" decoration-info="display_type">
+                                    <control>
+                                        <create name="add_line" string="Add an item"/>
+                                        <create name="add_section" string="Add a section" context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note" string="Add a note" context="{'default_display_type': 'line_note'}"/>
+                                    </control>
+                                    <field name="display_type" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="item_code"/>
+                                    <field name="name"/>
+                                    <field name="uom"/>
+                                    <field name="quantity"/>
+                                    <field name="estimate_rate"/>
+                                    <field name="material_rate" optional="hide"/>
+                                    <field name="labour_rate" optional="hide"/>
+                                    <field name="equipment_rate" optional="hide"/>
+                                    <field name="subcontract_rate" optional="hide"/>
+                                    <field name="cost_rate"/>
+                                    <field name="quoted_rate" optional="show"/>
+                                    <field name="estimate_amount" sum="Estimate"/>
+                                    <field name="cost_amount" sum="Cost"/>
+                                    <field name="executed_qty" optional="hide"/>
+                                    <field name="progress" widget="progressbar" optional="hide"/>
+                                </list>
+                            </field>
+                            <group>
+                                <group string="Mark-ups">
+                                    <field name="overhead_pct"/>
+                                    <field name="contingency_pct"/>
+                                    <field name="margin_pct"/>
+                                    <field name="gst_pct"/>
+                                </group>
+                                <group string="Bid Price">
+                                    <field name="boq_estimate_amount"/>
+                                    <field name="boq_cost"/>
+                                    <field name="quoted_amount"/>
+                                    <field name="final_quoted_amount"/>
+                                    <field name="bid_amount" class="fw-bold"/>
+                                    <field name="quote_vs_estimate_pct"/>
+                                    <field name="expected_margin_amount"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="EMD &amp; Submission" name="emd">
+                            <group>
+                                <group string="EMD / Bid Security">
+                                    <field name="emd_exempt"/>
+                                    <field name="emd_mode"/>
+                                    <field name="emd_status"/>
+                                    <field name="emd_reference"/>
+                                    <field name="emd_paid_date"/>
+                                    <field name="emd_valid_until"/>
+                                    <field name="emd_refund_date"/>
+                                    <field name="tender_fee_paid"/>
+                                    <field name="performance_security_pct"/>
+                                </group>
+                                <group string="Submission">
+                                    <field name="submitted_date"/>
+                                    <field name="submission_reference"/>
+                                    <field name="shortlisted_date"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Corrigenda" name="corrigenda">
+                            <field name="corrigendum_ids">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="description"/>
+                                    <field name="new_date_closing"/>
+                                    <field name="new_estimated_value"/>
+                                    <field name="applied"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <group><field name="name"/><field name="date"/></group>
+                                        <group><field name="new_date_closing"/><field name="new_date_opening"/>
+                                            <field name="new_estimated_value"/></group>
+                                    </group>
+                                    <field name="description"/>
+                                    <field name="attachment_ids" widget="many2many_binary"/>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Result &amp; Competitors" name="result">
+                            <group>
+                                <group>
+                                    <field name="our_rank"/>
+                                    <field name="l1_bidder"/>
+                                    <field name="l1_amount"/>
+                                    <field name="gap_to_l1_pct"/>
+                                </group>
+                                <group>
+                                    <field name="awarded_value"/>
+                                    <field name="result_date"/>
+                                    <field name="lost_reason_id"/>
+                                    <field name="lead_id"/>
+                                    <field name="project_id"/>
+                                </group>
+                            </group>
+                            <field name="competitor_ids">
+                                <list editable="bottom" decoration-bf="is_us" decoration-success="rank == 1">
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="rank"/>
+                                    <field name="partner_id"/>
+                                    <field name="name"/>
+                                    <field name="is_us"/>
+                                    <field name="technically_qualified"/>
+                                    <field name="quoted_amount" sum="Total"/>
+                                    <field name="pct_vs_estimate"/>
+                                    <field name="notes" optional="show"/>
+                                </list>
+                            </field>
+                            <field name="result_notes" placeholder="Lessons learned..."/>
+                        </page>
+                        <page string="Source Data" name="raw" groups="zivoit_tender_ai.group_tender_manager">
+                            <group>
+                                <field name="found_date"/>
+                                <field name="seen_count"/>
+                                <field name="fingerprint"/>
+                                <field name="last_reminder_days"/>
+                            </group>
+                            <field name="source_payload"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================= SEARCH ================= -->
+    <record id="view_zivoit_tender_search" model="ir.ui.view">
+        <field name="name">zivoit.tender.search</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <search string="Search Tenders">
+                <field name="name" string="Keyword"
+                       filter_domain="['|', '|', '|', '|', ('name', 'ilike', self), ('description', 'ilike', self), ('organisation', 'ilike', self), ('department', 'ilike', self), ('reference', 'ilike', self)]"/>
+                <field name="reference"/>
+                <field name="organisation"/>
+                <field name="zone_id"/>
+                <field name="state_id"/>
+                <field name="location"/>
+                <field name="sector_ids"/>
+                <field name="tag_ids"/>
+                <field name="profile_ids" string="Agent"/>
+                <field name="user_id"/>
+                <field name="source_id"/>
+                <filter name="filter_open" string="Open for Bidding" domain="[('is_open', '=', True)]"/>
+                <filter name="filter_new" string="New (7 days)" domain="[('is_new', '=', True)]"/>
+                <filter name="filter_hot" string="Hot" domain="[('priority', 'in', ('2', '3'))]"/>
+                <filter name="filter_mine" string="My Tenders" domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="filter_today" string="Closing Today" domain="[('deadline_bucket', '=', 'today')]"/>
+                <filter name="filter_3d" string="Closing in 3 Days" domain="[('deadline_bucket', 'in', ('today', '3d'))]"/>
+                <filter name="filter_7d" string="Closing in 7 Days" domain="[('deadline_bucket', 'in', ('today', '3d', '7d'))]"/>
+                <filter name="filter_30d" string="Closing in 30 Days" domain="[('deadline_bucket', 'in', ('today', '3d', '7d', '15d', '30d'))]"/>
+                <separator/>
+                <filter name="filter_small" string="Up to ₹2 Cr" domain="[('value_band', 'in', ('upto_50l', '50l_2cr'))]"/>
+                <filter name="filter_mid" string="₹2 - 50 Cr" domain="[('value_band', 'in', ('2cr_10cr', '10cr_50cr'))]"/>
+                <filter name="filter_large" string="Above ₹50 Cr" domain="[('value_band', 'in', ('50cr_100cr', 'above_100cr'))]"/>
+                <separator/>
+                <filter name="filter_short_duration" string="Up to 12 Months" domain="[('duration_band', 'in', ('upto_6m', '6_12m'))]"/>
+                <filter name="filter_long_duration" string="Over 12 Months" domain="[('duration_band', 'in', ('12_24m', '24_36m', 'above_36m'))]"/>
+                <separator/>
+                <filter name="filter_railways" string="Railways" domain="[('sector_ids.code', '=', 'railways')]"/>
+                <filter name="filter_roads" string="Roads" domain="[('sector_ids.code', '=', 'roads')]"/>
+                <filter name="filter_buildings" string="Buildings" domain="[('sector_ids.code', '=', 'buildings')]"/>
+                <filter name="filter_bridges" string="Bridges" domain="[('sector_ids.code', '=', 'bridges')]"/>
+                <separator/>
+                <filter name="filter_pipeline" string="In Bid Pipeline" domain="[('stage_type', 'in', ('shortlist', 'prepare', 'submitted', 'evaluation'))]"/>
+                <filter name="filter_shortlisted" string="Shortlisted" domain="[('stage_type', '=', 'shortlist')]"/>
+                <filter name="filter_won" string="Won" domain="[('stage_type', '=', 'won')]"/>
+                <filter name="filter_lost" string="Lost" domain="[('stage_type', '=', 'lost')]"/>
+                <filter name="filter_ai_go" string="AI: Go" domain="[('ai_recommendation', '=', 'go')]"/>
+                <filter name="filter_emd_refund" string="EMD Refund Due" domain="[('emd_status', '=', 'refund_due')]"/>
+                <separator/>
+                <filter name="filter_date_closing" string="Closing Date" date="date_closing"/>
+                <filter name="filter_date_published" string="Published Date" date="date_published"/>
+                <separator/>
+                <filter name="activities_overdue" string="Late Activities" invisible="1"
+                        domain="[('my_activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_stage" string="Stage" context="{'group_by': 'stage_id'}"/>
+                    <filter name="group_sector" string="Sector" context="{'group_by': 'sector_ids'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state_id'}"/>
+                    <filter name="group_zone" string="Railway Zone" context="{'group_by': 'zone_id'}"/>
+                    <filter name="group_org" string="Organisation" context="{'group_by': 'organisation'}"/>
+                    <filter name="group_value" string="Value Band" context="{'group_by': 'value_band'}"/>
+                    <filter name="group_deadline" string="Deadline" context="{'group_by': 'deadline_bucket'}"/>
+                    <filter name="group_duration" string="Completion Period" context="{'group_by': 'duration_band'}"/>
+                    <filter name="group_work_type" string="Contract Type" context="{'group_by': 'work_type'}"/>
+                    <filter name="group_ai" string="AI Recommendation" context="{'group_by': 'ai_recommendation'}"/>
+                    <filter name="group_user" string="Bid Manager" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_source" string="Source" context="{'group_by': 'source_id'}"/>
+                    <filter name="group_closing" string="Closing Month" context="{'group_by': 'date_closing:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================= PIVOT / GRAPH / CALENDAR / ACTIVITY ================= -->
+    <record id="view_zivoit_tender_pivot" model="ir.ui.view">
+        <field name="name">zivoit.tender.pivot</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <pivot string="Tender Analysis" sample="1">
+                <field name="state_id" type="row"/>
+                <field name="value_band" type="col"/>
+                <field name="estimated_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_zivoit_tender_graph" model="ir.ui.view">
+        <field name="name">zivoit.tender.graph</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <graph string="Tenders" type="bar" sample="1">
+                <field name="stage_id"/>
+                <field name="estimated_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="view_zivoit_tender_calendar" model="ir.ui.view">
+        <field name="name">zivoit.tender.calendar</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <calendar string="Bid Deadlines" date_start="date_closing" color="stage_id" mode="month" quick_create="0">
+                <field name="name"/>
+                <field name="organisation"/>
+                <field name="estimated_value"/>
+                <field name="user_id" avatar_field="avatar_128"/>
+            </calendar>
+        </field>
+    </record>
+    <record id="view_zivoit_tender_activity" model="ir.ui.view">
+        <field name="name">zivoit.tender.activity</field>
+        <field name="model">zivoit.tender</field>
+        <field name="arch" type="xml">
+            <activity string="Tenders">
+                <templates>
+                    <div t-name="activity-box">
+                        <field name="name" display="full" class="o_text_block"/>
+                        <field name="organisation" muted="1" display="full" class="o_text_block"/>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+
+    <!-- ================= ACTIONS ================= -->
+    <record id="action_zivoit_tender" model="ir.actions.act_window">
+        <field name="name">All Tenders</field>
+        <field name="res_model">zivoit.tender</field>
+        <field name="path">tenders</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
+        <field name="search_view_id" ref="view_zivoit_tender_search"/>
+        <field name="context">{'search_default_filter_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No tenders found yet</p>
+            <p>Create a <b>Tender Agent</b> (e.g. "open tenders in railways construction in SCR") and run it,
+               configure portal sources, forward tender-alert e-mails, or import an Excel sheet.</p>
+        </field>
+    </record>
+    <record id="action_zivoit_tender_pipeline" model="ir.actions.act_window">
+        <field name="name">Bid Pipeline</field>
+        <field name="res_model">zivoit.tender</field>
+        <field name="path">bid-pipeline</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph,activity</field>
+        <field name="search_view_id" ref="view_zivoit_tender_search"/>
+        <field name="context">{'search_default_filter_mine': 0}</field>
+        <field name="domain">[('stage_type', 'not in', ('expired',))]</field>
+    </record>
+    <record id="action_zivoit_tender_closing" model="ir.actions.act_window">
+        <field name="name">Closing Soon</field>
+        <field name="res_model">zivoit.tender</field>
+        <field name="view_mode">list,kanban,calendar,form</field>
+        <field name="search_view_id" ref="view_zivoit_tender_search"/>
+        <field name="context">{'search_default_filter_open': 1, 'search_default_filter_7d': 1}</field>
+    </record>
+    <record id="action_zivoit_tender_analysis" model="ir.actions.act_window">
+        <field name="name">Tender Analysis</field>
+        <field name="res_model">zivoit.tender</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="view_zivoit_tender_search"/>
+        <field name="context">{}</field>
+    </record>
+
+    <record id="action_server_tender_analyse" model="ir.actions.server">
+        <field name="name">AI Analyse</field>
+        <field name="model_id" ref="model_zivoit_tender"/>
+        <field name="binding_model_id" ref="model_zivoit_tender"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_analyse()</field>
+    </record>
+    <record id="action_server_tender_shortlist" model="ir.actions.server">
+        <field name="name">Shortlist</field>
+        <field name="model_id" ref="model_zivoit_tender"/>
+        <field name="binding_model_id" ref="model_zivoit_tender"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.filtered(lambda t: t.stage_type in ('new', 'review')).action_shortlist()</field>
+    </record>
+    <record id="action_server_tender_classify" model="ir.actions.server">
+        <field name="name">Re-classify (Sector / State / Zone)</field>
+        <field name="model_id" ref="model_zivoit_tender"/>
+        <field name="binding_model_id" ref="model_zivoit_tender"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records._auto_classify()</field>
+    </record>
+</odoo>

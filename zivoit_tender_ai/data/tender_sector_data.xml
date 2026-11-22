@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="sector_roads" model="zivoit.tender.sector">
+            <field name="name">Roads &amp; Highways</field>
+            <field name="code">roads</field>
+            <field name="sequence">10</field>
+            <field name="color">1</field>
+            <field name="keywords">road, roads, highway, highways, nh-, national highway, state highway, widening, carriageway, bt road, cc road, pavement, resurfacing, four lane, two lane, 4-lane, 2-lane, r&amp;b, nhai, morth, pmgsy, black topping, bituminous</field>
+        </record>
+        <record id="sector_buildings" model="zivoit.tender.sector">
+            <field name="name">Buildings</field>
+            <field name="code">buildings</field>
+            <field name="sequence">20</field>
+            <field name="color">2</field>
+            <field name="keywords">building, buildings, construction of quarters, quarters, hostel, school building, hospital building, office building, auditorium, residential, complex, g+, staff quarters, housing, dwelling, civil works building, cpwd</field>
+        </record>
+        <record id="sector_bridges" model="zivoit.tender.sector">
+            <field name="name">Bridges, ROB/RUB &amp; Flyovers</field>
+            <field name="code">bridges</field>
+            <field name="sequence">30</field>
+            <field name="color">3</field>
+            <field name="keywords">bridge, bridges, rob, rub, flyover, fly over, viaduct, culvert, road over bridge, road under bridge, limited height subway, lhs</field>
+        </record>
+        <record id="sector_railways" model="zivoit.tender.sector">
+            <field name="name">Railways (Civil &amp; Track)</field>
+            <field name="code">railways</field>
+            <field name="sequence">40</field>
+            <field name="color">4</field>
+            <field name="keywords">railway, railways, rail, track, doubling, third line, new line, gauge conversion, station building, platform, foot over bridge, fob, ballast, sleeper, yard remodelling, ireps, earthwork in formation</field>
+        </record>
+        <record id="sector_water" model="zivoit.tender.sector">
+            <field name="name">Water Supply &amp; Sewerage</field>
+            <field name="code">water</field>
+            <field name="sequence">50</field>
+            <field name="color">5</field>
+            <field name="keywords">water supply, sewerage, sewer, drainage, storm water, pipeline, stp, wtp, reservoir, overhead tank, jal jeevan, amrut</field>
+        </record>
+        <record id="sector_irrigation" model="zivoit.tender.sector">
+            <field name="name">Irrigation &amp; Dams</field>
+            <field name="code">irrigation</field>
+            <field name="sequence">60</field>
+            <field name="color">6</field>
+            <field name="keywords">irrigation, canal, dam, barrage, lift irrigation, check dam, tank bund</field>
+        </record>
+        <record id="sector_electrical" model="zivoit.tender.sector">
+            <field name="name">Electrical &amp; Electrification</field>
+            <field name="code">electrical</field>
+            <field name="sequence">70</field>
+            <field name="color">7</field>
+            <field name="keywords">electrical, electrification, ohe, substation, transmission line, lighting, solar, traction</field>
+        </record>
+        <record id="sector_metro" model="zivoit.tender.sector">
+            <field name="name">Metro &amp; Urban Transit</field>
+            <field name="code">metro</field>
+            <field name="sequence">80</field>
+            <field name="color">8</field>
+            <field name="keywords">metro, mrts, rapid transit</field>
+        </record>
+        <record id="sector_real_estate" model="zivoit.tender.sector">
+            <field name="name">Real Estate &amp; Township</field>
+            <field name="code">real_estate</field>
+            <field name="sequence">90</field>
+            <field name="color">9</field>
+            <field name="keywords">real estate, township, apartment, villas, commercial complex, mall, land development, layout development, plotted development</field>
+        </record>
+        <record id="sector_maintenance" model="zivoit.tender.sector">
+            <field name="name">Repairs &amp; Maintenance</field>
+            <field name="code">maintenance</field>
+            <field name="sequence">100</field>
+            <field name="color">10</field>
+            <field name="keywords">maintenance, repairs, special repairs, annual maintenance, amc, renovation, painting, patch work</field>
+        </record>
+    </data>
+    <data noupdate="1">
+        <record id="zone_scr" model="zivoit.tender.zone">
+            <field name="code">SCR</field>
+            <field name="name">South Central Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Secunderabad</field>
+            <field name="aliases">south central railway, secunderabad, s.c.railway, sc railway, scr</field>
+        </record>
+        <record id="zone_sr" model="zivoit.tender.zone">
+            <field name="code">SR</field>
+            <field name="name">Southern Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Chennai</field>
+            <field name="aliases">southern railway</field>
+        </record>
+        <record id="zone_cr" model="zivoit.tender.zone">
+            <field name="code">CR</field>
+            <field name="name">Central Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Mumbai</field>
+            <field name="aliases">central railway</field>
+        </record>
+        <record id="zone_wr" model="zivoit.tender.zone">
+            <field name="code">WR</field>
+            <field name="name">Western Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Mumbai</field>
+            <field name="aliases">western railway</field>
+        </record>
+        <record id="zone_er" model="zivoit.tender.zone">
+            <field name="code">ER</field>
+            <field name="name">Eastern Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Kolkata</field>
+            <field name="aliases">eastern railway</field>
+        </record>
+        <record id="zone_nr" model="zivoit.tender.zone">
+            <field name="code">NR</field>
+            <field name="name">Northern Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">New Delhi</field>
+            <field name="aliases">northern railway</field>
+        </record>
+        <record id="zone_ner" model="zivoit.tender.zone">
+            <field name="code">NER</field>
+            <field name="name">North Eastern Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Gorakhpur</field>
+            <field name="aliases">north eastern railway</field>
+        </record>
+        <record id="zone_nfr" model="zivoit.tender.zone">
+            <field name="code">NFR</field>
+            <field name="name">Northeast Frontier Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Guwahati</field>
+            <field name="aliases">northeast frontier railway, n.f.railway</field>
+        </record>
+        <record id="zone_nwr" model="zivoit.tender.zone">
+            <field name="code">NWR</field>
+            <field name="name">North Western Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Jaipur</field>
+            <field name="aliases">north western railway</field>
+        </record>
+        <record id="zone_ncr" model="zivoit.tender.zone">
+            <field name="code">NCR</field>
+            <field name="name">North Central Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Prayagraj</field>
+            <field name="aliases">north central railway</field>
+        </record>
+        <record id="zone_ecr" model="zivoit.tender.zone">
+            <field name="code">ECR</field>
+            <field name="name">East Central Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Hajipur</field>
+            <field name="aliases">east central railway</field>
+        </record>
+        <record id="zone_ecor" model="zivoit.tender.zone">
+            <field name="code">ECOR</field>
+            <field name="name">East Coast Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Bhubaneswar</field>
+            <field name="aliases">east coast railway</field>
+        </record>
+        <record id="zone_ser" model="zivoit.tender.zone">
+            <field name="code">SER</field>
+            <field name="name">South Eastern Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Kolkata</field>
+            <field name="aliases">south eastern railway</field>
+        </record>
+        <record id="zone_secr" model="zivoit.tender.zone">
+            <field name="code">SECR</field>
+            <field name="name">South East Central Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Bilaspur</field>
+            <field name="aliases">south east central railway</field>
+        </record>
+        <record id="zone_swr" model="zivoit.tender.zone">
+            <field name="code">SWR</field>
+            <field name="name">South Western Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Hubballi</field>
+            <field name="aliases">south western railway, hubballi</field>
+        </record>
+        <record id="zone_wcr" model="zivoit.tender.zone">
+            <field name="code">WCR</field>
+            <field name="name">West Central Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Jabalpur</field>
+            <field name="aliases">west central railway</field>
+        </record>
+        <record id="zone_scor" model="zivoit.tender.zone">
+            <field name="code">SCOR</field>
+            <field name="name">South Coast Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Visakhapatnam</field>
+            <field name="aliases">south coast railway, visakhapatnam zone</field>
+        </record>
+        <record id="zone_kr" model="zivoit.tender.zone">
+            <field name="code">KR</field>
+            <field name="name">Konkan Railway</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Navi Mumbai</field>
+            <field name="aliases">konkan railway, krcl</field>
+        </record>
+        <record id="zone_mtp" model="zivoit.tender.zone">
+            <field name="code">MTP</field>
+            <field name="name">Metro Railway Kolkata</field>
+            <field name="zone_type">zone</field>
+            <field name="headquarters">Kolkata</field>
+            <field name="aliases">metro railway kolkata</field>
+        </record>
+        <record id="zone_rvnl" model="zivoit.tender.zone">
+            <field name="code">RVNL</field>
+            <field name="name">Rail Vikas Nigam Ltd</field>
+            <field name="zone_type">psu</field>
+            <field name="headquarters">New Delhi</field>
+            <field name="aliases">rail vikas nigam, rvnl</field>
+        </record>
+        <record id="zone_ircon" model="zivoit.tender.zone">
+            <field name="code">IRCON</field>
+            <field name="name">IRCON International</field>
+            <field name="zone_type">psu</field>
+            <field name="headquarters">New Delhi</field>
+            <field name="aliases">ircon</field>
+        </record>
+        <record id="zone_rites" model="zivoit.tender.zone">
+            <field name="code">RITES</field>
+            <field name="name">RITES Ltd</field>
+            <field name="zone_type">psu</field>
+            <field name="headquarters">Gurugram</field>
+            <field name="aliases">rites ltd, rites limited</field>
+        </record>
+        <record id="zone_dfccil" model="zivoit.tender.zone">
+            <field name="code">DFCCIL</field>
+            <field name="name">Dedicated Freight Corridor</field>
+            <field name="zone_type">psu</field>
+            <field name="headquarters">New Delhi</field>
+            <field name="aliases">dfccil, dedicated freight corridor</field>
+        </record>
+    </data>
+</odoo>

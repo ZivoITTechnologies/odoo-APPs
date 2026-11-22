@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_zivoit_tender_source_list" model="ir.ui.view">
+        <field name="name">zivoit.tender.source.list</field>
+        <field name="model">zivoit.tender.source</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="last_status == 'error'" decoration-muted="not active">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="source_type"/>
+                <field name="portal"/>
+                <field name="last_run"/>
+                <field name="last_status" widget="badge" decoration-success="last_status == 'ok'" decoration-danger="last_status == 'error'"/>
+                <field name="last_count"/>
+                <field name="tender_count"/>
+                <field name="active" widget="boolean_toggle"/>
+                <button name="action_fetch_now" type="object" icon="fa-refresh" title="Fetch now"
+                        invisible="source_type in ('email', 'manual')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_zivoit_tender_source_form" model="ir.ui.view">
+        <field name="name">zivoit.tender.source.form</field>
+        <field name="model">zivoit.tender.source</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_fetch_now" type="object" string="Fetch Now" class="btn-primary"
+                            invisible="source_type in ('email', 'manual')"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_tenders" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="tender_count" widget="statinfo" string="Tenders"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="source_type"/>
+                            <field name="portal"/>
+                            <field name="url" invisible="source_type in ('ai_web', 'email', 'manual')"
+                                   required="source_type in ('rss', 'html', 'json_api')"/>
+                            <field name="domains" invisible="source_type != 'ai_web'"/>
+                            <field name="search_hint" invisible="source_type != 'ai_web'"/>
+                        </group>
+                        <group string="Defaults for Found Tenders">
+                            <field name="default_organisation"/>
+                            <field name="default_state_id"/>
+                            <field name="default_zone_id"/>
+                            <field name="default_sector_ids" widget="many2many_tags"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="source_type != 'ai_web'">
+                        The AI web-search agent asks the configured AI model (Claude or OpenAI) to search these
+                        domains live for open tenders matching each agent's request, and returns structured
+                        results. Requires an API key in Tender AI settings.
+                    </div>
+                    <div class="alert alert-info" role="alert" invisible="source_type != 'email'">
+                        Configure an incoming mail alias for the <b>Tender</b> model (Settings &gt; Technical &gt; Aliases),
+                        then subscribe that address to portal tender alerts (CPPP, IREPS, Telangana, aggregators).
+                        Each alert e-mail is parsed into tenders and matched against all agents.
+                    </div>
+                    <notebook invisible="source_type in ('ai_web', 'email', 'manual')">
+                        <page string="Request" name="request">
+                            <group>
+                                <field name="http_method"/>
+                                <field name="request_headers" placeholder='{"Authorization": "Bearer ..."}'/>
+                                <field name="request_body" invisible="http_method != 'POST'"/>
+                                <field name="timeout"/>
+                                <field name="verify_ssl"/>
+                            </group>
+                        </page>
+                        <page string="Mapping" name="mapping" invisible="source_type == 'rss'">
+                            <group>
+                                <field name="row_xpath" invisible="source_type != 'html'"/>
+                                <field name="results_path" invisible="source_type != 'json_api'"/>
+                                <field name="field_mapping"
+                                       placeholder='{"title": "./td[2]//text()", "reference": "./td[3]//text()", "closing_date": "./td[5]//text()", "url": ".//a/@href"}'/>
+                            </group>
+                        </page>
+                    </notebook>
+                    <group string="Last Run">
+                        <field name="last_run"/>
+                        <field name="last_status"/>
+                        <field name="last_count"/>
+                        <field name="last_message"/>
+                    </group>
+                    <field name="log_ids" readonly="1">
+                        <list decoration-danger="status == 'error'" limit="20">
+                            <field name="date"/>
+                            <field name="profile_id"/>
+                            <field name="status"/>
+                            <field name="found"/>
+                            <field name="created"/>
+                            <field name="updated"/>
+                            <field name="message"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivoit_tender_source" model="ir.actions.act_window">
+        <field name="name">Sources &amp; Portals</field>
+        <field name="res_model">zivoit.tender.source</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+    <record id="view_zivoit_tender_fetch_log_list" model="ir.ui.view">
+        <field name="name">zivoit.tender.fetch.log.list</field>
+        <field name="model">zivoit.tender.fetch.log</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-danger="status == 'error'">
+                <field name="date"/>
+                <field name="source_id"/>
+                <field name="profile_id"/>
+                <field name="query"/>
+                <field name="status"/>
+                <field name="found"/>
+                <field name="created"/>
+                <field name="updated"/>
+                <field name="message"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_zivoit_tender_fetch_log" model="ir.actions.act_window">
+        <field name="name">Fetch Logs</field>
+        <field name="res_model">zivoit.tender.fetch.log</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>
