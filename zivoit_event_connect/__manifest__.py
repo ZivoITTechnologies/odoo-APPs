@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 # Part of ZivoIT Technologies. See LICENSE file for full copyright and licensing details.
 {
-    'name': 'ZivoIT Event Connect AI - Headless Event API, Private Events, Equipment Booking & Survey Resume',
+    'name': 'Event Connect AI: Headless Events API, WordPress, Private Events and Equipment Booking',
     'version': '19.0.2.0.0',
-    'summary': 'AI-enabled (OpenAI, Claude, Gemini, Ollama): event writer, NL search, booking approval assistant, '
-               'survey insights, document assistant, anomaly alerts. Headless REST API & signed webhooks for WordPress, IP-range and '
-               'invitation-only events, department tagging, equipment time-slot booking with '
-               'approvals, versioned event documents, audit trail and survey save & continue later',
+    'summary': 'AI-powered Odoo Events: AI event writer, natural-language search, booking approval assistant, '
+               'survey insights, document assistant and security alerts (OpenAI, Claude, Gemini or Ollama). '
+               'Headless REST API with signed webhooks for WordPress, IP-restricted and invitation-only events, '
+               'department tagging, equipment booking by time slot with approvals, versioned event folders, '
+               'audit log and survey save and continue later.',
     'description': """
-ZivoIT Event Connect
-====================
-* Headless Events REST API (API keys, CORS, filters, pagination, iCal feed, registrations)
-* Signed outgoing webhooks (HMAC-SHA256) with queue, retries and delivery log - refresh WordPress
-  or any website the moment an event changes
-* Event access rules: Public, IP range (CIDR) restricted, Invitation only (tokenised invite links)
-* Department tagging for events (website, API and backend filters)
-* Equipment booking: time-slot selection, quantity aware availability, no pricing, approval flow
+ZivoIT Event Connect AI
+=======================
+* AI assistants (use your own OpenAI, Claude, Gemini or OpenAI-compatible key, including Ollama):
+  event content writer, natural-language website search, booking approval assistant,
+  survey insights, document assistant (summary, key dates, version comparison) and security alerts
+* Headless Events REST API: API keys, CORS, filters, pagination, iCal feed and registrations
+* Signed webhooks (HMAC-SHA256) with a queue, retries and a delivery log, to refresh WordPress
+  or any website as soon as an event changes
+* Event access rules: Open, IP-restricted (CIDR ranges) or Invitation Only (personal invitation links)
+* Department tagging for events, with website, API and backend filters
+* Equipment booking: time-slot selection, quantity-aware availability, no pricing, approval workflow
 * Event document folders with version history
-* Audit log with old/new values, user and IP for events, bookings, documents and invitations
-* Survey "Save & continue later" with resume link + resume code, works for anonymous respondents
-* Ready-made WordPress plugin (shortcode + webhook receiver) shipped inside the module
-* AI (bring your own key - OpenAI, Claude, Gemini or OpenAI-compatible/Ollama): event content writer,
-  natural-language website search, booking approval assistant, survey insights, document assistant
-  (summary, key dates, version diff) and audit anomaly alerts
+* Audit log with old and new values, user and IP address
+* Survey "Save and continue later" with a resume link and resume code, including anonymous respondents
+* Ready-made WordPress plugin (shortcodes and webhook receiver) included in the module
 """,
     'category': 'Marketing/Events',
     'author': 'ZivoIT Technologies',
