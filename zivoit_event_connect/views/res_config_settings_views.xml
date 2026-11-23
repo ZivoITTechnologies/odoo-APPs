@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_zivo" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.zivo.event.connect</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="event.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='event']" position="inside">
+                <block title="Event Connect (ZivoIT)" name="zivo_event_connect_container">
+                    <setting id="zivo_api" string="Headless Events API"
+                             help="Expose events to WordPress or any website through /api/zivo/v1">
+                        <field name="zivo_api_enabled"/>
+                        <div class="content-group" invisible="not zivo_api_enabled">
+                            <div class="row mt8">
+                                <label for="zivo_api_page_size" class="col-lg-5 o_light_label"/>
+                                <field name="zivo_api_page_size"/>
+                            </div>
+                            <div class="row">
+                                <label for="zivo_api_max_page_size" class="col-lg-5 o_light_label"/>
+                                <field name="zivo_api_max_page_size"/>
+                            </div>
+                            <div class="row">
+                                <label for="zivo_api_cache_seconds" class="col-lg-5 o_light_label"/>
+                                <field name="zivo_api_cache_seconds"/>
+                            </div>
+                            <button name="action_zivo_open_api_clients" type="object" string="API Clients"
+                                    icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </setting>
+                    <setting id="zivo_webhooks" string="Website Webhooks"
+                             help="Push signed notifications to your website whenever an event changes">
+                        <button name="action_zivo_open_webhooks" type="object" string="Configure Webhooks"
+                                icon="oi-arrow-right" class="btn-link"/>
+                    </setting>
+                </block>
+                <block title="Event Connect AI" name="zivo_event_connect_ai_container">
+                    <setting id="zivo_ai_provider" string="AI Provider"
+                             help="Bring your own key: OpenAI, Claude, Gemini or a private OpenAI-compatible model (Ollama, Azure…)">
+                        <field name="zivo_ai_enabled"/>
+                        <div class="content-group" invisible="not zivo_ai_enabled">
+                            <div class="row mt8">
+                                <label for="zivo_ai_provider" class="col-lg-4 o_light_label"/>
+                                <field name="zivo_ai_provider" required="zivo_ai_enabled"/>
+                            </div>
+                            <div class="row">
+                                <label for="zivo_ai_api_key" class="col-lg-4 o_light_label"/>
+                                <field name="zivo_ai_api_key" password="True" placeholder="sk-…"/>
+                            </div>
+                            <div class="row">
+                                <label for="zivo_ai_model" class="col-lg-4 o_light_label"/>
+                                <field name="zivo_ai_model" placeholder="provider default"/>
+                            </div>
+                            <div class="row" invisible="zivo_ai_provider != 'openai_compatible'">
+                                <label for="zivo_ai_base_url" class="col-lg-4 o_light_label"/>
+                                <field name="zivo_ai_base_url" placeholder="http://localhost:11434/v1"/>
+                            </div>
+                            <button name="action_zivo_ai_test" type="object" string="Test Connection" icon="fa-plug" class="btn-link"/>
+                            <button name="action_zivo_open_ai_log" type="object" string="AI Usage Log" icon="oi-arrow-right" class="btn-link"/>
+                        </div>
+                    </setting>
+                    <setting id="zivo_ai_features" string="AI Features" invisible="not zivo_ai_enabled"
+                             help="Every AI output is a suggestion reviewed by a user and recorded in the audit log">
+                        <div class="content-group">
+                            <div><field name="zivo_ai_feature_writer"/> <label for="zivo_ai_feature_writer" class="o_light_label"/></div>
+                            <div><field name="zivo_ai_feature_search"/> <label for="zivo_ai_feature_search" class="o_light_label"/></div>
+                            <div><field name="zivo_ai_feature_booking"/> <label for="zivo_ai_feature_booking" class="o_light_label"/></div>
+                            <div class="ms-4" invisible="not zivo_ai_feature_booking"><field name="zivo_ai_booking_auto"/> <label for="zivo_ai_booking_auto" class="o_light_label"/></div>
+                            <div><field name="zivo_ai_feature_survey"/> <label for="zivo_ai_feature_survey" class="o_light_label"/></div>
+                            <div class="ms-4" invisible="not zivo_ai_feature_survey"><field name="zivo_ai_survey_exclude_anonymous"/> <label for="zivo_ai_survey_exclude_anonymous" class="o_light_label"/></div>
+                            <div><field name="zivo_ai_feature_document"/> <label for="zivo_ai_feature_document" class="o_light_label"/></div>
+                            <div class="ms-4" invisible="not zivo_ai_feature_document"><field name="zivo_ai_document_auto"/> <label for="zivo_ai_document_auto" class="o_light_label"/></div>
+                            <div><field name="zivo_ai_feature_anomaly"/> <label for="zivo_ai_feature_anomaly" class="o_light_label"/></div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

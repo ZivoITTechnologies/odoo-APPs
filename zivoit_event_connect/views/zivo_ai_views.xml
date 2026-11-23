@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ===================== Event: AI writer button ===================== -->
+    <record id="event_event_view_form_zivo_ai" model="ir.ui.view">
+        <field name="name">event.event.form.zivo.ai</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="zivoit_event_connect.event_event_view_form_zivo"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_zivo_invite']" position="before">
+                <button name="action_zivo_ai_writer" type="object" string="AI Writer" icon="fa-magic"
+                        class="btn-secondary" groups="event.group_event_user"/>
+            </xpath>
+            <xpath expr="//group[@name='zivo_api']" position="after">
+                <group string="Invitation Message" name="zivo_invite_text" invisible="zivo_access_mode != 'invite'">
+                    <field name="zivo_invite_subject" placeholder="Default: You are invited: &lt;event&gt;"/>
+                    <field name="zivo_invite_body" placeholder="Default invitation text (use AI Writer to draft one)"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="zivo_ai_event_writer_view_form" model="ir.ui.view">
+        <field name="name">zivo.ai.event.writer.form</field>
+        <field name="model">zivo.ai.event.writer</field>
+        <field name="arch" type="xml">
+            <form string="AI Event Writer">
+                <field name="state" invisible="1"/>
+                <field name="event_id" invisible="1"/>
+                <div class="alert alert-info mb-3" role="alert" invisible="state == 'done'">
+                    <i class="fa fa-magic me-1" title="AI"/> Give a few key points; the AI drafts the website description, SEO
+                    tags, invitation e-mail and a social post. Nothing is changed until you click <b>Apply</b>.
+                </div>
+                <group invisible="state == 'done'">
+                    <field name="brief" placeholder="- 2-day strategy offsite for senior leaders&#10;- CEO keynote, OKR workshop, team dinner&#10;- Dress code: smart casual"/>
+                    <field name="tone"/>
+                    <field name="lang_id" options="{'no_create': True}"/>
+                </group>
+                <group invisible="state != 'done'">
+                    <group string="Website &amp; SEO" colspan="2">
+                        <field name="subtitle"/>
+                        <field name="seo_title"/>
+                        <field name="seo_description"/>
+                    </group>
+                </group>
+                <notebook invisible="state != 'done'">
+                    <page string="Description" name="desc"><field name="description"/></page>
+                    <page string="Invitation" name="invite">
+                        <group><field name="invite_subject"/></group>
+                        <field name="invite_body"/>
+                    </page>
+                    <page string="Social Post" name="social"><field name="social_post"/></page>
+                </notebook>
+                <footer>
+                    <button name="action_generate" type="object" string="Generate" class="btn-primary" icon="fa-magic"
+                            invisible="state == 'done'"/>
+                    <button name="action_apply" type="object" string="Apply to Event" class="btn-primary"
+                            invisible="state != 'done'"/>
+                    <button name="action_generate" type="object" string="Regenerate" icon="fa-refresh"
+                            invisible="state != 'done'"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== Booking assistant ===================== -->
+    <record id="zivo_equipment_booking_view_form_ai" model="ir.ui.view">
+        <field name="name">zivo.equipment.booking.form.ai</field>
+        <field name="model">zivo.equipment.booking</field>
+        <field name="inherit_id" ref="zivoit_event_connect.zivo_equipment_booking_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_approve']" position="after">
+                <button name="action_zivo_approve_suggested" type="object" class="btn-primary"
+                        string="Approve AI Quantity"
+                        invisible="state != 'submitted' or not can_approve or zivo_ai_decision != 'partial'"/>
+                <button name="action_zivo_ai_assess" type="object" string="AI Assess" icon="fa-magic"
+                        invisible="state not in ('draft', 'submitted') or not can_approve"/>
+            </xpath>
+            <xpath expr="//group[@name='approvers']" position="before">
+                <div class="alert mb-3" role="status" invisible="not zivo_ai_decision"
+                     style="background:#f5f8ff;border:1px solid #d5deef;border-left:5px solid #1f6feb;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fa fa-magic text-primary" title="AI"/>
+                        <b>AI recommendation:</b>
+                        <field name="zivo_ai_decision" widget="badge" decoration-success="zivo_ai_decision == 'approve'"
+                               decoration-warning="zivo_ai_decision in ('partial', 'reschedule')"
+                               decoration-danger="zivo_ai_decision == 'reject'"/>
+                        <span class="text-muted">confidence <field name="zivo_ai_confidence" class="oe_inline"/>%</span>
+                        <span class="text-muted" invisible="zivo_ai_decision != 'partial'">· suggested quantity
+                            <field name="zivo_ai_suggested_qty" class="oe_inline"/></span>
+                    </div>
+                    <field name="zivo_ai_reason" nolabel="1"/>
+                    <div invisible="not zivo_ai_alternatives" class="mt-2">
+                        <b>Alternatives</b>
+                        <field name="zivo_ai_alternatives" nolabel="1"/>
+                    </div>
+                    <div class="text-muted small mt-1">Assessed <field name="zivo_ai_date" class="oe_inline"/> · the decision stays with the approver.</div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="zivo_equipment_booking_view_list_ai" model="ir.ui.view">
+        <field name="name">zivo.equipment.booking.list.ai</field>
+        <field name="model">zivo.equipment.booking</field>
+        <field name="inherit_id" ref="zivoit_event_connect.zivo_equipment_booking_view_list"/>
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <field name="zivo_ai_decision" string="AI" optional="show" widget="badge"
+                       decoration-success="zivo_ai_decision == 'approve'"
+                       decoration-warning="zivo_ai_decision in ('partial', 'reschedule')"
+                       decoration-danger="zivo_ai_decision == 'reject'"/>
+                <field name="zivo_ai_confidence" string="AI %" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- ===================== Survey insights ===================== -->
+    <record id="survey_survey_view_form_zivo_ai" model="ir.ui.view">
+        <field name="name">survey.survey.form.zivo.ai</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="zivoit_event_connect.survey_survey_view_form_zivo"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_zivo_view_insights" type="object" class="oe_stat_button" icon="fa-magic"
+                        invisible="not zivo_insight_count">
+                    <field name="zivo_insight_count" widget="statinfo" string="AI Insights"/>
+                </button>
+                <button name="action_zivo_remind_at_risk" type="object" class="oe_stat_button" icon="fa-bell"
+                        invisible="not zivo_at_risk_count" confirm="E-mail the resume link to these respondents?">
+                    <field name="zivo_at_risk_count" widget="statinfo" string="At Risk – Remind"/>
+                </button>
+            </div>
+            <xpath expr="//field[@name='zivo_resume_validity_days']" position="after">
+                <field name="zivo_abandon_days" invisible="not zivo_allow_save_later"/>
+            </xpath>
+            <xpath expr="//header" position="inside">
+                <button name="action_zivo_ai_insights" type="object" string="AI Insights" icon="fa-magic"
+                        groups="survey.group_survey_user"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="zivo_survey_insight_view_form" model="ir.ui.view">
+        <field name="name">zivo.survey.insight.form</field>
+        <field name="model">zivo.survey.insight</field>
+        <field name="arch" type="xml">
+            <form string="AI Survey Insights" create="0" edit="0">
+                <sheet>
+                    <div class="oe_title">
+                        <span class="text-muted"><i class="fa fa-magic me-1" title="AI"/>AI insights</span>
+                        <h1><field name="survey_id" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="responses_count"/>
+                            <field name="answers_count"/>
+                        </group>
+                        <group string="Sentiment">
+                            <field name="sentiment_positive" widget="progressbar"/>
+                            <field name="sentiment_neutral" widget="progressbar"/>
+                            <field name="sentiment_negative" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <separator string="Executive Summary"/>
+                    <field name="summary"/>
+                    <separator string="Themes"/>
+                    <field name="theme_ids">
+                        <list decoration-success="sentiment == 'positive'" decoration-danger="sentiment == 'negative'">
+                            <field name="name"/>
+                            <field name="sentiment" widget="badge" decoration-success="sentiment == 'positive'"
+                                   decoration-danger="sentiment == 'negative'"/>
+                            <field name="mentions"/>
+                            <field name="example"/>
+                        </list>
+                    </field>
+                    <separator string="Recommendations"/>
+                    <field name="recommendations"/>
+                    <div class="text-muted small" invisible="not anonymous_excluded">Anonymous answers were excluded from the analysis.</div>
+                    <field name="anonymous_excluded" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_survey_insight_view_list" model="ir.ui.view">
+        <field name="name">zivo.survey.insight.list</field>
+        <field name="model">zivo.survey.insight</field>
+        <field name="arch" type="xml">
+            <list string="AI Survey Insights" create="0">
+                <field name="date"/>
+                <field name="survey_id"/>
+                <field name="responses_count"/>
+                <field name="sentiment_positive"/>
+                <field name="sentiment_negative"/>
+                <field name="user_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_zivo_survey_insight" model="ir.actions.act_window">
+        <field name="name">AI Survey Insights</field>
+        <field name="res_model">zivo.survey.insight</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ===================== Document assistant ===================== -->
+    <record id="zivo_event_document_view_form_ai" model="ir.ui.view">
+        <field name="name">zivo.event.document.form.ai</field>
+        <field name="model">zivo.event.document</field>
+        <field name="inherit_id" ref="zivoit_event_connect.zivo_event_document_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_download']" position="after">
+                <button name="action_zivo_ai_analyse" type="object" string="AI Analyse" icon="fa-magic"
+                        invisible="not version"/>
+            </xpath>
+            <xpath expr="//page[@name='versions']" position="before">
+                <page string="AI Assistant" name="ai" invisible="not zivo_ai_summary">
+                    <group>
+                        <group>
+                            <field name="zivo_ai_analysed_version" string="Analysed Version"/>
+                            <label for="zivo_ai_category"/>
+                            <div class="o_row">
+                                <field name="zivo_ai_category"/>
+                                <button name="action_zivo_ai_apply_category" type="object" string="Apply"
+                                        class="btn-link" invisible="not zivo_ai_category"/>
+                            </div>
+                        </group>
+                    </group>
+                    <separator string="Summary"/>
+                    <field name="zivo_ai_summary"/>
+                    <separator string="Key Dates &amp; Obligations"/>
+                    <field name="zivo_ai_date_ids">
+                        <list editable="bottom">
+                            <field name="date"/>
+                            <field name="name"/>
+                            <field name="activity_created" widget="boolean"/>
+                        </list>
+                    </field>
+                    <button name="action_zivo_ai_create_activities" type="object" string="Schedule as Event Activities"
+                            icon="fa-calendar-check-o" class="btn-secondary" invisible="not zivo_ai_date_ids"/>
+                </page>
+            </xpath>
+            <xpath expr="//field[@name='version_ids']/list/button[@name='action_restore']" position="after">
+                <button name="action_zivo_ai_explain_changes" type="object" icon="fa-magic"
+                        title="AI: explain changes vs previous version" invisible="version_number == 1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ===================== Alerts ===================== -->
+    <record id="zivo_ai_alert_view_list" model="ir.ui.view">
+        <field name="name">zivo.ai.alert.list</field>
+        <field name="model">zivo.ai.alert</field>
+        <field name="arch" type="xml">
+            <list string="Security Alerts" create="0" decoration-muted="state == 'dismissed'">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="rule"/>
+                <field name="severity" widget="badge" decoration-danger="severity == 'high'"
+                       decoration-warning="severity == 'medium'"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge" decoration-info="state == 'new'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_ai_alert_view_form" model="ir.ui.view">
+        <field name="name">zivo.ai.alert.form</field>
+        <field name="model">zivo.ai.alert</field>
+        <field name="arch" type="xml">
+            <form string="Security Alert" create="0">
+                <header>
+                    <button name="action_ack" type="object" string="Acknowledge" class="btn-primary" invisible="state != 'new'"/>
+                    <button name="action_dismiss" type="object" string="False Positive" invisible="state != 'new'"/>
+                    <button name="action_zivo_ai_assess" type="object" string="AI Risk Assessment" icon="fa-magic"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs" type="object" class="oe_stat_button" icon="fa-history">
+                            <field name="log_count" widget="statinfo" string="Audit Entries"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="rule" readonly="1"/>
+                            <field name="severity"/>
+                            <field name="date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="user_id" readonly="1"/>
+                            <field name="record_name" readonly="1"/>
+                        </group>
+                    </group>
+                    <separator string="Details"/>
+                    <field name="details" readonly="1"/>
+                    <div class="alert mt-3" role="status" invisible="not ai_assessment"
+                         style="background:#f5f8ff;border:1px solid #d5deef;border-left:5px solid #1f6feb;">
+                        <b><i class="fa fa-magic me-1" title="AI"/>AI risk assessment</b>
+                        <field name="ai_assessment" nolabel="1"/>
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_ai_alert_view_search" model="ir.ui.view">
+        <field name="name">zivo.ai.alert.search</field>
+        <field name="model">zivo.ai.alert</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="user_id"/>
+                <filter string="Open" name="open" domain="[('state', '=', 'new')]"/>
+                <filter string="High Severity" name="high" domain="[('severity', '=', 'high')]"/>
+                <filter string="Rule" name="groupby_rule" context="{'group_by': 'rule'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_ai_alert" model="ir.actions.act_window">
+        <field name="name">Security Alerts</field>
+        <field name="res_model">zivo.ai.alert</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_open': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No security alert</p>
+            <p>Mass deletions, private events made public, very wide IP ranges and bulk downloads are detected
+               every hour from the audit log. AI explains the risk and suggests next steps.</p>
+        </field>
+    </record>
+
+    <!-- ===================== AI usage log ===================== -->
+    <record id="zivo_ai_log_view_list" model="ir.ui.view">
+        <field name="name">zivo.ai.log.list</field>
+        <field name="model">zivo.ai.log</field>
+        <field name="arch" type="xml">
+            <list string="AI Usage" create="0" edit="0" decoration-danger="state == 'error'">
+                <field name="create_date" string="Date"/>
+                <field name="feature"/>
+                <field name="provider"/>
+                <field name="model_name"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge" decoration-success="state == 'ok'" decoration-danger="state == 'error'"/>
+                <field name="input_tokens" sum="Input"/>
+                <field name="output_tokens" sum="Output"/>
+                <field name="duration_ms"/>
+                <field name="error" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_zivo_ai_log" model="ir.actions.act_window">
+        <field name="name">AI Usage Log</field>
+        <field name="res_model">zivo.ai.log</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="menu_event_ai_alerts" name="Security Alerts" parent="event.menu_reporting_events" sequence="51"
+              action="action_zivo_ai_alert" groups="zivoit_event_connect.group_event_connect_manager"/>
+    <menuitem id="menu_event_ai_insights" name="AI Survey Insights" parent="event.menu_reporting_events" sequence="52"
+              action="zivoit_event_connect.action_zivo_survey_insight" groups="event.group_event_user"/>
+    <menuitem id="menu_event_ai_log" name="AI Usage Log" parent="menu_event_connect_config" sequence="30"
+              action="action_zivo_ai_log" groups="zivoit_event_connect.group_event_connect_manager"/>
+</odoo>

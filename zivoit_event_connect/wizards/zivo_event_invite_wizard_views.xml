@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_event_invite_wizard_view_form" model="ir.ui.view">
+        <field name="name">zivo.event.invite.wizard.form</field>
+        <field name="model">zivo.event.invite.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Invite Contacts">
+                <field name="event_id" invisible="1"/>
+                <group>
+                    <field name="partner_ids" widget="many2many_tags_email" placeholder="Select contacts…"/>
+                    <field name="department_ids" widget="many2many_tags" placeholder="Invite all members of…"/>
+                    <field name="emails" placeholder="guest1@example.com&#10;guest2@example.com"/>
+                    <field name="send_now"/>
+                </group>
+                <footer>
+                    <button name="action_invite" type="object" string="Create Invitations" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

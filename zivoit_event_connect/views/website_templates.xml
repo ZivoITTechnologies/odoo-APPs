@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="event_access_denied" name="Event Connect: private event">
+        <t t-call="website.layout">
+            <div id="wrap" class="o_zivo_event_denied">
+                <div class="container py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7 text-center">
+                            <div class="display-1 text-primary mb-3"><i class="fa fa-lock"/></div>
+                            <h1 class="h2" t-out="event.name"/>
+                            <p class="lead text-muted mt-3" t-out="event.zivo_access_denied_message or 'This event is private.'"/>
+                            <p t-if="event.zivo_access_mode == 'invite' and request.env.user._is_public()" class="mt-4">
+                                Already invited with your account?
+                                <a t-attf-href="/web/login?redirect=/event/#{event.id}/register" class="fw-bold">Sign in</a>
+                            </p>
+                            <a href="/event" class="btn btn-primary mt-3">Browse public events</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="event_invitation_invalid" name="Event Connect: invalid invitation">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container py-5 text-center">
+                    <div class="display-1 text-warning mb-3"><i class="fa fa-chain-broken"/></div>
+                    <h1 class="h2">This invitation link is not valid anymore</h1>
+                    <p class="lead text-muted">It may have been revoked or replaced. Please contact the organiser.</p>
+                    <a href="/event" class="btn btn-primary mt-3">Browse public events</a>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

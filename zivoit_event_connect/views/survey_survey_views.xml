@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="survey_survey_view_form_zivo" model="ir.ui.view">
+        <field name="name">survey.survey.form.zivo.event.connect</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='participants']" position="inside">
+                <field name="zivo_allow_save_later" invisible="survey_type == 'live_session'"/>
+                <field name="zivo_resume_validity_days" invisible="not zivo_allow_save_later"/>
+                <field name="zivo_event_id"/>
+            </xpath>
+            <div name="button_box" position="inside">
+                <button name="action_zivo_view_saved" type="object" class="oe_stat_button" icon="fa-floppy-o"
+                        invisible="not zivo_allow_save_later">
+                    <field name="zivo_saved_count" widget="statinfo" string="Saved for Later"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+    <record id="survey_user_input_view_form_zivo" model="ir.ui.view">
+        <field name="name">survey.user_input.form.zivo.event.connect</field>
+        <field name="model">survey.user_input</field>
+        <field name="inherit_id" ref="survey.survey_user_input_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="(//sheet/group)[1]" position="after">
+                <group string="Save &amp; Continue Later" invisible="not zivo_saved_later">
+                    <group>
+                        <field name="zivo_saved_later"/>
+                        <field name="zivo_resume_code"/>
+                        <field name="zivo_saved_date"/>
+                    </group>
+                    <group>
+                        <field name="zivo_save_count"/>
+                        <field name="zivo_resume_email"/>
+                        <field name="zivo_resume_url" widget="CopyClipboardChar"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

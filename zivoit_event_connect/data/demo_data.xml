@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Departments -->
+        <record id="demo_dept_hr" model="zivo.event.department">
+            <field name="name">Human Resources</field><field name="code">hr</field><field name="color">2</field>
+            <field name="manager_id" ref="base.user_admin"/>
+            <field name="member_ids" eval="[(4, ref('base.user_admin')), (4, ref('base.user_demo'))]"/>
+        </record>
+        <record id="demo_dept_it" model="zivo.event.department">
+            <field name="name">IT &amp; Digital</field><field name="code">it</field><field name="color">4</field>
+            <field name="member_ids" eval="[(4, ref('base.user_demo'))]"/>
+        </record>
+        <record id="demo_dept_marketing" model="zivo.event.department">
+            <field name="name">Marketing</field><field name="code">marketing</field><field name="color">9</field>
+        </record>
+        <record id="demo_dept_sales" model="zivo.event.department">
+            <field name="name">Sales</field><field name="code">sales</field><field name="color">10</field>
+        </record>
+        <record id="demo_dept_research" model="zivo.event.department">
+            <field name="name">Research</field><field name="code">research</field><field name="color">6</field>
+        </record>
+
+        <!-- Existing demo events: department tags -->
+        <record id="event.event_0" model="event.event">
+            <field name="zivo_department_ids" eval="[(6, 0, [ref('demo_dept_marketing'), ref('demo_dept_sales')])]"/>
+        </record>
+        <record id="event.event_2" model="event.event">
+            <field name="zivo_department_ids" eval="[(6, 0, [ref('demo_dept_research')])]"/>
+        </record>
+        <record id="event.event_3" model="event.event">
+            <field name="zivo_department_ids" eval="[(6, 0, [ref('demo_dept_marketing')])]"/>
+        </record>
+        <record id="event.event_7" model="event.event">
+            <field name="zivo_department_ids" eval="[(6, 0, [ref('demo_dept_marketing'), ref('demo_dept_it')])]"/>
+        </record>
+
+        <!-- Private events -->
+        <record id="demo_event_leadership" model="event.event">
+            <field name="name">Leadership Offsite 2027</field>
+            <field name="subtitle">Strategy days for senior leaders – by invitation only</field>
+            <field name="date_begin" eval="(DateTime.today() + timedelta(days=21)).strftime('%Y-%m-%d 04:00:00')"/>
+            <field name="date_end" eval="(DateTime.today() + timedelta(days=22)).strftime('%Y-%m-%d 12:00:00')"/>
+            <field name="date_tz">Asia/Kolkata</field>
+            <field name="seats_limited" eval="True"/>
+            <field name="seats_max">40</field>
+            <field name="website_published" eval="True"/>
+            <field name="zivo_access_mode">invite</field>
+            <field name="zivo_department_ids" eval="[(6, 0, [ref('demo_dept_hr')])]"/>
+            <field name="zivo_access_denied_message">The Leadership Offsite is by invitation only. Please open the personal link from your invitation email.</field>
+        </record>
+        <record id="demo_event_security_day" model="event.event">
+            <field name="name">Campus Cyber-Security Day</field>
+            <field name="subtitle">Internal workshop – available on the office network only</field>
+            <field name="date_begin" eval="(DateTime.today() + timedelta(days=9)).strftime('%Y-%m-%d 04:30:00')"/>
+            <field name="date_end" eval="(DateTime.today() + timedelta(days=9)).strftime('%Y-%m-%d 11:30:00')"/>
+            <field name="date_tz">Asia/Kolkata</field>
+            <field name="website_published" eval="True"/>
+            <field name="zivo_access_mode">ip</field>
+            <field name="zivo_ip_ranges">10.0.0.0/8
+192.168.0.0/16</field>
+            <field name="zivo_department_ids" eval="[(6, 0, [ref('demo_dept_it')])]"/>
+            <field name="zivo_access_denied_message">This workshop is reserved for staff connected to the office network.</field>
+        </record>
+        <record id="demo_invitation_1" model="zivo.event.invitation">
+            <field name="event_id" ref="demo_event_leadership"/>
+            <field name="partner_id" ref="base.res_partner_address_15"/>
+            <field name="email">brandon.freeman55@example.com</field>
+            <field name="state">sent</field>
+        </record>
+        <record id="demo_invitation_2" model="zivo.event.invitation">
+            <field name="event_id" ref="demo_event_leadership"/>
+            <field name="partner_id" ref="base.res_partner_address_28"/>
+            <field name="email">colleen.diaz83@example.com</field>
+            <field name="state">opened</field>
+        </record>
+        <record id="demo_invitation_3" model="zivo.event.invitation">
+            <field name="event_id" ref="demo_event_leadership"/>
+            <field name="name">Priya Raman</field>
+            <field name="email">priya.raman@example.com</field>
+        </record>
+
+        <!-- Equipment -->
+        <record id="demo_cat_av" model="zivo.equipment.category"><field name="name">Audio &amp; Video</field><field name="color">4</field></record>
+        <record id="demo_cat_it" model="zivo.equipment.category"><field name="name">IT Hardware</field><field name="color">2</field></record>
+        <record id="demo_cat_photo" model="zivo.equipment.category"><field name="name">Photo &amp; Media</field><field name="color">9</field></record>
+        <record id="demo_cat_furniture" model="zivo.equipment.category"><field name="name">Booths &amp; Furniture</field><field name="color">6</field></record>
+
+        <record id="demo_eq_projector" model="zivo.equipment">
+            <field name="name">4K Laser Projector</field><field name="code">AV-PRJ-01</field>
+            <field name="category_id" ref="demo_cat_av"/><field name="quantity">3</field>
+            <field name="location">AV Store – Ground floor</field>
+            <field name="tz">Asia/Kolkata</field>
+            <field name="department_id" ref="demo_dept_it"/>
+            <field name="approver_ids" eval="[(4, ref('base.user_admin'))]"/>
+            <field name="description" type="html"><p>5,000 lumen laser projector with HDMI / USB-C, ceiling or table mount. Includes remote and 10 m cable.</p></field>
+        </record>
+        <record id="demo_eq_mic" model="zivo.equipment">
+            <field name="name">Wireless Microphone Kit</field><field name="code">AV-MIC-02</field>
+            <field name="category_id" ref="demo_cat_av"/><field name="quantity">6</field>
+            <field name="location">AV Store – Ground floor</field>
+            <field name="tz">Asia/Kolkata</field>
+            <field name="slot_duration">2.0</field>
+            <field name="max_slots_per_booking">4</field>
+        </record>
+        <record id="demo_eq_laptop" model="zivo.equipment">
+            <field name="name">Presentation Laptop</field><field name="code">IT-LAP-10</field>
+            <field name="category_id" ref="demo_cat_it"/><field name="quantity">10</field>
+            <field name="location">IT Help Desk – 2nd floor</field>
+            <field name="tz">Asia/Kolkata</field>
+            <field name="requires_approval" eval="False"/>
+        </record>
+        <record id="demo_eq_camera" model="zivo.equipment">
+            <field name="name">Mirrorless Camera + Lens Kit</field><field name="code">PH-CAM-03</field>
+            <field name="category_id" ref="demo_cat_photo"/><field name="quantity">2</field>
+            <field name="location">Marketing Studio</field>
+            <field name="tz">Asia/Kolkata</field>
+            <field name="min_notice_hours">24</field>
+        </record>
+        <record id="demo_eq_booth" model="zivo.equipment">
+            <field name="name">Pop-up Exhibition Booth</field><field name="code">FN-BTH-01</field>
+            <field name="category_id" ref="demo_cat_furniture"/><field name="quantity">2</field>
+            <field name="location">Warehouse B</field>
+            <field name="tz">Asia/Kolkata</field>
+            <field name="slot_duration">4.0</field>
+            <field name="open_sat" eval="True"/>
+        </record>
+
+        <!-- Headless API client & webhook -->
+        <record id="demo_api_client_wordpress" model="zivo.api.client">
+            <field name="name">Corporate WordPress</field>
+            <field name="api_key">zec_demo_change_me_9f3b2a7c41</field>
+            <field name="allowed_origins">https://www.example.com</field>
+        </record>
+        <record id="demo_webhook_wordpress" model="zivo.webhook">
+            <field name="name">WordPress cache refresh</field>
+            <field name="url">https://www.example.com/wp-json/zivo/v1/webhook</field>
+            <field name="active" eval="False"/>
+        </record>
+
+        <!-- Survey: enable save & continue later on the demo feedback form -->
+        <record id="survey.survey_feedback" model="survey.survey">
+            <field name="zivo_allow_save_later" eval="True"/>
+        </record>
+    </data>
+</odoo>

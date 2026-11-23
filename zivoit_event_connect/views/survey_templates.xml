@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="survey_fill_form_in_progress_zivo" inherit_id="survey.survey_fill_form_in_progress"
+              name="Event Connect: Save &amp; continue later button">
+        <xpath expr="//div[hasclass('o_survey_form_content_data')]" position="after">
+            <div t-if="survey.zivo_allow_save_later and not answer.is_session_answer"
+                 class="o_zivo_save_later_bar text-end mb-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm o_zivo_survey_save_later">
+                    <i class="fa fa-floppy-o me-1"/>Save &amp; continue later
+                </button>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="survey_saved_page" name="Event Connect: survey saved">
+        <t t-call="survey.layout">
+            <t t-set="no_survey_navigation" t-value="True"/>
+            <div class="wrap o_survey_wrap d-flex">
+                <div class="container d-flex flex-column mb-5">
+                    <div class="row justify-content-center my-auto">
+                        <div class="col-lg-8 text-center py-5">
+                            <div class="display-4 text-success mb-3"><i class="fa fa-check-circle"/></div>
+                            <h1 class="h2">Your answers are saved</h1>
+                            <p class="text-muted">You can close this page and continue
+                                <strong t-out="survey.title"/> at any time
+                                <t t-if="survey.zivo_resume_validity_days">within <t t-out="survey.zivo_resume_validity_days"/> days</t>.</p>
+                            <p class="mt-4 mb-1 text-muted small text-uppercase">Your resume code</p>
+                            <div class="o_zivo_resume_code mb-3" t-out="zivo_answer.zivo_resume_code"/>
+                            <p class="small text-muted">Enter it on <a href="/survey-resume">/survey-resume</a>, or use your personal link:</p>
+                            <div class="input-group mb-4 mx-auto" style="max-width: 620px;">
+                                <input type="text" class="form-control" readonly="readonly" t-att-value="zivo_answer.zivo_resume_url"/>
+                                <a class="btn btn-primary" t-att-href="zivo_answer.zivo_resume_url">Continue now</a>
+                            </div>
+                            <div t-if="sent" class="alert alert-success">The resume link was sent to <t t-out="zivo_answer.zivo_resume_email"/>.</div>
+                            <div t-if="error" class="alert alert-danger">Please enter a valid email address.</div>
+                            <form t-attf-action="/survey/zivo/send_resume/#{survey.access_token}/#{zivo_answer.access_token}" method="post"
+                                  class="d-flex gap-2 justify-content-center mx-auto" style="max-width: 520px;">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="email" name="email" class="form-control" required="required"
+                                       placeholder="your@email.com" t-att-value="default_email"/>
+                                <button type="submit" class="btn btn-outline-primary text-nowrap">
+                                    <i class="fa fa-envelope-o me-1"/>Email me the link
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="survey_resume_page" name="Event Connect: resume survey">
+        <t t-call="survey.layout">
+            <t t-set="no_survey_navigation" t-value="True"/>
+            <div class="wrap o_survey_wrap d-flex">
+                <div class="container d-flex flex-column mb-5">
+                    <div class="row justify-content-center my-auto">
+                        <div class="col-lg-6 text-center py-5">
+                            <h1 class="h2">Continue a saved survey</h1>
+                            <p class="text-muted">Enter the resume code you received when you saved your answers.</p>
+                            <div t-if="error" class="alert alert-danger">This code is unknown, expired or the survey is already completed.</div>
+                            <form action="/survey-resume" method="post" class="d-flex gap-2 justify-content-center mt-4">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="text" name="code" class="form-control form-control-lg text-center text-uppercase"
+                                       style="max-width: 260px; letter-spacing: .2rem;" placeholder="ABCD-1234"
+                                       t-att-value="code" required="required"/>
+                                <button type="submit" class="btn btn-primary btn-lg">Resume</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

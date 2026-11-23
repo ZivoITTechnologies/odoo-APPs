@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_event_document_view_kanban" model="ir.ui.view">
+        <field name="name">zivo.event.document.kanban</field>
+        <field name="model">zivo.event.document</field>
+        <field name="arch" type="xml">
+            <kanban string="Event Folder" default_group_by="category" group_create="0" quick_create="0">
+                <field name="mimetype"/>
+                <field name="version"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="d-flex align-items-center">
+                            <i t-attf-class="fa fa-2x me-3 text-primary #{(record.mimetype.raw_value or '').includes('pdf') ? 'fa-file-pdf-o' : (record.mimetype.raw_value or '').includes('image') ? 'fa-file-image-o' : (record.mimetype.raw_value or '').includes('sheet') ? 'fa-file-excel-o' : 'fa-file-text-o'}" title="File"/>
+                            <div class="flex-grow-1">
+                                <field name="name" class="fw-bold"/>
+                                <div class="text-muted small"><field name="filename"/></div>
+                            </div>
+                            <span class="badge text-bg-info">v<field name="version"/></span>
+                        </div>
+                        <footer class="mt-2">
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="last_upload" widget="date" class="ms-auto text-muted small"/>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="zivo_event_document_view_list" model="ir.ui.view">
+        <field name="name">zivo.event.document.list</field>
+        <field name="model">zivo.event.document</field>
+        <field name="arch" type="xml">
+            <list string="Event Documents">
+                <field name="folder_name"/>
+                <field name="category"/>
+                <field name="name"/>
+                <field name="filename"/>
+                <field name="version"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="last_upload"/>
+                <button name="action_download" type="object" icon="fa-download" title="Download"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_event_document_view_form" model="ir.ui.view">
+        <field name="name">zivo.event.document.form</field>
+        <field name="model">zivo.event.document</field>
+        <field name="arch" type="xml">
+            <form string="Event Document">
+                <header>
+                    <button name="action_upload_version" type="object" string="Upload New Version" class="btn-primary"
+                            invisible="not id"/>
+                    <button name="action_download" type="object" string="Download" icon="fa-download"
+                            invisible="not version"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Venue contract"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="event_id"/>
+                            <field name="folder_name"/>
+                            <field name="category"/>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="datas" filename="filename" invisible="id" string="Initial File"/>
+                            <field name="filename" invisible="1"/>
+                            <field name="version"/>
+                            <field name="file_size"/>
+                            <field name="last_upload"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Description…"/>
+                    <notebook>
+                        <page string="Version History" name="versions">
+                            <field name="version_ids" readonly="1">
+                                <list>
+                                    <field name="version_number" string="v"/>
+                                    <field name="filename"/>
+                                    <field name="note"/>
+                                    <field name="file_size"/>
+                                    <field name="uploaded_by" widget="many2one_avatar_user"/>
+                                    <field name="create_date" string="Uploaded On"/>
+                                    <button name="action_download" type="object" icon="fa-download" title="Download"/>
+                                    <button name="action_restore" type="object" icon="fa-undo" title="Restore as new version"
+                                            confirm="Create a new version from this one?"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_event_document_view_search" model="ir.ui.view">
+        <field name="name">zivo.event.document.search</field>
+        <field name="model">zivo.event.document</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="filename"/>
+                <field name="event_id"/>
+                <filter string="My Documents" name="mine" domain="[('owner_id', '=', uid)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <filter string="Event" name="groupby_event" context="{'group_by': 'event_id'}"/>
+                <filter string="Sub-folder" name="groupby_category" context="{'group_by': 'category'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_event_document" model="ir.actions.act_window">
+        <field name="name">Event Folders</field>
+        <field name="res_model">zivo.event.document</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="context">{'search_default_groupby_event': 1}</field>
+    </record>
+</odoo>

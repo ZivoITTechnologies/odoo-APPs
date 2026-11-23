@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="event_event_view_form_zivo" model="ir.ui.view">
+        <field name="name">event.event.form.zivo.event.connect</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_zivo_invite" type="object" string="Invite" class="btn-secondary"
+                        icon="fa-envelope-o" invisible="zivo_access_mode != 'invite'"
+                        groups="event.group_event_user"/>
+                <button name="action_zivo_push_webhooks" type="object" string="Push to Website"
+                        icon="fa-refresh" groups="zivoit_event_connect.group_event_connect_manager"
+                        invisible="not zivo_api_published"/>
+            </xpath>
+            <div name="button_box" position="inside">
+                <button name="action_zivo_view_documents" type="object" class="oe_stat_button" icon="fa-folder-open">
+                    <field name="zivo_document_count" widget="statinfo" string="Documents"/>
+                </button>
+                <button name="action_zivo_view_bookings" type="object" class="oe_stat_button" icon="fa-cubes">
+                    <field name="zivo_booking_count" widget="statinfo" string="Equipment"/>
+                </button>
+                <button name="action_zivo_view_invitations" type="object" class="oe_stat_button" icon="fa-envelope"
+                        invisible="zivo_access_mode != 'invite' and not zivo_invitation_count">
+                    <field name="zivo_invitation_count" widget="statinfo" string="Invitations"/>
+                </button>
+                <button name="action_zivo_view_audit" type="object" class="oe_stat_button" icon="fa-history"
+                        groups="event.group_event_user">
+                    <field name="zivo_audit_count" widget="statinfo" string="Audit Log"/>
+                </button>
+            </div>
+            <xpath expr="(//field[@name='tag_ids'])[1]" position="before">
+                <field name="zivo_department_ids" widget="many2many_tags" options="{'color_field': 'color'}"
+                       placeholder="e.g. HR, IT"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Access &amp; Headless" name="zivo_access">
+                    <group>
+                        <group string="Access Rule" name="zivo_access_rule">
+                            <field name="zivo_access_mode" widget="radio" required="1"/>
+                            <field name="zivo_ip_ranges" invisible="zivo_access_mode != 'ip'"
+                                   required="zivo_access_mode == 'ip'"
+                                   placeholder="10.0.0.0/8&#10;192.168.1.0/24&#10;203.0.113.7"/>
+                            <field name="zivo_access_denied_message" invisible="zivo_access_mode == 'open'"/>
+                        </group>
+                        <group string="Headless API &amp; Webhooks" name="zivo_api">
+                            <field name="zivo_api_published"/>
+                            <field name="zivo_slug" invisible="not zivo_api_published"/>
+                            <div class="text-muted" colspan="2" invisible="not zivo_api_published">
+                                Served at <code>/api/zivo/v1/events/<field name="zivo_slug" class="oe_inline" nolabel="1"/></code>.
+                                Every change is pushed to the configured webhooks (e.g. WordPress cache refresh).
+                            </div>
+                        </group>
+                    </group>
+                    <div invisible="zivo_access_mode != 'invite'">
+                        <separator string="Invitations"/>
+                        <field name="zivo_invitation_ids" context="{'default_event_id': id}">
+                            <list editable="bottom" decoration-muted="state == 'revoked'" decoration-success="state == 'registered'">
+                                <field name="partner_id"/>
+                                <field name="name"/>
+                                <field name="email"/>
+                                <field name="state" widget="badge" decoration-info="state == 'sent'"
+                                       decoration-warning="state == 'opened'" decoration-success="state == 'registered'"/>
+                                <field name="open_count" optional="hide"/>
+                                <field name="invite_url" widget="CopyClipboardChar" optional="hide"/>
+                                <button name="action_send" type="object" icon="fa-paper-plane" title="Send"
+                                        invisible="state in ('registered', 'revoked')"/>
+                                <button name="action_revoke" type="object" icon="fa-ban" title="Revoke"
+                                        invisible="state == 'revoked'"/>
+                            </list>
+                        </field>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="event_event_view_list_zivo" model="ir.ui.view">
+        <field name="name">event.event.list.zivo.event.connect</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="zivo_department_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
+                <field name="zivo_access_mode" optional="show" widget="badge"
+                       decoration-warning="zivo_access_mode == 'ip'" decoration-info="zivo_access_mode == 'invite'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="event_event_view_search_zivo" model="ir.ui.view">
+        <field name="name">event.event.search.zivo.event.connect</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='event_type_id']" position="after">
+                <field name="zivo_department_ids"/>
+            </xpath>
+            <xpath expr="//filter[@name='filter_online']" position="after">
+                <separator/>
+                <filter string="Open Access" name="zivo_open" domain="[('zivo_access_mode', 'in', ('open', False))]"/>
+                <filter string="IP Restricted" name="zivo_ip" domain="[('zivo_access_mode', '=', 'ip')]"/>
+                <filter string="Invitation Only" name="zivo_invite" domain="[('zivo_access_mode', '=', 'invite')]"/>
+                <filter string="Hidden from API" name="zivo_no_api" domain="[('zivo_api_published', '=', False)]"/>
+            </xpath>
+            <xpath expr="//filter[@name='responsible']" position="after">
+                <filter string="Access Rule" name="groupby_zivo_access" context="{'group_by': 'zivo_access_mode'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

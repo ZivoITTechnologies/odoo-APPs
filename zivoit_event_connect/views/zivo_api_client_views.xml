@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_api_client_view_list" model="ir.ui.view">
+        <field name="name">zivo.api.client.list</field>
+        <field name="model">zivo.api.client</field>
+        <field name="arch" type="xml">
+            <list string="API Clients">
+                <field name="name"/>
+                <field name="key_preview"/>
+                <field name="include_restricted"/>
+                <field name="allow_registration"/>
+                <field name="call_count"/>
+                <field name="last_call"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_api_client_view_form" model="ir.ui.view">
+        <field name="name">zivo.api.client.form</field>
+        <field name="model">zivo.api.client</field>
+        <field name="arch" type="xml">
+            <form string="API Client">
+                <header>
+                    <button name="action_regenerate_key" type="object" string="Regenerate Key"
+                            confirm="The current key will stop working immediately. Continue?"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Corporate WordPress"/></h1>
+                    </div>
+                    <group>
+                        <group string="Credentials">
+                            <field name="api_key" widget="CopyClipboardChar"/>
+                            <field name="allowed_origins" placeholder="https://www.example.com"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Scope">
+                            <field name="include_unpublished"/>
+                            <field name="include_restricted"/>
+                            <field name="allow_registration"/>
+                            <field name="department_ids" widget="many2many_tags"/>
+                            <field name="website_id" options="{'no_create': True}"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Usage">
+                        <group>
+                            <field name="call_count"/>
+                            <field name="last_call"/>
+                        </group>
+                        <group>
+                            <field name="last_ip"/>
+                        </group>
+                    </group>
+                    <separator string="Quick start"/>
+                    <div class="alert alert-info" role="alert">
+                        <p class="mb-1"><b>List upcoming events</b></p>
+                        <code>curl -H "X-API-Key: &lt;key&gt;" https://your-odoo/api/zivo/v1/events?department=hr&amp;limit=10</code>
+                        <p class="mt-2 mb-1"><b>Endpoints</b>:
+                            <code>/ping</code>, <code>/events</code>, <code>/events/&lt;id|slug&gt;</code>,
+                            <code>POST /events/&lt;id&gt;/registrations</code>, <code>/departments</code>,
+                            <code>/tags</code>, <code>/calendar.ics</code></p>
+                        <p class="mb-0">A ready-made WordPress plugin is shipped in
+                            <code>zivoit_event_connect/static/wordpress/zivoit-event-connect.zip</code>.</p>
+                    </div>
+                    <field name="note" placeholder="Internal notes…"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_api_client" model="ir.actions.act_window">
+        <field name="name">Headless API Clients</field>
+        <field name="res_model">zivo.api.client</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Connect your website</p>
+            <p>Create an API client for each website (WordPress, Next.js, mobile app…) that reads your events.</p>
+        </field>
+    </record>
+</odoo>

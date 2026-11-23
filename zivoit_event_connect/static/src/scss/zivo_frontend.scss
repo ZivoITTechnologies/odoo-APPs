@@ -1,0 +1,67 @@
+$zivo-navy: #0b1f4b;
+$zivo-blue: #1f6feb;
+
+.o_zivo_hero {
+    background: linear-gradient(120deg, $zivo-navy 0%, #13357a 60%, $zivo-blue 100%);
+    color: #fff;
+    border-radius: 0.75rem;
+    padding: 2rem 2.25rem;
+    h1, h2, h3 { color: #fff; }
+    .text-muted { color: rgba(255, 255, 255, 0.75) !important; }
+}
+
+.o_zivo_equipment_card {
+    border: 1px solid rgba($zivo-navy, 0.12);
+    border-radius: 0.75rem;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    overflow: hidden;
+    &:hover { box-shadow: 0 0.5rem 1.25rem rgba($zivo-navy, 0.12); transform: translateY(-2px); }
+    .o_zivo_equipment_img {
+        height: 150px;
+        background: #eef3fb;
+        display: flex; align-items: center; justify-content: center;
+        img { max-height: 150px; max-width: 100%; object-fit: cover; }
+        .fa { font-size: 3rem; color: rgba($zivo-navy, 0.35); }
+    }
+}
+
+.o_zivo_slot_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.6rem;
+    .o_zivo_slot {
+        position: relative;
+        input { position: absolute; opacity: 0; pointer-events: none; }
+        label {
+            display: block; cursor: pointer; text-align: center;
+            border: 1px solid rgba($zivo-navy, 0.2); border-radius: 0.5rem;
+            padding: 0.6rem 0.4rem; background: #fff; margin: 0;
+            .o_zivo_slot_time { font-weight: 600; color: $zivo-navy; }
+            .o_zivo_slot_avail { font-size: 0.8rem; color: #2f8f46; }
+        }
+        input:checked + label { background: $zivo-blue; border-color: $zivo-blue; }
+        input:checked + label .o_zivo_slot_time,
+        input:checked + label .o_zivo_slot_avail { color: #fff; }
+        input:disabled + label { cursor: not-allowed; background: #f3f4f6; opacity: 0.7; }
+        input:disabled + label .o_zivo_slot_avail { color: #b42318; }
+    }
+}
+
+.o_zivo_resume_code {
+    font-family: monospace;
+    font-size: 2rem;
+    letter-spacing: 0.3rem;
+    background: #eef3fb;
+    color: $zivo-navy;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    display: inline-block;
+}
+
+.o_zivo_state_badge {
+    &.state-submitted { background: #fff4e5; color: #9a5b00; }
+    &.state-approved { background: #e7f6ec; color: #1e7a3c; }
+    &.state-rejected { background: #fdecec; color: #b42318; }
+    &.state-cancel, &.state-draft { background: #f1f3f5; color: #495057; }
+    &.state-done { background: #e8f0fe; color: #1f4fbf; }
+}

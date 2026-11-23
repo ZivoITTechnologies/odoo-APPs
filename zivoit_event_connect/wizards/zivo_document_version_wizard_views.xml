@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_document_version_wizard_view_form" model="ir.ui.view">
+        <field name="name">zivo.document.version.wizard.form</field>
+        <field name="model">zivo.document.version.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload New Version">
+                <field name="document_id" invisible="1"/>
+                <group>
+                    <field name="datas" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="note" placeholder="e.g. Signed by venue"/>
+                </group>
+                <footer>
+                    <button name="action_upload" type="object" string="Upload" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

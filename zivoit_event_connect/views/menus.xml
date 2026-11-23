@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Equipment Booking app -->
+    <menuitem id="menu_equipment_root" name="Equipment Booking" sequence="126"
+              web_icon="zivoit_event_connect,static/description/icon.png"
+              groups="zivoit_event_connect.group_equipment_user"/>
+    <menuitem id="menu_equipment_book" name="Book Equipment" parent="menu_equipment_root" sequence="1"
+              action="action_zivo_booking_portal"/>
+    <menuitem id="menu_equipment_my" name="My Bookings" parent="menu_equipment_root" sequence="2"
+              action="action_zivo_booking_my"/>
+    <menuitem id="menu_equipment_to_approve" name="To Approve" parent="menu_equipment_root" sequence="3"
+              action="action_zivo_booking_to_approve" groups="zivoit_event_connect.group_equipment_approver"/>
+    <menuitem id="menu_equipment_calendar" name="Booking Calendar" parent="menu_equipment_root" sequence="4"
+              action="action_zivo_booking_all" groups="zivoit_event_connect.group_equipment_approver"/>
+    <menuitem id="menu_equipment_config" name="Configuration" parent="menu_equipment_root" sequence="90"
+              groups="zivoit_event_connect.group_event_connect_manager"/>
+    <menuitem id="menu_equipment_equipment" name="Equipment" parent="menu_equipment_config" sequence="1"
+              action="action_zivo_equipment"/>
+    <menuitem id="menu_equipment_category" name="Categories" parent="menu_equipment_config" sequence="2"
+              action="action_zivo_equipment_category"/>
+
+    <!-- Events app -->
+    <menuitem id="menu_event_documents" name="Event Folders" parent="event.menu_event_event" sequence="5"
+              action="action_zivo_event_document" groups="event.group_event_user"/>
+    <menuitem id="menu_event_invitations" name="Invitations" parent="event.menu_event_event" sequence="6"
+              action="action_zivo_event_invitation" groups="event.group_event_user"/>
+    <menuitem id="menu_event_audit" name="Audit Log" parent="event.menu_reporting_events" sequence="50"
+              action="action_zivo_audit_log" groups="event.group_event_user"/>
+    <menuitem id="menu_event_connect_config" name="Event Connect" parent="event.menu_event_configuration" sequence="90"
+              groups="event.group_event_manager"/>
+    <menuitem id="menu_event_departments" name="Departments" parent="menu_event_connect_config" sequence="1"
+              action="action_zivo_event_department"/>
+    <menuitem id="menu_event_api_clients" name="Headless API Clients" parent="menu_event_connect_config" sequence="10"
+              action="action_zivo_api_client" groups="zivoit_event_connect.group_event_connect_manager"/>
+    <menuitem id="menu_event_webhooks" name="Webhooks" parent="menu_event_connect_config" sequence="11"
+              action="action_zivo_webhook" groups="zivoit_event_connect.group_event_connect_manager"/>
+    <menuitem id="menu_event_webhook_deliveries" name="Webhook Deliveries" parent="menu_event_connect_config" sequence="12"
+              action="action_zivo_webhook_delivery" groups="zivoit_event_connect.group_event_connect_manager"/>
+    <menuitem id="menu_event_equipment" name="Equipment" parent="menu_event_connect_config" sequence="20"
+              action="action_zivo_equipment" groups="zivoit_event_connect.group_event_connect_manager"/>
+</odoo>

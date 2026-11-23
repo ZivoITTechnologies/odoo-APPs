@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="mail_template_event_invitation" model="mail.template">
+            <field name="name">Event Connect: Personal event invitation</field>
+            <field name="model_id" ref="model_zivo_event_invitation"/>
+            <field name="subject">{{ object.event_id.zivo_invite_subject or ('You are invited: ' + object.event_id.name) }}</field>
+            <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="partner_to">{{ object.partner_id.id or '' }}</field>
+            <field name="description">Sent to invitees of invitation-only events</field>
+            <field name="body_html" type="html">
+<div style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+    <div style="background:#0b1f4b;color:#ffffff;padding:24px;border-radius:8px 8px 0 0;">
+        <div style="font-size:13px;opacity:.8;">PRIVATE INVITATION</div>
+        <div style="font-size:22px;font-weight:bold;margin-top:6px;" t-out="object.event_id.name or ''">Event</div>
+    </div>
+    <div style="border:1px solid #e5e7eb;border-top:0;padding:24px;border-radius:0 0 8px 8px;">
+        <p>Dear <t t-out="object.name or 'guest'">guest</t>,</p>
+        <p t-if="object.event_id.zivo_invite_body" style="white-space:pre-line;" t-out="object.event_id.zivo_invite_body"/>
+        <p t-else="">You have been personally invited to <strong t-out="object.event_id.name or ''"/>.
+           This event is by invitation only, please use your personal link below to view the details and register.</p>
+        <p style="margin:6px 0;"><strong>When:</strong>
+            <t t-out="format_datetime(object.event_id.date_begin, tz=object.event_id.date_tz, dt_format='medium')"/></p>
+        <p t-if="object.event_id.address_id" style="margin:6px 0;"><strong>Where:</strong>
+            <t t-out="object.event_id.address_id.name or ''"/></p>
+        <p style="margin:28px 0;">
+            <a t-att-href="object.invite_url"
+               style="background:#1f6feb;color:#ffffff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">
+                View my invitation
+            </a>
+        </p>
+        <p style="font-size:12px;color:#6b7280;">This link is personal. Please do not forward it.</p>
+    </div>
+</div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <record id="mail_template_booking_submitted" model="mail.template">
+            <field name="name">Event Connect: Booking submitted</field>
+            <field name="model_id" ref="model_zivo_equipment_booking"/>
+            <field name="subject">Booking {{ object.name }} is waiting for approval</field>
+            <field name="description">Posted when an equipment booking is submitted</field>
+            <field name="body_html" type="html">
+<div>
+    <p>Your booking request <strong t-out="object.name"/> for
+        <strong t-out="object.quantity"/> × <strong t-out="object.equipment_id.name"/>
+        (<t t-out="format_datetime(object.start, tz=object.equipment_id.tz, dt_format='medium')"/> →
+        <t t-out="format_datetime(object.stop, tz=object.equipment_id.tz, dt_format='short')"/>)
+        has been submitted and is waiting for approval.</p>
+</div>
+            </field>
+        </record>
+
+        <record id="mail_template_booking_approved" model="mail.template">
+            <field name="name">Event Connect: Booking approved</field>
+            <field name="model_id" ref="model_zivo_equipment_booking"/>
+            <field name="subject">Booking {{ object.name }} approved</field>
+            <field name="description">Posted when an equipment booking is approved</field>
+            <field name="body_html" type="html">
+<div>
+    <p>Good news! Your booking <strong t-out="object.name"/> for
+        <strong t-out="object.quantity"/> × <strong t-out="object.equipment_id.name"/> on
+        <t t-out="format_datetime(object.start, tz=object.equipment_id.tz, dt_format='medium')"/> has been
+        <strong style="color:#1e7a3c;">approved</strong>.</p>
+    <p t-if="object.equipment_id.location">Pick-up location: <t t-out="object.equipment_id.location"/></p>
+</div>
+            </field>
+        </record>
+
+        <record id="mail_template_booking_rejected" model="mail.template">
+            <field name="name">Event Connect: Booking rejected</field>
+            <field name="model_id" ref="model_zivo_equipment_booking"/>
+            <field name="subject">Booking {{ object.name }} rejected</field>
+            <field name="description">Posted when an equipment booking is rejected</field>
+            <field name="body_html" type="html">
+<div>
+    <p>Your booking <strong t-out="object.name"/> for <strong t-out="object.equipment_id.name"/> was
+        <strong style="color:#b42318;">rejected</strong>.</p>
+    <p t-if="object.reject_reason">Reason: <t t-out="object.reject_reason"/></p>
+</div>
+            </field>
+        </record>
+
+        <record id="mail_template_survey_resume" model="mail.template">
+            <field name="name">Event Connect: Survey resume link</field>
+            <field name="model_id" ref="survey.model_survey_user_input"/>
+            <field name="subject">Continue your survey: {{ object.survey_id.title }}</field>
+            <field name="email_from">{{ (object.survey_id.create_uid.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="description">Sent when a respondent emails himself the resume link</field>
+            <field name="body_html" type="html">
+<div style="font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+    <p>Hello,</p>
+    <p>Your answers to <strong t-out="object.survey_id.title or ''"/> have been saved.
+       You can continue whenever you like:</p>
+    <p style="margin:24px 0;">
+        <a t-att-href="object.zivo_resume_url"
+           style="background:#1f6feb;color:#ffffff;padding:12px 22px;border-radius:6px;text-decoration:none;font-weight:bold;">
+            Continue the survey
+        </a>
+    </p>
+    <p>Or enter your resume code <strong style="font-family:monospace;font-size:16px;" t-out="object.zivo_resume_code or ''"/>
+       on <t t-out="object.survey_id.get_base_url()"/>/survey-resume</p>
+</div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>

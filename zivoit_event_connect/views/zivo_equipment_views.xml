@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_equipment_category_view_list" model="ir.ui.view">
+        <field name="name">zivo.equipment.category.list</field>
+        <field name="model">zivo.equipment.category</field>
+        <field name="arch" type="xml">
+            <list string="Equipment Categories" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_zivo_equipment_category" model="ir.actions.act_window">
+        <field name="name">Equipment Categories</field>
+        <field name="res_model">zivo.equipment.category</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <record id="zivo_equipment_view_kanban" model="ir.ui.view">
+        <field name="name">zivo.equipment.kanban</field>
+        <field name="model">zivo.equipment</field>
+        <field name="arch" type="xml">
+            <kanban string="Equipment" sample="1">
+                <field name="id"/>
+                <field name="pending_count"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside class="o_kanban_aside_full">
+                            <field name="image_128" widget="image" class="o_kanban_image_fill w-100" alt="Equipment"/>
+                        </aside>
+                        <main class="ms-2">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <field name="category_id" class="text-muted"/>
+                            <div class="mt-1">
+                                <span class="badge text-bg-primary me-1"><field name="quantity"/> unit(s)</span>
+                                <span t-if="record.pending_count.raw_value" class="badge text-bg-warning">
+                                    <field name="pending_count"/> to approve
+                                </span>
+                            </div>
+                            <div class="text-muted small mt-1"><i class="fa fa-map-marker me-1" title="Location"/><field name="location"/></div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="zivo_equipment_view_list" model="ir.ui.view">
+        <field name="name">zivo.equipment.list</field>
+        <field name="model">zivo.equipment</field>
+        <field name="arch" type="xml">
+            <list string="Equipment">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="quantity"/>
+                <field name="location"/>
+                <field name="requires_approval"/>
+                <field name="portal_bookable"/>
+                <field name="pending_count" string="To Approve"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_equipment_view_form" model="ir.ui.view">
+        <field name="name">zivo.equipment.form</field>
+        <field name="model">zivo.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Equipment">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_bookings" type="object" class="oe_stat_button" icon="fa-calendar-check-o">
+                            <field name="booking_count" widget="statinfo" string="Bookings"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. 4K Projector"/></h1>
+                    </div>
+                    <group>
+                        <group string="General">
+                            <field name="code"/>
+                            <field name="category_id"/>
+                            <field name="quantity"/>
+                            <field name="location"/>
+                            <field name="department_id"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Approval">
+                            <field name="requires_approval"/>
+                            <field name="approver_ids" widget="many2many_avatar_user" invisible="not requires_approval"
+                                   placeholder="All Equipment Approvers"/>
+                            <field name="portal_bookable"/>
+                        </group>
+                    </group>
+                    <group string="Booking Window">
+                        <group>
+                            <field name="tz"/>
+                            <field name="slot_duration" widget="float_time"/>
+                            <label for="open_hour" string="Opening Hours"/>
+                            <div class="o_row">
+                                <field name="open_hour" widget="float_time" nolabel="1"/> to
+                                <field name="close_hour" widget="float_time" nolabel="1"/>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="open_mon" string="Open Days"/>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span><field name="open_mon" nolabel="1"/> Mon</span>
+                                <span><field name="open_tue" nolabel="1"/> Tue</span>
+                                <span><field name="open_wed" nolabel="1"/> Wed</span>
+                                <span><field name="open_thu" nolabel="1"/> Thu</span>
+                                <span><field name="open_fri" nolabel="1"/> Fri</span>
+                                <span><field name="open_sat" nolabel="1"/> Sat</span>
+                                <span><field name="open_sun" nolabel="1"/> Sun</span>
+                            </div>
+                            <field name="min_notice_hours" widget="float_time"/>
+                            <field name="max_days_ahead"/>
+                            <field name="max_slots_per_booking"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Shown on the booking screen…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_equipment_view_search" model="ir.ui.view">
+        <field name="name">zivo.equipment.search</field>
+        <field name="model">zivo.equipment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <filter string="Needs Approval" name="requires_approval" domain="[('requires_approval', '=', True)]"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <filter string="Category" name="groupby_category" context="{'group_by': 'category_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_equipment" model="ir.actions.act_window">
+        <field name="name">Equipment</field>
+        <field name="res_model">zivo.equipment</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Add bookable equipment</p>
+            <p>Projectors, cameras, laptops, booths, vehicles… define quantity, opening hours, slot length and approvers.</p>
+        </field>
+    </record>
+</odoo>

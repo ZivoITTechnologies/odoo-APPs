@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_webhook_view_list" model="ir.ui.view">
+        <field name="name">zivo.webhook.list</field>
+        <field name="model">zivo.webhook</field>
+        <field name="arch" type="xml">
+            <list string="Webhooks">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="topic_ids" widget="many2many_tags"/>
+                <field name="success_count" string="Delivered"/>
+                <field name="failure_count" string="Failed"/>
+                <field name="pending_count" string="Pending"/>
+                <field name="last_status"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_webhook_view_form" model="ir.ui.view">
+        <field name="name">zivo.webhook.form</field>
+        <field name="model">zivo.webhook</field>
+        <field name="arch" type="xml">
+            <form string="Webhook">
+                <header>
+                    <button name="action_send_ping" type="object" string="Send Test Ping" class="btn-primary"/>
+                    <button name="action_regenerate_secret" type="object" string="Regenerate Secret"
+                            confirm="The receiving website must be updated with the new secret. Continue?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_deliveries" type="object" class="oe_stat_button" icon="fa-paper-plane">
+                            <field name="delivery_count" widget="statinfo" string="Deliveries"/>
+                        </button>
+                        <button name="action_view_deliveries" type="object" class="oe_stat_button" icon="fa-exclamation-triangle">
+                            <field name="failure_count" widget="statinfo" string="Failed"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. WordPress cache refresh"/></h1>
+                    </div>
+                    <group>
+                        <group string="Endpoint">
+                            <field name="url" widget="url" placeholder="https://www.example.com/wp-json/zivo/v1/webhook"/>
+                            <field name="secret" widget="CopyClipboardChar"/>
+                            <field name="topic_ids" widget="many2many_tags"/>
+                            <field name="include_restricted"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Delivery">
+                            <field name="timeout"/>
+                            <field name="max_attempts"/>
+                            <field name="custom_headers" placeholder='{"X-Site": "main"}'/>
+                            <field name="last_status"/>
+                            <field name="last_delivery"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Every delivery is a JSON <code>POST</code> signed with
+                        <code>X-Zivo-Signature: sha256=HMAC(secret, timestamp + "." + body)</code> and carries
+                        <code>X-Zivo-Topic</code>, <code>X-Zivo-Delivery</code> and <code>X-Zivo-Timestamp</code> headers.
+                        Failed deliveries are retried automatically (1, 5, 15, 60, 240 minutes…).
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_zivo_webhook" model="ir.actions.act_window">
+        <field name="name">Webhooks</field>
+        <field name="res_model">zivo.webhook</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Refresh your website instantly</p>
+            <p>Register the URL of your website (e.g. the bundled WordPress plugin) to be notified whenever an event changes.</p>
+        </field>
+    </record>
+
+    <record id="zivo_webhook_delivery_view_list" model="ir.ui.view">
+        <field name="name">zivo.webhook.delivery.list</field>
+        <field name="model">zivo.webhook.delivery</field>
+        <field name="arch" type="xml">
+            <list string="Deliveries" create="0" decoration-danger="state == 'failed'" decoration-muted="state == 'cancel'"
+                  decoration-success="state == 'done'">
+                <field name="create_date" string="Queued"/>
+                <field name="webhook_id"/>
+                <field name="topic"/>
+                <field name="res_id"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'" decoration-danger="state == 'failed'"
+                       decoration-warning="state == 'pending'"/>
+                <field name="attempts"/>
+                <field name="response_code"/>
+                <field name="duration_ms" optional="show"/>
+                <field name="next_attempt" optional="show"/>
+                <button name="action_retry" type="object" icon="fa-repeat" title="Retry now" invisible="state == 'done'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_webhook_delivery_view_form" model="ir.ui.view">
+        <field name="name">zivo.webhook.delivery.form</field>
+        <field name="model">zivo.webhook.delivery</field>
+        <field name="arch" type="xml">
+            <form string="Delivery" create="0">
+                <header>
+                    <button name="action_retry" type="object" string="Retry Now" class="btn-primary" invisible="state == 'done'"/>
+                    <button name="action_cancel" type="object" string="Cancel" invisible="state != 'pending'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="uuid"/>
+                            <field name="webhook_id"/>
+                            <field name="topic"/>
+                            <field name="res_id"/>
+                        </group>
+                        <group>
+                            <field name="attempts"/>
+                            <field name="sent_date"/>
+                            <field name="next_attempt"/>
+                            <field name="response_code"/>
+                            <field name="duration_ms"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Payload" name="payload"><field name="payload" widget="code" options="{'mode': 'javascript'}"/></page>
+                        <page string="Response" name="response"><field name="response_body"/><field name="error"/></page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_webhook_delivery_view_search" model="ir.ui.view">
+        <field name="name">zivo.webhook.delivery.search</field>
+        <field name="model">zivo.webhook.delivery</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="topic"/>
+                <field name="webhook_id"/>
+                <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Failed" name="failed" domain="[('state', '=', 'failed')]"/>
+                <filter string="Delivered" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Webhook" name="groupby_webhook" context="{'group_by': 'webhook_id'}"/>
+                <filter string="Topic" name="groupby_topic" context="{'group_by': 'topic'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_webhook_delivery" model="ir.actions.act_window">
+        <field name="name">Webhook Deliveries</field>
+        <field name="res_model">zivo.webhook.delivery</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

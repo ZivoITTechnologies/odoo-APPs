@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_event_invitation_view_list" model="ir.ui.view">
+        <field name="name">zivo.event.invitation.list</field>
+        <field name="model">zivo.event.invitation</field>
+        <field name="arch" type="xml">
+            <list string="Invitations" decoration-muted="state == 'revoked'" decoration-success="state == 'registered'">
+                <field name="event_id"/>
+                <field name="partner_id"/>
+                <field name="email"/>
+                <field name="state" widget="badge" decoration-info="state == 'sent'"
+                       decoration-warning="state == 'opened'" decoration-success="state == 'registered'"/>
+                <field name="sent_date" optional="show"/>
+                <field name="opened_date" optional="show"/>
+                <field name="open_count" optional="hide"/>
+                <field name="registration_id" optional="hide"/>
+                <button name="action_send" type="object" icon="fa-paper-plane" title="Send" invisible="state in ('registered', 'revoked')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_event_invitation_view_form" model="ir.ui.view">
+        <field name="name">zivo.event.invitation.form</field>
+        <field name="model">zivo.event.invitation</field>
+        <field name="arch" type="xml">
+            <form string="Invitation">
+                <header>
+                    <button name="action_send" type="object" string="Send Invitation" class="btn-primary"
+                            invisible="state in ('registered', 'revoked')"/>
+                    <button name="action_revoke" type="object" string="Revoke" invisible="state == 'revoked'"/>
+                    <button name="action_reset" type="object" string="Reset &amp; New Link" invisible="state != 'revoked'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,opened,registered"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="event_id"/>
+                            <field name="partner_id"/>
+                            <field name="name"/>
+                            <field name="email"/>
+                        </group>
+                        <group>
+                            <field name="invite_url" widget="CopyClipboardChar"/>
+                            <field name="sent_date"/>
+                            <field name="opened_date"/>
+                            <field name="open_count"/>
+                            <field name="registration_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_event_invitation_view_search" model="ir.ui.view">
+        <field name="name">zivo.event.invitation.search</field>
+        <field name="model">zivo.event.invitation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="email"/>
+                <field name="partner_id"/>
+                <field name="event_id"/>
+                <filter string="Not Opened" name="not_opened" domain="[('state', 'in', ('draft', 'sent'))]"/>
+                <filter string="Registered" name="registered" domain="[('state', '=', 'registered')]"/>
+                <filter string="Event" name="groupby_event" context="{'group_by': 'event_id'}"/>
+                <filter string="Status" name="groupby_state" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_zivo_event_invitation" model="ir.actions.act_window">
+        <field name="name">Invitations</field>
+        <field name="res_model">zivo.event.invitation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

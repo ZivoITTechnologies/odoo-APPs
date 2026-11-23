@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portal home card -->
+    <template id="portal_my_home_zivo_bookings" name="Equipment Bookings" customize_show="True"
+              inherit_id="portal.portal_my_home" priority="45">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_service_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_service_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/zivoit_event_connect/static/description/icon.png'"/>
+                <t t-set="title">Equipment Bookings</t>
+                <t t-set="url" t-value="'/my/equipment-bookings'"/>
+                <t t-set="text">Book equipment by time slot and follow approvals</t>
+                <t t-set="placeholder_count" t-value="'zivo_booking_count'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_breadcrumbs_zivo" inherit_id="portal.portal_breadcrumbs" priority="45">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'zivo_bookings'" t-attf-class="breadcrumb-item #{'active ' if not booking else ''}">
+                <a t-if="booking" href="/my/equipment-bookings">Equipment Bookings</a>
+                <t t-else="">Equipment Bookings</t>
+            </li>
+            <li t-if="page_name == 'zivo_bookings' and booking" class="breadcrumb-item active" t-out="booking.name"/>
+        </xpath>
+    </template>
+
+    <template id="zivo_state_badge" name="Booking state badge">
+        <span t-attf-class="badge rounded-pill o_zivo_state_badge state-#{booking.state}"
+              t-out="dict(booking._fields['state']._description_selection(booking.env)).get(booking.state)"/>
+    </template>
+
+    <!-- Equipment catalogue -->
+    <template id="portal_equipment_list" name="Equipment catalogue">
+        <t t-call="website.layout">
+            <div id="wrap" class="o_zivo_equipment_page">
+                <div class="container py-4">
+                    <div class="o_zivo_hero mb-4 d-md-flex align-items-center justify-content-between">
+                        <div>
+                            <h1 class="h2 mb-1">Book equipment</h1>
+                            <p class="text-muted mb-0">Pick an item, choose your time slots and submit for approval. No payment needed.</p>
+                        </div>
+                        <a href="/my/equipment-bookings" class="btn btn-light mt-3 mt-md-0"><i class="fa fa-list-ul me-1"/>My bookings</a>
+                    </div>
+                    <form method="get" action="/equipment" class="d-flex flex-wrap gap-2 mb-4">
+                        <select name="category" class="form-select" style="max-width: 260px;" onchange="this.form.submit()">
+                            <option value="">All categories</option>
+                            <t t-foreach="categories" t-as="cat">
+                                <option t-att-value="cat.id" t-att-selected="cat.id == category" t-out="cat.name"/>
+                            </t>
+                        </select>
+                        <input type="search" name="search" class="form-control" style="max-width: 320px;"
+                               placeholder="Search equipment…" t-att-value="search"/>
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-search"/></button>
+                    </form>
+                    <div t-if="not equipments" class="alert alert-info">No equipment available for booking.</div>
+                    <div class="row g-4">
+                        <t t-foreach="equipments" t-as="eq">
+                            <div class="col-sm-6 col-lg-4 col-xl-3">
+                                <div class="o_zivo_equipment_card h-100 d-flex flex-column bg-white">
+                                    <div class="o_zivo_equipment_img">
+                                        <img t-if="eq.image_256" t-att-src="'/web/image/zivo.equipment/%s/image_256' % eq.id" t-att-alt="eq.name"/>
+                                        <i t-else="" class="fa fa-cube"/>
+                                    </div>
+                                    <div class="p-3 d-flex flex-column flex-grow-1">
+                                        <div class="small text-muted" t-out="eq.category_id.name"/>
+                                        <h5 class="mb-1" t-out="eq.name"/>
+                                        <div class="small text-muted mb-2">
+                                            <i class="fa fa-map-marker me-1"/><t t-out="eq.location or '—'"/>
+                                        </div>
+                                        <div class="d-flex gap-1 flex-wrap mb-3">
+                                            <span class="badge text-bg-light"><t t-out="eq.quantity"/> unit(s)</span>
+                                            <span class="badge text-bg-light"><t t-out="'%g' % eq.slot_duration"/>h slots</span>
+                                            <span t-if="eq.requires_approval" class="badge text-bg-warning">Approval</span>
+                                            <span t-else="" class="badge text-bg-success">Instant</span>
+                                        </div>
+                                        <a t-attf-href="/equipment/#{eq.id}" class="btn btn-primary mt-auto">Select time slot</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Time-slot booking screen -->
+    <template id="portal_equipment_book" name="Equipment booking screen">
+        <t t-call="website.layout">
+            <div id="wrap" class="o_zivo_equipment_page">
+                <div class="container py-4">
+                    <a href="/equipment" class="small"><i class="fa fa-arrow-left me-1"/>All equipment</a>
+                    <div class="row g-4 mt-1">
+                        <div class="col-lg-4">
+                            <div class="o_zivo_equipment_card bg-white">
+                                <div class="o_zivo_equipment_img">
+                                    <img t-if="equipment.image_512" t-att-src="'/web/image/zivo.equipment/%s/image_512' % equipment.id" t-att-alt="equipment.name"/>
+                                    <i t-else="" class="fa fa-cube"/>
+                                </div>
+                                <div class="p-3">
+                                    <div class="small text-muted" t-out="equipment.category_id.name"/>
+                                    <h2 class="h4" t-out="equipment.name"/>
+                                    <ul class="list-unstyled small mb-2">
+                                        <li><i class="fa fa-cubes me-2 text-primary"/><t t-out="equipment.quantity"/> unit(s) available</li>
+                                        <li t-if="equipment.location"><i class="fa fa-map-marker me-2 text-primary"/><t t-out="equipment.location"/></li>
+                                        <li><i class="fa fa-clock-o me-2 text-primary"/><t t-out="'%g' % equipment.slot_duration"/>h slots,
+                                            up to <t t-out="equipment.max_slots_per_booking"/> per booking</li>
+                                        <li t-if="equipment.requires_approval"><i class="fa fa-check-square-o me-2 text-primary"/>Requires approval</li>
+                                    </ul>
+                                    <div class="small" t-field="equipment.description"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <form t-attf-action="/equipment/#{equipment.id}/book" method="post" class="o_zivo_booking_form bg-white p-4 rounded border">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="date" t-att-value="day"/>
+                                <div t-if="error" class="alert alert-danger" t-out="error"/>
+                                <h3 class="h5 mb-3">1. Choose a date</h3>
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <a t-if="prev_day &gt;= min_day" t-attf-href="/equipment/#{equipment.id}?date=#{prev_day}" class="btn btn-outline-secondary"><i class="fa fa-chevron-left"/></a>
+                                    <input type="date" class="form-control o_zivo_date_input" style="max-width: 220px;"
+                                           t-att-value="day" t-att-min="min_day"/>
+                                    <a t-attf-href="/equipment/#{equipment.id}?date=#{next_day}" class="btn btn-outline-secondary"><i class="fa fa-chevron-right"/></a>
+                                    <span class="ms-2 fw-semibold" t-out="day.strftime('%A %d %B %Y')"/>
+                                </div>
+                                <h3 class="h5 mb-3">2. Select consecutive time slots</h3>
+                                <div t-if="not slots" class="alert alert-warning">
+                                    <t t-out="equipment.name"/> is not bookable on this day. Please pick another date.
+                                </div>
+                                <div t-else="" class="o_zivo_slot_grid mb-4">
+                                    <t t-foreach="slots" t-as="slot">
+                                        <div class="o_zivo_slot">
+                                            <input type="checkbox" name="slot" class="o_zivo_slot_input"
+                                                   t-att-id="'slot_%s' % slot_index"
+                                                   t-att-value="slot['start'].strftime('%Y-%m-%d %H:%M:%S')"
+                                                   t-att-disabled="not slot['bookable']"/>
+                                            <label t-att-for="'slot_%s' % slot_index">
+                                                <div class="o_zivo_slot_time" t-out="slot['label']"/>
+                                                <div class="o_zivo_slot_avail">
+                                                    <t t-if="slot['bookable']"><t t-out="slot['available']"/> free</t>
+                                                    <t t-elif="slot['available']">Unavailable</t>
+                                                    <t t-else="">Fully booked</t>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </t>
+                                </div>
+                                <div t-if="alternatives" class="alert alert-info d-flex flex-column gap-1 mb-4">
+                                    <div class="fw-semibold"><i class="fa fa-lightbulb-o me-1" role="img" aria-label="Tip"/>Smart suggestion: similar equipment is free on this day</div>
+                                    <t t-foreach="alternatives" t-as="alt">
+                                        <a t-attf-href="/equipment/#{alt['equipment'].id}?date=#{day}">
+                                            <t t-out="alt['equipment'].name"/> — <t t-out="alt['free_slots']"/> free slot(s), first at <t t-out="alt['first'].split(' - ')[0]"/>
+                                        </a>
+                                    </t>
+                                </div>
+                                <h3 class="h5 mb-3">3. Details</h3>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="zivo_qty">Quantity</label>
+                                        <input id="zivo_qty" type="number" name="quantity" class="form-control" min="1"
+                                               t-att-max="equipment.quantity" value="1"/>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label" for="zivo_event">For event (optional)</label>
+                                        <select id="zivo_event" name="event_id" class="form-select">
+                                            <option value="">— No event —</option>
+                                            <t t-foreach="events" t-as="ev">
+                                                <option t-att-value="ev.id" t-out="ev.name"/>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="zivo_purpose">Purpose</label>
+                                        <textarea id="zivo_purpose" name="purpose" class="form-control" rows="3"
+                                                  placeholder="What will you use it for?"/>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-4">
+                                    <span class="text-muted"><span class="o_zivo_slot_count fw-bold">0</span> slot(s) selected</span>
+                                    <button type="submit" class="btn btn-primary btn-lg o_zivo_book_submit" disabled="disabled">
+                                        <t t-if="equipment.requires_approval">Submit for approval</t>
+                                        <t t-else="">Confirm booking</t>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- My bookings -->
+    <template id="portal_my_bookings" name="My equipment bookings">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Equipment Bookings</t>
+            </t>
+            <div class="d-flex flex-wrap gap-2 my-3">
+                <t t-foreach="filters.items()" t-as="flt">
+                    <a t-attf-href="/my/equipment-bookings?filterby=#{flt[0]}"
+                       t-attf-class="btn btn-sm #{'btn-primary' if filterby == flt[0] else 'btn-outline-secondary'}" t-out="flt[1][0]"/>
+                </t>
+                <a href="/equipment" class="btn btn-sm btn-success ms-auto"><i class="fa fa-plus me-1"/>New booking</a>
+            </div>
+            <t t-if="not bookings">
+                <div class="alert alert-info">You have no booking yet. <a href="/equipment">Book equipment</a></div>
+            </t>
+            <t t-else="" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Reference</th>
+                        <th>Equipment</th>
+                        <th class="text-end">Qty</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="bookings" t-as="booking">
+                        <tr>
+                            <td><a t-attf-href="/my/equipment-bookings/#{booking.id}" t-out="booking.name"/></td>
+                            <td t-out="booking.equipment_id.name"/>
+                            <td class="text-end" t-out="booking.quantity"/>
+                            <td><span t-field="booking.start" t-options="{'tz_name': booking.equipment_id.tz}"/></td>
+                            <td><span t-field="booking.stop" t-options="{'tz_name': booking.equipment_id.tz}"/></td>
+                            <td><t t-call="zivoit_event_connect.zivo_state_badge"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_booking" name="My equipment booking">
+        <t t-call="portal.portal_layout">
+            <div class="mt-3">
+                <div t-if="message == 'submitted'" class="alert alert-success">
+                    <i class="fa fa-check me-1"/>
+                    <t t-if="booking.state == 'approved'">Your booking is confirmed.</t>
+                    <t t-else="">Your request was submitted. Your approver has been notified.</t>
+                </div>
+                <div t-if="message == 'cancelled'" class="alert alert-info">Your booking was cancelled.</div>
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><t t-out="booking.name"/> — <t t-out="booking.equipment_id.name"/></h4>
+                        <t t-call="zivoit_event_connect.zivo_state_badge"/>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row mb-0">
+                                    <dt class="col-5">Quantity</dt><dd class="col-7" t-out="booking.quantity"/>
+                                    <dt class="col-5">From</dt><dd class="col-7"><span t-field="booking.start" t-options="{'tz_name': booking.equipment_id.tz}"/></dd>
+                                    <dt class="col-5">To</dt><dd class="col-7"><span t-field="booking.stop" t-options="{'tz_name': booking.equipment_id.tz}"/></dd>
+                                    <dt class="col-5">Location</dt><dd class="col-7" t-out="booking.equipment_id.location or '—'"/>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row mb-0">
+                                    <dt class="col-5">Event</dt><dd class="col-7" t-out="booking.event_id.name or '—'"/>
+                                    <dt class="col-5">Decided by</dt><dd class="col-7" t-out="booking.approver_id.name or '—'"/>
+                                    <dt class="col-5" t-if="booking.reject_reason">Reason</dt>
+                                    <dd class="col-7" t-if="booking.reject_reason" t-out="booking.reject_reason"/>
+                                </dl>
+                            </div>
+                        </div>
+                        <p t-if="booking.purpose" class="mt-3 mb-0 text-muted" t-out="booking.purpose"/>
+                    </div>
+                    <div class="card-footer" t-if="booking.state in ('draft', 'submitted', 'approved')">
+                        <form t-attf-action="/my/equipment-bookings/#{booking.id}/cancel" method="post" class="d-inline">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Cancel booking</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
