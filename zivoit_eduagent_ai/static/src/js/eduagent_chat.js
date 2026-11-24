@@ -86,7 +86,7 @@
             var wrap = el("div", "o_eduagent_sources");
             wrap.appendChild(document.createTextNode("Sources: "));
             sources.forEach(function (s, i) {
-                if (i) { wrap.appendChild(document.createTextNode(" · ")); }
+                if (i) { wrap.appendChild(document.createTextNode(" | ")); }
                 var a = document.createElement(s.url ? "a" : "span");
                 if (s.url) { a.href = s.url; a.target = "_blank"; a.rel = "noopener"; }
                 a.textContent = s.title;
