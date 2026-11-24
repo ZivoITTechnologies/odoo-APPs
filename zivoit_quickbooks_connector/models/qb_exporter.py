@@ -166,9 +166,17 @@ class QbExporter(models.AbstractModel):
         return ctx.client.update(api_entity, body)
 
     def _after_export(self, ctx, entity, record, result):
-        if entity in ("Invoice", "CreditMemo") and "qb_payment_link" in record._fields:
+        if entity == "Invoice" and "qb_payment_link" in record._fields:
             link = result.get("InvoiceLink")
-            if link:
+            if not link and result.get("Id"):
+                # Intuit returns the online payment link only when asked for it explicitly,
+                # and only when QuickBooks Payments is active and the invoice has a billing e-mail.
+                try:
+                    fresh = ctx.client.read("Invoice", result["Id"], params={"include": "invoiceLink"}) or {}
+                    link = fresh.get("InvoiceLink")
+                except QBOError:
+                    _logger.info("QuickBooks invoice link not available", exc_info=True)
+            if link and link != record.qb_payment_link:
                 record.with_context(qb_importing=True).qb_payment_link = link
 
     # ========================================================= remote match

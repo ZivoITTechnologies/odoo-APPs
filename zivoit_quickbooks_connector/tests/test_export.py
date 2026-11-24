@@ -130,7 +130,9 @@ class TestExport(QbCommon):
         self.assertEqual(sale_line["SalesItemLineDetail"]["TaxCodeRef"]["value"], self.qb_taxcode["Id"])
         self.assertTrue(any(l["DetailType"] == "DescriptionOnly" for l in qb["Line"]))
         self.assertEqual(qb["GlobalTaxCalculation"], "TaxExcluded")
-        self.assertEqual(move.qb_payment_link, qb["InvoiceLink"])
+        self.assertEqual(move.qb_payment_link, "https://connect.intuit.com/t/fake-%s" % job.qb_id,
+                         "payment link fetched with include=invoiceLink")
+        self.assertTrue(any(c[2].get("include") == "invoiceLink" for c in self.fake.calls))
 
     def test_export_invoice_unmapped_tax_fails_clearly(self):
         other_tax = self.env["account.tax"].create({"name": "Unmapped 3%", "amount": 3, "type_tax_use": "sale"})

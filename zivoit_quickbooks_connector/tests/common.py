@@ -152,7 +152,11 @@ class FakeQBO:
             obj = self.get(entity, m.group(2))
             if not obj:
                 return _fault(610, "Object Not Found")
-            return FakeResponse(200, {entity: copy.deepcopy(obj)})
+            obj = copy.deepcopy(obj)
+            if entity == "Invoice" and params.get("include") == "invoiceLink" and obj.get("BillEmail"):
+                # like Intuit: the link is only returned on request (and with a billing e-mail)
+                obj["InvoiceLink"] = "https://connect.intuit.com/t/fake-%s" % obj["Id"]
+            return FakeResponse(200, {entity: obj})
         m = re.match(r"^(\w+)$", path)
         if m and method == "POST":
             return self._write(self._entity(m.group(1)), params, payload)
@@ -256,8 +260,6 @@ class FakeQBO:
         if entity in ("Invoice", "Bill") and not payload.get("Line"):
             return _fault(6000, "A business validation error has occurred: Line is required")
         obj = self.add(entity, payload)
-        if entity == "Invoice":
-            obj["InvoiceLink"] = "https://connect.intuit.com/t/fake-%s" % obj["Id"]
         return FakeResponse(200, {entity: copy.deepcopy(obj)})
 
     def _dup_name(self, name, exclude=None):
