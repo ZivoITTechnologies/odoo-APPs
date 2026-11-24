@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_support_ticket" model="ir.sequence">
+            <field name="name">EduAgent Support Ticket</field>
+            <field name="code">eduagent.support.ticket</field>
+            <field name="prefix">EDU-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="emi_plan_full" model="eduagent.emi.plan">
+            <field name="name">Pay in full</field>
+            <field name="installment_count">1</field>
+            <field name="interval_months">1</field>
+        </record>
+        <record id="emi_plan_3" model="eduagent.emi.plan">
+            <field name="name">3 monthly instalments</field>
+            <field name="installment_count">3</field>
+            <field name="interval_months">1</field>
+        </record>
+        <record id="emi_plan_6" model="eduagent.emi.plan">
+            <field name="name">6 monthly EMI with 20% down payment</field>
+            <field name="installment_count">6</field>
+            <field name="interval_months">1</field>
+            <field name="down_payment_pct">20</field>
+        </record>
+
+        <record id="faq_certificate" model="eduagent.faq">
+            <field name="name">How do I get my certificate?</field>
+            <field name="category">certificates</field>
+            <field name="answer">&lt;p&gt;Complete all lessons of the course. Your verifiable certificate is issued automatically and appears in your Learner Hub (My Account &gt; AI Learning Hub). Anyone can verify it with its code on the /eduagent/verify page.&lt;/p&gt;</field>
+        </record>
+        <record id="faq_refund" model="eduagent.faq">
+            <field name="name">What is the refund policy?</field>
+            <field name="category">fees</field>
+            <field name="answer">&lt;p&gt;Edit this answer with your own refund policy. The AI agents only quote what is written here.&lt;/p&gt;</field>
+        </record>
+        <record id="faq_login" model="eduagent.faq">
+            <field name="name">I cannot log in</field>
+            <field name="category">platform</field>
+            <field name="answer">&lt;p&gt;Use "Reset password" on the login page with the email you enrolled with. If you still cannot log in, ask the support assistant to open a ticket.&lt;/p&gt;</field>
+        </record>
+        <record id="faq_emi" model="eduagent.faq">
+            <field name="name">Can I pay in instalments (EMI)?</field>
+            <field name="category">fees</field>
+            <field name="answer">&lt;p&gt;Yes. Most programs can be paid in 3 monthly instalments, or 6 monthly instalments after a 20% down payment. Your counsellor sets up the plan when you enrol.&lt;/p&gt;</field>
+        </record>
+    </data>
+</odoo>

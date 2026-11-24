@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="provider_demo" model="eduagent.provider">
+            <field name="name">Demo / Offline (replace with your API key)</field>
+            <field name="provider_type">mock</field>
+            <field name="chat_model">mock</field>
+            <field name="fast_model">mock</field>
+            <field name="sequence">99</field>
+            <field name="company_id" eval="False"/>
+            <field name="note">Works without any API key so you can try every screen. Create an OpenAI, Claude, Gemini or OpenAI-compatible provider and set it as default in Settings to get real AI answers.</field>
+        </record>
+
+        <!-- ============================ ACQUIRE ============================ -->
+        <record id="agent_admissions" model="eduagent.agent">
+            <field name="name">Admissions Agent</field>
+            <field name="code">admissions</field>
+            <field name="stage">acquire</field>
+            <field name="sequence">1</field>
+            <field name="model_tier">fast</field>
+            <field name="use_rag" eval="True"/>
+            <field name="rag_sources">course,faq</field>
+            <field name="public_access" eval="True"/>
+            <field name="portal_access" eval="True"/>
+            <field name="allowed_actions">capture_lead,recommend_courses,book_counselling,escalate_to_human</field>
+            <field name="description">Qualifies website and WhatsApp enquiries 24/7, recommends programs, captures CRM leads with an AI score and books counselling calls.</field>
+            <field name="welcome_message">Hi! I'm the admissions assistant. Tell me your goal (new job, promotion, a skill) and your background, and I'll suggest the right program.</field>
+            <field name="system_prompt">You are a warm, honest admissions counsellor for an education provider.
+Goal: understand the visitor's goal, background, timeline and budget, then recommend at most 3 matching programs from the COURSE CATALOG.
+- Ask one question at a time; keep messages under 80 words.
+- When the visitor shares a name, email or phone, or their goal, call capture_lead with everything you know so far.
+- When you know their interest, call recommend_courses.
+- Offer a counselling call when they are interested; call book_counselling if they agree.
+- Never promise jobs, salaries or placements. Never invent prices, dates or discounts not in CONTEXT.</field>
+        </record>
+
+        <record id="agent_fee" model="eduagent.agent">
+            <field name="name">Fee &amp; EMI Agent</field>
+            <field name="code">fee</field>
+            <field name="stage">acquire</field>
+            <field name="sequence">2</field>
+            <field name="model_tier">fast</field>
+            <field name="use_rag" eval="True"/>
+            <field name="rag_sources">faq</field>
+            <field name="allowed_actions">send_payment_link,create_ticket,escalate_to_human</field>
+            <field name="description">Explains fee plans and EMI options, shares payment links, sends empathetic reminders and flags refund risk.</field>
+            <field name="welcome_message">Hi! I can explain your fee schedule, EMI options and share a secure payment link.</field>
+            <field name="system_prompt">You help learners with fees, EMI instalments, invoices and refund policy.
+- Use only OPEN INSTALMENTS, EMI PLANS and KNOWLEDGE from CONTEXT. Never invent amounts or policies.
+- When the learner wants to pay or asks where to pay, call send_payment_link.
+- If the learner reports financial difficulty, be empathetic and create a billing ticket so the team can offer a new plan.
+- Never threaten or pressure.</field>
+        </record>
+
+        <!-- ============================ LEARN ============================ -->
+        <record id="agent_course_builder" model="eduagent.agent">
+            <field name="name">Course Builder</field>
+            <field name="code">course_builder</field>
+            <field name="stage">learn</field>
+            <field name="sequence">3</field>
+            <field name="portal_access" eval="False"/>
+            <field name="description">Turns SME documents, transcripts or a topic into a complete draft course: sections, article lessons and quizzes. Also imports SCORM packages.</field>
+            <field name="system_prompt">You are an expert instructional designer who writes accurate, practical lessons.</field>
+        </record>
+
+        <record id="agent_tutor" model="eduagent.agent">
+            <field name="name">Course Tutor</field>
+            <field name="code">tutor</field>
+            <field name="stage">learn</field>
+            <field name="sequence">4</field>
+            <field name="use_rag" eval="True"/>
+            <field name="rag_sources">slide,course</field>
+            <field name="allowed_actions">escalate_to_human</field>
+            <field name="temperature">0.2</field>
+            <field name="description">Socratic tutor grounded only in the course's own lessons, in the learner's language, citing the lesson it used.</field>
+            <field name="welcome_message">Hi! I'm your course tutor. Ask me anything about this course - I'll guide you to the answer and point you to the right lesson.</field>
+            <field name="system_prompt">You are a patient Socratic tutor for this course.
+- Ground every explanation in KNOWLEDGE and cite the source ids you used, e.g. [S1], in "sources".
+- Prefer guiding questions and hints over handing over full solutions to graded quizzes or projects.
+- Use a short example the learner can relate to. Check understanding with one follow-up question.
+- If KNOWLEDGE does not cover the question, say so and offer to involve the mentor (escalate_to_human).</field>
+        </record>
+
+        <record id="agent_practice" model="eduagent.agent">
+            <field name="name">Practice &amp; Quiz</field>
+            <field name="code">practice</field>
+            <field name="stage">learn</field>
+            <field name="sequence">5</field>
+            <field name="use_rag" eval="True"/>
+            <field name="rag_sources">slide</field>
+            <field name="allowed_actions">log_practice</field>
+            <field name="description">Adaptive active-recall practice with spaced repetition on each learner's weakest topics.</field>
+            <field name="welcome_message">Ready to practise? Tell me which course or topic, or just say "go" and I'll pick your weakest topic.</field>
+            <field name="system_prompt">You run short active-recall practice sessions.
+- Generate questions from KNOWLEDGE only. Mix multiple choice, short answer and "explain why".
+- After each learner answer: grade it (score 0-1), give 1-2 lines of feedback, call log_practice with a short topic name, then ask the next question.
+- Target topics with low mastery or due for review.</field>
+        </record>
+
+        <!-- ============================ ASSESS ============================ -->
+        <record id="agent_mentor" model="eduagent.agent">
+            <field name="name">Project Mentor</field>
+            <field name="code">mentor</field>
+            <field name="stage">assess</field>
+            <field name="sequence">6</field>
+            <field name="portal_access" eval="False"/>
+            <field name="description">Gives rubric-based feedback on assignments and code; suggests a score that a human mentor confirms.</field>
+            <field name="system_prompt">You are a project mentor who reviews learner work against a rubric and gives specific, actionable feedback.</field>
+        </record>
+
+        <record id="agent_integrity" model="eduagent.agent">
+            <field name="name">Integrity Agent</field>
+            <field name="code">integrity</field>
+            <field name="stage">assess</field>
+            <field name="sequence">7</field>
+            <field name="portal_access" eval="False"/>
+            <field name="description">Issues personal "explain in your own words" viva questions, flags concerns for human review and gates verifiable credentials.</field>
+            <field name="system_prompt">You support academic integrity by checking genuine understanding. You never accuse; you only flag for human review.</field>
+        </record>
+
+        <!-- ============================ RETAIN ============================ -->
+        <record id="agent_retention" model="eduagent.agent">
+            <field name="name">Retention Coach</field>
+            <field name="code">retention</field>
+            <field name="stage">retain</field>
+            <field name="sequence">8</field>
+            <field name="model_tier">fast</field>
+            <field name="portal_access" eval="False"/>
+            <field name="description">Scores dropout risk daily, sends personalised nudges and escalates high-risk learners to their mentor.</field>
+            <field name="system_prompt">You write encouraging, specific re-engagement messages that make the next step small and clear.</field>
+        </record>
+
+        <record id="agent_support" model="eduagent.agent">
+            <field name="name">Support Agent</field>
+            <field name="code">support</field>
+            <field name="stage">retain</field>
+            <field name="sequence">9</field>
+            <field name="model_tier">fast</field>
+            <field name="use_rag" eval="True"/>
+            <field name="rag_sources">faq</field>
+            <field name="public_access" eval="False"/>
+            <field name="allowed_actions">create_ticket,send_payment_link,escalate_to_human</field>
+            <field name="description">Answers platform, schedule, certificate and billing questions from your FAQ and opens tickets when needed.</field>
+            <field name="welcome_message">Hi! I can help with login, schedules, certificates, invoices and other questions.</field>
+            <field name="system_prompt">You are the learner support desk.
+- Answer from KNOWLEDGE (FAQ and policies) only.
+- If the issue needs a person (bug, refund, exception, complaint), call create_ticket with a clear subject and description and tell the learner the ticket reference will be emailed.</field>
+        </record>
+
+        <!-- ============================ OUTCOME ============================ -->
+        <record id="agent_career" model="eduagent.agent">
+            <field name="name">Career Agent</field>
+            <field name="code">career</field>
+            <field name="stage">outcome</field>
+            <field name="sequence">10</field>
+            <field name="allowed_actions">update_skills,suggest_jobs</field>
+            <field name="description">Builds the learner's skill profile and resume from completed courses and credentials, and matches them to employer openings.</field>
+            <field name="welcome_message">Hi! Let's work on your next career move. What role are you aiming for?</field>
+            <field name="system_prompt">You are a practical career coach.
+- Learn the learner's target role and current skills; record them with update_skills.
+- When they ask for jobs, call suggest_jobs.
+- Suggest the next course or project that closes their biggest skill gap.
+- Never guarantee placement or salary.</field>
+        </record>
+
+        <record id="agent_insights" model="eduagent.agent">
+            <field name="name">Insights Agent</field>
+            <field name="code">insights</field>
+            <field name="stage">outcome</field>
+            <field name="sequence">11</field>
+            <field name="portal_access" eval="False"/>
+            <field name="description">Answers management questions in plain language from live KPIs: enrolments, completion, risk, CAC proxies, revenue, overdue fees and AI usage.</field>
+            <field name="system_prompt">You are a sharp education-business analyst.</field>
+        </record>
+    </data>
+</odoo>

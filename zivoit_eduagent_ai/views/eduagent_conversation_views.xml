@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_eduagent_conversation_list" model="ir.ui.view">
+        <field name="name">eduagent.conversation.list</field>
+        <field name="model">eduagent.conversation</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="state == 'human'" decoration-muted="state == 'closed'">
+                <field name="last_message_date"/>
+                <field name="agent_id"/>
+                <field name="partner_id"/>
+                <field name="channel_id" optional="show"/>
+                <field name="lead_id" optional="show"/>
+                <field name="source" optional="show"/>
+                <field name="message_count"/>
+                <field name="user_id" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'ai'" decoration-warning="state == 'human'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_eduagent_conversation_form" model="ir.ui.view">
+        <field name="name">eduagent.conversation.form</field>
+        <field name="model">eduagent.conversation</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_take_over" type="object" string="Take Over" class="btn-primary" invisible="state != 'ai'"/>
+                    <button name="action_back_to_ai" type="object" string="Hand Back to AI" invisible="state != 'human'"/>
+                    <button name="action_close" type="object" string="Close" invisible="state == 'closed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="agent_id" readonly="1"/>
+                            <field name="partner_id"/>
+                            <field name="channel_id"/>
+                            <field name="slide_id" invisible="not slide_id"/>
+                        </group>
+                        <group>
+                            <field name="lead_id"/>
+                            <field name="user_id"/>
+                            <field name="source" readonly="1"/>
+                            <field name="last_message_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="message_ids_eduagent" readonly="1" nolabel="1">
+                        <list decoration-info="role == 'assistant'" decoration-success="role == 'human'">
+                            <field name="create_date" string="Time"/>
+                            <field name="role"/>
+                            <field name="content"/>
+                            <field name="feedback" optional="show"/>
+                            <field name="actions_json" optional="hide"/>
+                        </list>
+                    </field>
+                    <group string="Reply as staff" invisible="state == 'closed'">
+                        <field name="staff_reply" nolabel="1" colspan="2" placeholder="Type a reply; the learner sees it in the chat."/>
+                        <button name="action_send_staff_reply" type="object" string="Send Reply" class="btn-secondary"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_eduagent_conversation_search" model="ir.ui.view">
+        <field name="name">eduagent.conversation.search</field>
+        <field name="model">eduagent.conversation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="agent_id"/>
+                <field name="channel_id"/>
+                <filter name="human" string="Needs a Human" domain="[('state', '=', 'human')]"/>
+                <filter name="with_lead" string="Created a Lead" domain="[('lead_id', '!=', False)]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('last_message_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group>
+                    <filter name="group_agent" string="Agent" context="{'group_by': 'agent_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_eduagent_conversation" model="ir.actions.act_window">
+        <field name="name">Conversations</field>
+        <field name="res_model">eduagent.conversation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

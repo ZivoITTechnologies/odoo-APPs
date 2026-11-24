@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_scorm_import_wizard_form" model="ir.ui.view">
+        <field name="name">eduagent.scorm.import.wizard.form</field>
+        <field name="model">eduagent.scorm.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import SCORM Package">
+                <p class="text-muted">Upload a SCORM 1.2 or 2004 zip. Each SCO becomes a lesson that launches in the built-in player; completion is tracked automatically.</p>
+                <group>
+                    <field name="package_file" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="channel_id"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Import" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_scorm_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import SCORM</field>
+        <field name="res_model">eduagent.scorm.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

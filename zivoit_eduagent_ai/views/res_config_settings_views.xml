@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_eduagent" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.eduagent</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="EduAgent AI" string="EduAgent AI" name="zivoit_eduagent_ai"
+                     groups="zivoit_eduagent_ai.group_eduagent_manager">
+                    <block title="AI Provider &amp; Budget" id="eduagent_provider_settings">
+                        <setting string="Default AI Provider" help="Used by every agent without its own provider.">
+                            <field name="eduagent_default_provider_id"/>
+                            <div class="mt-2">
+                                <button name="%(zivoit_eduagent_ai.action_eduagent_provider)d" type="action"
+                                        string="Manage Providers" class="btn-link" icon="oi-arrow-right"/>
+                            </div>
+                        </setting>
+                        <setting string="Monthly Token Budget" help="Agents pause politely when reached (0 = unlimited).">
+                            <field name="eduagent_monthly_token_budget"/>
+                        </setting>
+                        <setting string="Learner Daily Message Limit" help="Protects against abuse and runaway cost.">
+                            <field name="eduagent_learner_daily_messages"/>
+                        </setting>
+                    </block>
+                    <block title="Privacy &amp; Compliance" id="eduagent_compliance_settings">
+                        <setting help="Emails, phone numbers, card, Aadhaar and PAN numbers are replaced before text is sent to the AI provider.">
+                            <field name="eduagent_pii_masking"/>
+                        </setting>
+                        <setting help="Disclosures on every agent; grading, integrity and credential decisions always need a human reviewer.">
+                            <field name="eduagent_eu_mode"/>
+                        </setting>
+                        <setting string="AI Disclosure Text" help="Shown under every chat and in AI-written emails.">
+                            <field name="eduagent_disclosure_text"/>
+                        </setting>
+                    </block>
+                    <block title="Learner Success" id="eduagent_learner_settings">
+                        <setting help="The Retention Coach emails medium and high-risk learners (max once every 5 days).">
+                            <field name="eduagent_auto_nudge"/>
+                        </setting>
+                        <setting string="Expected Course Duration (days)" help="Used to compare actual vs expected progress.">
+                            <field name="eduagent_expected_course_days"/>
+                        </setting>
+                        <setting help="Learners must pass a human-reviewed viva check before a credential is issued.">
+                            <field name="eduagent_require_oral_check"/>
+                        </setting>
+                        <setting string="Admissions Sales Team" help="Team that receives AI-captured leads.">
+                            <field name="eduagent_admissions_team_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_eduagent_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="res_config_settings_view_form_eduagent"/>
+        <field name="context">{'module': 'zivoit_eduagent_ai', 'bin_size': False}</field>
+    </record>
+</odoo>

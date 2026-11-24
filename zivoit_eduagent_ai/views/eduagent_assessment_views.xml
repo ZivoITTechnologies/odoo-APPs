@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rubrics -->
+    <record id="view_eduagent_rubric_list" model="ir.ui.view">
+        <field name="name">eduagent.rubric.list</field>
+        <field name="model">eduagent.rubric</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="channel_id"/>
+                <field name="pass_score"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_rubric_form" model="ir.ui.view">
+        <field name="name">eduagent.rubric.form</field>
+        <field name="model">eduagent.rubric</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="channel_id"/>
+                        <field name="pass_score"/>
+                        <field name="instructions"/>
+                    </group>
+                    <field name="criterion_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="description"/>
+                            <field name="weight"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_eduagent_rubric" model="ir.actions.act_window">
+        <field name="name">Rubrics</field>
+        <field name="res_model">eduagent.rubric</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Submissions -->
+    <record id="view_eduagent_submission_list" model="ir.ui.view">
+        <field name="name">eduagent.submission.list</field>
+        <field name="model">eduagent.submission</field>
+        <field name="arch" type="xml">
+            <list decoration-info="state == 'ai_reviewed'" decoration-success="state == 'approved'">
+                <field name="create_date" string="Submitted"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="channel_id"/>
+                <field name="ai_score"/>
+                <field name="final_score"/>
+                <field name="state" widget="badge"/>
+                <field name="reviewer_id" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_submission_form" model="ir.ui.view">
+        <field name="name">eduagent.submission.form</field>
+        <field name="model">eduagent.submission</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_ai_review" type="object" string="Run AI Review" class="btn-primary" invisible="state not in ('submitted', 'returned')"/>
+                    <button name="action_ai_review" type="object" string="Re-run AI Review" invisible="state != 'ai_reviewed'"/>
+                    <button name="action_approve" type="object" string="Confirm Score" class="btn-primary" invisible="state != 'ai_reviewed'"/>
+                    <button name="action_return" type="object" string="Return for Rework" invisible="state not in ('ai_reviewed', 'approved')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="submitted,ai_reviewed,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="channel_id"/>
+                            <field name="rubric_id"/>
+                        </group>
+                        <group>
+                            <field name="ai_score"/>
+                            <field name="final_score"/>
+                            <field name="passed"/>
+                            <field name="reviewer_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="AI Feedback" name="feedback">
+                            <field name="ai_feedback"/>
+                            <field name="review_note" placeholder="Mentor note shown to the learner when returned"/>
+                        </page>
+                        <page string="Submission" name="content">
+                            <field name="content" widget="text"/>
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_eduagent_submission" model="ir.actions.act_window">
+        <field name="name">Project Submissions</field>
+        <field name="res_model">eduagent.submission</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Practice -->
+    <record id="view_eduagent_practice_list" model="ir.ui.view">
+        <field name="name">eduagent.practice.attempt.list</field>
+        <field name="model">eduagent.practice.attempt</field>
+        <field name="arch" type="xml">
+            <list create="false">
+                <field name="create_date"/>
+                <field name="partner_id"/>
+                <field name="channel_id"/>
+                <field name="topic"/>
+                <field name="score" avg="Average"/>
+                <field name="next_review"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_practice_pivot" model="ir.ui.view">
+        <field name="name">eduagent.practice.attempt.pivot</field>
+        <field name="model">eduagent.practice.attempt</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="topic" type="row"/>
+                <field name="score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_eduagent_practice" model="ir.actions.act_window">
+        <field name="name">Practice &amp; Mastery</field>
+        <field name="res_model">eduagent.practice.attempt</field>
+        <field name="view_mode">list,pivot</field>
+    </record>
+
+    <!-- Integrity checks -->
+    <record id="view_eduagent_oral_list" model="ir.ui.view">
+        <field name="name">eduagent.oral.check.list</field>
+        <field name="model">eduagent.oral.check</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="state == 'pending_review'" decoration-success="state == 'passed'" decoration-danger="state == 'failed'">
+                <field name="create_date"/>
+                <field name="partner_id"/>
+                <field name="channel_id"/>
+                <field name="ai_understanding"/>
+                <field name="flag_ids"/>
+                <field name="seconds_taken" optional="show"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_oral_form" model="ir.ui.view">
+        <field name="name">eduagent.oral.check.form</field>
+        <field name="model">eduagent.oral.check</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_issue_question" type="object" string="Generate Question" invisible="state != 'draft'"/>
+                    <button name="action_ai_assess" type="object" string="Run AI Assessment" invisible="state not in ('answered', 'pending_review')"/>
+                    <button name="action_pass" type="object" string="Pass" class="btn-primary" invisible="state != 'pending_review'"/>
+                    <button name="action_fail" type="object" string="Not Passed" invisible="state != 'pending_review'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="channel_id"/>
+                            <field name="reviewer_id"/>
+                        </group>
+                        <group>
+                            <field name="ai_understanding"/>
+                            <field name="seconds_taken"/>
+                            <field name="paste_detected"/>
+                            <field name="flag_ids"/>
+                        </group>
+                    </group>
+                    <separator string="Question"/>
+                    <field name="question" class="fw-bold"/>
+                    <separator string="Learner Answer"/>
+                    <field name="answer"/>
+                    <separator string="AI Assessment (decision support)"/>
+                    <field name="ai_assessment"/>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_eduagent_oral" model="ir.actions.act_window">
+        <field name="name">Integrity Checks</field>
+        <field name="res_model">eduagent.oral.check</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

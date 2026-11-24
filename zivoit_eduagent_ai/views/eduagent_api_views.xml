@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_eduagent_api_key_list" model="ir.ui.view">
+        <field name="name">eduagent.api.key.list</field>
+        <field name="model">eduagent.api.key</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="scope"/>
+                <field name="key_hint"/>
+                <field name="last_used"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_api_key_form" model="ir.ui.view">
+        <field name="name">eduagent.api.key.form</field>
+        <field name="model">eduagent.api.key</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate" type="object" string="Generate Key" class="btn-primary" invisible="key_hash"/>
+                    <button name="action_generate" type="object" string="Rotate Key" invisible="not key_hash"
+                            confirm="The old key stops working immediately. Continue?"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="user_id"/>
+                            <field name="scope"/>
+                            <field name="active" invisible="1"/>
+                            <field name="key_hash" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="key_hint"/>
+                            <field name="last_used"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning" role="alert" invisible="not new_key">
+                        <strong>Copy this key now.</strong> It will not be shown again.
+                        <field name="new_key" widget="CopyClipboardChar"/>
+                        <button name="action_clear_new_key" type="object" string="I copied it" class="btn-link"/>
+                    </div>
+                    <div class="text-muted small">
+                        <p>Endpoints (header <code>Authorization: Bearer &lt;key&gt;</code>):</p>
+                        <ul>
+                            <li><code>GET /eduagent/api/v1/kpis?days=90</code></li>
+                            <li><code>GET /eduagent/api/v1/learners/at-risk?level=high&amp;limit=100</code></li>
+                            <li><code>POST /eduagent/api/v1/chat</code> with JSON {"agent": "support", "message": "...", "partner_email": "...", "conversation_token": "..."} (scope "Read + run agents")</li>
+                        </ul>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_eduagent_api_key" model="ir.actions.act_window">
+        <field name="name">API Keys</field>
+        <field name="res_model">eduagent.api.key</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

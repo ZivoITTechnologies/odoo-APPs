@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_eduagent_profile_list" model="ir.ui.view">
+        <field name="name">eduagent.skill.profile.list</field>
+        <field name="model">eduagent.skill.profile</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="partner_id"/>
+                <field name="headline"/>
+                <field name="target_role"/>
+                <field name="skill_ids" widget="many2many_tags"/>
+                <field name="open_to_work"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_profile_form" model="ir.ui.view">
+        <field name="name">eduagent.skill.profile.form</field>
+        <field name="model">eduagent.skill.profile</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_refresh_from_courses" type="object" string="Refresh from Courses"/>
+                    <button name="action_generate_resume" type="object" string="Generate AI Resume" class="btn-primary"/>
+                    <button name="action_compute_matches" type="object" string="Match Jobs"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="partner_id"/></h1><field name="headline" placeholder="Headline"/></div>
+                    <group>
+                        <group>
+                            <field name="target_role"/>
+                            <field name="open_to_work"/>
+                        </group>
+                        <group>
+                            <field name="skill_ids" widget="many2many_tags"/>
+                            <field name="completed_channel_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Job Matches" name="matches">
+                            <field name="match_ids">
+                                <list editable="bottom">
+                                    <field name="job_id"/>
+                                    <field name="employer_id"/>
+                                    <field name="score"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="AI Resume" name="resume">
+                            <field name="resume_html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_eduagent_profile" model="ir.actions.act_window">
+        <field name="name">Skill Profiles</field>
+        <field name="res_model">eduagent.skill.profile</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_eduagent_job_list" model="ir.ui.view">
+        <field name="name">eduagent.job.opening.list</field>
+        <field name="model">eduagent.job.opening</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="employer_id"/>
+                <field name="location"/>
+                <field name="skill_ids" widget="many2many_tags"/>
+                <field name="match_count"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_eduagent_job_form" model="ir.ui.view">
+        <field name="name">eduagent.job.opening.form</field>
+        <field name="model">eduagent.job.opening</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_extract_skills" type="object" string="Extract Skills with AI"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" placeholder="Role"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="employer_id"/>
+                            <field name="location"/>
+                            <field name="apply_url" widget="url"/>
+                        </group>
+                        <group>
+                            <field name="skill_ids" widget="many2many_tags"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description"><field name="description"/></page>
+                        <page string="Matched Learners" name="matches">
+                            <field name="match_ids">
+                                <list>
+                                    <field name="partner_id"/>
+                                    <field name="score"/>
+                                    <field name="state"/>
+                                    <button name="action_share" type="object" string="Share with Employer" icon="fa-share"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_eduagent_job" model="ir.actions.act_window">
+        <field name="name">Job Openings</field>
+        <field name="res_model">eduagent.job.opening</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_eduagent_skill" model="ir.actions.act_window">
+        <field name="name">Skills</field>
+        <field name="res_model">eduagent.skill</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="view_eduagent_skill_list" model="ir.ui.view">
+        <field name="name">eduagent.skill.list</field>
+        <field name="model">eduagent.skill</field>
+        <field name="arch" type="xml">
+            <list editable="bottom"><field name="name"/></list>
+        </field>
+    </record>
+</odoo>

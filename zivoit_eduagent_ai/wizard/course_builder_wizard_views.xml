@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_course_builder_wizard_form" model="ir.ui.view">
+        <field name="name">eduagent.course.builder.wizard.form</field>
+        <field name="model">eduagent.course.builder.wizard</field>
+        <field name="arch" type="xml">
+            <form string="AI Course Builder">
+                <field name="state" invisible="1"/>
+                <div invisible="state != 'input'">
+                    <p class="text-muted">Describe the course and (optionally) paste or upload your source material. The AI creates an unpublished draft course with sections, article lessons and quizzes for you to review.</p>
+                    <group>
+                        <group>
+                            <field name="topic" placeholder="e.g. GST basics for small businesses"/>
+                            <field name="audience"/>
+                            <field name="level"/>
+                            <field name="language"/>
+                        </group>
+                        <group>
+                            <field name="section_count"/>
+                            <field name="lessons_per_section"/>
+                            <field name="include_quiz"/>
+                            <field name="questions_per_lesson" invisible="not include_quiz"/>
+                            <field name="channel_id"/>
+                        </group>
+                    </group>
+                    <group string="Source Material">
+                        <field name="source_file" filename="source_filename"/>
+                        <field name="source_filename" invisible="1"/>
+                        <field name="source_text" placeholder="Paste SME notes, a transcript or a syllabus..."/>
+                    </group>
+                </div>
+                <div invisible="state != 'done'">
+                    <div class="alert alert-success" role="alert">Draft course created. Review every lesson before publishing.</div>
+                    <field name="result_channel_id" readonly="1"/>
+                    <field name="preview"/>
+                </div>
+                <footer>
+                    <button name="action_generate" type="object" string="Generate Course" class="btn-primary" invisible="state != 'input'"/>
+                    <button name="action_open_course" type="object" string="Open Course" class="btn-primary" invisible="state != 'done'"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_course_builder_wizard" model="ir.actions.act_window">
+        <field name="name">AI Course Builder</field>
+        <field name="res_model">eduagent.course.builder.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Reusable chat box: the JS widget mounts on .o_eduagent_chat -->
+    <template id="chat_box" name="EduAgent Chat Box">
+        <div class="o_eduagent_chat" t-att-data-agent="agent_code" t-att-data-title="title"
+             t-att-data-channel-id="channel_id or ''" t-att-data-disclosure="disclosure or ''"
+             t-att-data-height="height or '520'"/>
+    </template>
+
+    <!-- Public admissions page -->
+    <template id="admissions_page" name="AI Admissions Counsellor">
+        <t t-call="website.layout">
+            <t t-set="pageName" t-value="'eduagent_admissions'"/>
+            <div id="wrap" class="o_eduagent_page">
+                <section class="o_eduagent_hero py-5">
+                    <div class="container">
+                        <div class="row align-items-center g-5">
+                            <div class="col-lg-5">
+                                <h1 class="display-5 fw-bold">Find the right program in 2 minutes</h1>
+                                <p class="lead">Tell our AI counsellor your goal and background. It recommends programs, explains fees and EMI options, and books a call with a human counsellor when you're ready.</p>
+                                <ul class="list-unstyled o_eduagent_ticks">
+                                    <li>Personal course recommendations</li>
+                                    <li>Fee and EMI options explained</li>
+                                    <li>Free counselling call</li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-7">
+                                <t t-call="zivoit_eduagent_ai.chat_box">
+                                    <t t-set="agent_code" t-value="'admissions'"/>
+                                    <t t-set="title" t-value="'Admissions Counsellor'"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <div class="oe_structure" id="oe_structure_eduagent_admissions"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- Learner hub -->
+    <template id="learner_hub" name="AI Learning Hub">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-set="no_breadcrumbs" t-value="True"/>
+            <div class="o_eduagent_hub my-3">
+                <div t-if="message" class="alert alert-info" role="alert" t-out="message"/>
+                <h2 class="mb-1">Your AI Learning Hub</h2>
+                <p class="text-muted">Tutors, practice, support and career help in one place.</p>
+
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item" t-foreach="agents" t-as="ag">
+                        <a t-attf-class="nav-link #{'active' if ag_index == 0 else ''}" data-bs-toggle="tab"
+                           t-attf-href="#eduagent-tab-#{ag.code}" role="tab" t-out="ag.name"/>
+                    </li>
+                </ul>
+                <div class="tab-content mb-4">
+                    <div t-foreach="agents" t-as="ag" t-attf-class="tab-pane fade #{'show active' if ag_index == 0 else ''}"
+                         t-attf-id="eduagent-tab-#{ag.code}" role="tabpanel">
+                        <p class="small text-muted" t-out="ag.description"/>
+                        <t t-call="zivoit_eduagent_ai.chat_box">
+                            <t t-set="agent_code" t-value="ag.code"/>
+                            <t t-set="title" t-value="ag.name"/>
+                            <t t-set="height" t-value="'460'"/>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <h4>My courses</h4>
+                        <table class="table table-sm align-middle">
+                            <thead><tr><th>Course</th><th>Progress</th><th>Status</th><th/></tr></thead>
+                            <tbody>
+                                <tr t-foreach="enrolments" t-as="enr">
+                                    <td><a t-att-href="enr.channel_id.website_url" t-out="enr.channel_id.name"/></td>
+                                    <td style="min-width:140px">
+                                        <div class="progress" style="height:8px">
+                                            <div class="progress-bar" t-attf-style="width: #{enr.completion}%"/>
+                                        </div>
+                                        <small><t t-out="enr.completion"/>%</small>
+                                    </td>
+                                    <td>
+                                        <span t-if="enr.member_status == 'completed'" class="badge text-bg-success">Completed</span>
+                                        <span t-elif="enr.eduagent_risk_level == 'high'" class="badge text-bg-warning">Let's catch up</span>
+                                        <span t-else="" class="badge text-bg-light">On track</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <form t-if="enr.completion &gt;= 50" action="/my/eduagent/oral/request" method="post" class="d-inline">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <input type="hidden" name="channel_id" t-att-value="enr.channel_id.id"/>
+                                            <button class="btn btn-sm btn-outline-secondary" type="submit">Explain-your-learning check</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr t-if="not enrolments"><td colspan="4" class="text-muted">You are not enrolled in a course yet. <a href="/slides">Browse courses</a></td></tr>
+                            </tbody>
+                        </table>
+
+                        <h4 id="projects" class="mt-4">Projects</h4>
+                        <form action="/my/eduagent/submit" method="post" class="card card-body mb-3" t-if="enrolments">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <select name="channel_id" class="form-select" required="required">
+                                        <option t-foreach="enrolments" t-as="enr" t-att-value="enr.channel_id.id" t-out="enr.channel_id.name"/>
+                                    </select>
+                                </div>
+                                <div class="col-md-6"><input name="title" class="form-control" placeholder="Project title" required="required"/></div>
+                                <div class="col-12"><textarea name="content" rows="5" class="form-control" placeholder="Paste your project write-up or code" required="required"/></div>
+                                <div class="col-12"><button class="btn btn-primary" type="submit">Submit for AI feedback</button>
+                                    <small class="text-muted ms-2">AI gives instant feedback; your mentor confirms the score.</small></div>
+                            </div>
+                        </form>
+                        <table class="table table-sm" t-if="submissions">
+                            <thead><tr><th>Project</th><th>Status</th><th>Score</th></tr></thead>
+                            <tbody>
+                                <t t-foreach="submissions" t-as="sub">
+                                    <tr>
+                                        <td t-out="sub.name"/>
+                                        <td><span class="badge text-bg-light" t-field="sub.state"/></td>
+                                        <td><t t-if="sub.state == 'approved'"><t t-out="sub.final_score"/>%</t><t t-else="">Pending mentor</t></td>
+                                    </tr>
+                                    <tr t-if="sub.ai_feedback"><td colspan="3" class="small"><div t-field="sub.ai_feedback"/></td></tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <h4>Practice mastery</h4>
+                        <div t-if="not mastery" class="text-muted small mb-3">Use the Practice tab to build your mastery map.</div>
+                        <div t-foreach="mastery" t-as="m" class="mb-2">
+                            <div class="d-flex justify-content-between small"><span t-out="m[0]"/><span><t t-out="int(m[1] * 100)"/>%</span></div>
+                            <div class="progress" style="height:6px"><div class="progress-bar bg-success" t-attf-style="width: #{int(m[1] * 100)}%"/></div>
+                        </div>
+
+                        <h4 class="mt-4">Credentials</h4>
+                        <ul class="list-unstyled">
+                            <li t-foreach="credentials" t-as="cred" class="mb-2">
+                                <i class="fa fa-certificate text-warning me-1"/>
+                                <span t-out="cred.channel_id.name"/>
+                                <a class="small ms-2" t-att-href="'/eduagent/verify/%s' % cred.code">Verify / share</a>
+                            </li>
+                            <li t-if="not credentials" class="text-muted small">Complete a course to earn a verifiable credential.</li>
+                        </ul>
+
+                        <h4 class="mt-4">Fee schedule</h4>
+                        <table class="table table-sm" t-if="installments">
+                            <tbody>
+                                <tr t-foreach="installments" t-as="inst">
+                                    <td t-out="inst.due_date"/>
+                                    <td><span t-field="inst.amount" t-options="{'widget': 'monetary', 'display_currency': inst.currency_id}"/></td>
+                                    <td><span t-attf-class="badge #{'text-bg-success' if inst.state == 'paid' else ('text-bg-danger' if inst.state == 'overdue' else 'text-bg-light')}" t-field="inst.state"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p t-else="" class="text-muted small">No instalments.</p>
+
+                        <h4 class="mt-4" t-if="oral_checks">Explain-your-learning checks</h4>
+                        <ul class="list-unstyled small" t-if="oral_checks">
+                            <li t-foreach="oral_checks" t-as="oc">
+                                <a t-if="oc.state == 'draft'" t-att-href="'/my/eduagent/oral/%s' % oc.id" t-out="oc.channel_id.name"/>
+                                <span t-else="" t-out="oc.channel_id.name"/>
+                                - <span t-field="oc.state"/>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="small text-muted mt-4" t-out="disclosure"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="oral_check_page" name="Explain your learning">
+        <t t-call="portal.portal_layout">
+            <div class="my-4" style="max-width: 760px">
+                <h3>Explain your learning</h3>
+                <p class="text-muted">Answer in your own words. There is no time limit, but please type your answer yourself. A reviewer reads every answer.</p>
+                <div class="card card-body mb-3"><strong t-out="check.question"/></div>
+                <form method="post" t-att-action="'/my/eduagent/oral/%s' % check.id">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="pasted" value="0" class="o_eduagent_pasted"/>
+                    <textarea name="answer" rows="10" class="form-control o_eduagent_oral_answer" required="required"/>
+                    <button type="submit" class="btn btn-primary mt-3">Submit answer</button>
+                </form>
+            </div>
+        </t>
+    </template>
+
+    <!-- Credential verification -->
+    <template id="verify_page" name="Verify Credential">
+        <t t-call="website.layout">
+            <div id="wrap" class="container py-5" style="max-width: 720px">
+                <h1 class="mb-4">Verify a credential</h1>
+                <form action="/eduagent/verify" method="get" class="d-flex gap-2 mb-4">
+                    <input name="code" class="form-control" placeholder="Credential code" t-att-value="code"/>
+                    <button class="btn btn-primary" type="submit">Verify</button>
+                </form>
+                <t t-if="code">
+                    <div t-if="cred and authentic" class="card border-success">
+                        <div class="card-body">
+                            <h4 class="text-success"><i class="fa fa-check-circle me-2"/>Authentic credential</h4>
+                            <p class="mb-1"><b>Learner:</b> <span t-out="cred.partner_id.name"/></p>
+                            <p class="mb-1"><b>Course:</b> <span t-out="cred.channel_id.name"/></p>
+                            <p class="mb-1"><b>Issued:</b> <span t-out="cred.issue_date"/> by <span t-out="cred.company_id.name"/></p>
+                            <p class="small text-muted mb-0">Code <span t-out="cred.code"/> - digital signature verified.</p>
+                        </div>
+                    </div>
+                    <div t-elif="cred and cred.state == 'revoked'" class="alert alert-danger">This credential has been revoked.</div>
+                    <div t-else="" class="alert alert-warning">No valid credential matches this code.</div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Portal home card -->
+    <template id="portal_my_home_eduagent" name="AI Learning Hub card" inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/zivoit_eduagent_ai/static/description/icon.png'"/>
+                <t t-set="title">AI Learning Hub</t>
+                <t t-set="text">AI tutor, practice, projects, credentials and support</t>
+                <t t-set="url" t-value="'/my/eduagent'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

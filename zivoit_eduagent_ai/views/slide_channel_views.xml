@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_slide_channel_form_eduagent" model="ir.ui.view">
+        <field name="name">slide.channel.form.eduagent</field>
+        <field name="model">slide.channel</field>
+        <field name="inherit_id" ref="website_slides.view_slide_channel_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_eduagent_view_risk" type="object" class="oe_stat_button" icon="fa-heartbeat"
+                        groups="zivoit_eduagent_ai.group_eduagent_user">
+                    <field name="eduagent_at_risk_count" widget="statinfo" string="At Risk"/>
+                </button>
+                <button name="action_eduagent_view_chunks" type="object" class="oe_stat_button" icon="fa-database"
+                        groups="zivoit_eduagent_ai.group_eduagent_user">
+                    <field name="eduagent_chunk_count" widget="statinfo" string="AI Knowledge"/>
+                </button>
+                <button name="action_eduagent_view_credentials" type="object" class="oe_stat_button" icon="fa-certificate"
+                        groups="zivoit_eduagent_ai.group_eduagent_user">
+                    <field name="eduagent_credential_count" widget="statinfo" string="Credentials"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="AI (EduAgent)" name="eduagent" groups="zivoit_eduagent_ai.group_eduagent_user">
+                    <group>
+                        <group string="Learner Agents">
+                            <field name="eduagent_tutor_enabled"/>
+                            <field name="eduagent_issue_credential"/>
+                            <field name="eduagent_skill_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Knowledge">
+                            <field name="eduagent_last_indexed"/>
+                            <button name="action_eduagent_index" type="object" string="Index for AI now"
+                                    class="btn-secondary" icon="fa-refresh"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

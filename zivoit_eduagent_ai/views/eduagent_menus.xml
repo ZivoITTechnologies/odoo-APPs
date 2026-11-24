@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_eduagent_root" name="EduAgent AI" sequence="34"
+              web_icon="zivoit_eduagent_ai,static/description/icon.png"
+              groups="zivoit_eduagent_ai.group_eduagent_user"/>
+
+    <!-- Agents -->
+    <menuitem id="menu_eduagent_agents" name="Agents" parent="menu_eduagent_root" sequence="1"
+              action="action_eduagent_agent"/>
+    <menuitem id="menu_eduagent_conversations" name="Conversations" parent="menu_eduagent_root" sequence="2"
+              action="action_eduagent_conversation"/>
+
+    <!-- Acquire -->
+    <menuitem id="menu_eduagent_acquire" name="Acquire" parent="menu_eduagent_root" sequence="10"/>
+    <menuitem id="menu_eduagent_leads" name="AI-captured Leads" parent="menu_eduagent_acquire" sequence="1"
+              action="action_eduagent_leads"/>
+    <menuitem id="menu_eduagent_installments" name="Fee Instalments" parent="menu_eduagent_acquire" sequence="2"
+              action="action_eduagent_installment"/>
+
+    <!-- Learn -->
+    <menuitem id="menu_eduagent_learn" name="Learn" parent="menu_eduagent_root" sequence="20"/>
+    <menuitem id="menu_eduagent_course_builder" name="AI Course Builder" parent="menu_eduagent_learn" sequence="1"
+              action="action_course_builder_wizard"/>
+    <menuitem id="menu_eduagent_scorm_import" name="Import SCORM" parent="menu_eduagent_learn" sequence="2"
+              action="action_scorm_import_wizard"/>
+    <menuitem id="menu_eduagent_scorm" name="SCORM Packages" parent="menu_eduagent_learn" sequence="3"
+              action="action_eduagent_scorm"/>
+    <menuitem id="menu_eduagent_knowledge" name="Knowledge Store (RAG)" parent="menu_eduagent_learn" sequence="4"
+              action="action_eduagent_knowledge"/>
+    <menuitem id="menu_eduagent_practice" name="Practice &amp; Mastery" parent="menu_eduagent_learn" sequence="5"
+              action="action_eduagent_practice"/>
+
+    <!-- Assess -->
+    <menuitem id="menu_eduagent_assess" name="Assess" parent="menu_eduagent_root" sequence="30"/>
+    <menuitem id="menu_eduagent_submissions" name="Project Submissions" parent="menu_eduagent_assess" sequence="1"
+              action="action_eduagent_submission"/>
+    <menuitem id="menu_eduagent_oral" name="Integrity Checks" parent="menu_eduagent_assess" sequence="2"
+              action="action_eduagent_oral"/>
+    <menuitem id="menu_eduagent_credentials" name="Verifiable Credentials" parent="menu_eduagent_assess" sequence="3"
+              action="action_eduagent_credential"/>
+    <menuitem id="menu_eduagent_rubrics" name="Rubrics" parent="menu_eduagent_assess" sequence="4"
+              action="action_eduagent_rubric"/>
+
+    <!-- Retain -->
+    <menuitem id="menu_eduagent_retain" name="Retain" parent="menu_eduagent_root" sequence="40"/>
+    <menuitem id="menu_eduagent_risk" name="Learner Risk Radar" parent="menu_eduagent_retain" sequence="1"
+              action="action_eduagent_risk"/>
+    <menuitem id="menu_eduagent_nudges" name="Nudges Sent" parent="menu_eduagent_retain" sequence="2"
+              action="action_eduagent_nudge"/>
+    <menuitem id="menu_eduagent_tickets" name="Support Tickets" parent="menu_eduagent_retain" sequence="3"
+              action="action_eduagent_ticket"/>
+    <menuitem id="menu_eduagent_faq" name="FAQ &amp; Policies" parent="menu_eduagent_retain" sequence="4"
+              action="action_eduagent_faq"/>
+
+    <!-- Outcome -->
+    <menuitem id="menu_eduagent_outcome" name="Outcome" parent="menu_eduagent_root" sequence="50"/>
+    <menuitem id="menu_eduagent_insights" name="Ask Insights Agent" parent="menu_eduagent_outcome" sequence="1"
+              action="action_insights_wizard"/>
+    <menuitem id="menu_eduagent_profiles" name="Skill Profiles" parent="menu_eduagent_outcome" sequence="2"
+              action="action_eduagent_profile"/>
+    <menuitem id="menu_eduagent_jobs" name="Job Openings" parent="menu_eduagent_outcome" sequence="3"
+              action="action_eduagent_job"/>
+
+    <!-- Configuration -->
+    <menuitem id="menu_eduagent_config" name="Configuration" parent="menu_eduagent_root" sequence="90"
+              groups="zivoit_eduagent_ai.group_eduagent_manager"/>
+    <menuitem id="menu_eduagent_settings" name="Settings" parent="menu_eduagent_config" sequence="1"
+              action="action_eduagent_settings"/>
+    <menuitem id="menu_eduagent_providers" name="AI Providers" parent="menu_eduagent_config" sequence="2"
+              action="action_eduagent_provider"/>
+    <menuitem id="menu_eduagent_emi_plans" name="EMI Plans" parent="menu_eduagent_config" sequence="3"
+              action="action_eduagent_emi_plan"/>
+    <menuitem id="menu_eduagent_skills" name="Skills" parent="menu_eduagent_config" sequence="4"
+              action="action_eduagent_skill"/>
+    <menuitem id="menu_eduagent_api" name="API Keys" parent="menu_eduagent_config" sequence="5"
+              action="action_eduagent_api_key"/>
+    <menuitem id="menu_eduagent_usage" name="AI Audit &amp; Usage" parent="menu_eduagent_config" sequence="6"
+              action="action_eduagent_usage"/>
+</odoo>

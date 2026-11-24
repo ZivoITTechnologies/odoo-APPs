@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_eduagent_provider_list" model="ir.ui.view">
+        <field name="name">eduagent.provider.list</field>
+        <field name="model">eduagent.provider</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="provider_type"/>
+                <field name="chat_model"/>
+                <field name="fast_model"/>
+                <field name="embedding_model" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_eduagent_provider_form" model="ir.ui.view">
+        <field name="name">eduagent.provider.form</field>
+        <field name="model">eduagent.provider</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object" string="Test Connection" class="btn-primary"/>
+                    <button name="action_set_default" type="object" string="Set as Company Default"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. OpenAI production"/></h1>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="provider_type"/>
+                            <field name="api_key" password="True" invisible="provider_type == 'mock'"/>
+                            <field name="base_url" invisible="provider_type == 'mock'"
+                                   placeholder="Leave default unless using Azure, Ollama, a proxy..."/>
+                            <field name="timeout"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Models &amp; Routing">
+                            <field name="chat_model"/>
+                            <field name="fast_model"/>
+                            <field name="embedding_model"/>
+                            <field name="temperature"/>
+                        </group>
+                        <group string="Cost Tracking">
+                            <field name="cost_input_per_1k"/>
+                            <field name="cost_output_per_1k"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Internal notes"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_eduagent_provider" model="ir.actions.act_window">
+        <field name="name">AI Providers</field>
+        <field name="res_model">eduagent.provider</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Bring your own AI key</p>
+            <p>Connect OpenAI, Anthropic Claude, Google Gemini or any OpenAI-compatible endpoint (Azure, Ollama, vLLM). Costs are billed by your provider, and you can track them here.</p>
+        </field>
+    </record>
+</odoo>

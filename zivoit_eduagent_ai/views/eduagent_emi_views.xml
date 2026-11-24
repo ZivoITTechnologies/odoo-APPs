@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_eduagent_emi_plan_list" model="ir.ui.view">
+        <field name="name">eduagent.emi.plan.list</field>
+        <field name="model">eduagent.emi.plan</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+                <field name="installment_count"/>
+                <field name="interval_months"/>
+                <field name="down_payment_pct"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_eduagent_emi_plan" model="ir.actions.act_window">
+        <field name="name">EMI Plans</field>
+        <field name="res_model">eduagent.emi.plan</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+
+    <record id="view_eduagent_installment_list" model="ir.ui.view">
+        <field name="name">eduagent.installment.list</field>
+        <field name="model">eduagent.installment</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-danger="state == 'overdue'" decoration-warning="state == 'due'" decoration-success="state == 'paid'">
+                <field name="order_id"/>
+                <field name="partner_id"/>
+                <field name="sequence" string="#"/>
+                <field name="due_date"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state" widget="badge" decoration-danger="state == 'overdue'" decoration-warning="state == 'due'" decoration-success="state == 'paid'"/>
+                <field name="reminder_count" optional="show"/>
+                <field name="last_reminder" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_eduagent_installment_search" model="ir.ui.view">
+        <field name="name">eduagent.installment.search</field>
+        <field name="model">eduagent.installment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="order_id"/>
+                <filter name="overdue" string="Overdue" domain="[('state', '=', 'overdue')]"/>
+                <filter name="unpaid" string="Not Paid" domain="[('state', '!=', 'paid')]"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_month" string="Due Month" context="{'group_by': 'due_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_eduagent_installment" model="ir.actions.act_window">
+        <field name="name">Fee Instalments</field>
+        <field name="res_model">eduagent.installment</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_unpaid': 1}</field>
+    </record>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_form_eduagent" model="ir.ui.view">
+        <field name="name">sale.order.form.eduagent</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fees &amp; EMI" name="eduagent_emi">
+                    <group>
+                        <group>
+                            <field name="eduagent_emi_plan_id"/>
+                            <field name="eduagent_amount_paid"/>
+                        </group>
+                        <group>
+                            <field name="eduagent_refund_risk" widget="badge"
+                                   decoration-danger="eduagent_refund_risk == 'high'"
+                                   decoration-warning="eduagent_refund_risk == 'medium'"
+                                   decoration-success="eduagent_refund_risk == 'low'"/>
+                            <field name="eduagent_refund_reasons"/>
+                        </group>
+                    </group>
+                    <div class="d-flex gap-2 mb-2">
+                        <button name="action_eduagent_generate_schedule" type="object" string="Generate Instalment Schedule"
+                                class="btn-secondary" invisible="not eduagent_emi_plan_id"/>
+                        <button name="action_eduagent_send_reminders" type="object" string="Send AI Reminders Now"
+                                class="btn-secondary" invisible="not eduagent_installment_ids"/>
+                    </div>
+                    <field name="eduagent_installment_ids">
+                        <list editable="bottom" decoration-danger="state == 'overdue'" decoration-success="state == 'paid'">
+                            <field name="sequence" string="#"/>
+                            <field name="due_date"/>
+                            <field name="amount" sum="Total"/>
+                            <field name="currency_id" column_invisible="True"/>
+                            <field name="state" widget="badge"/>
+                            <field name="reminder_count"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

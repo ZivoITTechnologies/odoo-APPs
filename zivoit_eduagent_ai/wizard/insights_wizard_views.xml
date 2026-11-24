@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_insights_wizard_form" model="ir.ui.view">
+        <field name="name">eduagent.insights.wizard.form</field>
+        <field name="model">eduagent.insights.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Ask the Insights Agent">
+                <group>
+                    <field name="question" placeholder="e.g. Why did completion drop last month and what should we do?"/>
+                    <field name="period_days"/>
+                </group>
+                <div invisible="not answer">
+                    <separator string="Answer"/>
+                    <field name="answer"/>
+                </div>
+                <details invisible="not kpi_json">
+                    <summary class="text-muted small">Numbers the answer is based on</summary>
+                    <field name="kpi_json" widget="text"/>
+                </details>
+                <footer>
+                    <button name="action_ask" type="object" string="Ask" class="btn-primary"/>
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_insights_wizard" model="ir.actions.act_window">
+        <field name="name">Ask Insights Agent</field>
+        <field name="res_model">eduagent.insights.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
