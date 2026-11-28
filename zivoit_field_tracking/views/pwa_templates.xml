@@ -29,6 +29,10 @@
                     <section class="zv-card zv-hero" id="zv-hero">
                         <div class="zv-hero-state" id="zv-state">Day not started</div>
                         <div class="zv-hero-sub" id="zv-state-sub">Tap Start Day to begin tracking. Works without network.</div>
+                        <div class="zv-vehicle" id="zv-vehicle-box">
+                            <label for="zv-vehicle">Travelling by</label>
+                            <select id="zv-vehicle" class="zv-input zv-input-dark"></select>
+                        </div>
                         <button class="zv-btn zv-btn-start" id="zv-toggle" type="button">Start Day</button>
                     </section>
 
@@ -46,6 +50,34 @@
                         <div class="zv-row"><span>Keep screen on</span>
                             <label class="zv-switch"><input type="checkbox" id="zv-wake" checked="checked"/><span></span></label></div>
                         <button class="zv-btn zv-btn-ghost" id="zv-sync" type="button">Upload now</button>
+                    </section>
+
+                    <section class="zv-card zv-allow" id="zv-allow-card" hidden="hidden">
+                        <div class="zv-card-title">Today's allowance <span class="zv-muted-inline" id="zv-allow-src">estimate</span></div>
+                        <div class="zv-allow-grid">
+                            <div><div class="zv-allow-num" id="zv-ta">0</div><div class="zv-lbl" id="zv-ta-lbl">Mileage</div></div>
+                            <div><div class="zv-allow-num" id="zv-da">0</div><div class="zv-lbl" id="zv-da-lbl">Daily allow.</div></div>
+                            <div><div class="zv-allow-num" id="zv-bills">0</div><div class="zv-lbl">Bills</div></div>
+                            <div class="zv-allow-total"><div class="zv-allow-num" id="zv-total">0</div><div class="zv-lbl">Total</div></div>
+                        </div>
+                    </section>
+
+                    <section class="zv-card" id="zv-exp-card" hidden="hidden">
+                        <div class="zv-card-title">Add expense</div>
+                        <div class="zv-chips" id="zv-exp-cats"></div>
+                        <div class="zv-exp-row">
+                            <input id="zv-exp-amount" class="zv-input zv-amount" type="number" inputmode="decimal"
+                                   min="0" step="0.01" placeholder="Amount"/>
+                            <label class="zv-photo" id="zv-exp-photo-btn">
+                                <input id="zv-exp-photo" type="file" accept="image/*" capture="environment"/>
+                                <span id="zv-exp-photo-lbl">📷 Bill photo</span>
+                            </label>
+                        </div>
+                        <img id="zv-exp-preview" class="zv-preview" alt="" hidden="hidden"/>
+                        <input id="zv-exp-note" class="zv-input" type="text" maxlength="200" placeholder="Note (optional)"/>
+                        <div class="zv-muted" id="zv-exp-hint"></div>
+                        <button class="zv-btn zv-btn-out" id="zv-exp-save" type="button">Save Expense</button>
+                        <ul class="zv-list zv-exp-list" id="zv-exp-list"></ul>
                     </section>
 
                     <section class="zv-card" id="zv-visit-card">

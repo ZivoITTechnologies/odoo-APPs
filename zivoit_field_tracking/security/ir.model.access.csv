@@ -7,3 +7,15 @@ access_visit_user,zivo.track.visit user,model_zivo_track_visit,group_field_user,
 access_visit_manager,zivo.track.visit manager,model_zivo_track_visit,group_field_manager,1,1,1,1
 access_device_user,zivo.track.device user,model_zivo_track_device,group_field_user,1,1,1,0
 access_device_manager,zivo.track.device manager,model_zivo_track_device,group_field_manager,1,1,1,1
+access_expense_policy_user,zivo.expense.policy user,model_zivo_expense_policy,group_field_user,1,0,0,0
+access_expense_policy_manager,zivo.expense.policy manager,model_zivo_expense_policy,group_field_manager,1,1,1,1
+access_expense_rate_user,zivo.expense.policy.rate user,model_zivo_expense_policy_rate,group_field_user,1,0,0,0
+access_expense_rate_manager,zivo.expense.policy.rate manager,model_zivo_expense_policy_rate,group_field_manager,1,1,1,1
+access_expense_category_user,zivo.expense.category user,model_zivo_expense_category,group_field_user,1,0,0,0
+access_expense_category_manager,zivo.expense.category manager,model_zivo_expense_category,group_field_manager,1,1,1,1
+access_expense_line_user,zivo.expense.line user,model_zivo_expense_line,group_field_user,1,1,1,1
+access_expense_line_manager,zivo.expense.line manager,model_zivo_expense_line,group_field_manager,1,1,1,1
+access_expense_claim_user,zivo.expense.claim user,model_zivo_expense_claim,group_field_user,1,1,1,1
+access_expense_claim_manager,zivo.expense.claim manager,model_zivo_expense_claim,group_field_manager,1,1,1,1
+access_expense_claim_wizard_user,zivo.expense.claim.wizard user,model_zivo_expense_claim_wizard,group_field_user,1,1,1,1
+access_expense_reject_wizard_user,zivo.expense.reject.wizard user,model_zivo_expense_reject_wizard,group_field_user,1,1,1,1

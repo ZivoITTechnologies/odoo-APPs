@@ -10,11 +10,12 @@
     "use strict";
 
     var DB_NAME = "zivo_field_tracker";
-    var DB_VERSION = 1;
+    var DB_VERSION = 2;
     var SYNC_URL = "/zivoit_tracking/api/sync";
     var CUSTOMERS_URL = "/zivoit_tracking/api/customers";
     var BATCH = 200;
     var HEARTBEAT_MS = 5 * 60 * 1000;
+    var EXP_BATCH = 3; // bill photos are big: few per request
 
     var boot = {};
     try { boot = JSON.parse(document.body.getAttribute("data-boot") || "{}"); } catch (e) { boot = {}; }
@@ -31,6 +32,7 @@
                     if (!d.objectStoreNames.contains("visits")) { d.createObjectStore("visits", { keyPath: "uid" }); }
                     if (!d.objectStoreNames.contains("events")) { d.createObjectStore("events", { keyPath: "uid" }); }
                     if (!d.objectStoreNames.contains("kv")) { d.createObjectStore("kv"); }
+                    if (!d.objectStoreNames.contains("expenses")) { d.createObjectStore("expenses", { keyPath: "uid" }); }
                 };
                 req.onsuccess = function () { resolve(req.result); };
                 req.onerror = function () { reject(req.error); };
@@ -95,6 +97,8 @@
         today: { day: localDay(Date.now()), km: 0, count: 0, last: null },
         lastSync: null, syncing: false, backoff: 5000, battery: null, charging: false,
         wakeLock: null, customers: [], activeVisit: null, token: boot.token || null,
+        vehicle: null, dayStart: null, visitsToday: { day: localDay(Date.now()), n: 0 },
+        expCat: null, expPhoto: null, expLog: [], serverToday: null, serverTodayAt: 0,
     };
 
     function saveKV(key, value) { return put("kv", value, key); }
@@ -192,7 +196,12 @@
     function startDay() {
         state.tracking = true;
         saveKV("tracking", true);
-        put("events", { uid: uuid(), type: "day_start", ts: Date.now() });
+        state.vehicle = $("zv-vehicle").value || state.vehicle;
+        saveKV("vehicle", state.vehicle);
+        if (!state.dayStart || localDay(state.dayStart) !== localDay(Date.now())) {
+            state.dayStart = Date.now(); saveKV("dayStart", state.dayStart);
+        }
+        put("events", { uid: uuid(), type: "day_start", ts: Date.now(), vehicle: state.vehicle });
         startWatch();
         render(); scheduleSync(500);
         toast("Day started - tracking works even without network");
@@ -223,21 +232,30 @@
         if (state.syncing || !state.token) { return Promise.resolve(); }
         state.syncing = true;
         render();
-        return Promise.all([getAll("points", BATCH), getAll("visits"), getAll("events")]).then(function (res) {
+        return Promise.all([getAll("points", BATCH), getAll("visits"), getAll("events"), getAll("expenses", EXP_BATCH)]).then(function (res) {
             var points = res[0], visits = res[1].filter(function (v) { return !v.synced; }), events = res[2];
-            if (!points.length && !visits.length && !events.length) { return { done: true }; }
+            var expenses = res[3];
+            if (!points.length && !visits.length && !events.length && !expenses.length) { return { done: true }; }
             return fetch(SYNC_URL, {
                 method: "POST",
                 credentials: "omit",
                 cache: "no-store",
                 headers: { "Content-Type": "application/json", "Authorization": "Bearer " + state.token },
-                body: JSON.stringify({ points: points, visits: visits, events: events, user_agent: navigator.userAgent }),
+                body: JSON.stringify({ points: points, visits: visits, events: events, expenses: expenses,
+                    user_agent: navigator.userAgent }),
             }).then(function (resp) {
                 if (resp.status === 401) { throw new Error("device_revoked"); }
                 if (!resp.ok) { throw new Error("http_" + resp.status); }
                 return resp.json();
             }).then(function (data) {
-                if (data.config) { cfg = Object.assign(cfg, data.config); saveKV("config", cfg); }
+                if (data.config) { cfg = Object.assign(cfg, data.config); saveKV("config", cfg); renderExpenseSetup(); }
+                if (data.today) { state.serverToday = data.today; state.serverTodayAt = Date.now(); saveKV("serverToday", data.today); }
+                var ex = data.expenses || {};
+                var expOk = (ex.accepted || []).concat(ex.duplicates || []);
+                var expBad = (ex.rejected || []);
+                expOk.forEach(function (uid) { markExpense(uid, "ok"); });
+                expBad.forEach(function (r) { markExpense(r.uid, "bad", r.reason); });
+                if (expBad.length) { toast("An expense was refused by Odoo (" + expBad[0].reason + ")"); }
                 var p = data.points || {}, v = data.visits || {}, ev = data.events || {};
                 var ackPoints = (p.accepted || []).concat(p.duplicates || [], (p.rejected || []).map(function (r) { return r.uid; }));
                 var visitAck = (v.accepted || []).concat((v.rejected || []).map(function (r) { return r.uid; }));
@@ -250,10 +268,13 @@
                     delMany("points", ackPoints),
                     delMany("events", ev.accepted || []),
                     delMany("visits", doneVisits),
+                    delMany("expenses", expOk.concat(expBad.map(function (r) { return r.uid; }))),
+                    saveKV("expLog", state.expLog),
                 ].concat(keepVisits.map(function (vis) { return put("visits", vis); }))).then(function () {
                     state.lastSync = Date.now(); saveKV("lastSync", state.lastSync);
+                    if (expOk.length || expBad.length) { renderExpenseList(); renderExpenseHint(); }
                     state.backoff = 5000;
-                    return { done: points.length < BATCH };
+                    return { done: points.length < BATCH && expenses.length < EXP_BATCH };
                 });
             });
         }).then(function (r) {
@@ -305,7 +326,9 @@
                 accuracy: fix ? fix.accuracy : 0, offline: !isOnline(), synced: false,
             };
             state.activeVisit = visit;
-            return Promise.all([put("visits", visit), saveKV("activeVisit", visit)]);
+            if (state.visitsToday.day !== localDay(Date.now())) { state.visitsToday = { day: localDay(Date.now()), n: 0 }; }
+            state.visitsToday.n += 1;
+            return Promise.all([put("visits", visit), saveKV("activeVisit", visit), saveKV("visitsToday", state.visitsToday)]);
         }).then(function () {
             renderVisit(); render(); scheduleSync(300);
             toast("Checked in at " + customer.name);
@@ -331,6 +354,214 @@
         });
     }
 
+    // ------------------------------------------------------------------ expenses
+    function expenseCfg() { return cfg.expense || { enabled: false, categories: [], vehicles: [], da: {} }; }
+    function money(v) {
+        var c = expenseCfg().currency || { symbol: "", position: "before", digits: 2 };
+        var n = Number(v || 0);
+        var txt = n.toLocaleString(undefined, { minimumFractionDigits: n % 1 ? Math.min(2, c.digits) : 0,
+            maximumFractionDigits: Math.min(2, c.digits) });
+        return c.position === "after" ? txt + " " + c.symbol : c.symbol + txt;
+    }
+    function vehicleInfo(key) {
+        var list = expenseCfg().vehicles || [];
+        for (var i = 0; i < list.length; i++) { if (list[i].key === key) { return list[i]; } }
+        return { key: key, label: key, rate: 0, cap_km: 0 };
+    }
+    function categoryById(id) {
+        var list = expenseCfg().categories || [];
+        for (var i = 0; i < list.length; i++) { if (list[i].id === id) { return list[i]; } }
+        return null;
+    }
+    function todayLog() {
+        var today = localDay(Date.now());
+        return state.expLog.filter(function (e) { return localDay(e.ts) === today; });
+    }
+
+    function estimateToday() {
+        var ex = expenseCfg(), da = ex.da || {};
+        var km = state.today.day === localDay(Date.now()) ? state.today.km : 0;
+        var v = vehicleInfo(state.vehicle || ex.vehicle);
+        var paidKm = v.cap_km ? Math.min(km, v.cap_km) : km;
+        var ta = Math.round(paidKm * (v.rate || 0) * 100) / 100;
+        var hours = state.dayStart && localDay(state.dayStart) === localDay(Date.now())
+            ? ((state.tracking ? Date.now() : (state.today.last || Date.now())) - state.dayStart) / 3600000 : 0;
+        var visits = state.visitsToday.day === localDay(Date.now()) ? state.visitsToday.n : 0;
+        var daAmt = 0, kind = "";
+        if (!(da.min_visits && visits < da.min_visits)) {
+            if (da.outstation_km && km > da.outstation_km && da.outstation && hours >= (da.half_hours || 0)) { daAmt = da.outstation; kind = "outstation"; }
+            else if (da.full && hours >= da.full_hours) { daAmt = da.full; kind = "full day"; }
+            else if (da.half && hours >= da.half_hours) { daAmt = da.half; kind = "half day"; }
+        }
+        var bills = todayLog().filter(function (e) { return e.status !== "bad"; })
+            .reduce(function (a, e) { return a + Number(e.amount || 0); }, 0);
+        return { km: km, ta: ta, da: daAmt, daKind: kind, bills: bills, total: ta + daAmt + bills, vehicle: v };
+    }
+
+    function renderAllowance() {
+        var ex = expenseCfg();
+        $("zv-allow-card").hidden = !ex.enabled;
+        $("zv-exp-card").hidden = !ex.enabled || !(ex.categories || []).length;
+        if (!ex.enabled) { return; }
+        var est = estimateToday();
+        var srv = state.serverToday;
+        var useServer = srv && srv.date && isOnline() && Date.now() - state.serverTodayAt < 10 * 60 * 1000 &&
+            !state.tracking && Number(srv.km || 0) >= est.km - 0.05;
+        var ta = useServer ? srv.ta : est.ta, da = useServer ? srv.da : est.da;
+        $("zv-ta").textContent = money(ta);
+        $("zv-ta-lbl").textContent = est.vehicle.rate ? "Mileage " + est.km.toFixed(1) + " km" : "Mileage";
+        $("zv-da").textContent = money(da);
+        $("zv-da-lbl").textContent = est.daKind ? "DA " + est.daKind : "Daily allow.";
+        $("zv-bills").textContent = money(est.bills);
+        $("zv-total").textContent = money(Number(ta) + Number(da) + est.bills);
+        $("zv-allow-src").textContent = useServer ? "calculated by Odoo" : "estimate";
+    }
+
+    function renderExpenseSetup() {
+        var ex = expenseCfg();
+        var sel = $("zv-vehicle");
+        sel.innerHTML = "";
+        (ex.vehicles || []).forEach(function (v) {
+            var o = document.createElement("option");
+            o.value = v.key;
+            o.textContent = v.label + (v.rate ? " · " + money(v.rate) + "/km" : "");
+            sel.appendChild(o);
+        });
+        sel.value = state.vehicle || ex.vehicle || "two_wheeler";
+        var box = $("zv-exp-cats");
+        box.innerHTML = "";
+        (ex.categories || []).forEach(function (c) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "zv-chip" + (state.expCat === c.id ? " zv-chip-on" : "");
+            b.textContent = (c.icon ? c.icon + " " : "") + c.name;
+            b.setAttribute("data-cat", String(c.id));
+            b.addEventListener("click", function () { state.expCat = c.id; renderExpenseSetup(); renderExpenseHint(); });
+            box.appendChild(b);
+        });
+        renderExpenseHint();
+        renderExpenseList();
+        render();
+    }
+
+    function receiptNeeded(cat, amount) {
+        if (!cat || cat.receipt === "never") { return false; }
+        if (cat.receipt === "always") { return true; }
+        return amount > (cat.receipt_above || 0);
+    }
+
+    function renderExpenseHint() {
+        var cat = categoryById(state.expCat);
+        var amount = parseFloat($("zv-exp-amount").value || "0");
+        var hint = "";
+        if (!cat) { hint = "Choose a category."; }
+        else {
+            if (receiptNeeded(cat, amount) && !state.expPhoto) { hint = "Bill photo required for " + cat.name + (cat.receipt === "above" ? " above " + money(cat.receipt_above) : "") + "."; }
+            if (cat.daily_limit) {
+                var spent = todayLog().filter(function (e) { return e.category_id === cat.id && e.status !== "bad"; })
+                    .reduce(function (a, e) { return a + Number(e.amount || 0); }, 0);
+                hint += (hint ? " " : "") + "Daily limit " + money(cat.daily_limit) + " (used " + money(spent) + ").";
+            }
+        }
+        $("zv-exp-hint").textContent = hint;
+        $("zv-exp-photo-btn").className = "zv-photo" + (state.expPhoto ? " zv-photo-ok" : "");
+        $("zv-exp-photo-lbl").textContent = state.expPhoto ? "✓ Photo added" : "📷 Bill photo";
+    }
+
+    function renderExpenseList() {
+        var ul = $("zv-exp-list");
+        ul.innerHTML = "";
+        todayLog().slice().reverse().forEach(function (e) {
+            var li = document.createElement("li");
+            var box = document.createElement("div");
+            var name = document.createElement("div"); name.className = "zv-c-name";
+            name.textContent = e.name;
+            var badge = document.createElement("span");
+            badge.className = "zv-badge " + (e.status === "ok" ? "zv-badge-ok" : (e.status === "bad" ? "zv-badge-bad" : "zv-badge-wait"));
+            badge.textContent = e.status === "ok" ? "uploaded" : (e.status === "bad" ? "refused" : "waiting upload");
+            name.appendChild(badge);
+            var sub = document.createElement("div"); sub.className = "zv-c-sub";
+            sub.textContent = new Date(e.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) +
+                (e.photo ? " · 📷 bill" : "") + (e.partner ? " · " + e.partner : "") + (e.reason ? " · " + e.reason : "");
+            box.appendChild(name); box.appendChild(sub);
+            var amt = document.createElement("div"); amt.className = "zv-exp-amt"; amt.textContent = money(e.amount);
+            li.appendChild(box); li.appendChild(amt);
+            ul.appendChild(li);
+        });
+    }
+
+    function markExpense(uid, status, reason) {
+        state.expLog.forEach(function (e) { if (e.uid === uid) { e.status = status; e.reason = reason || ""; } });
+    }
+
+    function compressImage(file) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onerror = function () { reject(reader.error); };
+            reader.onload = function () {
+                var img = new Image();
+                img.onerror = function () { reject(new Error("not_an_image")); };
+                img.onload = function () {
+                    function draw(max, quality) {
+                        var scale = Math.min(1, max / Math.max(img.width, img.height));
+                        var c = document.createElement("canvas");
+                        c.width = Math.max(1, Math.round(img.width * scale));
+                        c.height = Math.max(1, Math.round(img.height * scale));
+                        var ctx = c.getContext("2d");
+                        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+                        ctx.drawImage(img, 0, 0, c.width, c.height);
+                        return c.toDataURL("image/jpeg", quality);
+                    }
+                    var out = draw(1280, 0.72);
+                    if (out.length > 900000) { out = draw(1024, 0.55); }
+                    resolve(out);
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function saveExpense() {
+        var cat = categoryById(state.expCat);
+        var amount = parseFloat($("zv-exp-amount").value || "0");
+        if (!cat) { toast("Choose a category"); return; }
+        if (!(amount > 0)) { toast("Enter the amount"); return; }
+        if (receiptNeeded(cat, amount) && !state.expPhoto) { toast("Add a photo of the bill"); renderExpenseHint(); return; }
+        $("zv-exp-save").disabled = true;
+        currentFix().then(function (fix) {
+            var note = ($("zv-exp-note").value || "").trim();
+            var item = {
+                uid: uuid(), category_id: cat.id, amount: amount, note: note, ts: Date.now(),
+                lat: fix ? fix.lat : 0, lon: fix ? fix.lon : 0, accuracy: fix ? fix.accuracy : 0,
+                offline: !isOnline(), receipt: state.expPhoto || null,
+                partner_id: state.activeVisit ? state.activeVisit.partner_id : null,
+            };
+            state.expLog.push({ uid: item.uid, name: note || cat.name, category_id: cat.id, amount: amount, ts: item.ts,
+                photo: !!item.receipt, partner: state.activeVisit ? state.activeVisit.partner_name : "", status: "wait" });
+            // keep two weeks of history on the phone
+            var limit = Date.now() - 14 * 86400000;
+            state.expLog = state.expLog.filter(function (e) { return e.ts > limit; });
+            return Promise.all([put("expenses", item), saveKV("expLog", state.expLog)]);
+        }).then(function () {
+            $("zv-exp-amount").value = ""; $("zv-exp-note").value = ""; $("zv-exp-photo").value = "";
+            state.expPhoto = null; $("zv-exp-preview").hidden = true; $("zv-exp-preview").removeAttribute("src");
+            renderExpenseHint(); renderExpenseList(); render(); scheduleSync(300);
+            toast(isOnline() ? "Expense saved" : "Expense saved on the phone - uploads when online");
+        }).catch(function () { toast("Could not save the expense"); }).then(function () { $("zv-exp-save").disabled = false; });
+    }
+
+    function onPhoto() {
+        var file = this.files && this.files[0];
+        if (!file) { return; }
+        $("zv-exp-photo-lbl").textContent = "Processing…";
+        compressImage(file).then(function (dataUrl) {
+            state.expPhoto = dataUrl;
+            $("zv-exp-preview").src = dataUrl; $("zv-exp-preview").hidden = false;
+            renderExpenseHint();
+        }).catch(function () { state.expPhoto = null; toast("This file is not a photo"); renderExpenseHint(); });
+    }
+
     // ------------------------------------------------------------------ rendering
     function render() {
         var online = isOnline();
@@ -350,8 +581,10 @@
         $("zv-lastfix").textContent = fmtTime(state.last && state.last.ts);
         $("zv-lastsync").textContent = fmtTime(state.lastSync);
         $("zv-batt").textContent = state.battery !== null ? state.battery + "%" + (state.charging ? " ⚡" : "") : "–";
-        Promise.all([count("points"), getAll("visits"), count("events")]).then(function (r) {
-            var pend = r[0] + r[1].filter(function (v) { return !v.synced; }).length + r[2];
+        $("zv-vehicle-box").hidden = state.tracking || !expenseCfg().enabled;
+        renderAllowance();
+        Promise.all([count("points"), getAll("visits"), count("events"), count("expenses")]).then(function (r) {
+            var pend = r[0] + r[1].filter(function (v) { return !v.synced; }).length + r[2] + r[3];
             $("zv-pending").textContent = String(pend);
             $("zv-pending").parentNode.className = "zv-stat" + (pend ? " zv-stat-warn" : " zv-stat-ok");
         });
@@ -400,7 +633,8 @@
     // ------------------------------------------------------------------ start-up
     function restore() {
         return Promise.all([get("kv", "tracking"), get("kv", "today"), get("kv", "last"), get("kv", "lastSync"),
-            get("kv", "config"), get("kv", "activeVisit"), get("kv", "token")]).then(function (r) {
+            get("kv", "config"), get("kv", "activeVisit"), get("kv", "token"), get("kv", "vehicle"), get("kv", "dayStart"),
+            get("kv", "visitsToday"), get("kv", "expLog"), get("kv", "serverToday")]).then(function (r) {
             state.tracking = !!r[0];
             if (r[1] && r[1].day === localDay(Date.now())) { state.today = r[1]; }
             state.last = r[2] || null;
@@ -414,6 +648,11 @@
             } else {
                 state.token = r[6] || null;
             }
+            state.vehicle = r[7] || (cfg.expense && cfg.expense.vehicle) || "two_wheeler";
+            state.dayStart = r[8] || null;
+            if (r[9] && r[9].day === localDay(Date.now())) { state.visitsToday = r[9]; }
+            state.expLog = r[10] || [];
+            state.serverToday = r[11] || null;
         });
     }
 
@@ -423,6 +662,10 @@
         $("zv-search").addEventListener("input", renderCustomers);
         $("zv-checkout").addEventListener("click", checkOut);
         $("zv-wake").addEventListener("change", function () { if (this.checked) { requestWakeLock(); } else { releaseWakeLock(); } });
+        $("zv-vehicle").addEventListener("change", function () { state.vehicle = this.value; saveKV("vehicle", state.vehicle); render(); });
+        $("zv-exp-photo").addEventListener("change", onPhoto);
+        $("zv-exp-amount").addEventListener("input", renderExpenseHint);
+        $("zv-exp-save").addEventListener("click", saveExpense);
         window.addEventListener("online", function () { render(); state.backoff = 5000; scheduleSync(300); loadCustomers(); });
         window.addEventListener("offline", render);
         document.addEventListener("visibilitychange", function () {
@@ -444,12 +687,13 @@
     $("zv-ver").textContent = "v" + (boot.version || "");
     registerSW();
     restore().then(function () {
-        bind(); initBattery(); render(); renderVisit(); loadCustomers();
+        bind(); initBattery(); renderExpenseSetup(); render(); renderVisit(); loadCustomers();
         if (state.tracking) { startWatch(); }
         scheduleSync(1000);
     });
 
     // test hooks (used by the automated browser test)
     window.zivoTracker = { state: state, syncNow: syncNow, onPosition: onPosition, startDay: startDay, endDay: endDay,
-        count: count, getAll: getAll, cfg: function () { return cfg; } };
+        count: count, getAll: getAll, cfg: function () { return cfg; }, estimateToday: estimateToday,
+        setPhoto: function (dataUrl) { state.expPhoto = dataUrl; renderExpenseHint(); } };
 })();

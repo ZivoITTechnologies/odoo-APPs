@@ -2,47 +2,180 @@
 
   <!-- ============ COVER ============ -->
   <div style="border-radius:22px;overflow:hidden;background-color:#0c1a3d;margin-bottom:34px;">
-    <img src="banner.png" alt="ZivoIT Offline Field Sales Tracking for Odoo 19" style="width:100%;display:block;"/>
+    <img src="banner.png" alt="ZivoIT Field Sales Tracking &amp; Expense Management for Odoo 19" style="width:100%;display:block;"/>
   </div>
 
-  <div style="text-align:center;margin:0 auto 34px;max-width:860px;">
+  <div style="text-align:center;margin:0 auto 34px;max-width:880px;">
     <div style="display:inline-block;font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;background-color:#e6f7fb;border-radius:999px;padding:6px 16px;margin-bottom:14px;">ZIVO IT TECHNOLOGIES &#183; ODOO 19</div>
-    <h1 style="font-size:40px;font-weight:900;color:#0c1a3d;margin:0 0 12px;line-height:1.15;">Offline Field Sales Tracking</h1>
-    <p style="font-size:19px;color:#4a5a70;line-height:1.55;margin:0;">Live GPS tracking of your salespeople that <b>keeps recording where there is no mobile signal</b> and
-      uploads everything to Odoo automatically when the network returns &ndash; with a live map, route replay, day logs and verified customer visits.</p>
+    <h1 style="font-size:40px;font-weight:900;color:#0c1a3d;margin:0 0 12px;line-height:1.15;">Field Sales Tracking &amp; Expense Management</h1>
+    <p style="font-size:19px;color:#4a5a70;line-height:1.55;margin:0;">Offline GPS tracking of your field team <b>plus the travel expenses it proves</b>: mileage (TA) per GPS kilometre,
+      daily allowance (DA), bill photos captured with no signal, expense claims with approval, and reimbursement through <b>Odoo Expenses</b> &ndash; with automatic fraud checks.</p>
   </div>
 
   <!-- KPI tiles -->
   <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:44px;">
     <div style="flex:1 1 200px;background-color:#0c1a3d;color:#fff;border-radius:16px;padding:20px 22px;">
-      <div style="font-size:30px;font-weight:900;color:#ffd43b;">0</div><div style="font-size:14px;color:#c9d6ea;">points lost in dead zones &ndash; stored on the phone, acknowledged by Odoo</div></div>
+      <div style="font-size:30px;font-weight:900;color:#ffd43b;">GPS km</div><div style="font-size:14px;color:#c9d6ea;">mileage is paid on the distance really driven, not on what is typed</div></div>
     <div style="flex:1 1 200px;background-color:#14295a;color:#fff;border-radius:16px;padding:20px 22px;">
-      <div style="font-size:30px;font-weight:900;">0</div><div style="font-size:14px;color:#c9d6ea;">duplicates when a phone re-sends after a dropped connection</div></div>
+      <div style="font-size:30px;font-weight:900;">9</div><div style="font-size:14px;color:#c9d6ea;">automatic policy checks on every claim line, shown to the approver</div></div>
     <div style="flex:1 1 200px;background-color:#1bacd0;color:#fff;border-radius:16px;padding:20px 22px;">
-      <div style="font-size:30px;font-weight:900;">2</div><div style="font-size:14px;color:#e2ecff;">capture modes: offline web app + Traccar Client for locked-screen tracking</div></div>
+      <div style="font-size:30px;font-weight:900;">0</div><div style="font-size:14px;color:#e2ecff;">GPS points or bills lost in dead zones &ndash; stored on the phone, synced once</div></div>
     <div style="flex:1 1 200px;background-color:#e6f7fb;color:#0c1a3d;border-radius:16px;padding:20px 22px;">
-      <div style="font-size:30px;font-weight:900;color:#1bacd0;">43 + 19</div><div style="font-size:14px;color:#4a5a70;">automated tests + offline browser checks, all passing on Odoo 19</div></div>
+      <div style="font-size:30px;font-weight:900;color:#1bacd0;">77 + 36</div><div style="font-size:14px;color:#4a5a70;">automated Odoo tests + real-browser offline checks, all passing on Odoo 19</div></div>
   </div>
 
   <!-- ============ SECTION 01 ============ -->
   <div style="margin-bottom:46px;">
     <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 01</div>
-    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">The problem: field teams work where the network doesn't</h2>
-    <p style="font-size:16.5px;line-height:1.65;color:#3a4a60;">Industrial areas, basements, highways, villages and tier-3 towns all have patchy coverage. Most tracking apps
-      simply send the location to the server &ndash; when there is no signal, that location is gone. Managers see jumps on the map, distance reports
-      are wrong and customer visits cannot be proven.</p>
-    <div style="background-color:#e6f7fb;border-left:5px solid #1bacd0;border-radius:12px;padding:16px 20px;margin-top:16px;">
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">The problem: travel claims nobody can verify</h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">Field staff fill a monthly sheet: "120 km, 6 days DA, petrol, lunch". Managers cannot check the kilometres, bills arrive crumpled at month end,
+      and accounts re-type everything. Most tracking apps stop at the map; most expense apps never see the GPS.</p>
+    <div style="background-color:#e6f7fb;border-left:5px solid #1bacd0;border-radius:12px;padding:16px 20px;">
       <div style="font-size:12px;font-weight:900;letter-spacing:2px;color:#1bacd0;margin-bottom:6px;">IN BRIEF</div>
-      <div style="font-size:16px;line-height:1.6;color:#142033;">This app records every GPS fix on the phone first (GPS works without mobile data), queues it safely,
-        and syncs it the moment any network is available. Odoo keeps the <b>original GPS time</b>, flags the point as
-        <b style="color:#e8590c;">captured offline</b> and rebuilds the route and distance as if the salesperson had been online all day.</div>
+      <div style="font-size:16px;line-height:1.6;color:#142033;">One app does both. The day log measured by GPS becomes the <b>mileage and daily allowance</b> lines, bills photographed on the phone
+        (even with no signal) are attached to the same day, the approver sees <b style="color:#e8590c;">policy warnings</b> next to each line, and the approved claim
+        becomes approved <b>Odoo Expenses</b> ready to post and pay.</div>
     </div>
   </div>
 
   <!-- ============ SECTION 02 ============ -->
   <div style="margin-bottom:46px;">
     <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 02</div>
-    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 18px;">How offline tracking works</h2>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">From GPS day to reimbursement in 5 steps</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;">
+      <div style="flex:1 1 170px;background-color:#0c1a3d;color:#fff;border-radius:16px;padding:20px;">
+        <div style="font-size:30px;font-weight:900;color:#5fd0ec;">1</div><div style="font-size:17px;font-weight:800;margin:4px 0 6px;">Start day</div>
+        <div style="font-size:14px;color:#c9d6ea;line-height:1.5;">Salesperson picks the vehicle (two-wheeler, car, public transport, company vehicle) and starts tracking.</div></div>
+      <div style="flex:1 1 170px;background-color:#14295a;color:#fff;border-radius:16px;padding:20px;">
+        <div style="font-size:30px;font-weight:900;color:#ffd43b;">2</div><div style="font-size:17px;font-weight:800;margin:4px 0 6px;">Work offline</div>
+        <div style="font-size:14px;color:#c9d6ea;line-height:1.5;">GPS route, customer visits and bill photos are saved on the phone and synced when the network returns.</div></div>
+      <div style="flex:1 1 170px;background-color:#1bacd0;color:#fff;border-radius:16px;padding:20px;">
+        <div style="font-size:30px;font-weight:900;color:#fff;">3</div><div style="font-size:17px;font-weight:800;margin:4px 0 6px;">Allowance</div>
+        <div style="font-size:14px;color:#e2ecff;line-height:1.5;">Odoo computes mileage (rate &times; GPS km, daily cap) and DA (full / half / outstation, minimum visits).</div></div>
+      <div style="flex:1 1 170px;background-color:#14295a;color:#fff;border-radius:16px;padding:20px;">
+        <div style="font-size:30px;font-weight:900;color:#ffd43b;">4</div><div style="font-size:17px;font-weight:800;margin:4px 0 6px;">Claim &amp; approve</div>
+        <div style="font-size:14px;color:#c9d6ea;line-height:1.5;">Monthly claim built automatically; the expense manager approves or rejects with a reason.</div></div>
+      <div style="flex:1 1 170px;background-color:#0c1a3d;color:#fff;border-radius:16px;padding:20px;">
+        <div style="font-size:30px;font-weight:900;color:#5fd0ec;">5</div><div style="font-size:17px;font-weight:800;margin:4px 0 6px;">Reimburse</div>
+        <div style="font-size:14px;color:#c9d6ea;line-height:1.5;">Approved lines become approved Odoo Expenses with the bill photos attached &ndash; post and pay in Accounting.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 03 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 03</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">The expense claim: every number backed by GPS</h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">Mileage, daily allowance and bills per day, the GPS km next to the claimed km, bill thumbnails, and a warning banner when lines break the policy.
+      Approve, reject with a reason, or reset &ndash; with chatter, activities and a printable PDF.</p>
+    <img src="assets/10_claim_form.png" alt="Expense claim with warnings" style="width:100%;border-radius:14px;box-shadow:0 10px 30px rgba(11,31,58,.18);border:1px solid #e3e8ef;"/>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:16px;">
+      <div style="flex:1 1 520px;"><img src="assets/11_claims_list.png" alt="Claims list" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>All claims</b> with GPS km, TA, DA, bills, warnings, status and reimbursement status.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/19_claim_rejected.png" alt="Rejected claim" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Rejected with a reason</b> &ndash; the salesperson is notified, corrects and resubmits.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 04 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 04</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">9 automatic fraud &amp; policy checks</h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">Warnings never block the salesperson &ndash; they are shown to the approver on the line, in the claim banner and in the PDF.</p>
+    <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;font-size:15px;margin-bottom:16px;">
+      <tr style="background-color:#0c1a3d;color:#fff;"><th style="color:#ffffff;padding:13px 16px;text-align:left;width:30%;">Check</th><th style="color:#ffffff;padding:13px 16px;text-align:left;">Flags a line when&hellip;</th></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Claimed km vs GPS km</td><td style="color:#3a4a60;padding:11px 16px;">More km claimed than tracked (configurable tolerance %)</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Daily km cap</td><td style="color:#3a4a60;padding:11px 16px;">Mileage paid only up to the cap of the vehicle type</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Bill photo</td><td style="color:#3a4a60;padding:11px 16px;">Missing photo when the category requires it (always / above an amount)</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Daily limit</td><td style="color:#3a4a60;padding:11px 16px;">Food, hotel, cab... above the daily limit of the category</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Duplicates</td><td style="color:#3a4a60;padding:11px 16px;">Same category, amount and day recorded twice</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Fuel on mileage day</td><td style="color:#3a4a60;padding:11px 16px;">Fuel bill on a day already paid per km (double claim)</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Away from route</td><td style="color:#3a4a60;padding:11px 16px;">Bill recorded more than N km from the GPS route of that day</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Fake GPS</td><td style="color:#3a4a60;padding:11px 16px;">Mock-location app detected on the phone that day</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">No tracking</td><td style="color:#3a4a60;padding:11px 16px;">Expense on a day without any GPS data</td></tr>
+    </table>
+    <img src="assets/13_bills.png" alt="Bills with warnings" style="width:100%;border-radius:14px;box-shadow:0 10px 30px rgba(11,31,58,.18);border:1px solid #e3e8ef;"/>
+    <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Expenses &amp; Bills</b>: photo thumbnails, recorded-offline flag, warnings and the claim each bill belongs to.</div>
+  </div>
+
+  <!-- ============ SECTION 05 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 05</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">The phone: allowance of the day and bills, even with no signal</h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">The same offline web app now shows <b>today's allowance</b> (mileage, DA, bills, total) and lets the salesperson photograph a bill in two taps.
+      The photo is compressed on the phone, queued offline, linked to the customer being visited and uploaded exactly once.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+      <div style="flex:0 1 230px;text-align:center;"><img src="assets/phone_online.png" alt="Start day" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">1 &middot; Day started, tracking live</div></div>
+      <div style="flex:0 1 230px;text-align:center;"><img src="assets/phone_offline_visit.png" alt="Offline visit" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">2 &middot; Customer check-in offline</div></div>
+      <div style="flex:0 1 230px;text-align:center;"><img src="assets/phone_expense_offline.png" alt="Bill offline" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">3 &middot; Bill photo with no signal</div></div>
+      <div style="flex:0 1 230px;text-align:center;"><img src="assets/phone_offline.png" alt="Queue" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">4 &middot; Everything queued on the phone</div></div>
+      <div style="flex:0 1 230px;text-align:center;"><img src="assets/phone_synced.png" alt="Synced" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">5 &middot; Signal back: all uploaded</div></div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 06 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 06</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">Day log: what the GPS earned today</h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">Each field day shows the vehicle, payable km, mileage, the type of day (full / half / outstation) and its bills. Policy changes update every day not claimed yet.</p>
+    <img src="assets/12_day_log_allowance.png" alt="Day log with allowance" style="width:100%;border-radius:14px;box-shadow:0 10px 30px rgba(11,31,58,.18);border:1px solid #e3e8ef;"/>
+  </div>
+
+  <!-- ============ SECTION 07 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 07</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">Your policy, your rates</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;">
+      <div style="flex:1 1 520px;"><img src="assets/14_policy.png" alt="Mileage rates" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Mileage rates</b> per vehicle type with a daily km cap. One default policy per company, or a policy per salesperson / team.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/14b_policy_da.png" alt="Daily allowance" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Daily allowance</b>: full day after N hours, half day, outstation above N km, minimum customer visits.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/15_categories.png" alt="Categories" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>11 ready categories</b> (fuel, toll &amp; parking, food, cab, hotel, phone...) with bill rule, daily limit and the Odoo Expenses product used for accounting.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/20_settings_expenses.png" alt="Settings" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Settings</b>: one-click <b>INR / USD</b> currency switch, default policy, automatic sending to Odoo Expenses, monthly claim preparation on the 1st.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 08 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 08</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">Approved claims become Odoo Expenses</h2>
+    <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">On approval, every line becomes an <b>approved Odoo expense</b> of the employee (product, amount, date, description with GPS km and warnings,
+      bill photo attached). Accounting posts and pays as usual; the claim shows <b>To Pay / In Payment / Paid</b> automatically.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;">
+      <div style="flex:1 1 520px;"><img src="assets/17_claim_posted.png" alt="Claim sent" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Claim sent to Expenses</b> with an outstation day: 255 km by car and outstation DA.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/18_odoo_expenses.png" alt="Odoo Expenses" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Odoo Expenses</b> created from the claim, approved and ready for the expense report entry.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/22_claim_pdf.png" alt="PDF" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>PDF claim</b>: day-wise lines, GPS vs claimed km, warnings, signatures and all bill photos.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/16_analysis.png" alt="Analysis" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Expense analysis</b>: pivot and graph by salesperson, category, day or month.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ SECTION 09 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 09</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">Why one app instead of two</h2>
+    <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;font-size:15px;">
+      <tr style="background-color:#0c1a3d;color:#fff;"><th style="color:#ffffff;padding:13px 16px;text-align:left;"></th><th style="color:#ffffff;padding:13px 16px;text-align:left;">This app</th>
+        <th style="color:#ffffff;padding:13px 16px;text-align:left;">Typical expense app</th><th style="color:#ffffff;padding:13px 16px;text-align:left;">Typical tracking app</th></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Mileage from real GPS kilometres</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003;</td><td style="color:#3a4a60;padding:11px 16px;">&#10007; typed by the employee</td><td style="color:#3a4a60;padding:11px 16px;">&#10007; no expense module</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Works with no mobile signal (GPS + bills)</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003;</td><td style="color:#3a4a60;padding:11px 16px;">&#10007; usually online only</td><td style="color:#3a4a60;padding:11px 16px;">varies</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Daily allowance: full / half / outstation / visits</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003;</td><td style="color:#3a4a60;padding:11px 16px;">manual</td><td style="color:#3a4a60;padding:11px 16px;">&#10007;</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Policy warnings for the approver (9 checks)</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003;</td><td style="color:#3a4a60;padding:11px 16px;">partly</td><td style="color:#3a4a60;padding:11px 16px;">&#10007;</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Reimbursement through Odoo Expenses &amp; Accounting</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003; native</td><td style="color:#3a4a60;padding:11px 16px;">depends on integration</td><td style="color:#3a4a60;padding:11px 16px;">&#10007;</td></tr>
+      <tr style="background-color:#ffffff;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Live map, route replay, visit geo-fence</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003;</td><td style="color:#3a4a60;padding:11px 16px;">&#10007;</td><td style="color:#3a4a60;padding:11px 16px;">&#10003;</td></tr>
+      <tr style="background-color:#f6f8fc;"><td style="color:#0c1a3d;padding:11px 16px;font-weight:700;">Data stays in your Odoo, no per-user SaaS fee</td><td style="color:#12a150;padding:11px 16px;font-weight:800;">&#10003;</td><td style="color:#3a4a60;padding:11px 16px;">&#10007;</td><td style="color:#3a4a60;padding:11px 16px;">&#10007; often</td></tr>
+    </table>
+    <div style="font-size:13px;color:#66758a;margin-top:8px;">Comparison of typical product categories, not of a specific vendor.</div>
+  </div>
+
+  <!-- ============ SECTION 10 ============ -->
+  <div style="margin-bottom:46px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 10</div>
+    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 18px;">How offline tracking works (GPS, visits and bills)</h2>
     <div style="display:flex;flex-wrap:wrap;gap:14px;">
       <div style="flex:1 1 240px;background-color:#0c1a3d;color:#fff;border-radius:16px;padding:22px;">
         <div style="font-size:34px;font-weight:900;color:#5fd0ec;">1</div><div style="font-size:18px;font-weight:800;margin:4px 0 6px;">Record on the phone</div>
@@ -56,9 +189,9 @@
     </div>
   </div>
 
-  <!-- ============ SECTION 03 ============ -->
+  <!-- ============ SECTION 11 ============ -->
   <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 03</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 11</div>
     <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">Two ways to capture &ndash; pick per salesperson</h2>
     <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;font-size:15px;">
       <tr style="background-color:#0c1a3d;color:#fff;">
@@ -75,9 +208,9 @@
       <b>Honest note:</b> mobile browsers pause GPS for web pages when the screen is locked. For all-day tracking with the phone in a pocket, use the free Traccar Client &ndash; this module receives its data natively, including its offline buffer.</div>
   </div>
 
-  <!-- ============ SECTION 04 ============ -->
+  <!-- ============ SECTION 12 ============ -->
   <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 04</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 12</div>
     <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 10px;">Live map for managers</h2>
     <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">Every salesperson with today's trail and a clear status:
       <b style="color:#12a150;">Live</b>, <b style="color:#f08c00;">Delayed</b>, <b style="color:#d6336c;">No signal</b>, <b style="color:#5c6b80;">Day ended</b>.
@@ -85,34 +218,22 @@
     <img src="assets/02_live_map_popup.png" alt="Live map" style="width:100%;border-radius:14px;box-shadow:0 10px 30px rgba(11,31,58,.18);border:1px solid #e3e8ef;"/>
   </div>
 
-  <!-- ============ SECTION 05 ============ -->
+  <!-- ============ SECTION 13 ============ -->
   <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 05</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 13</div>
     <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 10px;">Route replay &ndash; see what happened in the dead zone</h2>
     <p style="font-size:16.5px;line-height:1.6;color:#3a4a60;margin:0 0 16px;">Blue = uploaded live, <span style="color:#f08c00;font-weight:800;">orange dashed = recorded with no signal and synced later</span>.
       Automatic stop detection, visits inside / outside geo-fence, play-back slider with GPS time, accuracy and upload delay.</p>
     <img src="assets/03_route_replay.png" alt="Route replay" style="width:100%;border-radius:14px;box-shadow:0 10px 30px rgba(11,31,58,.18);border:1px solid #e3e8ef;"/>
   </div>
 
-  <!-- ============ SECTION 06 ============ -->
+  <!-- ============ SECTION 14 ============ -->
   <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 06</div>
-    <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 16px;">The salesperson's phone &ndash; online, offline, back online</h2>
-    <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
-      <div style="flex:0 1 240px;text-align:center;"><img src="assets/phone_online.png" alt="Tracking live" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">1 &middot; Day started, tracking live</div></div>
-      <div style="flex:0 1 240px;text-align:center;"><img src="assets/phone_offline.png" alt="Tracking offline" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">2 &middot; No network: points queue up</div></div>
-      <div style="flex:0 1 240px;text-align:center;"><img src="assets/phone_offline_visit.png" alt="Offline visit" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">3 &middot; Customer check-in offline</div></div>
-      <div style="flex:0 1 240px;text-align:center;"><img src="assets/phone_synced.png" alt="Synced" style="width:100%;border-radius:22px;border:6px solid #0c1a3d;"/><div style="font-size:14px;font-weight:700;margin-top:8px;">4 &middot; Signal back: everything uploaded</div></div>
-    </div>
-  </div>
-
-  <!-- ============ SECTION 07 ============ -->
-  <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 07</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 14</div>
     <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 16px;">Day logs, visits &amp; location history</h2>
     <div style="display:flex;flex-wrap:wrap;gap:16px;">
-      <div style="flex:1 1 520px;"><img src="assets/05_day_log_form.png" alt="Day log" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
-        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Day log</b> per salesperson: distance (GPS spike filter), tracked hours, offline points, longest offline gap, stops, visits.</div></div>
+      <div style="flex:1 1 520px;"><img src="assets/12_day_log_allowance.png" alt="Day log" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
+        <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Day log</b> per salesperson: distance (GPS spike filter), tracked hours, offline points, longest offline gap, stops, visits, vehicle, TA, DA and bills.</div></div>
       <div style="flex:1 1 520px;"><img src="assets/07_points.png" alt="Offline points" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
         <div style="font-size:14.5px;color:#3a4a60;margin-top:8px;"><b>Location points</b> keep GPS time <i>and</i> received time &ndash; the upload delay proves the point was recorded offline.</div></div>
       <div style="flex:1 1 520px;"><img src="assets/06_visits.png" alt="Visits" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/>
@@ -122,9 +243,9 @@
     </div>
   </div>
 
-  <!-- ============ SECTION 08 ============ -->
+  <!-- ============ SECTION 15 ============ -->
   <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 08</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 15</div>
     <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 16px;">Setup, security &amp; control</h2>
     <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
       <div style="flex:1 1 520px;"><img src="assets/08_device_traccar.png" alt="Traccar device setup" style="width:100%;border-radius:12px;border:1px solid #e3e8ef;"/></div>
@@ -132,7 +253,7 @@
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:14px;">
       <div style="flex:1 1 320px;background-color:#f6f8fc;border-radius:14px;padding:18px;font-size:14.5px;line-height:1.6;">
-        <b style="color:#0c1a3d;font-size:16px;">Access rights</b><br/>Salesperson: own data only. Manager: live map and data of all field staff. Multi-company rules included.</div>
+        <b style="color:#0c1a3d;font-size:16px;">Access rights</b><br/>Salesperson: own data and claims only, cannot change rates, GPS km or claim status. Approver: claims of the team. Manager: everything. Multi-company rules included.</div>
       <div style="flex:1 1 320px;background-color:#f6f8fc;border-radius:14px;padding:18px;font-size:14.5px;line-height:1.6;">
         <b style="color:#0c1a3d;font-size:16px;">Anti-cheating</b><br/>Mock / fake GPS detection (reported by Traccar Client), accuracy filter, spike filter, geo-fenced visits, phone-clock correction.</div>
       <div style="flex:1 1 320px;background-color:#f6f8fc;border-radius:14px;padding:18px;font-size:14.5px;line-height:1.6;">
@@ -142,22 +263,23 @@
     </div>
   </div>
 
-  <!-- ============ SECTION 09 ============ -->
+  <!-- ============ SECTION 16 ============ -->
   <div style="margin-bottom:46px;">
-    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 09</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:3px;color:#1bacd0;margin-bottom:6px;">SECTION 16</div>
     <h2 style="font-size:30px;font-weight:900;color:#0c1a3d;margin:0 0 14px;">Tested &amp; compatible</h2>
     <div style="display:flex;flex-wrap:wrap;gap:14px;">
       <div style="flex:1 1 320px;border:1px solid #e3e8ef;border-radius:14px;padding:18px;font-size:14.5px;line-height:1.7;">
         <b style="color:#0c1a3d;font-size:16px;">Automated tests (included)</b><br/>
-        &#10003; 43 Odoo tests: offline backlog, idempotent re-send, out-of-order upload, time zones, spike filter, stops, geo-fence, access rights, OsmAnd GET/POST, Traccar JSON, live-map browser tour<br/>
-        &#10003; Real-browser offline scenario: network cut, app re-opened with no signal, offline visit, reconnect &rarr; all data synced once</div>
+        &#10003; 77 Odoo tests: INR / USD currency switch, TA / DA rules, caps, outstation, claim building without double claims, 9 policy checks, approval rights, rejection, Odoo Expenses posting and payment status, monthly cron, PDF, expense sync API with photos, plus all tracking tests<br/>
+        &#10003; 36 real-browser offline checks: network cut, app re-opened with no signal, offline visit, offline bill photo, reconnect &rarr; everything synced once</div>
       <div style="flex:1 1 320px;border:1px solid #e3e8ef;border-radius:14px;padding:18px;font-size:14.5px;line-height:1.7;">
         <b style="color:#0c1a3d;font-size:16px;">Compatibility</b><br/>
         &#10003; Odoo 19 Community &amp; Enterprise<br/>&#10003; On-premise and Odoo.sh<br/>&#10003; Android Chrome, iPhone Safari (web app); Traccar Client Android / iOS<br/>
-        &#9888; HTTPS is required by phones for GPS access in the browser</div>
+        &#9888; HTTPS is required by phones for GPS and camera access in the browser</div>
       <div style="flex:1 1 320px;border:1px solid #e3e8ef;border-radius:14px;padding:18px;font-size:14.5px;line-height:1.7;">
         <b style="color:#0c1a3d;font-size:16px;">Dependencies</b><br/>
-        Only standard Odoo: Contacts, Discuss, Sales Teams. No Google Maps key needed (OpenStreetMap by default, Leaflet bundled).</div>
+        Standard Odoo only: Expenses (with Employees and Invoicing/Accounting), Contacts, Discuss, Sales Teams. No Google Maps key needed (OpenStreetMap by default, Leaflet bundled).
+        Upgrading from version 19.0.1 keeps all tracking data.</div>
     </div>
   </div>
 
@@ -170,6 +292,11 @@
       <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">How long can a phone stay offline?</b><br/>Days. The queue is limited only by the phone's storage; one day of tracking is typically a few hundred kilobytes.</p>
       <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">What if the upload is interrupted half-way?</b><br/>Only points acknowledged by Odoo are removed from the phone. Points sent twice are recognised and stored once.</p>
       <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">Do salespeople need an Odoo licence?</b><br/>Yes, each tracked salesperson is an Odoo internal user with the "Field Tracking: Salesperson" access right.</p>
+      <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">Can salespeople edit the kilometres?</b><br/>They can correct the claimed km of a day (e.g. a detour), never the rate or the GPS km. Any claim above the GPS distance plus tolerance is flagged for the approver.</p>
+      <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">Who approves the claims?</b><br/>The expense manager of the employee (or the employee's manager); Field Tracking managers can approve any claim. Nobody can approve their own claim.</p>
+      <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">Do we need the Expenses app?</b><br/>Yes, it is installed automatically. Each salesperson needs an employee record linked to the user so Odoo can reimburse them.</p>
+      <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">Can we pay field expenses in INR or USD?</b><br/>Yes. Choose INR or USD in Settings &ndash; rates, allowances, bills, claims, the phone app and the PDF follow it. Claims already created keep their currency. If the claim currency differs from the company currency (e.g. INR team, USD company), Odoo Expenses converts it with your exchange rate.</p>
+      <p style="color:#3a4a60;margin:0 0 12px;"><b style="color:#0c1a3d;">Different rates for different teams?</b><br/>Create several policies and assign one per salesperson; everyone else uses the company default.</p>
       <p style="color:#3a4a60;margin:0;"><b style="color:#0c1a3d;">Can we use Google Maps tiles?</b><br/>Any XYZ tile server can be set in Settings (OpenStreetMap, MapTiler, your own server, or a provider you are licensed for).</p>
     </div>
   </div>
@@ -179,7 +306,7 @@
     <div style="font-size:34px;font-weight:900;letter-spacing:2px;margin-bottom:6px;">ZIVO <span style="color:#1bacd0;">IT</span></div>
     <div style="font-size:12px;letter-spacing:5px;color:#9fb4d4;margin-bottom:22px;">TECHNOLOGIES &middot; OFFICIAL ODOO PARTNER</div>
     <div style="font-size:30px;font-weight:900;margin-bottom:10px;">Let's Talk</div>
-    <p style="font-size:16.5px;color:#c9d6ea;max-width:640px;margin:0 auto 22px;line-height:1.6;">Installation help, a branded Android build, or a custom field-sales workflow (beat plans, orders on the road, expense claims)? Our Odoo team is ready.</p>
+    <p style="font-size:16.5px;color:#c9d6ea;max-width:640px;margin:0 auto 22px;line-height:1.6;">Installation help, a branded Android build, or a custom field-sales workflow (beat plans, orders on the road, payroll integration of allowances)? Our Odoo team is ready.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;">
       <a href="mailto:info@zivoit.com" style="background-color:#1bacd0;color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:13px 24px;">info@zivoit.com</a>
       <a href="https://www.zivoit.com" target="_blank" style="background-color:rgba(255,255,255,.1);color:#fff;text-decoration:none;font-weight:800;border-radius:12px;padding:13px 24px;border:1px solid rgba(255,255,255,.25);">www.zivoit.com</a>

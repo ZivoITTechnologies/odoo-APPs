@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- policies -->
+    <record id="zivo_expense_policy_view_list" model="ir.ui.view">
+        <field name="name">zivo.expense.policy.list</field>
+        <field name="model">zivo.expense.policy</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="is_default"/>
+                <field name="da_full_amount"/>
+                <field name="da_half_amount"/>
+                <field name="da_outstation_amount" optional="show"/>
+                <field name="km_tolerance_pct" optional="show"/>
+                <field name="user_count"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_expense_policy_view_form" model="ir.ui.view">
+        <field name="name">zivo.expense.policy.form</field>
+        <field name="model">zivo.expense.policy</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_users" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="user_count" widget="statinfo" string="Salespeople"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Field Sales - Metro"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="is_default"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Mileage (TA)" name="mileage">
+                            <p class="text-muted">Paid per km measured by GPS, for the vehicle chosen on the phone when the day starts.</p>
+                            <field name="rate_ids">
+                                <list editable="bottom">
+                                    <field name="vehicle_type"/>
+                                    <field name="rate_per_km"/>
+                                    <field name="max_km_per_day"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Daily Allowance (DA)" name="daily">
+                            <group>
+                                <group string="Local">
+                                    <field name="da_full_amount"/>
+                                    <field name="da_full_min_hours" widget="float_time"/>
+                                    <field name="da_half_amount"/>
+                                    <field name="da_half_min_hours" widget="float_time"/>
+                                    <field name="da_min_visits"/>
+                                </group>
+                                <group string="Outstation">
+                                    <field name="outstation_km"/>
+                                    <field name="da_outstation_amount"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Controls" name="controls">
+                            <group>
+                                <group>
+                                    <field name="km_tolerance_pct"/>
+                                    <field name="location_check_km"/>
+                                </group>
+                                <group>
+                                    <div class="text-muted" colspan="2">
+                                        Every claim line is checked automatically: claimed km vs GPS km, km cap,
+                                        bill photo, daily limits per category, duplicates, fuel on mileage days,
+                                        bills recorded away from the tracked route, fake GPS apps and days without
+                                        tracking. Warnings are shown to the approver.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="note" placeholder="Rules shown to the team…"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_expense_policy_action" model="ir.actions.act_window">
+        <field name="name">Expense Policies</field>
+        <field name="res_model">zivo.expense.policy</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="domain">[]</field>
+    </record>
+
+    <!-- categories -->
+    <record id="zivo_expense_category_view_list" model="ir.ui.view">
+        <field name="name">zivo.expense.category.list</field>
+        <field name="model">zivo.expense.category</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="icon" width="50px"/>
+                <field name="name"/>
+                <field name="code" optional="hide"/>
+                <field name="line_type" readonly="id and line_type != 'expense'"/>
+                <field name="product_id" options="{'no_create': True}"/>
+                <field name="receipt_policy" invisible="line_type != 'expense'"/>
+                <field name="receipt_threshold" invisible="receipt_policy != 'above' or line_type != 'expense'"/>
+                <field name="daily_limit" invisible="line_type != 'expense'"/>
+                <field name="conflicts_with_mileage" invisible="line_type != 'expense'"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_expense_category_action" model="ir.actions.act_window">
+        <field name="name">Expense Categories</field>
+        <field name="res_model">zivo.expense.category</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'active_test': False}</field>
+    </record>
+</odoo>

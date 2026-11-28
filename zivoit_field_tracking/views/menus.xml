@@ -23,8 +23,27 @@
     <menuitem id="menu_visits" name="Customer Visits" parent="menu_activity" sequence="2" action="zivo_track_visit_action"/>
     <menuitem id="menu_points" name="Location Points" parent="menu_activity" sequence="3" action="zivo_track_point_action"/>
 
+    <menuitem id="menu_expenses" name="Expenses" parent="menu_root" sequence="20"/>
+    <menuitem id="menu_expense_claims" name="Expense Claims" parent="menu_expenses" sequence="1"
+              action="zivo_expense_claim_action"/>
+    <menuitem id="menu_expense_to_approve" name="Claims to Approve" parent="menu_expenses" sequence="2"
+              action="zivo_expense_claim_approve_action" groups="zivoit_field_tracking.group_field_manager"/>
+    <menuitem id="menu_expense_lines" name="Expenses &amp; Bills" parent="menu_expenses" sequence="3"
+              action="zivo_expense_line_action"/>
+    <menuitem id="menu_expense_create" name="Create Claims" parent="menu_expenses" sequence="4"
+              action="zivo_expense_claim_wizard_action"/>
+
+    <menuitem id="menu_reporting" name="Reporting" parent="menu_root" sequence="80"
+              groups="zivoit_field_tracking.group_field_manager"/>
+    <menuitem id="menu_expense_analysis" name="Expense Analysis" parent="menu_reporting" sequence="1"
+              action="zivo_expense_line_analysis_action"/>
+
     <menuitem id="menu_config" name="Configuration" parent="menu_root" sequence="90"
               groups="zivoit_field_tracking.group_field_manager"/>
+    <menuitem id="menu_expense_policies" name="Expense Policies" parent="menu_config" sequence="5"
+              action="zivo_expense_policy_action"/>
+    <menuitem id="menu_expense_categories" name="Expense Categories" parent="menu_config" sequence="6"
+              action="zivo_expense_category_action"/>
     <menuitem id="menu_settings" name="Settings" parent="menu_config" sequence="1" action="zivo_track_settings_action"/>
     <menuitem id="menu_devices" name="Tracking Devices" parent="menu_config" sequence="2" action="zivo_track_device_action"/>
 </odoo>

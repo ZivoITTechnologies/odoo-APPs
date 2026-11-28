@@ -44,6 +44,31 @@
                                  <field name="zivo_stop_minutes" class="text-center" style="width: 6ch;"/><span class="ms-1">min</span></div>
                         </setting>
                     </block>
+                    <block title="Field Expenses (TA / DA / Bills)" name="zivo_expenses">
+                        <setting string="Expense Currency" help="Mileage rates, allowances, limits, bills and claims (phone app and PDF included). Claims already created keep their currency; a claim in another currency than the company's is converted at the exchange rate when sent to Odoo Expenses.">
+                            <field name="zivo_expense_currency" widget="radio" options="{'horizontal': true}"/>
+                            <div class="text-muted small mt-1">Policy rates and limits are plain amounts: review them after switching.</div>
+                            <div class="mt8">
+                                <button name="action_zivo_currency_rates" type="object" string="Exchange Rates"
+                                        icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                        <setting string="Default Expense Policy" help="Mileage rates, daily allowance and controls for salespeople without a policy of their own.">
+                            <field name="zivo_expense_default_policy_id" options="{'no_create': True}"/>
+                            <div class="mt8">
+                                <button name="%(zivoit_field_tracking.zivo_expense_policy_action)d" type="action"
+                                        string="Expense Policies" icon="oi-arrow-right" class="btn-link"/>
+                                <button name="%(zivoit_field_tracking.zivo_expense_category_action)d" type="action"
+                                        string="Categories &amp; Limits" icon="oi-arrow-right" class="btn-link"/>
+                            </div>
+                        </setting>
+                        <setting string="Send to Odoo Expenses" help="Approved claims become approved Odoo Expenses automatically, ready to post and reimburse.">
+                            <field name="zivo_expense_auto_post"/>
+                        </setting>
+                        <setting string="Monthly Claims" help="On the 1st of each month, prepare draft claims of the previous month for every salesperson.">
+                            <field name="zivo_expense_auto_claim"/>
+                        </setting>
+                    </block>
                     <block title="Map &amp; Data" name="zivo_map">
                         <setting string="Map Tiles" help="Any XYZ tile server (OpenStreetMap, MapTiler, your own). Leave the default for OpenStreetMap.">
                             <field name="zivo_tile_url" class="w-100"/>

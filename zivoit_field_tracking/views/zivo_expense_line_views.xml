@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="zivo_expense_line_view_list" model="ir.ui.view">
+        <field name="name">zivo.expense.line.list</field>
+        <field name="model">zivo.expense.line</field>
+        <field name="arch" type="xml">
+            <list decoration-warning="has_warning" sample="1">
+                <field name="date"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="category_id"/>
+                <field name="name"/>
+                <field name="partner_id" optional="show"/>
+                <field name="quantity" optional="hide"/>
+                <field name="tracked_km" optional="hide"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="receipt" widget="image" options="{'size': [32, 32]}" optional="show"
+                       invisible="line_type != 'expense'"/>
+                <field name="line_type" column_invisible="1"/>
+                <field name="has_receipt" optional="hide"/>
+                <field name="captured_offline" optional="show"/>
+                <field name="source" optional="hide"/>
+                <field name="warning_text" string="Warnings" optional="show"/>
+                <field name="has_warning" column_invisible="1"/>
+                <field name="claim_id" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'submitted'"
+                       decoration-success="state in ('approved', 'posted')" decoration-danger="state == 'rejected'"
+                       decoration-muted="state == 'unclaimed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="zivo_expense_line_view_form" model="ir.ui.view">
+        <field name="name">zivo.expense.line.form</field>
+        <field name="model">zivo.expense.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="state" invisible="1"/>
+                <field name="line_type" invisible="1"/>
+                <field name="source" invisible="1"/>
+                <field name="has_warning" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <div class="alert alert-warning" role="alert" invisible="not has_warning">
+                    <i class="fa fa-exclamation-triangle me-1" title="Warning"/><field name="warning_text" class="d-inline"/>
+                </div>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_map" type="object" class="oe_stat_button" icon="fa-map-pin"
+                                invisible="not latitude and not longitude" string="Where Recorded"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Lunch with customer"
+                                   readonly="state not in ('unclaimed', 'draft', 'rejected')"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="category_id" options="{'no_create': True}"
+                                   domain="[('line_type', '=', 'expense')]"
+                                   readonly="source == 'auto' or state not in ('unclaimed', 'draft', 'rejected')"/>
+                            <field name="date" readonly="source == 'auto' or state not in ('unclaimed', 'draft', 'rejected')"/>
+                            <field name="user_id" widget="many2one_avatar_user" options="{'no_create': True}"
+                                   readonly="source != 'backend' or state not in ('unclaimed', 'draft', 'rejected')"/>
+                            <field name="unit_amount" string="Amount" invisible="line_type != 'expense'"
+                                   readonly="state not in ('unclaimed', 'draft', 'rejected')"/>
+                            <field name="tracked_km" invisible="line_type != 'travel'"/>
+                            <field name="quantity" string="Claimed km" invisible="line_type != 'travel'"
+                                   readonly="state not in ('unclaimed', 'draft', 'rejected')"/>
+                            <field name="max_quantity" invisible="line_type != 'travel' or not max_quantity"/>
+                            <field name="unit_amount" string="Rate" invisible="line_type == 'expense'" readonly="1"/>
+                            <field name="da_kind" invisible="line_type != 'daily'"/>
+                            <field name="amount" class="fw-bold"/>
+                            <field name="partner_id" invisible="line_type != 'expense'"
+                                   readonly="state not in ('unclaimed', 'draft', 'rejected')"/>
+                        </group>
+                        <group>
+                            <field name="receipt" widget="image" class="oe_avatar_none" options="{'size': [240, 320]}"
+                                   invisible="line_type != 'expense'" readonly="state not in ('unclaimed', 'draft', 'rejected')"/>
+                            <field name="receipt_attachment_ids" widget="many2many_binary" string="Other Bills (PDF)"
+                                   invisible="line_type != 'expense'" readonly="state not in ('unclaimed', 'draft', 'rejected')"/>
+                        </group>
+                    </group>
+                    <group string="Tracking Evidence">
+                        <group>
+                            <field name="session_id" readonly="1"/>
+                            <field name="vehicle_type" invisible="line_type != 'travel'"/>
+                            <field name="claim_id" readonly="1"/>
+                            <field name="hr_expense_id" invisible="not hr_expense_id"/>
+                            <field name="company_id" groups="base.group_multi_company"
+                                   readonly="source != 'backend' or state not in ('unclaimed', 'draft', 'rejected')"/>
+                        </group>
+                        <group>
+                            <field name="source"/>
+                            <field name="captured_offline"/>
+                            <field name="latitude" invisible="not latitude and not longitude"/>
+                            <field name="longitude" invisible="not latitude and not longitude"/>
+                            <field name="gps_accuracy" invisible="not latitude and not longitude"/>
+                            <field name="route_distance_km" invisible="not latitude and not longitude"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="zivo_expense_line_view_search" model="ir.ui.view">
+        <field name="name">zivo.expense.line.search</field>
+        <field name="model">zivo.expense.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="category_id"/>
+                <field name="partner_id"/>
+                <field name="claim_id"/>
+                <filter name="my" string="My Expenses" domain="[('user_id', '=', uid)]"/>
+                <filter name="unclaimed" string="Not Claimed" domain="[('state', '=', 'unclaimed')]"/>
+                <filter name="warnings" string="With Warnings" domain="[('has_warning', '=', True)]"/>
+                <filter name="no_receipt" string="Without Bill" domain="[('has_receipt', '=', False), ('line_type', '=', 'expense')]"/>
+                <filter name="offline" string="Recorded Offline" domain="[('captured_offline', '=', True)]"/>
+                <separator/>
+                <filter name="bills" string="Bills" domain="[('line_type', '=', 'expense')]"/>
+                <filter name="allowances" string="Allowances (TA / DA)" domain="[('line_type', 'in', ('travel', 'daily'))]"/>
+                <separator/>
+                <filter name="date" string="Date" date="date"/>
+                <group>
+                    <filter name="group_user" string="Salesperson" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'date'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="zivo_expense_line_view_pivot" model="ir.ui.view">
+        <field name="name">zivo.expense.line.pivot</field>
+        <field name="model">zivo.expense.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Field Expense Analysis">
+                <field name="user_id" type="row"/>
+                <field name="category_id" type="col"/>
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="zivo_expense_line_view_graph" model="ir.ui.view">
+        <field name="name">zivo.expense.line.graph</field>
+        <field name="model">zivo.expense.line</field>
+        <field name="arch" type="xml">
+            <graph string="Field Expenses by Category" type="pie">
+                <field name="category_id"/>
+                <field name="amount" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="zivo_expense_line_action" model="ir.actions.act_window">
+        <field name="name">Expenses &amp; Bills</field>
+        <field name="res_model">zivo.expense.line</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="context">{'search_default_bills': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No bill recorded yet</p>
+            <p>Salespeople photograph their bills in the Field App, even with no network.
+               You can also add a bill here.</p>
+        </field>
+    </record>
+
+    <record id="zivo_expense_line_analysis_action" model="ir.actions.act_window">
+        <field name="name">Expense Analysis</field>
+        <field name="res_model">zivo.expense.line</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="context">{'search_default_date': 1}</field>
+    </record>
+</odoo>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_expense_claim" model="ir.sequence">
+            <field name="name">Field Expense Claim</field>
+            <field name="code">zivo.expense.claim</field>
+            <field name="prefix">FEC/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="product_expense_ta" model="product.product">
+            <field name="name">Field Mileage Allowance (TA)</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-TA</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/mileage.svg"/>
+        </record>
+        <record id="product_expense_da" model="product.product">
+            <field name="name">Field Daily Allowance (DA)</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-DA</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/food.svg"/>
+        </record>
+        <record id="product_expense_fuel" model="product.product">
+            <field name="name">Field Fuel</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-FUEL</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/transport.svg"/>
+        </record>
+        <record id="product_expense_toll" model="product.product">
+            <field name="name">Field Toll &amp; Parking</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-TOLL</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/transport.svg"/>
+        </record>
+        <record id="product_expense_food" model="product.product">
+            <field name="name">Field Food &amp; Beverages</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-FOOD</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/food.svg"/>
+        </record>
+        <record id="product_expense_conveyance" model="product.product">
+            <field name="name">Field Local Conveyance</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-CONV</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/transport.svg"/>
+        </record>
+        <record id="product_expense_lodging" model="product.product">
+            <field name="name">Field Lodging</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-LODG</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/transport.svg"/>
+        </record>
+        <record id="product_expense_phone" model="product.product">
+            <field name="name">Field Phone &amp; Internet</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-COMM</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/communication.svg"/>
+        </record>
+        <record id="product_expense_courier" model="product.product">
+            <field name="name">Field Courier &amp; Stationery</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-MISC</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/gift.svg"/>
+        </record>
+        <record id="product_expense_entertain" model="product.product">
+            <field name="name">Field Customer Entertainment</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-ENT</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/gift.svg"/>
+        </record>
+        <record id="product_expense_other" model="product.product">
+            <field name="name">Field Other Expenses</field>
+            <field name="standard_price">0.0</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="default_code">FLD-OTH</field>
+            <field name="can_be_expensed" eval="True"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="True"/>
+            <field name="supplier_taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="taxes_id" eval="[(5, 0, 0)]"/>
+            <field name="categ_id" eval="ref('product.product_category_expenses', raise_if_not_found=False)"/>
+            <field name="image_1920" type="base64" file="hr_expense/static/img/gift.svg"/>
+        </record>
+        <record id="expense_category_ta" model="zivo.expense.category">
+            <field name="name">Mileage (TA)</field>
+            <field name="code">TA</field>
+            <field name="sequence">1</field>
+            <field name="line_type">travel</field>
+            <field name="product_id" ref="product_expense_ta"/>
+            <field name="icon">🛵</field>
+            <field name="receipt_policy">never</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">0</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_da" model="zivo.expense.category">
+            <field name="name">Daily Allowance (DA)</field>
+            <field name="code">DA</field>
+            <field name="sequence">2</field>
+            <field name="line_type">daily</field>
+            <field name="product_id" ref="product_expense_da"/>
+            <field name="icon">🍱</field>
+            <field name="receipt_policy">never</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">0</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_fuel" model="zivo.expense.category">
+            <field name="name">Fuel</field>
+            <field name="code">FUEL</field>
+            <field name="sequence">10</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_fuel"/>
+            <field name="icon">⛽</field>
+            <field name="receipt_policy">always</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">0</field>
+            <field name="conflicts_with_mileage" eval="True"/>
+        </record>
+        <record id="expense_category_toll" model="zivo.expense.category">
+            <field name="name">Toll &amp; Parking</field>
+            <field name="code">TOLL</field>
+            <field name="sequence">20</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_toll"/>
+            <field name="icon">🅿️</field>
+            <field name="receipt_policy">above</field>
+            <field name="receipt_threshold">50</field>
+            <field name="daily_limit">500</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_food" model="zivo.expense.category">
+            <field name="name">Food &amp; Beverages</field>
+            <field name="code">FOOD</field>
+            <field name="sequence">30</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_food"/>
+            <field name="icon">☕</field>
+            <field name="receipt_policy">above</field>
+            <field name="receipt_threshold">100</field>
+            <field name="daily_limit">500</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_conveyance" model="zivo.expense.category">
+            <field name="name">Auto / Cab / Bus</field>
+            <field name="code">CONV</field>
+            <field name="sequence">40</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_conveyance"/>
+            <field name="icon">🚕</field>
+            <field name="receipt_policy">above</field>
+            <field name="receipt_threshold">200</field>
+            <field name="daily_limit">1000</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_lodging" model="zivo.expense.category">
+            <field name="name">Hotel / Lodging</field>
+            <field name="code">LODG</field>
+            <field name="sequence">50</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_lodging"/>
+            <field name="icon">🏨</field>
+            <field name="receipt_policy">always</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">3000</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_phone" model="zivo.expense.category">
+            <field name="name">Phone &amp; Internet</field>
+            <field name="code">COMM</field>
+            <field name="sequence">60</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_phone"/>
+            <field name="icon">📱</field>
+            <field name="receipt_policy">always</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">0</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_courier" model="zivo.expense.category">
+            <field name="name">Courier &amp; Stationery</field>
+            <field name="code">MISC</field>
+            <field name="sequence">70</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_courier"/>
+            <field name="icon">📦</field>
+            <field name="receipt_policy">above</field>
+            <field name="receipt_threshold">100</field>
+            <field name="daily_limit">0</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_entertain" model="zivo.expense.category">
+            <field name="name">Customer Entertainment</field>
+            <field name="code">ENT</field>
+            <field name="sequence">80</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_entertain"/>
+            <field name="icon">🤝</field>
+            <field name="receipt_policy">always</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">2000</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_category_other" model="zivo.expense.category">
+            <field name="name">Other</field>
+            <field name="code">OTH</field>
+            <field name="sequence">90</field>
+            <field name="line_type">expense</field>
+            <field name="product_id" ref="product_expense_other"/>
+            <field name="icon">🧾</field>
+            <field name="receipt_policy">always</field>
+            <field name="receipt_threshold">0</field>
+            <field name="daily_limit">0</field>
+            <field name="conflicts_with_mileage" eval="False"/>
+        </record>
+        <record id="expense_policy_default" model="zivo.expense.policy">
+            <field name="name">Standard Field Sales Policy</field>
+            <field name="is_default" eval="True"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="da_full_amount">400</field>
+            <field name="da_full_min_hours">6</field>
+            <field name="da_half_amount">200</field>
+            <field name="da_half_min_hours">3</field>
+            <field name="da_min_visits">1</field>
+            <field name="outstation_km">150</field>
+            <field name="da_outstation_amount">800</field>
+            <field name="km_tolerance_pct">10</field>
+            <field name="location_check_km">2</field>
+            <field name="rate_ids" eval="[
+                (0, 0, {'vehicle_type': 'two_wheeler', 'rate_per_km': 3.5, 'max_km_per_day': 150}),
+                (0, 0, {'vehicle_type': 'four_wheeler', 'rate_per_km': 9.0, 'max_km_per_day': 300}),
+                (0, 0, {'vehicle_type': 'public', 'rate_per_km': 0.0}),
+                (0, 0, {'vehicle_type': 'company', 'rate_per_km': 0.0}),
+            ]"/>
+            <field name="note" type="html"><p>Mileage is paid on the distance measured by GPS (own vehicle only).
+Daily allowance depends on the hours spent in the field and needs at least one customer visit.
+Fuel bills are not reimbursed on days paid with mileage. Upload a photo of every bill above the limit.</p></field>
+        </record>
+        <record id="cron_monthly_claims" model="ir.cron">
+            <field name="name">Field Tracking: prepare monthly expense claims</field>
+            <field name="model_id" ref="model_zivo_expense_claim"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_create_monthly_claims()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

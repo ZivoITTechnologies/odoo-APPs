@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_expense_claim" model="ir.actions.report">
+        <field name="name">Expense Claim</field>
+        <field name="model">zivo.expense.claim</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">zivoit_field_tracking.report_expense_claim</field>
+        <field name="report_file">zivoit_field_tracking.report_expense_claim</field>
+        <field name="print_report_name">'Expense Claim - %s - %s' % (object.user_id.name, object.name)</field>
+        <field name="binding_model_id" ref="model_zivo_expense_claim"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_expense_claim_document">
+        <t t-call="web.external_layout">
+            <t t-set="claim" t-value="doc"/>
+            <t t-set="cur" t-value="claim.currency_id"/>
+            <div class="page" style="font-size: 12px;">
+                <h2 class="mb-1">Field Expense Claim <span t-field="claim.name"/></h2>
+                <div class="mb-3 text-muted">
+                    <span t-field="claim.date_from"/> to <span t-field="claim.date_to"/> ·
+                    Status: <span t-field="claim.state"/>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>Salesperson:</strong> <span t-field="claim.user_id"/><br/>
+                        <t t-if="claim.employee_id"><strong>Employee:</strong> <span t-field="claim.employee_id"/><br/></t>
+                        <strong>Approver:</strong> <span t-out="claim.approver_id.name or '-'"/><br/>
+                        <strong>Policy:</strong> <span t-out="claim.policy_id.name or '-'"/>
+                    </div>
+                    <div class="col-6">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><td>Field days</td><td class="text-end" t-out="claim.day_count"/></tr>
+                            <tr><td>GPS tracked km</td><td class="text-end" t-out="'%.1f' % claim.tracked_km"/></tr>
+                            <tr><td>Claimed km</td><td class="text-end" t-out="'%.1f' % claim.claimed_km"/></tr>
+                            <tr><td>Mileage (TA)</td><td class="text-end"><span t-field="claim.travel_amount"/></td></tr>
+                            <tr><td>Daily allowance (DA)</td><td class="text-end"><span t-field="claim.daily_amount"/></td></tr>
+                            <tr><td>Bills</td><td class="text-end"><span t-field="claim.expense_amount"/></td></tr>
+                            <tr class="border-top"><td><strong>Total</strong></td>
+                                <td class="text-end"><strong t-field="claim.total_amount"/></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th class="text-end">GPS km</th>
+                            <th class="text-end">Claimed</th>
+                            <th class="text-end">Rate</th>
+                            <th class="text-end">Amount</th>
+                            <th>Bill</th>
+                            <th>Warnings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="claim._report_days()" t-as="day">
+                            <t t-set="day_total" t-value="sum(l.amount for l in day[1])"/>
+                            <tr t-foreach="day[1]" t-as="line">
+                                <td><span t-if="line_first" t-out="day[0].strftime('%d %b %Y')"/></td>
+                                <td t-out="line.category_id.name"/>
+                                <td>
+                                    <span t-out="line.name"/>
+                                    <t t-if="line.partner_id"><br/><small class="text-muted" t-out="line.partner_id.name"/></t>
+                                </td>
+                                <td class="text-end"><t t-if="line.line_type == 'travel'" t-out="'%.1f' % line.tracked_km"/></td>
+                                <td class="text-end"><t t-if="line.line_type == 'travel'" t-out="'%.1f' % line.quantity"/></td>
+                                <td class="text-end"><t t-if="line.line_type != 'expense'" t-out="cur.format(line.unit_amount)"/></td>
+                                <td class="text-end"><span t-field="line.amount"/></td>
+                                <td><t t-if="line.line_type == 'expense'" t-out="'Yes' if line.has_receipt else 'No'"/></td>
+                                <td><small class="text-danger" t-out="line.warning_text or ''"/></td>
+                            </tr>
+                            <tr class="table-light">
+                                <td colspan="6" class="text-end"><small>Day total</small></td>
+                                <td class="text-end"><small t-out="cur.format(day_total)"/></td>
+                                <td colspan="2"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <p t-if="claim.note"><strong>Remarks:</strong> <span t-field="claim.note"/></p>
+                <p t-if="claim.reject_reason" class="text-danger"><strong>Rejected:</strong> <span t-field="claim.reject_reason"/></p>
+
+                <div class="row mt-5">
+                    <div class="col-4 text-center">
+                        <div style="border-top: 1px solid #333; margin-top: 40px;">Salesperson</div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="border-top: 1px solid #333; margin-top: 40px;">
+                            Approved by <t t-out="claim.approved_by_id.name or ''"/>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="border-top: 1px solid #333; margin-top: 40px;">Accounts</div>
+                    </div>
+                </div>
+
+                <t t-set="bills" t-value="claim.line_ids.filtered('receipt')"/>
+                <t t-if="bills">
+                    <div style="page-break-before: always;"/>
+                    <h4>Bill Photos</h4>
+                    <table style="width: 100%; table-layout: fixed;">
+                        <tr t-foreach="range(0, len(bills), 3)" t-as="row_start" style="page-break-inside: avoid;">
+                            <td t-foreach="bills[row_start:row_start + 3]" t-as="bill"
+                                style="width: 33%; vertical-align: top; padding: 6px; text-align: center;">
+                                <img t-att-src="image_data_uri(bill.receipt)" style="max-width: 100%; max-height: 280px;"/>
+                                <div><small><t t-out="bill.date.strftime('%d %b %Y')"/> · <t t-out="bill.category_id.name"/> ·
+                                    <t t-out="cur.format(bill.amount)"/></small></div>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_expense_claim">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="zivoit_field_tracking.report_expense_claim_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -19,7 +19,11 @@ DEFAULTS = {
     'stop_minutes': 10,
     'tile_url': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     'tile_attribution': '&copy; OpenStreetMap contributors',
+    'expense_auto_post': 1,
+    'expense_auto_claim': 0,
+    'expense_currency': '',
 }
+EXPENSE_CURRENCIES = ('INR', 'USD')
 
 
 def get_param(env, key):
@@ -29,11 +33,26 @@ def get_param(env, key):
     if raw in (None, False, ''):
         return default
     if isinstance(default, int):
+        if str(raw).strip().lower() in ('true', 'yes', 'on'):
+            return 1
+        if str(raw).strip().lower() in ('false', 'no', 'off'):
+            return 0
         try:
             return int(float(raw))
         except ValueError:
             return default
     return raw
+
+
+def expense_currency(env, company=None):
+    """Currency of field expenses: the INR / USD toggle of the settings, else the company currency."""
+    company = company or env.company
+    code = str(get_param(env, 'expense_currency') or '').upper()
+    if code in EXPENSE_CURRENCIES:
+        currency = env['res.currency'].sudo().with_context(active_test=False).search([('name', '=', code)], limit=1)
+        if currency:
+            return currency
+    return company.currency_id
 
 
 class ZivoTrackDevice(models.Model):

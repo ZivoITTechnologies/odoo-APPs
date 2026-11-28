@@ -95,5 +95,55 @@
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
         </record>
+
+        <!-- field expenses -->
+        <record id="rule_expense_line_company" model="ir.rule">
+            <field name="name">Field expense lines: multi-company</field>
+            <field name="model_id" ref="model_zivo_expense_line"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_expense_claim_company" model="ir.rule">
+            <field name="name">Field expense claims: multi-company</field>
+            <field name="model_id" ref="model_zivo_expense_claim"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_expense_policy_company" model="ir.rule">
+            <field name="name">Field expense policies: multi-company</field>
+            <field name="model_id" ref="model_zivo_expense_policy"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_expense_category_company" model="ir.rule">
+            <field name="name">Field expense categories: multi-company</field>
+            <field name="model_id" ref="model_zivo_expense_category"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_expense_line_own" model="ir.rule">
+            <field name="name">Field expense lines: own or to approve</field>
+            <field name="model_id" ref="model_zivo_expense_line"/>
+            <field name="domain_force">['|', ('user_id', '=', user.id), ('claim_id.approver_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_field_user'))]"/>
+        </record>
+        <record id="rule_expense_claim_own" model="ir.rule">
+            <field name="name">Field expense claims: own or to approve</field>
+            <field name="model_id" ref="model_zivo_expense_claim"/>
+            <field name="domain_force">['|', ('user_id', '=', user.id), ('approver_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_field_user'))]"/>
+        </record>
+        <record id="rule_expense_line_manager" model="ir.rule">
+            <field name="name">Field expense lines: manager all</field>
+            <field name="model_id" ref="model_zivo_expense_line"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
+        </record>
+        <record id="rule_expense_claim_manager" model="ir.rule">
+            <field name="name">Field expense claims: manager all</field>
+            <field name="model_id" ref="model_zivo_expense_claim"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_field_manager'))]"/>
+        </record>
     </data>
 </odoo>

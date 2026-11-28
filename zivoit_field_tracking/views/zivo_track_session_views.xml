@@ -18,6 +18,13 @@
                 <field name="max_delay_minutes" optional="hide"/>
                 <field name="stop_count" optional="show"/>
                 <field name="visit_count"/>
+                <field name="vehicle_type" optional="show"/>
+                <field name="ta_amount" sum="TA" optional="show"/>
+                <field name="da_amount" sum="DA" optional="show"/>
+                <field name="bill_amount" sum="Bills" optional="show"/>
+                <field name="allowance_total" sum="Total" optional="show"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="claim_state" optional="hide" widget="badge"/>
                 <field name="state" widget="badge" decoration-info="state == 'active'" decoration-success="state == 'closed'"/>
                 <button name="action_open_route" type="object" string="Route" icon="fa-map-marker" class="btn-link"/>
             </list>
@@ -36,9 +43,22 @@
                     <button name="action_reopen" type="object" string="Reopen" invisible="state != 'closed'"
                             groups="zivoit_field_tracking.group_field_manager"/>
                     <button name="action_recompute" type="object" string="Recompute" groups="zivoit_field_tracking.group_field_manager"/>
+                    <button name="action_add_expense" type="object" string="Add Bill" icon="fa-plus"
+                            invisible="claim_state not in (False, 'draft', 'rejected', 'cancel')"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_claim" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not claim_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="claim_state" readonly="1"/></span>
+                                <span class="o_stat_text">Expense Claim</span>
+                            </div>
+                        </button>
+                    </div>
+                    <field name="claim_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
                     <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
                     <group>
                         <group string="Day">
@@ -57,6 +77,21 @@
                             <field name="offline_point_count"/>
                             <field name="max_delay_minutes"/>
                             <field name="stop_count"/>
+                            <field name="mock_point_count" invisible="not mock_point_count" class="text-danger"/>
+                        </group>
+                    </group>
+                    <group string="Allowance of the Day" name="allowance">
+                        <group>
+                            <field name="vehicle_type" readonly="claim_state not in (False, 'draft', 'cancel')"/>
+                            <field name="ta_rate" invisible="not ta_rate"/>
+                            <field name="ta_km" invisible="not ta_rate"/>
+                            <field name="ta_amount"/>
+                        </group>
+                        <group>
+                            <field name="da_kind"/>
+                            <field name="da_amount"/>
+                            <field name="bill_amount"/>
+                            <field name="allowance_total" class="fw-bold"/>
                         </group>
                     </group>
                     <notebook>
@@ -70,6 +105,24 @@
                                     <field name="distance_from_customer_m"/>
                                     <field name="outcome"/>
                                     <field name="captured_offline"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Expenses &amp; Bills" name="expenses">
+                            <field name="expense_line_ids" readonly="1">
+                                <list decoration-warning="has_warning">
+                                    <field name="category_id"/>
+                                    <field name="name"/>
+                                    <field name="partner_id" optional="show"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="receipt" widget="image" options="{'size': [32, 32]}"
+                                           invisible="line_type != 'expense'"/>
+                                    <field name="line_type" column_invisible="1"/>
+                                    <field name="captured_offline" optional="show"/>
+                                    <field name="warning_text" string="Warnings"/>
+                                    <field name="has_warning" column_invisible="1"/>
+                                    <field name="state" widget="badge"/>
                                 </list>
                             </field>
                         </page>
@@ -103,6 +156,8 @@
                 <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter name="active_days" string="In Field" domain="[('state', '=', 'active')]"/>
                 <filter name="with_offline" string="Had Offline Data" domain="[('offline_point_count', '&gt;', 0)]"/>
+                <filter name="unclaimed" string="Not Claimed" domain="[('claim_id', '=', False), ('state', '=', 'closed')]"/>
+                <filter name="mock" string="Fake GPS Detected" domain="[('mock_point_count', '&gt;', 0)]"/>
                 <separator/>
                 <filter name="date" string="Date" date="date"/>
                 <group>

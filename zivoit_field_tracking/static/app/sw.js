@@ -5,7 +5,7 @@
  */
 "use strict";
 
-var CACHE = "zivo-tracker-v19.0.1.0.0";
+var CACHE = "zivo-tracker-v19.0.2.0.0";
 var SHELL = [
     "/zivoit_tracking/app",
     "/zivoit_tracking/manifest.webmanifest",
@@ -68,7 +68,8 @@ self.addEventListener("fetch", function (event) {
 // ---------------------------------------------------------------- background sync
 function idb() {
     return new Promise(function (resolve, reject) {
-        var req = indexedDB.open("zivo_field_tracker", 1);
+        // no version: open whatever version the app created (expenses store added in v2)
+        var req = indexedDB.open("zivo_field_tracker");
         req.onsuccess = function () { resolve(req.result); };
         req.onerror = function () { reject(req.error); };
         req.onupgradeneeded = function () { req.transaction.abort(); };

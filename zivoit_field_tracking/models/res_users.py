@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import fields, models
 
+from .zivo_expense_policy import VEHICLE_TYPES
+
 
 class ResUsers(models.Model):
     _inherit = 'res.users'
@@ -11,6 +13,11 @@ class ResUsers(models.Model):
         compute_sudo=True,
         help='The user belongs to the "Field Tracking / Salesperson" group, so the phone can send locations.')
     zivo_device_ids = fields.One2many('zivo.track.device', 'user_id', string='Tracking Devices')
+    zivo_expense_policy_id = fields.Many2one(
+        'zivo.expense.policy', string='Field Expense Policy', ondelete='set null',
+        help='Travel and daily allowance rules. Empty = default policy of the company.')
+    zivo_vehicle_type = fields.Selection(VEHICLE_TYPES, string='Default Vehicle', default='two_wheeler',
+                                         help='Pre-selected on the phone when the day starts.')
 
     def _zivo_group(self):
         return self.env.ref('zivoit_field_tracking.group_field_user', raise_if_not_found=False)
